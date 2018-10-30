@@ -9,11 +9,11 @@ namespace projarm
 {
     class Unit : GrRoot
     {
-        double lenght;
-        double angle;
+        public double lenght;
+        public double angle;
 
-        Joint start;
-        Joint end;
+        public Joint start;
+        public Joint end;
 
         public Unit(Joint startJ, Joint endJ, double len, double a)
         {
@@ -22,24 +22,29 @@ namespace projarm
             lenght = len;
             angle = a;
         }
+        public void MoveEnd(double len, double angle)
+        {
+        }
+        public override void Move(Graphics gr, double q) { }
+        /*public static Unit operator =(Unit A, Unit B)
+        {
+            A.start = B.start;
+            A.end = B.end;
+            A.lenght = B.lenght;
+            A.angle = B.angle;
+            return A;
+        }*/
         public override void Show(Graphics gr)
         {
-            if ( (end.Type != 'S'))
-            {
-                gr.DrawLine(new Pen(Color.Blue, 4), start.Dot, end.Dot);
-                start.Show(gr);
-            }
+            start.Show(gr);
+            gr.DrawLine(new Pen(Color.Blue, 4), start.Dot, end.Dot);
             end.Show(gr);
         }
         public override void Hide(Graphics gr)
         {
             gr.DrawLine(new Pen(Color.White, 4), start.Dot, end.Dot);
-            start.Show(gr);
-            end.Show(gr);
-        }
-        public override void Move(Graphics gr, double q)
-        {
-
+            start.Hide(gr);
+            end.Hide(gr);
         }
     }
 }
