@@ -7,10 +7,12 @@ namespace projarm
     public partial class Form1 : Form
     {
         byte numOfUnits = 0;
+        MathModel ModelMnpltr;
         Manipulator mnpltr;
         public Graphics gr;
-        Point[] dots;
-        Joint[] joints;
+        byte flag = 0;
+        Path S;
+        int k;
 
         public Form1()
         {
@@ -21,16 +23,12 @@ namespace projarm
         {
             Graphics actionArea = e.Graphics;
             gr = CreateGraphics();
-            dots = new Point[25];
-            joints = new Joint[25];
-            joints[0] = new Joint('D');
-            joints[1] = new Joint('D');
-            Pen p = new Pen(Color.Black, 5);
-            actionArea.DrawLine(p, new Point(270, 552), new Point(1000, 552));
-            actionArea.DrawLine(p, new Point(272, 0), new Point(272, 550));
-            actionArea.DrawLine(p, new Point(997, 0), new Point(997, 550));
-            actionArea.DrawString("ProjectARM", new Font("Arial", 24),
-                new SolidBrush(System.Drawing.Color.Red), new Point(550, 220));
+            Pen p = new Pen(Color.Black, 6);
+            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
+            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
+            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
+            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
+            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 288, 41, this.Width - 321, this.Height - 94);
             actionArea.Dispose();
         }
 
@@ -98,12 +96,13 @@ namespace projarm
             unitsDataGridView.Rows[5].Cells[3].Value = 0;
         }
 
-        private void CreateMnpltrButton_Click(object sender, EventArgs e)
+        private void ctreateMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
         {
             mnpltr = new Manipulator(numOfUnits);
+            Point OffSet = new Point(288 + (this.Width - 321) / 2, this.Height - 58);
+            Joint tmpJstart = new Joint('S', OffSet);
+            Joint tmpJend = new Joint('S', OffSet);
             double anglemnpltr = 0;
-            Joint tmpJstart = new Joint('S');
-            Joint tmpJend = new Joint('S');
 
             for (int i = 0; i < numOfUnits; i++)
             {
@@ -121,6 +120,7 @@ namespace projarm
                     case 'R':
                         tmpJstart.type = 'R';
                         tmpJend.type = 'S';
+                        mnpltr.Q[i - 1] = angle;
                         anglemnpltr += angle;
                         tmpJend.TransferFunction(len, anglemnpltr);
                         mnpltr.addUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
@@ -130,6 +130,7 @@ namespace projarm
                     case 'P':
                         tmpJstart.type = 'P';
                         tmpJend.type = 'S';
+                        mnpltr.Q[i -1] = len;
                         tmpJend.TransferFunction(len, anglemnpltr);
                         mnpltr.addUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
                         tmpJstart.TransferFunction(len, anglemnpltr);
@@ -139,59 +140,153 @@ namespace projarm
                         tmpJstart.type = tmpJend.type = 'G';
                         tmpJend.TransferFunction(len, anglemnpltr);
                         mnpltr.addUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
-                        //tmpJstart.TransferFunction(len, anglemnpltr);
                         break;
                     default:
                         break;
                 }
             }
             label2.Visible = true;
-            mnpltr.Show(gr);
+            mnpltr.Show(gr); // Отображение манипулятора в начальном положении
         }
-
-        private void DestroyMnpltrButton_Click(object sender, EventArgs e)
+        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           mnpltr.Hide(gr);
-        }
+            //double[] q = new double[4] { 0, 0, 75, 0};
+            //double[] q = new double[numOfUnits - 2];
+            ModelMnpltr = new MathModel(numOfUnits - 2);
 
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
+            for (int i = 0; i < numOfUnits - 2; i++)
             {
-
-                joints[0].Hide(gr);
-                joints[0].Dot = new Point(Form1.MousePosition.X, 
-                    Form1.MousePosition.Y);
-                joints[0].Show(gr);
+                MathModel.len[i] = mnpltr.mnp[i + 1].lenght;
+                MathModel.angle[i] = mnpltr.mnp[i + 1].angle;
+                ModelMnpltr.dq[i] = mnpltr.Q[i];
             }
-            else if (e.Button == MouseButtons.Right)
-            {
-                joints[1].Hide(gr);
-                joints[1].Dot = new Point(Form1.MousePosition.X,
-                    Form1.MousePosition.Y);
-                joints[1].Show(gr);
-            }
-        }
 
-        private void MoveButon_Click(object sender, EventArgs e)
-        {
-            double[] q = new double[numOfUnits];
-            q[0] = 0; q[numOfUnits - 1] = 0;
+            progressBar1.Visible = true;
+            CancelButton.Visible = true;
+            backgroundWorker1.RunWorkerAsync();
+
             for (int i = 1; i < numOfUnits - 1; i++)
             {
                 switch (mnpltr.mnp[i].start.type)
                 {
                     case 'R':
-                        q[i] = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString());
+                        unitsDataGridView.Rows[i].Cells[3].Value = mnpltr.Q[i - 1];
                         break;
                     case 'P':
-                        q[i] = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
+                        unitsDataGridView.Rows[i].Cells[2].Value = mnpltr.Q[i - 1];
                         break;
                     default:
                         break;
                 }
-                mnpltr.Move(gr, q);
             }
+        }
+
+        private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mnpltr.Hide(gr);
+            //mnpltr.Dispose();
+        }
+
+        private void createPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            S = new Path();
+            Klabel.Visible = true;
+            comboBox1.Visible = true;
+            label3.Visible = true;
+            flag = 1;
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            switch(flag)
+            {
+                case 1:
+                    S.AddAnchorPoint(e.Location);
+                    label3.Text = $"Path lenght = {S.len.ToString("#.0000000000")}";
+                    comboBox1.Items.Clear();
+                    S.Show(gr);
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void Form1_ResizeBegin(object sender, EventArgs e)
+        {
+            Graphics actionArea = CreateGraphics();
+            Pen p = new Pen(Color.White, 6);
+            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
+            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
+            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
+            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
+            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.White), 288, 41, this.Width - 321, this.Height - 94);
+            actionArea.Dispose();
+        }
+
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            Graphics actionArea = CreateGraphics();
+            Pen p = new Pen(Color.Black, 6);
+            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
+            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
+            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
+            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
+            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 288, 41, this.Width - 321, this.Height - 94);
+            actionArea.Dispose();
+        }
+
+        private void comboBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (Convert.ToInt32(comboBox1.Text) < (int)S.len && (S.len / Convert.ToInt32(comboBox1.Text) == 0))
+                    MessageBox.Show("k should be longer than path lenght or it is too big");
+                    //Число К должно быть больше длины пути или оно слишком большое
+                else
+                {
+                    flag = 0;
+                    k = Convert.ToInt32(comboBox1.Text);
+                    S.SplitPath(k);
+                    S.ShowExtraPoints(gr);
+                }
+            }
+        }
+
+        private void comboBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            comboBox1.Items.Add($"{(int)S.len + 1}");
+            comboBox1.Items.Add($"{(int)S.len + 13}");
+            comboBox1.Items.Add($"{(int)S.len * 2}");
+            comboBox1.Items.Add($"{(int)S.len * 5}");
+            comboBox1.Items.Add($"{(int)S.len * 10}");
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            PhysicsEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, numOfUnits, k, backgroundWorker1);
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            if (!e.Cancelled)
+            {
+                ;
+            }
+            progressBar1.Value = 0;
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            backgroundWorker1.CancelAsync();
         }
     }
     //MessageBox.Show("Left tButton");

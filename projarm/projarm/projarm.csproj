@@ -56,6 +56,9 @@
     <Compile Include="GrRoot.cs" />
     <Compile Include="Joint.cs" />
     <Compile Include="Manipulator.cs" />
+    <Compile Include="MathModel.cs" />
+    <Compile Include="Path.cs" />
+    <Compile Include="PhysicsEngine.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="BlockMatrix.cs" />
     <Compile Include="Program.cs" />

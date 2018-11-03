@@ -11,6 +11,6 @@ namespace projarm
     {
         public abstract void Show(Graphics gr);
         public abstract void Hide(Graphics gr);
-        public abstract void Move(Graphics gr, double q);
+        public abstract void Move(Graphics gr);
     }
 }

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace projarm
 {
     class GausMethod
-    {/*
+    {
+        /*
         void SwapElem(double a, double b)
         {
             double tmp = a;
@@ -134,6 +135,6 @@ namespace projarm
                 cout << endl;
             }
         }
-*/
+    */
     }
 }

@@ -10,7 +10,7 @@ namespace projarm
     class Manipulator : GrRoot
     {
         public Unit[] mnp;
-        //Joint Prev, Curr;
+        public double[] Q;
         byte currUn;
         byte numOfUnits;
 
@@ -18,6 +18,7 @@ namespace projarm
         {
             numOfUnits = _numOfUnits;
             mnp = new Unit[numOfUnits];
+            Q = new double[numOfUnits - 2];
             currUn = 0;
         }
         public void addUnit(Unit newU)
@@ -29,13 +30,12 @@ namespace projarm
             for (int i = 0; i < numOfUnits; i++)
                 mnp[i].Show(gr);
         }
-        public override void Move(Graphics gr, double q) { }
         public override void Hide(Graphics gr)
         {
             for (int i = 0; i < numOfUnits; i++)
                 mnp[i].Hide(gr);
         }
-        public void Move(Graphics gr, double[] q)
+        public override void Move(Graphics gr)
         {
             Hide(gr);
             double anglemnpltr = 0f;
@@ -51,13 +51,13 @@ namespace projarm
                         mnp[i + 1].start.TransferFunction(len, angle);
                         break;
                     case 'R':
-                        anglemnpltr += mnp[i].angle = q[i];
+                        anglemnpltr += mnp[i].angle = Q[i - 1];
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(len, anglemnpltr);
                         mnp[i + 1].start.DotClone(mnp[i].end);
                         break;
                     case 'P':
-                        len = mnp[i].lenght = q[i];
+                        len = mnp[i].lenght = Q[i - 1];
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(len, anglemnpltr);
                         mnp[i + 1].start.DotClone(mnp[i].end);
