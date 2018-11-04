@@ -12,7 +12,6 @@ namespace projarm
         public Graphics gr;
         byte flag = 0;
         Path S;
-        int k;
 
         public Form1()
         {
@@ -145,7 +144,6 @@ namespace projarm
                         break;
                 }
             }
-            label2.Visible = true;
             mnpltr.Show(gr); // Отображение манипулятора в начальном положении
         }
         private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -160,9 +158,7 @@ namespace projarm
                 MathModel.angle[i] = mnpltr.mnp[i + 1].angle;
                 ModelMnpltr.dq[i] = mnpltr.Q[i];
             }
-
-            progressBar1.Visible = true;
-            CancelButton.Visible = true;
+            
             backgroundWorker1.RunWorkerAsync();
 
             for (int i = 1; i < numOfUnits - 1; i++)
@@ -190,19 +186,26 @@ namespace projarm
         private void createPathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             S = new Path();
-            Klabel.Visible = true;
-            comboBox1.Visible = true;
-            label3.Visible = true;
             flag = 1;
         }
 
+        private void editPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            flag = 2;
+        }
+
+        private void deletePathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            S.Hide(gr);
+            flag = 0;
+        }
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
             switch(flag)
             {
                 case 1:
                     S.AddAnchorPoint(e.Location);
-                    label3.Text = $"Path lenght = {S.len.ToString("#.0000000000")}";
+                    if (S.len != 0) label3.Text = $"Path lenght = {S.len.ToString("#.0000000000")}";
                     comboBox1.Items.Clear();
                     S.Show(gr);
                     break;
@@ -243,15 +246,17 @@ namespace projarm
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (Convert.ToInt32(comboBox1.Text) < (int)S.len && (S.len / Convert.ToInt32(comboBox1.Text) == 0))
+                Int32 k = Convert.ToInt32(comboBox1.Text);
+                if (k < (int)S.len || (S.len / k == 0))
                     MessageBox.Show("k should be longer than path lenght or it is too big");
                     //Число К должно быть больше длины пути или оно слишком большое
                 else
                 {
                     flag = 0;
-                    k = Convert.ToInt32(comboBox1.Text);
+                    S.ExtraPoint.Clear();
+                    S.ExactExtraPoint.Clear();
                     S.SplitPath(k);
-                    S.ShowExtraPoints(gr);
+                    backgroundWorker2.RunWorkerAsync();
                 }
             }
         }
@@ -267,7 +272,7 @@ namespace projarm
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            PhysicsEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, numOfUnits, k, backgroundWorker1);
+            PhysicsEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -279,7 +284,7 @@ namespace projarm
         {
             if (!e.Cancelled)
             {
-                ;
+                ;//////////////
             }
             progressBar1.Value = 0;
         }
@@ -287,7 +292,29 @@ namespace projarm
         private void CancelButton_Click(object sender, EventArgs e)
         {
             backgroundWorker1.CancelAsync();
+            backgroundWorker2.CancelAsync();
         }
+
+        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+
+            S.ShowExtraPoints(gr, backgroundWorker2);
+        }
+
+        private void backgroundWorker2_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            if (!e.Cancelled)
+            {
+                ;//////////////
+            }
+            progressBar1.Value = 0;
+        }
+
     }
     //MessageBox.Show("Left tButton");
 }

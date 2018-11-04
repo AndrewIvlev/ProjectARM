@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,21 +14,18 @@ namespace projarm
         public List<Point> AnchorPoint; // Опорные точки
         public List<Point> ExtraPoint; // Дополнительные точки
         public List<double[]> ExactExtraPoint; // Точные доп точки
-        public int NumOfAnchorPoints;          //Число опорных точек
         public double len;
         //int k;
 
         public Path()
         {
             len = 0;
-            NumOfAnchorPoints++;
             AnchorPoint = new List<Point>();
             ExtraPoint = new List<Point>();
             ExactExtraPoint = new List<double[]>();
         }
         public Path(Point StartPoint)
         {
-            NumOfAnchorPoints++;
             AnchorPoint = new List<Point>() { StartPoint };
             ExtraPoint = new List<Point>();
             ExactExtraPoint = new List<double[]>();
@@ -38,44 +37,49 @@ namespace projarm
         public void AddAnchorPoint(Point NAP) //NAP = New Anchot Point
         {
             AnchorPoint.Add(NAP);
-            NumOfAnchorPoints++;
             int index = AnchorPoint.IndexOf(NAP);
             if (index != 0)
                 len += DistanceBetweenPoints(AnchorPoint[index - 1], NAP);
         }
-        public void SplitPath(int k)    //Разбить путь на k отрезков, с шагом step принадлежащем отрезку [0,1]
+        public void SplitPath(Int32 k)    //Разбить путь на k отрезков, с шагом step принадлежащем отрезку [0,1]
         {
-            double step = len / (k - NumOfAnchorPoints); // Шаг = длину всего пути делим на число К с вычетом количества опорных точек
+            int j = 0; //Пожалуй можно заменить на (ExtraPoint.Count - AnchorPoint.Count)
+            double step = len / k; // Шаг = длину всего пути делим на количество точек
 
-            ExtraPoint.AddRange(AnchorPoint.ToArray());
-            foreach (Point P in AnchorPoint)
+            foreach (Point P in AnchorPoint) //Разбиение ломаной линии с шагом step
             {
-                int index = AnchorPoint.IndexOf(P);
+                ExtraPoint.Add(P);
+                ExactExtraPoint.Add(new double[2] { P.X, P.Y });
+                int  index = AnchorPoint.IndexOf(P);
                 if (index != 0)
                 {
                     int i = 1;
                     double lambda = step;
                     double dist = DistanceBetweenPoints(AnchorPoint[index - 1], P);
-                    while(lambda < dist)
+                    while((int)lambda < (int)dist)
                     {
-                        lambda = (step * i) / (dist - step * i);
+                        lambda = (step * i) / (dist - step * i++);
                         double x = (AnchorPoint[index - 1].X + lambda * P.X) / (1 + lambda);
                         double y = (AnchorPoint[index - 1].Y + lambda * P.Y) / (1 + lambda);
-                        ExactExtraPoint.Insert(index - 1 + i, new double[] { x, y });
+                        ExactExtraPoint.Insert(index + j, new double[] { x, y });
                         Point newExtraP = new Point((int)x, (int)y);
-                        ExtraPoint.Insert(index - 1 + i++, newExtraP);
+                        ExtraPoint.Insert(index + j++, newExtraP);
                     }
                 }
-                ExactExtraPoint.Add(new double[] { P.X, P.Y });
             }
         }
-        public void ShowExtraPoints(Graphics gr)
+        public bool ShowExtraPoints(Graphics gr, BackgroundWorker worker)
         {
             foreach (Point P in ExtraPoint)
             {
                 gr.FillEllipse(new SolidBrush(System.Drawing.Color.Red),
                         new Rectangle(P.X - 1, P.Y - 1, 3, 3));
+                //Thread.Sleep(100);
+                worker.ReportProgress((int)((float)ExtraPoint.IndexOf(P) / ExtraPoint.Count * 100));
+                if (worker.CancellationPending)
+                    return false;
             }
+            return true;
         }
         public void Show(Graphics gr)
         {
@@ -99,13 +103,19 @@ namespace projarm
         }
         public void Hide(Graphics gr)
         {
-
+            foreach (Point P in AnchorPoint)
+            {
+                int index = AnchorPoint.IndexOf(P);
+                if (index + 1 < AnchorPoint.Count)
+                {
+                    Point NextP = AnchorPoint[index + 1];
+                    gr.DrawLine(new Pen(Color.LightBlue, 4), P, NextP);
+                }
+                gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),
+                        new Rectangle(P.X - 6, P.Y - 6, 12, 12));
+            }
         }
-        public void Move(Graphics gr)
-        {
-
-        }
-        public void MoveAnchorPoint(Graphics gr)
+        public void Move(Graphics gr) //Move any anchor point in Path Edit
         {
 
         }

@@ -12,7 +12,7 @@ namespace projarm
         public Unit[] mnp;
         public double[] Q;
         byte currUn;
-        byte numOfUnits;
+        public byte numOfUnits;
 
         public Manipulator(byte _numOfUnits)
         {

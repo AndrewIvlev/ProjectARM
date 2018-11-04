@@ -53,6 +53,7 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.CancelButton = new System.Windows.Forms.Button();
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -107,7 +108,6 @@
             this.label2.Size = new System.Drawing.Size(257, 37);
             this.label2.TabIndex = 5;
             this.label2.Text = "В красных ячейках находится значение обобщенных координат";
-            this.label2.Visible = false;
             // 
             // menuStrip1
             // 
@@ -165,21 +165,23 @@
             // createPathToolStripMenuItem
             // 
             this.createPathToolStripMenuItem.Name = "createPathToolStripMenuItem";
-            this.createPathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.createPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.createPathToolStripMenuItem.Text = "Create Path";
             this.createPathToolStripMenuItem.Click += new System.EventHandler(this.createPathToolStripMenuItem_Click);
             // 
             // editPathToolStripMenuItem
             // 
             this.editPathToolStripMenuItem.Name = "editPathToolStripMenuItem";
-            this.editPathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.editPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.editPathToolStripMenuItem.Text = "Edit Path";
+            this.editPathToolStripMenuItem.Click += new System.EventHandler(this.editPathToolStripMenuItem_Click);
             // 
             // deletePathToolStripMenuItem
             // 
             this.deletePathToolStripMenuItem.Name = "deletePathToolStripMenuItem";
-            this.deletePathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.deletePathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deletePathToolStripMenuItem.Text = "Delete Path";
+            this.deletePathToolStripMenuItem.Click += new System.EventHandler(this.deletePathToolStripMenuItem_Click);
             // 
             // obstacleToolStripMenuItem
             // 
@@ -218,7 +220,6 @@
             this.Klabel.Size = new System.Drawing.Size(259, 20);
             this.Klabel.TabIndex = 9;
             this.Klabel.Text = "Divide the path into         points";
-            this.Klabel.Visible = false;
             // 
             // comboBox1
             // 
@@ -227,7 +228,6 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(40, 21);
             this.comboBox1.TabIndex = 10;
-            this.comboBox1.Visible = false;
             this.comboBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
             this.comboBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.comboBox1_MouseDown);
             // 
@@ -237,10 +237,9 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label3.Location = new System.Drawing.Point(12, 312);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(116, 20);
+            this.label3.Size = new System.Drawing.Size(131, 20);
             this.label3.TabIndex = 11;
-            this.label3.Text = "Path lenght =";
-            this.label3.Visible = false;
+            this.label3.Text = "Path lenght = 0";
             // 
             // backgroundWorker1
             // 
@@ -256,7 +255,6 @@
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(161, 23);
             this.progressBar1.TabIndex = 12;
-            this.progressBar1.Visible = false;
             // 
             // CancelButton
             // 
@@ -267,8 +265,15 @@
             this.CancelButton.TabIndex = 13;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Visible = false;
             this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // backgroundWorker2
+            // 
+            this.backgroundWorker2.WorkerReportsProgress = true;
+            this.backgroundWorker2.WorkerSupportsCancellation = true;
+            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
+            this.backgroundWorker2.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker2_ProgressChanged);
+            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
             // 
             // Form1
             // 
@@ -330,6 +335,7 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Button CancelButton;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
     }
 }
 
