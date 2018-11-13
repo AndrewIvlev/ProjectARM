@@ -30,11 +30,6 @@ namespace projarm
             type = j.type;
             dot = j.dot;
         }
-        /*public Joint(char _type, Point p)
-        {
-            type = _type;
-            Dot = p;
-        }*/
         public Joint(char _type)
         {
             type = _type;
@@ -52,7 +47,7 @@ namespace projarm
         }
         public void TransferFunction(double len, double angle)
         {
-            angle *= -0.01745f;
+            angle *= -0.0174533f;
             Dot = new Point((int)(Dot.X + len * Math.Cos(angle)) - offset.X,
                 offset.Y - (int)(Dot.Y + len * Math.Sin(angle)));
         }
@@ -85,8 +80,6 @@ namespace projarm
             gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),
                 new Rectangle(Dot.X - 5, Dot.Y - 5, 10, 10));
         }
-        public override void Move(Graphics gr)
-        {
-        }
+        public override void Move(Graphics gr) { }
     }
 }

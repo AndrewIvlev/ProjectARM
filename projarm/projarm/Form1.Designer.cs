@@ -101,13 +101,13 @@
             // 
             // label2
             // 
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label2.ForeColor = System.Drawing.Color.Red;
             this.label2.Location = new System.Drawing.Point(13, 213);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(257, 37);
+            this.label2.Size = new System.Drawing.Size(257, 50);
             this.label2.TabIndex = 5;
-            this.label2.Text = "В красных ячейках находится значение обобщенных координат";
+            this.label2.Text = "Generalized Coordinates Q=(0,0,0,0)";
             // 
             // menuStrip1
             // 
@@ -165,21 +165,21 @@
             // createPathToolStripMenuItem
             // 
             this.createPathToolStripMenuItem.Name = "createPathToolStripMenuItem";
-            this.createPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.createPathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.createPathToolStripMenuItem.Text = "Create Path";
             this.createPathToolStripMenuItem.Click += new System.EventHandler(this.createPathToolStripMenuItem_Click);
             // 
             // editPathToolStripMenuItem
             // 
             this.editPathToolStripMenuItem.Name = "editPathToolStripMenuItem";
-            this.editPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.editPathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.editPathToolStripMenuItem.Text = "Edit Path";
             this.editPathToolStripMenuItem.Click += new System.EventHandler(this.editPathToolStripMenuItem_Click);
             // 
             // deletePathToolStripMenuItem
             // 
             this.deletePathToolStripMenuItem.Name = "deletePathToolStripMenuItem";
-            this.deletePathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.deletePathToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.deletePathToolStripMenuItem.Text = "Delete Path";
             this.deletePathToolStripMenuItem.Click += new System.EventHandler(this.deletePathToolStripMenuItem_Click);
             // 
@@ -301,6 +301,7 @@
             this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

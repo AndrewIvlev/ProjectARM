@@ -14,12 +14,9 @@ namespace projarm
         public List<Point> AnchorPoint; // Опорные точки
         public List<Point> ExtraPoint; // Дополнительные точки
         public List<double[]> ExactExtraPoint; // Точные доп точки
-        public double len;
-        //int k;
 
         public Path()
         {
-            len = 0;
             AnchorPoint = new List<Point>();
             ExtraPoint = new List<Point>();
             ExactExtraPoint = new List<double[]>();
@@ -30,21 +27,59 @@ namespace projarm
             ExtraPoint = new List<Point>();
             ExactExtraPoint = new List<double[]>();
         }
+        public void ClearAllList()
+        {
+            AnchorPoint.Clear();
+            ExtraPoint.Clear();
+            ExactExtraPoint.Clear();
+        }
         public double DistanceBetweenPoints(Point A, Point B)
         {
             return Math.Sqrt(Math.Pow(A.X - B.X, 2) + Math.Pow(A.Y - B.Y, 2));
         }
+        public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
+        {
+            int index = -1;
+            double MinDist = 8192;
+            foreach (Point P in AnchorPoint)
+            {
+                double dist = DistanceBetweenPoints(O, P);
+                if (dist < MinDist)
+                {
+                    MinDist = dist;
+                    index = AnchorPoint.IndexOf(P);
+                }
+            }
+            return index;
+        }
         public void AddAnchorPoint(Point NAP) //NAP = New Anchot Point
         {
             AnchorPoint.Add(NAP);
-            int index = AnchorPoint.IndexOf(NAP);
-            if (index != 0)
-                len += DistanceBetweenPoints(AnchorPoint[index - 1], NAP);
+        }
+        public double GetLen()
+        {
+            double len = 0;
+            foreach (Point P in AnchorPoint)
+            {
+                int index = AnchorPoint.IndexOf(P);
+                if (index != 0)
+                    len += DistanceBetweenPoints(AnchorPoint[index - 1], P);
+                else len = 0;
+            }
+            return len;
+        }
+        public void ExactExtraPointOffset(Point offset)
+        {
+            foreach (double[] point in ExactExtraPoint)
+            {
+                point[0] = point[0] - offset.X;
+                point[1] = offset.Y - point[1];
+            }
         }
         public void SplitPath(Int32 k)    //Разбить путь на k отрезков, с шагом step принадлежащем отрезку [0,1]
         {
             int j = 0; //Пожалуй можно заменить на (ExtraPoint.Count - AnchorPoint.Count)
-            double step = len / k; // Шаг = длину всего пути делим на количество точек
+            double step = GetLen() / k; // Шаг = длину всего пути делим на количество точек
 
             foreach (Point P in AnchorPoint) //Разбиение ломаной линии с шагом step
             {
@@ -114,10 +149,6 @@ namespace projarm
                 gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),
                         new Rectangle(P.X - 6, P.Y - 6, 12, 12));
             }
-        }
-        public void Move(Graphics gr) //Move any anchor point in Path Edit
-        {
-
         }
     }
 }

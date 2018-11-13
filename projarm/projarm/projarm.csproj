@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,7 +59,7 @@
     <Compile Include="Manipulator.cs" />
     <Compile Include="MathModel.cs" />
     <Compile Include="Path.cs" />
-    <Compile Include="PhysicsEngine.cs" />
+    <Compile Include="MathEngine.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="BlockMatrix.cs" />
     <Compile Include="Program.cs" />

@@ -6,22 +6,27 @@ namespace projarm
 {
     public partial class Form1 : Form
     {
-        byte numOfUnits = 0;
         MathModel ModelMnpltr;
         Manipulator mnpltr;
         public Graphics gr;
-        byte flag = 0;
+        byte MousePressed;
+        byte numOfUnits;
+        int index;
+        byte flag;
         Path S;
 
         public Form1()
         {
             InitializeComponent();
+            gr = CreateGraphics();
+            MousePressed = 0;
+            numOfUnits = 0;
+            flag = 0;
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             Graphics actionArea = e.Graphics;
-            gr = CreateGraphics();
             Pen p = new Pen(Color.Black, 6);
             actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
             actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
@@ -119,21 +124,17 @@ namespace projarm
                     case 'R':
                         tmpJstart.type = 'R';
                         tmpJend.type = 'S';
-                        mnpltr.Q[i - 1] = angle;
                         anglemnpltr += angle;
                         tmpJend.TransferFunction(len, anglemnpltr);
                         mnpltr.addUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
                         tmpJstart.TransferFunction(len, anglemnpltr);
-                        unitsDataGridView.Rows[i].Cells[3].Style.BackColor = System.Drawing.Color.Red;
                         break;
                     case 'P':
                         tmpJstart.type = 'P';
                         tmpJend.type = 'S';
-                        mnpltr.Q[i -1] = len;
                         tmpJend.TransferFunction(len, anglemnpltr);
                         mnpltr.addUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
                         tmpJstart.TransferFunction(len, anglemnpltr);
-                        unitsDataGridView.Rows[i].Cells[2].Style.BackColor = System.Drawing.Color.Red;
                         break;
                     case 'G':
                         tmpJstart.type = tmpJend.type = 'G';
@@ -148,33 +149,16 @@ namespace projarm
         }
         private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //double[] q = new double[4] { 0, 0, 75, 0};
-            //double[] q = new double[numOfUnits - 2];
             ModelMnpltr = new MathModel(numOfUnits - 2);
-
             for (int i = 0; i < numOfUnits - 2; i++)
             {
                 MathModel.len[i] = mnpltr.mnp[i + 1].lenght;
                 MathModel.angle[i] = mnpltr.mnp[i + 1].angle;
-                ModelMnpltr.dq[i] = mnpltr.Q[i];
             }
-            
-            backgroundWorker1.RunWorkerAsync();
 
-            for (int i = 1; i < numOfUnits - 1; i++)
-            {
-                switch (mnpltr.mnp[i].start.type)
-                {
-                    case 'R':
-                        unitsDataGridView.Rows[i].Cells[3].Value = mnpltr.Q[i - 1];
-                        break;
-                    case 'P':
-                        unitsDataGridView.Rows[i].Cells[2].Value = mnpltr.Q[i - 1];
-                        break;
-                    default:
-                        break;
-                }
-            }
+            S.ExactExtraPointOffset(new Point(288 + (this.Width - 321) / 2, this.Height - 58));
+
+            backgroundWorker1.RunWorkerAsync();
         }
 
         private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -186,6 +170,7 @@ namespace projarm
         private void createPathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             S = new Path();
+            S.AddAnchorPoint(mnpltr.mnp[numOfUnits - 1].end.dot);
             flag = 1;
         }
 
@@ -197,6 +182,7 @@ namespace projarm
         private void deletePathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             S.Hide(gr);
+            S.ClearAllList(); //Впоследствии заменить
             flag = 0;
         }
         private void Form1_MouseDown(object sender, MouseEventArgs e)
@@ -205,16 +191,49 @@ namespace projarm
             {
                 case 1:
                     S.AddAnchorPoint(e.Location);
-                    if (S.len != 0) label3.Text = $"Path lenght = {S.len.ToString("#.0000000000")}";
+                    if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
                     comboBox1.Items.Clear();
                     S.Show(gr);
                     break;
                 case 2:
+                    if (MousePressed == 0)
+                    {
+                        //Находим ближайшую опорную точку
+                        index = S.NearestPointIndex(e.Location);
+                        /*Нажал ли пользователь на опорную точку, если да, то её координаты
+                        должны удовлетворять уравнению  (x - x')^2 + (y - y')^2 <= R^2
+                        В нашей графической реализации радиус равен 6, но для удобства возьмём окрестность большего радиуса
+                        */
+                        if (Math.Pow((e.Location.X - S.AnchorPoint[index].X), 2) +
+                            Math.Pow((e.Location.Y + S.AnchorPoint[index].Y), 2) <= 40) 
+                        {
+                            S.AnchorPoint[index] = e.Location;
+                        }
+                        MousePressed = 1;
+                        return;
+                    }
+                    if (MousePressed == 1)
+                    {
+                        MousePressed = 0;
+                        return;
+                    }
                     break;
                 case 3:
                     break;
                 default:
                     break;
+            }
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (MousePressed == 1)
+            {
+                S.Hide(gr);
+                S.AnchorPoint[index] = e.Location;
+                if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
+                comboBox1.Items.Clear();
+                S.Show(gr);
             }
         }
 
@@ -247,9 +266,14 @@ namespace projarm
             if (e.KeyCode == Keys.Enter)
             {
                 Int32 k = Convert.ToInt32(comboBox1.Text);
-                if (k < (int)S.len || (S.len / k == 0))
+                double PathLen = S.GetLen();
+                if (k < (int)PathLen || (PathLen / k == 0))
                     MessageBox.Show("k should be longer than path lenght or it is too big");
-                    //Число К должно быть больше длины пути или оно слишком большое
+                //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
+                /* Чтобы шаг Step был в промежутке от 0 до 1,
+                 * нужно чтобы отношение длины пути к количеству
+                 * точек было больше 0 но меньше 1
+                */
                 else
                 {
                     flag = 0;
@@ -263,16 +287,17 @@ namespace projarm
 
         private void comboBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            comboBox1.Items.Add($"{(int)S.len + 1}");
-            comboBox1.Items.Add($"{(int)S.len + 13}");
-            comboBox1.Items.Add($"{(int)S.len * 2}");
-            comboBox1.Items.Add($"{(int)S.len * 5}");
-            comboBox1.Items.Add($"{(int)S.len * 10}");
+            comboBox1.Items.Add($"{(int)S.GetLen() + 1}");
+            comboBox1.Items.Add($"{(int)S.GetLen() + 13}");
+            comboBox1.Items.Add($"{(int)S.GetLen() * 2}");
+            comboBox1.Items.Add($"{(int)S.GetLen() * 5}");
+            comboBox1.Items.Add($"{(int)S.GetLen() * 10}");
         }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            PhysicsEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1);
+            MathEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1);
+            //label2.Text = $"Generalized Coordinates Q = ({mnpltr.Q[0]}, {mnpltr.Q[1]}, {mnpltr.Q[2]}, {mnpltr.Q[3]})";
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -314,7 +339,6 @@ namespace projarm
             }
             progressBar1.Value = 0;
         }
-
     }
     //MessageBox.Show("Left tButton");
 }
