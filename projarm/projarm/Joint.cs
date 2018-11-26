@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace projarm
 {
-    class Joint : GrRoot
+    class Joint : IGraphics
     {
         public char type; //S - Static, R - Revolute, P - Prismatic, G - Gripper
         public Point dot;
@@ -51,7 +51,7 @@ namespace projarm
             Dot = new Point((int)(Dot.X + len * Math.Cos(angle)) - offset.X,
                 offset.Y - (int)(Dot.Y + len * Math.Sin(angle)));
         }
-        public override void Show(Graphics gr)
+        public void Show(Graphics gr)
         {
             switch (type)
             {
@@ -75,11 +75,11 @@ namespace projarm
                     break;
             }
         }
-        public override void Hide(Graphics gr)
+        public void Hide(Graphics gr)
         {
             gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),
                 new Rectangle(Dot.X - 5, Dot.Y - 5, 10, 10));
         }
-        public override void Move(Graphics gr) { }
+        public void Move(Graphics gr) { }
     }
 }

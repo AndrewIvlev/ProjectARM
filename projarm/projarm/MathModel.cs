@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace projarm
@@ -65,9 +66,7 @@ namespace projarm
             double[] μ = CramerMethod(A, b);
             ;
             double[] error = SolutionVerification(A, b, μ);
-            if (Math.Sqrt(error[0] * error[0] + error[1] * error[1]) > 1)
-                ;
-
+            //if (Math.Sqrt(error[0] * error[0] + error[1] * error[1]) > 1) return null;
             //if (μ[0] + μ[1] == 0) return dq;
             for (int i = 0; i < 4; i++)
                 dq[i] = MagicFunc(μ, q, dFxpodqi[i], dFypodqi[i]);
@@ -88,8 +87,7 @@ namespace projarm
                 double detx2 = A[0, 0] * b[1] - b[0] * A[1, 0];
                 x[1] = detx2 / det;
             }
-            else
-                ;
+            else return null;
             return x;
         }
         public double[] SolutionVerification(double[,] A, double[] b, double[] x)
@@ -138,6 +136,12 @@ namespace projarm
         public static double dFypodq4(ref double[] q)
         {
             return len[3] * cos(q[0] + q[1] + q[3]);
+        }
+        public Point GetPointError(double[] Q, double[] dq, double[] xy)
+        {
+            for (int i = 0; i < Q.Length; i++)
+                Q[i] += dq[i];
+            return new Point((int)(xy[0] - Fx(Q)), (int)(xy[1] - Fy(Q))); 
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace projarm
 {
-    class Manipulator : GrRoot
+    class Manipulator : IGraphics
     {
         public byte numOfUnits;
         public double[] Q;
@@ -27,17 +27,17 @@ namespace projarm
         {
             mnp[currUn++] = newU;
         }
-        public override void Show(Graphics gr)
+        public void Show(Graphics gr)
         {
             for (int i = 0; i < numOfUnits; i++)
                 mnp[i].Show(gr);
         }
-        public override void Hide(Graphics gr)
+        public void Hide(Graphics gr)
         {
             for (int i = 0; i < numOfUnits; i++)
                 mnp[i].Hide(gr);
         }
-        public override void Move(Graphics gr)
+        public void Move(Graphics gr)
         {
             Hide(gr);
             double anglemnpltr = 0f;

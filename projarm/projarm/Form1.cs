@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace projarm
 {
     public partial class Form1 : Form
     {
+        public List<Point> ForDeltaPoints;
         MathModel ModelMnpltr;
         Manipulator mnpltr;
         public Graphics gr;
         byte MousePressed;
         byte numOfUnits;
+        Series series;
         int index;
         byte flag;
         Path S;
@@ -18,7 +22,9 @@ namespace projarm
         public Form1()
         {
             InitializeComponent();
-            gr = CreateGraphics();
+            series = new Series("Delta");
+            ForDeltaPoints = new List<Point>();
+             gr = pictureBox.CreateGraphics();
             MousePressed = 0;
             numOfUnits = 0;
             flag = 0;
@@ -26,14 +32,10 @@ namespace projarm
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics actionArea = e.Graphics;
-            Pen p = new Pen(Color.Black, 6);
-            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
-            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
-            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
-            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
-            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 288, 41, this.Width - 321, this.Height - 94);
-            actionArea.Dispose();
+            //PictureBox
+            //Пересчёт координат от физ модели к графике
+            //Почему манипулятор не доходит до опорных точек, не достигает их и соседних экстра точек
+            pictureBox_Paint(sender, e);
         }
 
         private void NumofUnits_KeyDown(object sender, KeyEventArgs e)
@@ -103,7 +105,7 @@ namespace projarm
         private void ctreateMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
         {
             mnpltr = new Manipulator(numOfUnits);
-            Point OffSet = new Point(288 + (this.Width - 321) / 2, this.Height - 58);
+            Point OffSet = new Point(pictureBox.Width / 2, pictureBox.Height - 10);
             Joint tmpJstart = new Joint('S', OffSet);
             Joint tmpJend = new Joint('S', OffSet);
             double anglemnpltr = 0;
@@ -156,7 +158,7 @@ namespace projarm
                 MathModel.angle[i] = mnpltr.mnp[i + 1].angle;
             }
 
-            S.ExactExtraPointOffset(new Point(288 + (this.Width - 321) / 2, this.Height - 58));
+            S.ExactExtraPointOffset(new Point(pictureBox.Width / 2, pictureBox.Height - 10));
 
             backgroundWorker1.RunWorkerAsync();
         }
@@ -169,9 +171,14 @@ namespace projarm
 
         private void createPathToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            S = new Path();
-            S.AddAnchorPoint(mnpltr.mnp[numOfUnits - 1].end.dot);
-            flag = 1;
+            if (mnpltr == null)
+                MessageBox.Show("Firstly Create Manipulator");
+            else
+            {
+                S = new Path();
+                S.AddAnchorPoint(mnpltr.mnp[numOfUnits - 1].end.dot);
+                flag = 1;
+            }
         }
 
         private void editPathToolStripMenuItem_Click(object sender, EventArgs e)
@@ -182,83 +189,8 @@ namespace projarm
         private void deletePathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             S.Hide(gr);
-            S.ClearAllList(); //Впоследствии заменить
+            S.ClearAllList(); //Впоследствии заменить на S.Dispose();
             flag = 0;
-        }
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-            switch(flag)
-            {
-                case 1:
-                    S.AddAnchorPoint(e.Location);
-                    if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
-                    comboBox1.Items.Clear();
-                    S.Show(gr);
-                    break;
-                case 2:
-                    if (MousePressed == 0)
-                    {
-                        //Находим ближайшую опорную точку
-                        index = S.NearestPointIndex(e.Location);
-                        /*Нажал ли пользователь на опорную точку, если да, то её координаты
-                        должны удовлетворять уравнению  (x - x')^2 + (y - y')^2 <= R^2
-                        В нашей графической реализации радиус равен 6, но для удобства возьмём окрестность большего радиуса
-                        */
-                        if (Math.Pow((e.Location.X - S.AnchorPoint[index].X), 2) +
-                            Math.Pow((e.Location.Y + S.AnchorPoint[index].Y), 2) <= 40) 
-                        {
-                            S.AnchorPoint[index] = e.Location;
-                        }
-                        MousePressed = 1;
-                        return;
-                    }
-                    if (MousePressed == 1)
-                    {
-                        MousePressed = 0;
-                        return;
-                    }
-                    break;
-                case 3:
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void Form1_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (MousePressed == 1)
-            {
-                S.Hide(gr);
-                S.AnchorPoint[index] = e.Location;
-                if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
-                comboBox1.Items.Clear();
-                S.Show(gr);
-            }
-        }
-
-        private void Form1_ResizeBegin(object sender, EventArgs e)
-        {
-            Graphics actionArea = CreateGraphics();
-            Pen p = new Pen(Color.White, 6);
-            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
-            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
-            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
-            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
-            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.White), 288, 41, this.Width - 321, this.Height - 94);
-            actionArea.Dispose();
-        }
-
-        private void Form1_ResizeEnd(object sender, EventArgs e)
-        {
-            Graphics actionArea = CreateGraphics();
-            Pen p = new Pen(Color.Black, 6);
-            actionArea.DrawLine(p, new Point(282, 38), new Point(this.Width - 27, 38));
-            actionArea.DrawLine(p, new Point(282, this.Height - 50), new Point(this.Width - 27, this.Height - 50));
-            actionArea.DrawLine(p, new Point(285, 38), new Point(285, this.Height - 50));
-            actionArea.DrawLine(p, new Point(this.Width - 30, 38), new Point(this.Width - 30, this.Height - 50));
-            actionArea.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 288, 41, this.Width - 321, this.Height - 94);
-            actionArea.Dispose();
         }
 
         private void comboBox1_KeyDown(object sender, KeyEventArgs e)
@@ -266,14 +198,9 @@ namespace projarm
             if (e.KeyCode == Keys.Enter)
             {
                 Int32 k = Convert.ToInt32(comboBox1.Text);
-                double PathLen = S.GetLen();
-                if (k < (int)PathLen || (PathLen / k == 0))
+                if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
                     MessageBox.Show("k should be longer than path lenght or it is too big");
                 //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
-                /* Чтобы шаг Step был в промежутке от 0 до 1,
-                 * нужно чтобы отношение длины пути к количеству
-                 * точек было больше 0 но меньше 1
-                */
                 else
                 {
                     flag = 0;
@@ -287,17 +214,20 @@ namespace projarm
 
         private void comboBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            comboBox1.Items.Add($"{(int)S.GetLen() + 1}");
-            comboBox1.Items.Add($"{(int)S.GetLen() + 13}");
-            comboBox1.Items.Add($"{(int)S.GetLen() * 2}");
-            comboBox1.Items.Add($"{(int)S.GetLen() * 5}");
-            comboBox1.Items.Add($"{(int)S.GetLen() * 10}");
+            if (S != null)
+            {
+                comboBox1.Items.Add($"{(int)S.GetLen() + 1}");
+                comboBox1.Items.Add($"{(int)S.GetLen() + 13}");
+                comboBox1.Items.Add($"{(int)S.GetLen() * 2}");
+                comboBox1.Items.Add($"{(int)S.GetLen() * 5}");
+                comboBox1.Items.Add($"{(int)S.GetLen() * 10}");
+            }
+            
         }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            MathEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1);
-            //label2.Text = $"Generalized Coordinates Q = ({mnpltr.Q[0]}, {mnpltr.Q[1]}, {mnpltr.Q[2]}, {mnpltr.Q[3]})";
+            MathEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1, ref ForDeltaPoints);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -312,6 +242,10 @@ namespace projarm
                 ;//////////////
             }
             progressBar1.Value = 0;
+            
+            foreach (Point p in ForDeltaPoints)
+                chart1.Series[0].Points.AddXY(ForDeltaPoints.IndexOf(p), MathEngine.NormaVectora(p));
+            label2.Text = $"Generalized Coordinates Q = ({(int)mnpltr.Q[0]}, {(int)mnpltr.Q[1]}, {(int)mnpltr.Q[2]}, {(int)mnpltr.Q[3]})";
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -335,9 +269,80 @@ namespace projarm
         {
             if (!e.Cancelled)
             {
-                ;//////////////
+                ;
             }
             progressBar1.Value = 0;
+        }
+
+        private void pictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            switch (flag)
+            {
+                case 1:
+                    S.AddAnchorPoint(e.Location);
+                    if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
+                    comboBox1.Items.Clear();
+                    S.Show(gr);
+                    break;
+                case 2:
+                    if (MousePressed == 0)
+                    {
+                        //Находим ближайшую опорную точку
+                        index = S.NearestPointIndex(e.Location);
+                        /*Нажал ли пользователь на опорную точку, если да, то её координаты
+                        должны удовлетворять уравнению  (x - x')^2 + (y - y')^2 <= R^2
+                        В нашей графической реализации радиус равен 6, но для удобства возьмём окрестность большего радиуса
+                        */
+                        if (Math.Pow((e.Location.X - S.AnchorPoint[index].X), 2) +
+                            Math.Pow((e.Location.Y + S.AnchorPoint[index].Y), 2) <= 40)
+                        {
+                            S.AnchorPoint[index] = e.Location;
+                        }
+                        MousePressed = 1;
+                        return;
+                    }
+                    if (MousePressed == 1)
+                    {
+                        MousePressed = 0;
+                        return;
+                    }
+                    break;
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void pictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (MousePressed == 1)
+            {
+                S.Hide(gr);
+                S.AnchorPoint[index] = e.Location;
+                if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
+                comboBox1.Items.Clear();
+                S.Show(gr);
+            }
+        }
+
+        private void pictureBox_Paint(object sender, EventArgs e)
+        {
+            Pen p = new Pen(Color.Black, 7);
+            gr.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
+            gr.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
+            gr.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            gr.DrawLine(p, new Point(1, 1), new Point(1, pictureBox.Height - 2));
+            gr.DrawLine(p, new Point(pictureBox.Width - 2, 1), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            if (mnpltr != null)
+                mnpltr.Show(gr);
+            if (S != null)
+                S.Show(gr);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
     //MessageBox.Show("Left tButton");

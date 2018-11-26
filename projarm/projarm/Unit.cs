@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace projarm
 {
-    class Unit : GrRoot
+    class Unit : IGraphics
     {
         public double lenght;
         public double angle;
@@ -22,7 +22,7 @@ namespace projarm
             lenght = len;
             angle = a;
         }
-        public override void Move(Graphics gr) { }
+        public void Move(Graphics gr) { }
         /*public static Unit operator =(Unit A, Unit B)
         {
             A.start = B.start;
@@ -31,13 +31,13 @@ namespace projarm
             A.angle = B.angle;
             return A;
         }*/
-        public override void Show(Graphics gr)
+        public void Show(Graphics gr)
         {
             start.Show(gr);
             gr.DrawLine(new Pen(Color.DarkBlue, 4), start.Dot, end.Dot);
             end.Show(gr);
         }
-        public override void Hide(Graphics gr)
+        public void Hide(Graphics gr)
         {
             gr.DrawLine(new Pen(Color.LightBlue, 4), start.Dot, end.Dot);
             start.Hide(gr);
