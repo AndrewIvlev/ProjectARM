@@ -56,9 +56,10 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.CancelButton = new System.Windows.Forms.Button();
-            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).BeginInit();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
@@ -93,7 +94,6 @@
             this.unitsDataGridView.RowHeadersWidth = 20;
             this.unitsDataGridView.Size = new System.Drawing.Size(252, 143);
             this.unitsDataGridView.TabIndex = 2;
-            this.unitsDataGridView.ColumnAdded += new System.Windows.Forms.DataGridViewColumnEventHandler(this.unitsDataGridView_ColumnAdded);
             // 
             // DefaultManipulator
             // 
@@ -224,16 +224,16 @@
             this.Klabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Klabel.Location = new System.Drawing.Point(11, 292);
             this.Klabel.Name = "Klabel";
-            this.Klabel.Size = new System.Drawing.Size(259, 20);
+            this.Klabel.Size = new System.Drawing.Size(269, 20);
             this.Klabel.TabIndex = 9;
-            this.Klabel.Text = "Divide the path into         points";
+            this.Klabel.Text = "Divide the path into           points";
             // 
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(174, 294);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(40, 21);
+            this.comboBox1.Size = new System.Drawing.Size(45, 21);
             this.comboBox1.TabIndex = 10;
             this.comboBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
             this.comboBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.comboBox1_MouseDown);
@@ -242,11 +242,11 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(12, 312);
+            this.label3.Location = new System.Drawing.Point(12, 342);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(131, 20);
+            this.label3.Size = new System.Drawing.Size(159, 20);
             this.label3.TabIndex = 11;
-            this.label3.Text = "Path lenght = 0";
+            this.label3.Text = "Path lenght = 0 cm";
             // 
             // backgroundWorker1
             // 
@@ -274,14 +274,6 @@
             this.CancelButton.UseVisualStyleBackColor = true;
             this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
-            // backgroundWorker2
-            // 
-            this.backgroundWorker2.WorkerReportsProgress = true;
-            this.backgroundWorker2.WorkerSupportsCancellation = true;
-            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
-            this.backgroundWorker2.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker2_ProgressChanged);
-            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
-            // 
             // chart1
             // 
             chartArea1.AxisX.Title = "iteration";
@@ -293,7 +285,7 @@
             chartArea1.AxisY.TitleForeColor = System.Drawing.Color.Red;
             chartArea1.Name = "ChartArea1";
             this.chart1.ChartAreas.Add(chartArea1);
-            this.chart1.Location = new System.Drawing.Point(0, 335);
+            this.chart1.Location = new System.Drawing.Point(0, 365);
             this.chart1.Name = "chart1";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
@@ -318,12 +310,32 @@
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
             this.pictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseMove);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(11, 318);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(262, 20);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "Or select a split step:            cm";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(190, 320);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(45, 21);
+            this.comboBox2.TabIndex = 17;
+            this.comboBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox2_KeyDown);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1064, 682);
+            this.Controls.Add(this.comboBox2);
             this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.CancelButton);
@@ -337,6 +349,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.Klabel);
+            this.Controls.Add(this.label4);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(540, 360);
@@ -380,9 +393,10 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Button CancelButton;
-        private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.PictureBox pictureBox;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox comboBox2;
     }
 }
 

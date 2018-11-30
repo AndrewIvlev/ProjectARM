@@ -9,121 +9,211 @@ using System.Drawing;
 
 namespace projarm
 {
+    public struct dpoint
+    {
+        public double x;
+        public double y;
+        //double len; длина от this точки до начала пути
+        public dpoint(double _x, double _y)
+        {
+            x = _x;
+            y = _y;
+        }
+    }
+
     class Path
     {
-        public List<Point> AnchorPoint; // Опорные точки
-        public List<Point> ExtraPoint; // Дополнительные точки
-        public List<double[]> ExactExtraPoint; // Точные доп точки
+        public List<Point> AnchorPoints; // Опорные точки
+        public dpoint[] ExtraPoints; // Дополнительные точки
+        public Int32 NumOfExtraPoints;
 
         public Path()
         {
-            AnchorPoint = new List<Point>();
-            ExtraPoint = new List<Point>();
-            ExactExtraPoint = new List<double[]>();
+            AnchorPoints = new List<Point>();
+            ExtraPoints = new dpoint[512];
+            NumOfExtraPoints = 0;
         }
         public Path(Point StartPoint)
         {
-            AnchorPoint = new List<Point>() { StartPoint };
-            ExtraPoint = new List<Point>();
-            ExactExtraPoint = new List<double[]>();
+            AnchorPoints = new List<Point>() { StartPoint };
+            ExtraPoints = new dpoint[512];
+            NumOfExtraPoints = 0;
         }
-        public void ClearAllList()
+        public void Clear()
         {
-            AnchorPoint.Clear();
-            ExtraPoint.Clear();
-            ExactExtraPoint.Clear();
+            AnchorPoints.Clear();
+            Array.Clear(ExtraPoints, 0, ExtraPoints.Length);
         }
         public double DistanceBetweenPoints(Point A, Point B)
         {
-            return Math.Sqrt(Math.Pow(A.X - B.X, 2) + Math.Pow(A.Y - B.Y, 2));
+            return Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
+        }
+        public double DistanceBetweenDPoints(dpoint p1, dpoint p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
+        }
+        public double DistanceBerweenPointAndDpoint(Point P, dpoint dp)
+        {
+            return Math.Sqrt(Math.Pow(dp.x - P.X, 2) + Math.Pow(dp.y - P.Y, 2));
         }
         public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
         {
             int index = -1;
             double MinDist = 8192;
-            foreach (Point P in AnchorPoint)
+            foreach (Point P in AnchorPoints)
             {
                 double dist = DistanceBetweenPoints(O, P);
                 if (dist < MinDist)
                 {
                     MinDist = dist;
-                    index = AnchorPoint.IndexOf(P);
+                    index = AnchorPoints.IndexOf(P);
                 }
             }
             return index;
         }
-        public void AddAnchorPoint(Point NAP) //NAP = New Anchot Point
+        public void AddAnchorPoint(Point NAP) //NAP = New Anchor Point
         {
-            AnchorPoint.Add(NAP);
+            AnchorPoints.Add(NAP);
         }
         public double GetLen()
         {
             double len = 0;
-            foreach (Point P in AnchorPoint)
-            {
-                int index = AnchorPoint.IndexOf(P);
-                if (index != 0)
-                    len += DistanceBetweenPoints(AnchorPoint[index - 1], P);
-                else len = 0;
-            }
+            for ( int i = 1; i < AnchorPoints.Count; i++)
+                len += DistanceBetweenPoints(AnchorPoints[i - 1], AnchorPoints[i]);
             return len;
+        }
+        public dpoint ToDpoint(Point P)
+        {
+            return new dpoint(P.X, P.Y);
+        }
+        public double[] GetSteps()
+        {
+            double len = GetLen();
+            double[] res = new double[AnchorPoints.Count];
+            for (int i = 0; i < AnchorPoints.Count; i++)
+                res[i] = DistanceBetweenPoints(AnchorPoints[0], AnchorPoints[i]) / len;
+            return res;
+        }
+        public void SplitPath(double step)
+        {
+            int index = 1;
+            ExtraPoints[0] = ToDpoint(AnchorPoints[0]);
+            for (int i = 1; i < AnchorPoints.Count; i++)
+            {
+                int j = 0;
+                double lambda = 0;
+                double x = AnchorPoints[i - 1].X;
+                double y = AnchorPoints[i - 1].Y;
+                double dist = DistanceBetweenPoints(AnchorPoints[i - 1], AnchorPoints[i]);
+                do
+                {
+                    lambda = (step * j) / (dist - step * j);
+                    x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
+                    y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
+                    ExtraPoints[index++] = new dpoint(x, y);
+                    j++;
+                }
+                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new dpoint(x, y)) + step < dist);
+            }
+            ExtraPoints[index] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
+            NumOfExtraPoints = ++index;
+        }
+        public void SplitPath(Int32 k)
+        {
+            int index = 1;
+            double step = GetLen() / k; // Шаг = длину всего пути делим на количество доп точек
+            ExtraPoints[0] = ToDpoint(AnchorPoints[0]);
+            for (int i = 1; i < AnchorPoints.Count; i++)
+            {
+                int j = 0;
+                double lambda = 0;
+                double x = AnchorPoints[i - 1].X;
+                double y = AnchorPoints[i - 1].Y;
+                double dist = DistanceBetweenPoints(AnchorPoints[i - 1], AnchorPoints[i]);
+                do
+                {
+                    lambda = (step * j) / (dist - step * j);
+                    x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
+                    y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
+                    ExtraPoints[index++] = new dpoint(x, y);
+                    j++;
+                }
+                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new dpoint(x, y)) + step < dist);
+            }
+            ExtraPoints[index] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
+            NumOfExtraPoints = ++index;
+            //NumOfExtraPoints = k + AnchorPoints.Count;
+            if (++index == NumOfExtraPoints)
+                ;//Ни одной точки не потерялось
+            else
+                ;//Потерялось NumOfExtraPoints - index точек
+            /* Другой вариант:
+             * k = _k; 
+            int i = 0;
+            double[] steps = GetSteps();
+            for (int j = 0; j < k; j++)
+            {
+                double step = (1.0 / k) * j;
+                if (step > steps[i]) i++;
+                if (i >= AnchorPoints.Count - 1) break;
+                ExtraPoints[j].x = AnchorPoints[i].X + (step - steps[i]) / (steps[i + 1] - steps[i]) * (AnchorPoints[i + 1].X - AnchorPoints[i].X);
+                ExtraPoints[j].y = AnchorPoints[i].Y + (step - steps[i]) / (steps[i + 1] - steps[i]) * (AnchorPoints[i + 1].Y - AnchorPoints[i].Y);
+            }
+            */
+        }
+        public void ExtraClear()
+        {
+            Array.Clear(ExtraPoints, 0, NumOfExtraPoints);
+        }
+        public void ShowExtraPoints(Graphics gr)
+        {
+            for ( int i = 0; i < NumOfExtraPoints; i++)
+                gr.FillEllipse(new SolidBrush(System.Drawing.Color.Red), new Rectangle((int)ExtraPoints[i].x - 3, (int)ExtraPoints[i].y - 3, 6, 6));
         }
         public void ExactExtraPointOffset(Point offset)
         {
-            foreach (double[] point in ExactExtraPoint)
+            for (int i = 0; i < ExtraPoints.Length; i++)
             {
-                point[0] = point[0] - offset.X;
-                point[1] = offset.Y - point[1];
+                ExtraPoints[i].x -= offset.X;
+                ExtraPoints[i].y = offset.Y - ExtraPoints[i].y;
             }
         }
-        public void SplitPath(Int32 k)    //Разбить путь на k отрезков, с шагом step принадлежащем отрезку [0,1]
+        public void TransExtraPoints(Int32 k, double CoeftoRealW)
         {
-            int j = 0; //Пожалуй можно заменить на (ExtraPoint.Count - AnchorPoint.Count)
-            double step = GetLen() / k; // Шаг = длину всего пути делим на количество точек
-
-            foreach (Point P in AnchorPoint) //Разбиение ломаной линии с шагом step
+            for ( int i = 0; i < k; i++)
             {
-                ExtraPoint.Add(P);
-                ExactExtraPoint.Add(new double[2] { P.X, P.Y });
-                int  index = AnchorPoint.IndexOf(P);
-                if (index != 0)
-                {
-                    int i = 1;
-                    double lambda = step;
-                    double dist = DistanceBetweenPoints(AnchorPoint[index - 1], P);
-                    while((int)lambda < (int)dist)
-                    {
-                        lambda = (step * i) / (dist - step * i++);
-                        double x = (AnchorPoint[index - 1].X + lambda * P.X) / (1 + lambda);
-                        double y = (AnchorPoint[index - 1].Y + lambda * P.Y) / (1 + lambda);
-                        ExactExtraPoint.Insert(index + j, new double[] { x, y });
-                        Point newExtraP = new Point((int)x, (int)y);
-                        ExtraPoint.Insert(index + j++, newExtraP);
-                    }
-                }
+                ExtraPoints[i].x *= CoeftoRealW;
+                ExtraPoints[i].y *= CoeftoRealW;
             }
         }
-        public bool ShowExtraPoints(Graphics gr, BackgroundWorker worker)
+        public void TransferFunction(Point offset, Int32 k, double CoeftoRealW)
         {
-            foreach (Point P in ExtraPoint)
+            for (int i = 0; i < k; i++)
             {
-                gr.FillEllipse(new SolidBrush(System.Drawing.Color.Red),
-                        new Rectangle(P.X - 1, P.Y - 1, 3, 3));
-                //Thread.Sleep(100);
-                worker.ReportProgress((int)((float)ExtraPoint.IndexOf(P) / ExtraPoint.Count * 100));
-                if (worker.CancellationPending)
-                    return false;
+                ExtraPoints[i].x -= offset.X;
+                ExtraPoints[i].y = offset.Y - ExtraPoints[i].y;
+                ExtraPoints[i].x *= CoeftoRealW;
+                ExtraPoints[i].y *= CoeftoRealW;
             }
-            return true;
+        }
+        public void TransferFunction(Point offset, double CoeftoRealW)
+        {
+            for (int i = 0; i < NumOfExtraPoints; i++)
+            {
+                ExtraPoints[i].x -= offset.X;
+                ExtraPoints[i].y = offset.Y - ExtraPoints[i].y;
+                ExtraPoints[i].x *= CoeftoRealW;
+                ExtraPoints[i].y *= CoeftoRealW;
+            }
         }
         public void Show(Graphics gr)
         {
-            foreach (Point P in AnchorPoint)
+            foreach (Point P in AnchorPoints)
             {
-                int index = AnchorPoint.IndexOf(P);
-                if (index + 1 < AnchorPoint.Count)
+                int index = AnchorPoints.IndexOf(P);
+                if (index + 1 < AnchorPoints.Count)
                 {
-                    Point NextP = AnchorPoint[index + 1];
+                    Point NextP = AnchorPoints[index + 1];
                     gr.DrawLine(new Pen(Color.Purple, 4), P, NextP);
                 }
                 gr.FillEllipse(new SolidBrush(System.Drawing.Color.Purple),
@@ -138,12 +228,12 @@ namespace projarm
         }
         public void Hide(Graphics gr)
         {
-            foreach (Point P in AnchorPoint)
+            foreach (Point P in AnchorPoints)
             {
-                int index = AnchorPoint.IndexOf(P);
-                if (index + 1 < AnchorPoint.Count)
+                int index = AnchorPoints.IndexOf(P);
+                if (index + 1 < AnchorPoints.Count)
                 {
-                    Point NextP = AnchorPoint[index + 1];
+                    Point NextP = AnchorPoints[index + 1];
                     gr.DrawLine(new Pen(Color.LightBlue, 4), P, NextP);
                 }
                 gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),

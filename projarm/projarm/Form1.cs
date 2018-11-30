@@ -8,13 +8,14 @@ namespace projarm
 {
     public partial class Form1 : Form
     {
-        public List<Point> ForDeltaPoints;
+        public List<double[]> DeltaPoints;
         MathModel ModelMnpltr;
         Manipulator mnpltr;
         public Graphics gr;
         byte MousePressed;
         byte numOfUnits;
         Series series;
+        Point OffSet;
         int index;
         byte flag;
         Path S;
@@ -23,19 +24,44 @@ namespace projarm
         {
             InitializeComponent();
             series = new Series("Delta");
-            ForDeltaPoints = new List<Point>();
-             gr = pictureBox.CreateGraphics();
+            DeltaPoints = new List<double[]>();
+            gr = pictureBox.CreateGraphics();
             MousePressed = 0;
             numOfUnits = 0;
             flag = 0;
         }
 
+        private double CoeftoGraphic()//Коэф. перевода значений длин из сантиметров в пиксели picturebox
+        {
+            double percent = 0.9;
+            if (ModelMnpltr != null)
+               return pictureBox.Width * percent / (2 * ModelMnpltr.MaxL(new double[1]{50}));
+            return 0;
+        }
+        private double CoeftoRealW()
+        {
+            return 1 / CoeftoGraphic();
+        }
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            //PictureBox
-            //Пересчёт координат от физ модели к графике
             //Почему манипулятор не доходит до опорных точек, не достигает их и соседних экстра точек
-            pictureBox_Paint(sender, e);
+                //Неверное разбиение пути!
+            //Пересчёт координат от физ модели к графике
+            //Путь интерполируется полиномом Лагранжа
+            //Реализовать матричный MathEngine
+            //Написать функцию следования хвата манипулятора за курсором на pictureBox
+            //Чтение конфигурации манипулятора из файла.txt
+            //Обход препятсвий
+            //3D model
+            if (flag == 0)
+            {
+                Pen p = new Pen(Color.Black, 7);
+                gr.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
+                gr.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
+                gr.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+                gr.DrawLine(p, new Point(1, 1), new Point(1, pictureBox.Height - 2));
+                gr.DrawLine(p, new Point(pictureBox.Width - 2, 1), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            }
         }
 
         private void NumofUnits_KeyDown(object sender, KeyEventArgs e)
@@ -47,18 +73,15 @@ namespace projarm
                 unitsDataGridView.RowCount = numOfUnits;
                 unitsDataGridView.RowHeadersVisible = false;
                 
-                unitsDataGridView.Columns[0].Name = "Number";
+                unitsDataGridView.Columns[0].Name = "Num";
+                unitsDataGridView.Columns[0].Width = 1;
                 unitsDataGridView.Columns[1].Name = "Type";
-                unitsDataGridView.Columns[2].Name = "Lenght";
-                unitsDataGridView.Columns[3].Name = "Angle";
+                unitsDataGridView.Columns[1].Width = 1;
+                unitsDataGridView.Columns[2].Name = "Lenght, cm";
+                unitsDataGridView.Columns[3].Name = "Angle, °";
                 for( int i = 0; i < numOfUnits; i++)
                     unitsDataGridView.Rows[i].Cells[0].Value = i;
             }
-        }
-
-        private void unitsDataGridView_ColumnAdded(object sender, DataGridViewColumnEventArgs e)
-        {
-            e.Column.Width = 5;
         }
 
         private void DefaultManipulator_Click(object sender, EventArgs e)
@@ -82,19 +105,19 @@ namespace projarm
             unitsDataGridView.Rows[0].Cells[3].Value = 0;   //Unit Angle
 
             unitsDataGridView.Rows[1].Cells[1].Value = "R";
-            unitsDataGridView.Rows[1].Cells[2].Value = 55;
+            unitsDataGridView.Rows[1].Cells[2].Value = 25;
             unitsDataGridView.Rows[1].Cells[3].Value = 0;
 
             unitsDataGridView.Rows[2].Cells[1].Value = "R";
-            unitsDataGridView.Rows[2].Cells[2].Value = 50;
+            unitsDataGridView.Rows[2].Cells[2].Value = 25;
             unitsDataGridView.Rows[2].Cells[3].Value = 0;
 
             unitsDataGridView.Rows[3].Cells[1].Value = "P";
-            unitsDataGridView.Rows[3].Cells[2].Value = 75;
+            unitsDataGridView.Rows[3].Cells[2].Value = 30;
             unitsDataGridView.Rows[3].Cells[3].Value = 0;
 
             unitsDataGridView.Rows[4].Cells[1].Value = "R";
-            unitsDataGridView.Rows[4].Cells[2].Value = 25;
+            unitsDataGridView.Rows[4].Cells[2].Value = 20;
             unitsDataGridView.Rows[4].Cells[3].Value = 0;
 
             unitsDataGridView.Rows[5].Cells[1].Value = "G";
@@ -104,8 +127,19 @@ namespace projarm
 
         private void ctreateMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            ModelMnpltr = new MathModel(numOfUnits - 2);
+            for (int i = 0; i < numOfUnits - 2; i++)
+            {
+                //у MatrixMathModel здесь будет считываться тип звена
+                MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[2].Value.ToString());
+                MathModel.angle[i] = Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[3].Value.ToString());
+            }
+            ShowManipulator();
+        }
+        private void ShowManipulator()
+        {
             mnpltr = new Manipulator(numOfUnits);
-            Point OffSet = new Point(pictureBox.Width / 2, pictureBox.Height - 10);
+            OffSet = new Point(pictureBox.Width / 2, pictureBox.Height - 10);
             Joint tmpJstart = new Joint('S', OffSet);
             Joint tmpJend = new Joint('S', OffSet);
             double anglemnpltr = 0;
@@ -113,7 +147,7 @@ namespace projarm
             for (int i = 0; i < numOfUnits; i++)
             {
                 char type = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
-                double len = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
+                double len = CoeftoGraphic() * Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
                 double angle = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString());
 
                 switch (type)
@@ -151,15 +185,6 @@ namespace projarm
         }
         private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ModelMnpltr = new MathModel(numOfUnits - 2);
-            for (int i = 0; i < numOfUnits - 2; i++)
-            {
-                MathModel.len[i] = mnpltr.mnp[i + 1].lenght;
-                MathModel.angle[i] = mnpltr.mnp[i + 1].angle;
-            }
-
-            S.ExactExtraPointOffset(new Point(pictureBox.Width / 2, pictureBox.Height - 10));
-
             backgroundWorker1.RunWorkerAsync();
         }
 
@@ -189,8 +214,8 @@ namespace projarm
         private void deletePathToolStripMenuItem_Click(object sender, EventArgs e)
         {
             S.Hide(gr);
-            S.ClearAllList(); //Впоследствии заменить на S.Dispose();
-            flag = 0;
+            S.Clear(); //Впоследствии заменить на S.Dispose();
+            flag = 7;
         }
 
         private void comboBox1_KeyDown(object sender, KeyEventArgs e)
@@ -198,17 +223,19 @@ namespace projarm
             if (e.KeyCode == Keys.Enter)
             {
                 Int32 k = Convert.ToInt32(comboBox1.Text);
-                if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
-                    MessageBox.Show("k should be longer than path lenght or it is too big");
+              //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
+                //  MessageBox.Show("k should be longer than path lenght or it is too big");
                 //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
-                else
-                {
-                    flag = 0;
-                    S.ExtraPoint.Clear();
-                    S.ExactExtraPoint.Clear();
+              //else
+              //{
+                    flag = 7;
+                    Array.Clear(S.ExtraPoints, 0, k);
                     S.SplitPath(k);
-                    backgroundWorker2.RunWorkerAsync();
-                }
+                    S.ShowExtraPoints(gr);
+                    /*S.ExactExtraPointOffset(OffSet);
+                    S.TransExtraPoints(k, CoeftoRealW());*/
+                    S.TransferFunction(OffSet, k, CoeftoRealW());
+              //}
             }
         }
 
@@ -216,18 +243,19 @@ namespace projarm
         {
             if (S != null)
             {
-                comboBox1.Items.Add($"{(int)S.GetLen() + 1}");
-                comboBox1.Items.Add($"{(int)S.GetLen() + 13}");
-                comboBox1.Items.Add($"{(int)S.GetLen() * 2}");
-                comboBox1.Items.Add($"{(int)S.GetLen() * 5}");
-                comboBox1.Items.Add($"{(int)S.GetLen() * 10}");
+                double len = S.GetLen();
+                comboBox1.Items.Add($"{(int)len}");
+                comboBox1.Items.Add($"{(int)len / 2}");
+                comboBox1.Items.Add($"{(int)len / 3}");
+                comboBox1.Items.Add($"{(int)len / 4}");
+                comboBox1.Items.Add($"{(int)len / 5}");
             }
             
         }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            MathEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1, ref ForDeltaPoints);
+            MathEngine.MovingAlongThePath(gr, S, ModelMnpltr, mnpltr, backgroundWorker1, ref DeltaPoints);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -243,35 +271,14 @@ namespace projarm
             }
             progressBar1.Value = 0;
             
-            foreach (Point p in ForDeltaPoints)
-                chart1.Series[0].Points.AddXY(ForDeltaPoints.IndexOf(p), MathEngine.NormaVectora(p));
+            foreach (double[] p in DeltaPoints)
+                chart1.Series[0].Points.AddXY(p[0], p[1]);
             label2.Text = $"Generalized Coordinates Q = ({(int)mnpltr.Q[0]}, {(int)mnpltr.Q[1]}, {(int)mnpltr.Q[2]}, {(int)mnpltr.Q[3]})";
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
             backgroundWorker1.CancelAsync();
-            backgroundWorker2.CancelAsync();
-        }
-
-        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
-        {
-
-            S.ShowExtraPoints(gr, backgroundWorker2);
-        }
-
-        private void backgroundWorker2_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-            progressBar1.Value = e.ProgressPercentage;
-        }
-
-        private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
-        {
-            if (!e.Cancelled)
-            {
-                ;
-            }
-            progressBar1.Value = 0;
         }
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
@@ -280,7 +287,7 @@ namespace projarm
             {
                 case 1:
                     S.AddAnchorPoint(e.Location);
-                    if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
+                    if (S.GetLen() != 0) label3.Text = $"Path lenght = {(CoeftoRealW() * S.GetLen()).ToString("#.0000000000")}cm";
                     comboBox1.Items.Clear();
                     S.Show(gr);
                     break;
@@ -293,10 +300,10 @@ namespace projarm
                         должны удовлетворять уравнению  (x - x')^2 + (y - y')^2 <= R^2
                         В нашей графической реализации радиус равен 6, но для удобства возьмём окрестность большего радиуса
                         */
-                        if (Math.Pow((e.Location.X - S.AnchorPoint[index].X), 2) +
-                            Math.Pow((e.Location.Y + S.AnchorPoint[index].Y), 2) <= 40)
+                        if (Math.Pow((e.Location.X - S.AnchorPoints[index].X), 2) +
+                            Math.Pow((e.Location.Y + S.AnchorPoints[index].Y), 2) <= 40)
                         {
-                            S.AnchorPoint[index] = e.Location;
+                            S.AnchorPoints[index] = e.Location;
                         }
                         MousePressed = 1;
                         return;
@@ -319,16 +326,16 @@ namespace projarm
             if (MousePressed == 1)
             {
                 S.Hide(gr);
-                S.AnchorPoint[index] = e.Location;
-                if (S.GetLen() != 0) label3.Text = $"Path lenght = {S.GetLen().ToString("#.0000000000")}";
+                S.AnchorPoints[index] = e.Location;
+                if (S.GetLen() != 0) label3.Text = $"Path lenght = {(CoeftoRealW() * S.GetLen()).ToString("#.0000000000")}cm";
                 comboBox1.Items.Clear();
                 S.Show(gr);
             }
         }
 
-        private void pictureBox_Paint(object sender, EventArgs e)
+        private void pictureBox_Paint(object sender, PaintEventArgs e)
         {
-            Pen p = new Pen(Color.Black, 7);
+            /*Pen p = new Pen(Color.Black, 7);
             gr.FillRectangle(new SolidBrush(System.Drawing.Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
             gr.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
             gr.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
@@ -337,12 +344,27 @@ namespace projarm
             if (mnpltr != null)
                 mnpltr.Show(gr);
             if (S != null)
-                S.Show(gr);
+                S.Show(gr);*/
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void comboBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                double step = CoeftoGraphic() * Convert.ToDouble(comboBox2.Text);
+                S.ExtraClear();
+                S.SplitPath(step);
+                S.ShowExtraPoints(gr);
+                /*S.ExactExtraPointOffset(OffSet);
+                S.TransExtraPoints(k, CoeftoRealW());*/
+                S.TransferFunction(OffSet, CoeftoRealW());
+                //}
+            }
         }
     }
     //MessageBox.Show("Left tButton");
