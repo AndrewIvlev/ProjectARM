@@ -9,21 +9,36 @@ namespace projarm
 {
     class MathEngine
     {
-        public static bool MovingAlongThePath(Graphics gr, Path S, MathModel ModelMnpltr, Manipulator mnpltr, BackgroundWorker worker, ref List<double[]> DeltaPoints)
+        public static bool MovingAlongThePath(Path S, MathModel ModelMnpltr, Manipulator mnpltr,
+            Graphics gr, BackgroundWorker worker, ref List<dpoint> DeltaPoints)
         {
-            double[] dq = new double[mnpltr.numOfUnits - 2]; //numofUnits - 2 = числу степеней подвижности манипулятора,
-                                                            //так как нулевое звено и последнее статические
-            for (int i = 1; i < S.NumOfExtraPoints; i++)
+            for (int i = 0; i < S.NumOfExtraPoints; i++)
             {
+                Thread.Sleep(100);
                 worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
                 if (worker.CancellationPending)
                     return false;
 
-                dq = (double[])ModelMnpltr.LagrangeMethod(ref mnpltr.Q, S.ExtraPoints[i]).Clone();
-                Thread.Sleep(50);
+                ModelMnpltr.LagrangeMethod(ref mnpltr.Q, S.ExtraPoints[i]);
                 //if (dq[0] + dq[1] + dq[2] + dq[3] == 0) continue;
-                mnpltr.Move(gr, dq);
-                //DeltaPoints.Add(new double[2] { i, ModelMnpltr.GetPointError(mnpltr.Q, dq, S.ExtraPoints[i]) });
+                mnpltr.Move(gr);
+                //gr.FillEllipse(new SolidBrush(System.Drawing.Color.Green), new Rectangle((int)S.ExtraPoints[i].x - 3, (int)S.ExtraPoints[i].y - 3, 6, 6));
+                DeltaPoints.Add(new dpoint(i, ModelMnpltr.GetPointError(mnpltr.Q, S.ExtraPoints[i])));
+            }
+            return true;
+            //Для демонстрации работы функции
+            mnpltr.Q = new double[4] { 0, 0, 0, 0 };
+            mnpltr.Move(gr);
+            
+            for ( int i = 0; i < 180; i++)
+            {
+                //for (int j = 0; j < 4; j++)
+                    mnpltr.Q[0] += MathModel.DegreeToRadian(1);
+                Thread.Sleep(100);
+                mnpltr.Move(gr);
+                worker.ReportProgress((int)((float)i / 180 * 100));
+                if (worker.CancellationPending)
+                    return false;
             }
             return true;
         }

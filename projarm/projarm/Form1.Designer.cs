@@ -280,7 +280,7 @@
             chartArea1.AxisX.TitleAlignment = System.Drawing.StringAlignment.Far;
             chartArea1.AxisX.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             chartArea1.AxisX.TitleForeColor = System.Drawing.Color.Red;
-            chartArea1.AxisY.Title = "Delta";
+            chartArea1.AxisY.Title = "Delta, cm";
             chartArea1.AxisY.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             chartArea1.AxisY.TitleForeColor = System.Drawing.Color.Red;
             chartArea1.Name = "ChartArea1";

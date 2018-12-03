@@ -23,7 +23,7 @@ namespace projarm
                 Q[i] = 0;
             currUn = 0;
         }
-        public void addUnit(Unit newU)
+        public void AddUnit(Unit newU)
         {
             mnp[currUn++] = newU;
         }
@@ -46,41 +46,12 @@ namespace projarm
                 switch (mnp[i].start.type)
                 {
                     case 'R':
-                        anglemnpltr += Q[i - 1];
+                        anglemnpltr -= Q[i - 1];
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(mnp[i].lenght, anglemnpltr);
                         mnp[i + 1].start.DotClone(mnp[i].end);
                         break;
                     case 'P':
-                        mnp[i].end.DotClone(mnp[i].start);
-                        mnp[i].end.TransferFunction(mnp[i].lenght + Q[i - 1], anglemnpltr);
-                        mnp[i + 1].start.DotClone(mnp[i].end);
-                        break;
-                    case 'G':
-                        mnp[i].end.DotClone(mnp[i].start);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            Show(gr);
-        }
-        public void Move(Graphics gr, double[] dq)
-        {
-            Hide(gr);
-            double anglemnpltr = 0f;
-            for (int i = 1; i < numOfUnits; i++)
-            {
-                switch (mnp[i].start.type)
-                {
-                    case 'R':
-                        anglemnpltr += Q[i - 1] += dq[i - 1];
-                        mnp[i].end.DotClone(mnp[i].start);
-                        mnp[i].end.TransferFunction(mnp[i].lenght, anglemnpltr);
-                        mnp[i + 1].start.DotClone(mnp[i].end);
-                        break;
-                    case 'P':
-                        Q[i - 1] += dq[i - 1];
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(mnp[i].lenght + Q[i - 1], anglemnpltr);
                         mnp[i + 1].start.DotClone(mnp[i].end);

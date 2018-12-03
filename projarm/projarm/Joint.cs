@@ -41,13 +41,9 @@ namespace projarm
             offset = _offset;
             Dot = new Point(0, 0);
         }
-        public void DotClone(Joint j)
-        {
-            dot = j.dot;
-        }
+        public void DotClone(Joint j) => dot = j.dot;
         public void TransferFunction(double len, double angle)
         {
-            angle *= -0.0174533f;
             Dot = new Point((int)(Dot.X + len * Math.Cos(angle)) - offset.X,
                 offset.Y - (int)(Dot.Y + len * Math.Sin(angle)));
         }
@@ -75,11 +71,7 @@ namespace projarm
                     break;
             }
         }
-        public void Hide(Graphics gr)
-        {
-            gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue),
-                new Rectangle(Dot.X - 5, Dot.Y - 5, 10, 10));
-        }
+        public void Hide(Graphics gr) => gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue), new Rectangle(Dot.X - 5, Dot.Y - 5, 10, 10));
         public void Move(Graphics gr) { }
     }
 }
