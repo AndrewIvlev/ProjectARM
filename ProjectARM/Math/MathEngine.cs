@@ -9,7 +9,7 @@ namespace ProjectARM
 {
     class MathEngine
     {
-        public static bool MovingAlongThePath(Path S, MathModel ModelMnpltr, Manipulator mnpltr,
+        public static bool MovingAlongThePath(Path S, MatrixMathModel ModelMnpltr, Manipulator mnpltr,
             Graphics gr, BackgroundWorker worker, ref List<Dpoint> DeltaPoints)
         {
             for (int i = 1; i < S.NumOfExtraPoints; i++)
@@ -19,13 +19,13 @@ namespace ProjectARM
                 if (worker.CancellationPending)
                     return false;
 
-                ModelMnpltr.LagrangeMethod(ref mnpltr.Q, S.ExactExtraPoints[i]);
+                //ModelMnpltr.LagrangeMethod(ref mnpltr.Q, S.ExactExtraPoints[i]);
                 S.Show(gr);
                 S.ShowNextPoints(gr, i);
                 S.ShowPastPoints(gr, i);
                 mnpltr.Move(gr);
 
-                DeltaPoints.Add(new Dpoint(i, ModelMnpltr.GetPointError(mnpltr.Q, S.ExactExtraPoints[i])));
+                //DeltaPoints.Add(new Dpoint(i, ModelMnpltr.GetPointError(mnpltr.Q, S.ExactExtraPoints[i])));
             }
             return true;
         }

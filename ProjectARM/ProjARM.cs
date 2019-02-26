@@ -124,6 +124,13 @@ namespace ProjectARM
 
         #region Manipulator
 
+        private void newMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            label1.Visible = true;
+            NumOfUnitsTextBox.Visible = true;
+            GoBtn.Visible = true;
+        }
+
         private void MathModelConfig()
         {
             double[] a = new double[NumOfUnits];
@@ -149,6 +156,45 @@ namespace ProjectARM
         {
             Man.Hide(PicBoxGraphics);
             //mnpltr.Dispose();
+        }
+
+        #endregion
+
+        #region Manipulator Configuration File
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            dialog.Title = "Open manipulator configuration file";
+            dialog.InitialDirectory = @"D:\repo\ProjectARM\ProjectARM\ManipConfig";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string filename = dialog.FileName;
+                string[] filelines = File.ReadAllLines(filename);
+                NumOfUnits = Convert.ToByte(filelines[0].Trim());
+                MatrixModelMan = new MatrixMathModel(NumOfUnits);
+                int CurrUnitLine = 0;
+
+                for (int i = 1; i < filelines.Length; i++)
+                {
+                    MatrixModelMan.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
+                    MatrixModelMan.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
+                    MatrixModelMan.angle[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
+                    CurrUnitLine++;
+                }
+                ShowManipulator();
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
 
         #endregion
@@ -254,18 +300,6 @@ namespace ProjectARM
 
         #endregion
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ctreateMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            label1.Visible = true;
-            NumOfUnitsTextBox.Visible = true;
-            GoBtn.Visible = true;
-        }
-
         private void ShowManipulator()
         {
             OffSet = new Point(pictureBox.Width / 2, pictureBox.Height - 10);
@@ -312,31 +346,6 @@ namespace ProjectARM
                 }
             }
             Man.Show(PicBoxGraphics); // Отображение манипулятора в начальном положении
-        }
-
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            dialog.Title = "Open manipulator configuration file";
-            dialog.InitialDirectory = @"C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\ManipTXT";
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                string filename = dialog.FileName;
-                string[] filelines = File.ReadAllLines(filename);
-                NumOfUnits = Convert.ToByte(filelines[0].Trim());
-                MatrixModelMan = new MatrixMathModel(NumOfUnits);
-                int CurrUnitLine = 0;
-
-                for (int i = 1; i < filelines.Length; i++)
-                {
-                    MatrixModelMan.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
-                    MatrixModelMan.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    MatrixModelMan.angle[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    CurrUnitLine++;
-                }
-                ShowManipulator();
-            }
         }
 
         private void GoBtn_Click(object sender, EventArgs e) => DataGridViewLoad();
