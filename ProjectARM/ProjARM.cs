@@ -9,25 +9,22 @@ namespace ProjectARM
     public partial class ProjARM : Form
     {
         List<Dpoint> DeltaPoints;
-        MathModel ModelMan;
         MatrixMathModel MatrixModelMan;
         Manipulator Man;
         byte NumOfUnits;
         Path Way;
         Point OffSet;
-        double CoefToGr;
         Graphics PicBoxGraphics;
         byte Flag;
         byte MousePressed;
         int index;
-
-        #region Helpers
-
+        
         public ProjARM()
         {
             InitializeComponent();
             DeltaPoints = new List<Dpoint>();
             PicBoxGraphics = pictureBox.CreateGraphics();
+            PictureBoxShow(true);
             MousePressed = 0;
             NumOfUnits = 0;
             Flag = 0;
@@ -40,8 +37,8 @@ namespace ProjectARM
         internal double CoefToGraphic()
         {
             double percent = 0.9;
-            if (ModelMan != null)
-                return pictureBox.Width * percent / (2 * ModelMan.MaxL(new double[1] { 0 }));
+            if (MatrixModelMan != null)
+                return pictureBox.Width * percent / (2 * MatrixModelMan.MaxL(new double[1] { 0 }));
             return 0;
         }
 
@@ -56,25 +53,20 @@ namespace ProjectARM
             Flag = 3;
         }
 
-        #endregion
-
         #region PictureBox
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
-        {
-            if (Flag == 0)
-                PictureBoxFrame(true);
-        }
-
-        private void PictureBoxFrame(bool AsSolid)
+        public void PictureBoxShow(bool AsSolid)
         {
             Pen p = new Pen(Color.Black, 7);
-            if (AsSolid) PicBoxGraphics.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
-            PicBoxGraphics.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
-            PicBoxGraphics.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
-            PicBoxGraphics.DrawLine(p, new Point(1, 1), new Point(1, pictureBox.Height - 2));
-            PicBoxGraphics.DrawLine(p, new Point(pictureBox.Width - 2, 1), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            Graphics gr = pictureBox.CreateGraphics();
+            if (AsSolid)
+                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
+            gr.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
+            gr.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            gr.DrawLine(p, new Point(1, 1), new Point(1, pictureBox.Height - 2));
+            gr.DrawLine(p, new Point(pictureBox.Width - 2, 1), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
         }
+
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             switch (Flag)
@@ -233,7 +225,7 @@ namespace ProjectARM
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            MathEngine.MovingAlongThePath(Way, ModelMan, Man, PicBoxGraphics, backgroundWorker1, ref DeltaPoints);
+            MathEngine.MovingAlongThePath(Way, MatrixModelMan, Man, PicBoxGraphics, backgroundWorker1, ref DeltaPoints);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -352,12 +344,8 @@ namespace ProjectARM
         private void CancelBtn_Click(object sender, EventArgs e)
         {
             //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
-            label1.Visible = false;
-            NumOfUnitsTextBox.Visible = false;
-            GoBtn.Visible = false;
-            units.Visible = false;
-            CancelBtn.Visible = false;
-            CreateManipulator.Visible = false;
+            units.Rows.Clear();
+            units.Refresh();
         }
 
         private void CreateManipulator_Click(object sender, EventArgs e)
@@ -418,6 +406,7 @@ namespace ProjectARM
             for (int i = 0; i < NumOfUnits; i++)
                 units.Rows[i].Cells[0].Value = i;
         }
+
         private void ManipulatorConfigShow(int NumOfUnits)
         {
             for ( int i = 0; i < NumOfUnits; i++)
@@ -426,6 +415,26 @@ namespace ProjectARM
                 units.Rows[i].Cells[2].Value = MatrixModelMan.len[i];
                 units.Rows[i].Cells[3].Value = MatrixModelMan.angle[i]; 
             }
+        }
+        
+        private void ProjARM_Layout(object sender, LayoutEventArgs e)
+        {
+            pictureBox.Width = Width - 586;
+            pictureBox.Height = Height - 85;
+            Klabel.Location = new Point(Width - 293, Klabel.Location.Y);
+            label2.Location = new Point(Width - 293, label2.Location.Y);
+            label3.Location = new Point(Width - 293, label3.Location.Y);
+            label4.Location = new Point(Width - 293, label4.Location.Y);
+            comboBox1.Location = new Point(Width - 128, comboBox1.Location.Y);
+            comboBox2.Location = new Point(Width - 109, comboBox2.Location.Y);
+            chart1.Location = new Point(Width - 300, chart1.Location.Y);
+            CancelMoveBtn.Location = new Point(Width - 109, CancelMoveBtn.Location.Y); 
+            progressBar1.Location = new Point(Width - 289, progressBar1.Location.Y);
+        }
+
+        private void pictureBox_Layout(object sender, LayoutEventArgs e)
+        {
+            PictureBoxShow(true);
         }
     }
 }
