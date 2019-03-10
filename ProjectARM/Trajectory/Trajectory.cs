@@ -21,7 +21,7 @@ namespace ProjectARM
         }
     }
 
-    class Path
+    class Trajectory
     {
         /// <summary>
         /// Опорные точки
@@ -36,7 +36,7 @@ namespace ProjectARM
         public Dpoint[] ExactExtraPoints; // Точные дополнительные точки
         public int NumOfExtraPoints;
 
-        public Path()
+        public Trajectory()
         {
             AnchorPoints = new List<Point>();
             ExtraPoints = new List<Point>();
@@ -44,7 +44,7 @@ namespace ProjectARM
             NumOfExtraPoints = 0;
         }
 
-        public Path(Point StartPoint)
+        public Trajectory(Point StartPoint)
         {
             AnchorPoints = new List<Point>() { StartPoint };
             ExtraPoints = new List<Point>();
@@ -109,8 +109,8 @@ namespace ProjectARM
             return res;
         }
 
-        #region Split Path
-        public void SplitPath(double step)
+        #region Split Trajectory
+        public void SplitTrajectory(double step)
         {
             int index = 0;
             for (int i = 1; i < AnchorPoints.Count; i++)
@@ -135,7 +135,7 @@ namespace ProjectARM
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
         }
-        public void SplitPath(int k)
+        public void SplitTrajectory(int k)
         {
             int index = 0;
             double step = GetLen() / k; // Шаг = длину всего пути делим на количество доп точек

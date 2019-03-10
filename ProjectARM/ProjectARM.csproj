@@ -50,18 +50,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Graphics\GraphicsEngine.cs" />
     <Compile Include="Graphics\IGraphics.cs" />
     <Compile Include="Graphics\Joint.cs" />
     <Compile Include="Graphics\Manipulator.cs" />
     <Compile Include="Graphics\Unit.cs" />
-    <Compile Include="Math\BlockMatrix.cs" />
-    <Compile Include="Math\GausMethod.cs" />
-    <Compile Include="Math\MathEngine.cs" />
-    <Compile Include="Math\MathModel.cs" />
-    <Compile Include="Math\MatrixMathModel.cs" />
-    <Compile Include="Math\Vector.cs" />
-    <Compile Include="Path\LagrangeInterpolation.cs" />
-    <Compile Include="Path\Path.cs" />
+    <Compile Include="MathModel\BlockMatrix.cs" />
+    <Compile Include="MathModel\GausMethod.cs" />
+    <Compile Include="MathModel\MathModel.cs" />
+    <Compile Include="MathModel\MathEngine.cs" />
+    <Compile Include="MathModel\ExplicitMathModel.cs" />
+    <Compile Include="MathModel\MatrixMathModel.cs" />
+    <Compile Include="MathModel\Vector.cs" />
+    <Compile Include="Trajectory\LagrangeInterpolation.cs" />
+    <Compile Include="Trajectory\Trajectory.cs" />
     <Compile Include="ProjARM.cs">
       <SubType>Form</SubType>
     </Compile>
