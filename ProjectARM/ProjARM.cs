@@ -1,71 +1,125 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace ProjectARM
 {
     public partial class ProjARM : Form
     {
+        #region COMPUTATION
+
         List<Dpoint> DeltaPoints;
-        MatrixMathModel MatrixModelMan;
-        Manipulator Man;
+        MathModel modelMan;
         byte NumOfUnits;
-        Path Way;
+        Trajectory Way;
+
+        #endregion
+
+        #region GRAPHICS
+
+        Manipulator Man;
         Point OffSet;
         Graphics PicBoxGraphics;
-        byte Flag;
         byte MousePressed;
+        //TODO: if it possible remove Flag and index
+        byte Flag;
         int index;
-        
+
+        #endregion
+
         public ProjARM()
         {
             InitializeComponent();
+
             DeltaPoints = new List<Dpoint>();
-            PicBoxGraphics = pictureBox.CreateGraphics();
-            PictureBoxShow(true);
+            modelMan = new MatrixMathModel(NumOfUnits);
+            PicBoxGraphics = pbCanvas.CreateGraphics();
             MousePressed = 0;
             NumOfUnits = 0;
             Flag = 0;
         }
 
-        /// <summary>
-        /// Перевод значений длин из сантиметров в пиксели picturebox
-        /// </summary>
-        /// <returns>Возвращает коэффициент перевода из реального мира в графический</returns>
-        internal double CoefToGraphic()
+        #region Left Layout
+
+        private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            double percent = 0.9;
-            if (MatrixModelMan != null)
-                return pictureBox.Width * percent / (2 * MatrixModelMan.MaxL(new double[1] { 0 }));
-            return 0;
+            if (e.KeyCode != Keys.Enter) return;
+            DataGridViewLoad();
         }
 
-        /// <summary>
-        /// Перевод значений длин из пикселей picturebox в сантиметры
-        /// </summary>
-        /// <returns>Возвращает коэффициент перевода из графического мира в реальный</returns>
-        public double CoeftoRealW() => 1f / CoefToGraphic();
-
-        private void followForToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DataGridViewLoad()
         {
-            Flag = 3;
+            if (byte.TryParse(NumOfUnitsTextBox.Text, out NumOfUnits))
+            {
+                UnitsFilling(NumOfUnits);
+            }
+            else
+            {
+                MessageBox.Show("Not correct input of the Number of Units");
+                return;
+            }
         }
 
-        #region PictureBox
-
-        public void PictureBoxShow(bool AsSolid)
+        private void OKBtn_Click(object sender, EventArgs e)
         {
-            Pen p = new Pen(Color.Black, 7);
-            Graphics gr = pictureBox.CreateGraphics();
-            if (AsSolid)
-                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pictureBox.Width, pictureBox.Height);
-            gr.DrawLine(p, new Point(1, 1), new Point(pictureBox.Width - 2, 1));
-            gr.DrawLine(p, new Point(1, pictureBox.Height - 2), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
-            gr.DrawLine(p, new Point(1, 1), new Point(1, pictureBox.Height - 2));
-            gr.DrawLine(p, new Point(pictureBox.Width - 2, 1), new Point(pictureBox.Width - 2, pictureBox.Height - 2));
+            DataGridViewLoad();
         }
+
+        private void CancelBtn_Click(object sender, EventArgs e)
+        {
+            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
+            units.Rows.Clear();
+            units.Refresh();
+        }
+
+        private void CreateManipulator_Click(object sender, EventArgs e)
+        {
+            modelMan = new MatrixMathModel(NumOfUnits);
+            for (int i = 0; i < NumOfUnits; i++)
+            {
+                MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
+                MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
+                MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
+            }
+            NumOfUnitsTextBox.Text = NumOfUnits.ToString();
+            UnitsFilling(NumOfUnits);
+            ManipulatorConfigShow(NumOfUnits);
+            ShowManipulator();
+        }
+
+        private void UnitsFilling(int NumOfUnits)
+        {
+            units.Visible = true;
+            CancelBtn.Visible = true;
+            CreateManipulator.Visible = true;
+            units.ColumnCount = 4;
+            units.RowCount = NumOfUnits;
+            units.Height = 23 + NumOfUnits * 20;
+            CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
+            CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
+            units.Columns[0].Name = "Num";
+            units.Columns["Num"].Width = 40;
+            units.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[1].Name = "Type";
+            units.Columns["Type"].Width = 48;
+            units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[2].Name = "Lenght, cm";
+            units.Columns["Lenght, cm"].Width = 85;
+            units.Columns["Lenght, cm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[3].Name = "Angle, °";
+            units.Columns["Angle, °"].Width = 77;
+            units.Columns["Angle, °"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            for (int i = 0; i < NumOfUnits; i++)
+                units.Rows[i].Cells[0].Value = i;
+        }
+
+        #endregion
+
+        #region Center Layout
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
@@ -73,7 +127,7 @@ namespace ProjectARM
             {
                 case 1:
                     Way.AddAnchorPoint(e.Location);
-                    if (Way.GetLen() != 0) label3.Text = $"Path lenght = {(CoeftoRealW() * Way.GetLen()).ToString("#.0000000000")}cm";
+                    if (Way.GetLen() != 0) label3.Text = $"Trajectory lenght = {(CoeftoRealW() * Way.GetLen()).ToString("#.0000000000")}cm";
                     comboBox1.Items.Clear();
                     Way.Show(PicBoxGraphics);
                     break;
@@ -114,82 +168,42 @@ namespace ProjectARM
             {
                 Way.Hide(PicBoxGraphics);
                 Way.AnchorPoints[index] = e.Location;
-                if (Way.GetLen() != 0) label3.Text = $"Path lenght = {(CoeftoRealW() * Way.GetLen()).ToString("#.00")}cm";
+                if (Way.GetLen() != 0) label3.Text = $"Trajectory lenght = {(CoeftoRealW() * Way.GetLen()).ToString("#.00")}cm";
                 comboBox1.Items.Clear();
                 Way.Show(PicBoxGraphics);
             }
         }
 
-        #endregion
-
-        #region Manipulator
-
-        private void MathModelConfig()
+        private void startMotion_Click(object sender, EventArgs e)
         {
-            double[] a = new double[NumOfUnits];
-            for (int i = 0; i < NumOfUnits - 2; i++)
-            {
-                a[i] = Math.Pow(1f / 4, 2) / Math.Pow(Math.PI, 2);
-            }
-            a[2] = Math.Pow(1f / 4, 2) / 25;
-            MathModel.SetA(a);
+
         }
 
-
-        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void stopMotion_Click(object sender, EventArgs e)
         {
-            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
-            if (Way == null) MessageBox.Show("Firstly Create a Path");
-            //if (S.IsSplit()) MessageBox.Show("Please split path firstly");
-            Way.TransferFunction(OffSet, CoeftoRealW());
-            backgroundWorker1.RunWorkerAsync();
+
         }
 
-        private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void restartMotion_Click(object sender, EventArgs e)
         {
-            Man.Hide(PicBoxGraphics);
-            //mnpltr.Dispose();
+
         }
 
         #endregion
 
-        #region Path
-
-        private void createPathToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (Man == null)
-                MessageBox.Show("Firstly Create Manipulator");
-            else
-            {
-                Way = new Path();
-                Way.AddAnchorPoint(Man.mnp[NumOfUnits - 1].end.dot);
-                Flag = 1;
-            }
-        }
-
-        private void editPathToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Flag = 2;
-        }
-
-        private void deletePathToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Way.Hide(PicBoxGraphics);
-            Way.Clear();
-            Flag = 7;
-        }
+        #region Right Layout
 
         private void comboBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
             int k = Convert.ToInt32(comboBox1.Text);
-            //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
-            //  MessageBox.Show("k should be longer than path lenght or it is too big");
-            //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
-            //else
-            //{
-            Way.ExactExtraPointsClear();
-            Way.SplitPath(k);
+        //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
+        //  MessageBox.Show("k should be longer than trajectory lenght or it is too big");
+        //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
+        //else
+        //{
+        Way.ExactExtraPointsClear();
+            Way.SplitTrajectory(k);
             Way.ShowExtraPoints(PicBoxGraphics);
             //}
         }
@@ -199,7 +213,7 @@ namespace ProjectARM
             if (e.KeyCode != Keys.Enter) return;
             double step = CoefToGraphic() * Convert.ToDouble(comboBox2.Text);
             Way.ExactExtraPointsClear();
-            Way.SplitPath(step);
+            Way.SplitTrajectory(step);
             Way.ShowExtraPoints(PicBoxGraphics);
         }
 
@@ -214,32 +228,20 @@ namespace ProjectARM
             comboBox1.Items.Add($"{(int)len / 5}");
         }
 
-        private void interpolatePathToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        #endregion
-
-        #region Background Workers
-
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            MathEngine.MovingAlongThePath(Way, MatrixModelMan, Man, PicBoxGraphics, backgroundWorker1, ref DeltaPoints);
+            DeltaPoints = MathEngine.MovingAlongTheTrajectory(Way, modelMan, backgroundWorker1);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            progressBar1.Value = e.ProgressPercentage;
+            computetionProgressBar.Value = e.ProgressPercentage;
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled)
-            {
-                ;
-            }
-            progressBar1.Value = 0;
+            if (!e.Cancelled) ;
+            computetionProgressBar.Value = 0;
             chart1.Series[0].Points.Clear();
             foreach (Dpoint p in DeltaPoints)
                 chart1.Series[0].Points.AddXY(p.x, (int)(CoeftoRealW() * p.y));
@@ -254,21 +256,203 @@ namespace ProjectARM
 
         #endregion
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        #region Menu Strip
 
-        }
+        #region Manipulator
 
-        private void ctreateMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newMnpltrToolStripMenuItem_Click(object sender, EventArgs e)
         {
             label1.Visible = true;
             NumOfUnitsTextBox.Visible = true;
             GoBtn.Visible = true;
         }
 
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string path = @"\ManipConfig";
+            var currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var varFileFullName = currentDirectory + path;
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            dialog.Title = "Open manipulator configuration file";
+            dialog.InitialDirectory = varFileFullName;
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string filename = dialog.FileName;
+                string[] filelines = File.ReadAllLines(filename);
+
+                NumOfUnits = Convert.ToByte(filelines[0].Trim());
+                modelMan = new MatrixMathModel(NumOfUnits);
+
+                int CurrUnitLine = 0;
+                for (int i = 1; i < filelines.Length; i++)
+                {
+                    MathModel.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
+                    MathModel.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
+                    MathModel.angle[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
+                    CurrUnitLine++;
+                }
+                ShowManipulator();
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
+            if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
+            //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly");
+            Way.TransferFunction(OffSet, CoeftoRealW());
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Man.Hide(PicBoxGraphics);
+            //mnpltr.Dispose();
+        }
+
+        #endregion
+
+        #region Trajectory
+        
+        private void newTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Man == null)
+                MessageBox.Show("Firstly Create Manipulator");
+            else
+            {
+                Way = new Trajectory();
+                Way.AddAnchorPoint(Man.mnp[NumOfUnits - 1].end.dot);
+                Flag = 1;
+            }
+        }
+
+        private void openToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void sToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void editTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Flag = 2;
+        }
+
+        private void interpolateTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void deleteTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Way.Hide(PicBoxGraphics);
+            Way.Clear();
+            Flag = 7;
+        }
+
+        #endregion
+
+        #region Obstacle
+        
+        private void createObstacleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void editObstacleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void destrouObstacleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void deleteAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        #endregion
+
+        #region Following the Cursor
+
+        #endregion
+
+        #endregion
+
+        /// <summary>
+        /// Перевод значений длин из сантиметров в пиксели picturebox
+        /// </summary>
+        /// <returns>Возвращает коэффициент перевода из реального мира в графический</returns>
+        internal double CoefToGraphic()
+        {
+            double percent = 0.9;
+            if (modelMan != null)
+                return pbCanvas.Width * percent / (2 * modelMan.MaxL(new double[1] { 0 }));
+            return 0;
+        }
+
+        /// <summary>
+        /// Перевод значений длин из пикселей picturebox в сантиметры
+        /// </summary>
+        /// <returns>Возвращает коэффициент перевода из графического мира в реальный</returns>
+        public double CoeftoRealW() => 1f / CoefToGraphic();
+
+        private void followForToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Flag = 3;
+        }
+
+        public void PictureBoxShow(bool AsSolid)
+        {
+            Pen p = new Pen(Color.Black, 7);
+            Graphics gr = pbCanvas.CreateGraphics();
+            if (AsSolid)
+                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pbCanvas.Width, pbCanvas.Height);
+
+            gr.DrawLine(p, new Point(0, 0), new Point(pbCanvas.Width, 0));
+            gr.DrawLine(p, new Point(0, pbCanvas.Height), new Point(pbCanvas.Width, pbCanvas.Height));
+            gr.DrawLine(p, new Point(0, 0), new Point(0, pbCanvas.Height));
+            gr.DrawLine(p, new Point(pbCanvas.Width, 0), new Point(pbCanvas.Width, pbCanvas.Height));
+        }
+
+        private void MathModelConfig()
+        {
+            double[] a = new double[NumOfUnits];
+            for (int i = 0; i < NumOfUnits - 2; i++)
+            {
+                a[i] = Math.Pow(1f / 4, 2) / Math.Pow(Math.PI, 2);
+            }
+            a[2] = Math.Pow(1f / 4, 2) / 25;
+
+            MathModel.SetA(a);
+        }
+
         private void ShowManipulator()
         {
-            OffSet = new Point(pictureBox.Width / 2, pictureBox.Height - 10);
+            OffSet = new Point(pbCanvas.Width / 2, pbCanvas.Height - 10);
             Man = new Manipulator(NumOfUnits);
             Joint tmpJstart = new Joint('S', OffSet);
             Joint tmpJend = new Joint('S', OffSet);
@@ -276,9 +460,9 @@ namespace ProjectARM
 
             for (int i = 0; i < NumOfUnits; i++)
             {
-                char type = MatrixModelMan.type[i];
-                double len = CoefToGraphic() * MatrixModelMan.len[i];
-                double angle = MatrixModelMan.angle[i];
+                char type = MathModel.type[i];
+                double len = CoefToGraphic() * MathModel.len[i];
+                double angle = MathModel.angle[i];
 
                 switch (type)
                 {
@@ -313,128 +497,48 @@ namespace ProjectARM
             }
             Man.Show(PicBoxGraphics); // Отображение манипулятора в начальном положении
         }
-
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            dialog.Title = "Open manipulator configuration file";
-            dialog.InitialDirectory = @"C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\ManipTXT";
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                string filename = dialog.FileName;
-                string[] filelines = File.ReadAllLines(filename);
-                NumOfUnits = Convert.ToByte(filelines[0].Trim());
-                MatrixModelMan = new MatrixMathModel(NumOfUnits);
-                int CurrUnitLine = 0;
-
-                for (int i = 1; i < filelines.Length; i++)
-                {
-                    MatrixModelMan.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
-                    MatrixModelMan.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    MatrixModelMan.angle[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    CurrUnitLine++;
-                }
-                ShowManipulator();
-            }
-        }
-
-        private void GoBtn_Click(object sender, EventArgs e) => DataGridViewLoad();
-
-        private void CancelBtn_Click(object sender, EventArgs e)
-        {
-            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
-            units.Rows.Clear();
-            units.Refresh();
-        }
-
-        private void CreateManipulator_Click(object sender, EventArgs e)
-        {
-            MatrixModelMan = new MatrixMathModel(NumOfUnits);
-            for (int i = 0; i < NumOfUnits; i++)
-            {
-                MatrixModelMan.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
-                MatrixModelMan.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
-                MatrixModelMan.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
-            }
-            NumOfUnitsTextBox.Text = NumOfUnits.ToString();
-            UnitsFilling(NumOfUnits);
-            ManipulatorConfigShow(NumOfUnits);
-            ShowManipulator();
-        }
-
-        private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Enter) return;
-            DataGridViewLoad();
-        }
-
-        private void DataGridViewLoad()
-        {
-            if (byte.TryParse(NumOfUnitsTextBox.Text, out NumOfUnits))
-            {
-                UnitsFilling(NumOfUnits);
-            }
-            else
-            {
-                MessageBox.Show("Not correct input of the Number of Units");
-                return;
-            }
-        }
-        private void UnitsFilling(int NumOfUnits)
-        {
-            units.Visible = true;
-            CancelBtn.Visible = true;
-            CreateManipulator.Visible = true;
-            units.ColumnCount = 4;
-            units.RowCount = NumOfUnits;
-            units.Height = 23 + NumOfUnits * 20;
-            CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
-            CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
-            units.Columns[0].Name = "Num";
-            units.Columns["Num"].Width = 40;
-            units.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[1].Name = "Type";
-            units.Columns["Type"].Width = 48;
-            units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[2].Name = "Lenght, cm";
-            units.Columns["Lenght, cm"].Width = 85;
-            units.Columns["Lenght, cm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[3].Name = "Angle, °";
-            units.Columns["Angle, °"].Width = 77;
-            units.Columns["Angle, °"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            for (int i = 0; i < NumOfUnits; i++)
-                units.Rows[i].Cells[0].Value = i;
-        }
-
+        
         private void ManipulatorConfigShow(int NumOfUnits)
         {
-            for ( int i = 0; i < NumOfUnits; i++)
+            for (int i = 0; i < NumOfUnits; i++)
             {
-                units.Rows[i].Cells[1].Value = MatrixModelMan.type[i];
-                units.Rows[i].Cells[2].Value = MatrixModelMan.len[i];
-                units.Rows[i].Cells[3].Value = MatrixModelMan.angle[i]; 
+                units.Rows[i].Cells[1].Value = MathModel.type[i];
+                units.Rows[i].Cells[2].Value = MathModel.len[i];
+                units.Rows[i].Cells[3].Value = MathModel.angle[i];
             }
         }
-        
-        private void ProjARM_Layout(object sender, LayoutEventArgs e)
+
+        private void ProjARM_Load(object sender, EventArgs e)
         {
-            pictureBox.Width = Width - 586;
-            pictureBox.Height = Height - 85;
-            Klabel.Location = new Point(Width - 293, Klabel.Location.Y);
-            label2.Location = new Point(Width - 293, label2.Location.Y);
-            label3.Location = new Point(Width - 293, label3.Location.Y);
-            label4.Location = new Point(Width - 293, label4.Location.Y);
-            comboBox1.Location = new Point(Width - 128, comboBox1.Location.Y);
-            comboBox2.Location = new Point(Width - 109, comboBox2.Location.Y);
-            chart1.Location = new Point(Width - 300, chart1.Location.Y);
-            CancelMoveBtn.Location = new Point(Width - 109, CancelMoveBtn.Location.Y); 
-            progressBar1.Location = new Point(Width - 289, progressBar1.Location.Y);
         }
 
-        private void pictureBox_Layout(object sender, LayoutEventArgs e)
+        private void mainTableLayoutPanel_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
         {
-            PictureBoxShow(true);
+            paindBorder(sender, e);
+        }
+
+        private void paindBorder(object sender, TableLayoutCellPaintEventArgs e)
+        {
+            var panel = sender as TableLayoutPanel;
+            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            var rectangle = e.CellBounds;
+            using (var pen = new Pen(Color.Black, 1))
+            {
+                pen.Alignment = System.Drawing.Drawing2D.PenAlignment.Center;
+                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+
+                if (e.Row == (panel.RowCount - 1))
+                {
+                    rectangle.Height -= 1;
+                }
+
+                if (e.Column == (panel.ColumnCount - 1))
+                {
+                    rectangle.Width -= 1;
+                }
+
+                e.Graphics.DrawRectangle(pen, rectangle);
+            }
         }
     }
 }

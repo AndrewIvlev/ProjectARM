@@ -6,19 +6,8 @@ using System.Threading.Tasks;
 
 namespace ProjectARM
 {
-    class MatrixMathModel
+    public class MatrixMathModel : MathModel
     {
-        /// <summary>
-        ///  S - Static
-        ///  R - Revolute
-        ///  P - Prismatic
-        ///  G - Gripper
-        /// </summary>
-        public char[] type;
-        public double[] len;
-        public double[] angle;
-        public double[] a;
-        public int N;
 
         public MatrixMathModel(int _N)
         {
@@ -47,7 +36,7 @@ namespace ProjectARM
             }
         }
 
-        public double MaxL(double[] UnitTypePmaxLen)
+        public override double MaxL(double[] UnitTypePmaxLen)
         {
             double MaxL = 0;
             for (int i = 0; i < N; i++)             //Вычисление максимально возможной длины
@@ -59,12 +48,7 @@ namespace ProjectARM
 
         public static double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
         public static double RadianToDegree(double angle) => angle * (180.0 / Math.PI);
-
-        public void SetA(double[] A)
-        {
-            for (int i = 0; i < N; i++)
-                a[i] = A[i];
-        }
+       
 
         public Dpoint CramerMethod(double[,] A, Dpoint b)
         {
@@ -89,5 +73,13 @@ namespace ProjectARM
         }
         //public double GetPointError(double[] q, Dpoint p) => NormaVectora(new Dpoint((p.x - Fx(q)), (p.y - Fy(q))));
         public double NormaVectora(Dpoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
+
+
+        public override void LagrangeMethodToThePoint(Dpoint p) { }
+
+        public override double GetPointError(Dpoint p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

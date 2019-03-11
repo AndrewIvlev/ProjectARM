@@ -8,3 +8,13 @@ C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\bin\Debug\Proje
 C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\obj\Debug\ProjectARM.exe
 C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\obj\Debug\ProjectARM.pdb
 C:\Users\Andrew\Desktop\AndrewIvlev-Folder\ProjectARM\ProjectARM\obj\Debug\ProjectARM.ProjARM.resources
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.ProjARM.resources
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.Properties.Resources.resources
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.GenerateResource.cache
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.CoreCompileInputs.cache
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.exe
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.pdb
+D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe.config
+D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe
+D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.pdb
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csprojAssemblyReference.cache
