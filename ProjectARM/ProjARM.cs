@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace ProjectARM
 {
@@ -35,50 +36,90 @@ namespace ProjectARM
             InitializeComponent();
 
             DeltaPoints = new List<Dpoint>();
+            modelMan = new MatrixMathModel(NumOfUnits);
             PicBoxGraphics = pbCanvas.CreateGraphics();
-            PictureBoxShow(true);
             MousePressed = 0;
             NumOfUnits = 0;
             Flag = 0;
+        }
+
+        #region Left Layout
+
+        private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            DataGridViewLoad();
+        }
+
+        private void DataGridViewLoad()
+        {
+            if (byte.TryParse(NumOfUnitsTextBox.Text, out NumOfUnits))
+            {
+                UnitsFilling(NumOfUnits);
+            }
+            else
+            {
+                MessageBox.Show("Not correct input of the Number of Units");
+                return;
+            }
+        }
+
+        private void OKBtn_Click(object sender, EventArgs e)
+        {
+            DataGridViewLoad();
+        }
+
+        private void CancelBtn_Click(object sender, EventArgs e)
+        {
+            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
+            units.Rows.Clear();
+            units.Refresh();
+        }
+
+        private void CreateManipulator_Click(object sender, EventArgs e)
+        {
             modelMan = new MatrixMathModel(NumOfUnits);
+            for (int i = 0; i < NumOfUnits; i++)
+            {
+                MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
+                MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
+                MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
+            }
+            NumOfUnitsTextBox.Text = NumOfUnits.ToString();
+            UnitsFilling(NumOfUnits);
+            ManipulatorConfigShow(NumOfUnits);
+            ShowManipulator();
         }
 
-        /// <summary>
-        /// Перевод значений длин из сантиметров в пиксели picturebox
-        /// </summary>
-        /// <returns>Возвращает коэффициент перевода из реального мира в графический</returns>
-        internal double CoefToGraphic()
+        private void UnitsFilling(int NumOfUnits)
         {
-            double percent = 0.9;
-            if (modelMan != null)
-                return pbCanvas.Width * percent / (2 * modelMan.MaxL(new double[1] { 0 }));
-            return 0;
+            units.Visible = true;
+            CancelBtn.Visible = true;
+            CreateManipulator.Visible = true;
+            units.ColumnCount = 4;
+            units.RowCount = NumOfUnits;
+            units.Height = 23 + NumOfUnits * 20;
+            CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
+            CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
+            units.Columns[0].Name = "Num";
+            units.Columns["Num"].Width = 40;
+            units.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[1].Name = "Type";
+            units.Columns["Type"].Width = 48;
+            units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[2].Name = "Lenght, cm";
+            units.Columns["Lenght, cm"].Width = 85;
+            units.Columns["Lenght, cm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[3].Name = "Angle, °";
+            units.Columns["Angle, °"].Width = 77;
+            units.Columns["Angle, °"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            for (int i = 0; i < NumOfUnits; i++)
+                units.Rows[i].Cells[0].Value = i;
         }
 
-        /// <summary>
-        /// Перевод значений длин из пикселей picturebox в сантиметры
-        /// </summary>
-        /// <returns>Возвращает коэффициент перевода из графического мира в реальный</returns>
-        public double CoeftoRealW() => 1f / CoefToGraphic();
+        #endregion
 
-        private void followForToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Flag = 3;
-        }
-
-        #region PictureBox
-
-        public void PictureBoxShow(bool AsSolid)
-        {
-            Pen p = new Pen(Color.Black, 7);
-            Graphics gr = pbCanvas.CreateGraphics();
-            if (AsSolid)
-                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pbCanvas.Width, pbCanvas.Height);
-            gr.DrawLine(p, new Point(1, 1), new Point(pbCanvas.Width - 2, 1));
-            gr.DrawLine(p, new Point(1, pbCanvas.Height - 2), new Point(pbCanvas.Width - 2, pbCanvas.Height - 2));
-            gr.DrawLine(p, new Point(1, 1), new Point(1, pbCanvas.Height - 2));
-            gr.DrawLine(p, new Point(pbCanvas.Width - 2, 1), new Point(pbCanvas.Width - 2, pbCanvas.Height - 2));
-        }
+        #region Center Layout
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
@@ -133,7 +174,89 @@ namespace ProjectARM
             }
         }
 
+        private void startMotion_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void stopMotion_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void restartMotion_Click(object sender, EventArgs e)
+        {
+
+        }
+
         #endregion
+
+        #region Right Layout
+
+        private void comboBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            int k = Convert.ToInt32(comboBox1.Text);
+        //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
+        //  MessageBox.Show("k should be longer than trajectory lenght or it is too big");
+        //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
+        //else
+        //{
+        Way.ExactExtraPointsClear();
+            Way.SplitTrajectory(k);
+            Way.ShowExtraPoints(PicBoxGraphics);
+            //}
+        }
+
+        private void comboBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            double step = CoefToGraphic() * Convert.ToDouble(comboBox2.Text);
+            Way.ExactExtraPointsClear();
+            Way.SplitTrajectory(step);
+            Way.ShowExtraPoints(PicBoxGraphics);
+        }
+
+        private void comboBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (Way == null) return;
+            double len = Way.GetLen();
+            comboBox1.Items.Add($"{(int)len}");
+            comboBox1.Items.Add($"{(int)len / 2}");
+            comboBox1.Items.Add($"{(int)len / 3}");
+            comboBox1.Items.Add($"{(int)len / 4}");
+            comboBox1.Items.Add($"{(int)len / 5}");
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            DeltaPoints = MathEngine.MovingAlongTheTrajectory(Way, modelMan, backgroundWorker1);
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            computetionProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            if (!e.Cancelled) ;
+            computetionProgressBar.Value = 0;
+            chart1.Series[0].Points.Clear();
+            foreach (Dpoint p in DeltaPoints)
+                chart1.Series[0].Points.AddXY(p.x, (int)(CoeftoRealW() * p.y));
+            label2.Text = $"Generalized Coordinates Q=({(int)MathModel.RadianToDegree(Man.Q[0])}, {(int)MathModel.RadianToDegree(Man.Q[1])}," +
+                          $" {(int)Man.Q[2]}, {(int)MathModel.RadianToDegree(Man.Q[3])})";
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            backgroundWorker1.CancelAsync();
+        }
+
+        #endregion
+
+        #region Menu Strip
 
         #region Manipulator
 
@@ -143,38 +266,6 @@ namespace ProjectARM
             NumOfUnitsTextBox.Visible = true;
             GoBtn.Visible = true;
         }
-
-        private void MathModelConfig()
-        {
-            double[] a = new double[NumOfUnits];
-            for (int i = 0; i < NumOfUnits - 2; i++)
-            {
-                a[i] = Math.Pow(1f / 4, 2) / Math.Pow(Math.PI, 2);
-            }
-            a[2] = Math.Pow(1f / 4, 2) / 25;
-
-            MathModel.SetA(a);
-        }
-
-
-        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
-            if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
-            //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly");
-            Way.TransferFunction(OffSet, CoeftoRealW());
-            backgroundWorker1.RunWorkerAsync();
-        }
-
-        private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Man.Hide(PicBoxGraphics);
-            //mnpltr.Dispose();
-        }
-
-        #endregion
-
-        #region Manipulator Configuration File
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -216,11 +307,26 @@ namespace ProjectARM
 
         }
 
+        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
+            if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
+            //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly");
+            Way.TransferFunction(OffSet, CoeftoRealW());
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Man.Hide(PicBoxGraphics);
+            //mnpltr.Dispose();
+        }
+
         #endregion
 
         #region Trajectory
-
-        private void createTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        
+        private void newTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (Man == null)
                 MessageBox.Show("Firstly Create Manipulator");
@@ -232,9 +338,29 @@ namespace ProjectARM
             }
         }
 
+        private void openToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void sToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private void editTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Flag = 2;
+        }
+
+        private void interpolateTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void deleteTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -244,80 +370,85 @@ namespace ProjectARM
             Flag = 7;
         }
 
-        private void comboBox1_KeyDown(object sender, KeyEventArgs e)
+        #endregion
+
+        #region Obstacle
+        
+        private void createObstacleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (e.KeyCode != Keys.Enter) return;
-            int k = Convert.ToInt32(comboBox1.Text);
-            //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
-            //  MessageBox.Show("k should be longer than trajectory lenght or it is too big");
-            //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
-            //else
-            //{
-            Way.ExactExtraPointsClear();
-            Way.SplitTrajectory(k);
-            Way.ShowExtraPoints(PicBoxGraphics);
-            //}
+
         }
 
-        private void comboBox2_KeyDown(object sender, KeyEventArgs e)
+        private void editObstacleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (e.KeyCode != Keys.Enter) return;
-            double step = CoefToGraphic() * Convert.ToDouble(comboBox2.Text);
-            Way.ExactExtraPointsClear();
-            Way.SplitTrajectory(step);
-            Way.ShowExtraPoints(PicBoxGraphics);
+
         }
 
-        private void comboBox1_MouseDown(object sender, MouseEventArgs e)
+        private void destrouObstacleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (Way == null) return;
-            double len = Way.GetLen();
-            comboBox1.Items.Add($"{(int)len}");
-            comboBox1.Items.Add($"{(int)len / 2}");
-            comboBox1.Items.Add($"{(int)len / 3}");
-            comboBox1.Items.Add($"{(int)len / 4}");
-            comboBox1.Items.Add($"{(int)len / 5}");
+
         }
 
-        private void interpolateTrajectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        private void deleteAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
 
         #endregion
 
-        #region Background Workers
+        #region Following the Cursor
 
-        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        #endregion
+
+        #endregion
+
+        /// <summary>
+        /// Перевод значений длин из сантиметров в пиксели picturebox
+        /// </summary>
+        /// <returns>Возвращает коэффициент перевода из реального мира в графический</returns>
+        internal double CoefToGraphic()
         {
-            DeltaPoints = MathEngine.MovingAlongTheTrajectory(Way, modelMan, backgroundWorker1);
+            double percent = 0.9;
+            if (modelMan != null)
+                return pbCanvas.Width * percent / (2 * modelMan.MaxL(new double[1] { 0 }));
+            return 0;
         }
 
-        private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        /// <summary>
+        /// Перевод значений длин из пикселей picturebox в сантиметры
+        /// </summary>
+        /// <returns>Возвращает коэффициент перевода из графического мира в реальный</returns>
+        public double CoeftoRealW() => 1f / CoefToGraphic();
+
+        private void followForToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            computetionProgressBar.Value = e.ProgressPercentage;
+            Flag = 3;
         }
 
-        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        public void PictureBoxShow(bool AsSolid)
         {
-            if (!e.Cancelled)
+            Pen p = new Pen(Color.Black, 7);
+            Graphics gr = pbCanvas.CreateGraphics();
+            if (AsSolid)
+                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pbCanvas.Width, pbCanvas.Height);
+
+            gr.DrawLine(p, new Point(0, 0), new Point(pbCanvas.Width, 0));
+            gr.DrawLine(p, new Point(0, pbCanvas.Height), new Point(pbCanvas.Width, pbCanvas.Height));
+            gr.DrawLine(p, new Point(0, 0), new Point(0, pbCanvas.Height));
+            gr.DrawLine(p, new Point(pbCanvas.Width, 0), new Point(pbCanvas.Width, pbCanvas.Height));
+        }
+
+        private void MathModelConfig()
+        {
+            double[] a = new double[NumOfUnits];
+            for (int i = 0; i < NumOfUnits - 2; i++)
             {
-                ;
+                a[i] = Math.Pow(1f / 4, 2) / Math.Pow(Math.PI, 2);
             }
-            computetionProgressBar.Value = 0;
-            chart1.Series[0].Points.Clear();
-            foreach (Dpoint p in DeltaPoints)
-                chart1.Series[0].Points.AddXY(p.x, (int)(CoeftoRealW() * p.y));
-            label2.Text = $"Generalized Coordinates Q=({(int)MathModel.RadianToDegree(Man.Q[0])}, {(int)MathModel.RadianToDegree(Man.Q[1])}," +
-                          $" {(int)Man.Q[2]}, {(int)MathModel.RadianToDegree(Man.Q[3])})";
-        }
+            a[2] = Math.Pow(1f / 4, 2) / 25;
 
-        private void CancelButton_Click(object sender, EventArgs e)
-        {
-            backgroundWorker1.CancelAsync();
+            MathModel.SetA(a);
         }
-
-        #endregion
 
         private void ShowManipulator()
         {
@@ -366,75 +497,7 @@ namespace ProjectARM
             }
             Man.Show(PicBoxGraphics); // Отображение манипулятора в начальном положении
         }
-
-        private void GoBtn_Click(object sender, EventArgs e) => DataGridViewLoad();
-
-        private void CancelBtn_Click(object sender, EventArgs e)
-        {
-            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
-            units.Rows.Clear();
-            units.Refresh();
-        }
-
-        private void CreateManipulator_Click(object sender, EventArgs e)
-        {
-            modelMan = new MatrixMathModel(NumOfUnits);
-            for (int i = 0; i < NumOfUnits; i++)
-            {
-                MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
-                MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
-                MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
-            }
-            NumOfUnitsTextBox.Text = NumOfUnits.ToString();
-            UnitsFilling(NumOfUnits);
-            ManipulatorConfigShow(NumOfUnits);
-            ShowManipulator();
-        }
-
-        private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Enter) return;
-            DataGridViewLoad();
-        }
-
-        private void DataGridViewLoad()
-        {
-            if (byte.TryParse(NumOfUnitsTextBox.Text, out NumOfUnits))
-            {
-                UnitsFilling(NumOfUnits);
-            }
-            else
-            {
-                MessageBox.Show("Not correct input of the Number of Units");
-                return;
-            }
-        }
-        private void UnitsFilling(int NumOfUnits)
-        {
-            units.Visible = true;
-            CancelBtn.Visible = true;
-            CreateManipulator.Visible = true;
-            units.ColumnCount = 4;
-            units.RowCount = NumOfUnits;
-            units.Height = 23 + NumOfUnits * 20;
-            CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
-            CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
-            units.Columns[0].Name = "Num";
-            units.Columns["Num"].Width = 40;
-            units.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[1].Name = "Type";
-            units.Columns["Type"].Width = 48;
-            units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[2].Name = "Lenght, cm";
-            units.Columns["Lenght, cm"].Width = 85;
-            units.Columns["Lenght, cm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[3].Name = "Angle, °";
-            units.Columns["Angle, °"].Width = 77;
-            units.Columns["Angle, °"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            for (int i = 0; i < NumOfUnits; i++)
-                units.Rows[i].Cells[0].Value = i;
-        }
-
+        
         private void ManipulatorConfigShow(int NumOfUnits)
         {
             for (int i = 0; i < NumOfUnits; i++)
@@ -445,31 +508,16 @@ namespace ProjectARM
             }
         }
 
-        private void ProjARM_Layout(object sender, LayoutEventArgs e)
-        {
-            pbCanvas.Width = Width - 586;
-            pbCanvas.Height = Height - 85;
-            Klabel.Location = new Point(Width - 293, Klabel.Location.Y);
-            label2.Location = new Point(Width - 293, label2.Location.Y);
-            label3.Location = new Point(Width - 293, label3.Location.Y);
-            label4.Location = new Point(Width - 293, label4.Location.Y);
-            comboBox1.Location = new Point(Width - 128, comboBox1.Location.Y);
-            comboBox2.Location = new Point(Width - 109, comboBox2.Location.Y);
-            chart1.Location = new Point(Width - 300, chart1.Location.Y);
-            CancelMoveBtn.Location = new Point(Width - 109, CancelMoveBtn.Location.Y);
-            computetionProgressBar.Location = new Point(Width - 289, computetionProgressBar.Location.Y);
-        }
-
-        private void pictureBox_Layout(object sender, LayoutEventArgs e)
-        {
-            PictureBoxShow(true);
-        }
-
         private void ProjARM_Load(object sender, EventArgs e)
         {
         }
 
         private void mainTableLayoutPanel_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
+        {
+            paindBorder(sender, e);
+        }
+
+        private void paindBorder(object sender, TableLayoutCellPaintEventArgs e)
         {
             var panel = sender as TableLayoutPanel;
             e.Graphics.SmoothingMode = SmoothingMode.HighQuality;

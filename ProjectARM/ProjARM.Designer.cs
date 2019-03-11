@@ -28,10 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProjARM));
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.label2 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.manipulatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,10 +92,12 @@
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.mainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.centerTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
+            this.timerMotion = new System.Windows.Forms.Timer(this.components);
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
@@ -106,6 +109,10 @@
             this.tableLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             this.mainTableLayoutPanel.SuspendLayout();
+            this.centerTableLayoutPanel.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
+            this.tableLayoutPanel7.SuspendLayout();
             this.SuspendLayout();
             // 
             // label2
@@ -211,25 +218,28 @@
             this.createTrajectoryToolStripMenuItem.Name = "createTrajectoryToolStripMenuItem";
             this.createTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.createTrajectoryToolStripMenuItem.Text = "New";
-            this.createTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.createTrajectoryToolStripMenuItem_Click);
+            this.createTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.newTrajectoryToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem1
             // 
             this.openToolStripMenuItem1.Name = "openToolStripMenuItem1";
             this.openToolStripMenuItem1.Size = new System.Drawing.Size(131, 22);
             this.openToolStripMenuItem1.Text = "Open";
+            this.openToolStripMenuItem1.Click += new System.EventHandler(this.openToolStripMenuItem1_Click);
             // 
             // saveToolStripMenuItem1
             // 
             this.saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
             this.saveToolStripMenuItem1.Size = new System.Drawing.Size(131, 22);
             this.saveToolStripMenuItem1.Text = "Save";
+            this.saveToolStripMenuItem1.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
             // 
             // sToolStripMenuItem
             // 
             this.sToolStripMenuItem.Name = "sToolStripMenuItem";
             this.sToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.sToolStripMenuItem.Text = "Save as";
+            this.sToolStripMenuItem.Click += new System.EventHandler(this.sToolStripMenuItem_Click);
             // 
             // editTrajectoryToolStripMenuItem
             // 
@@ -268,24 +278,28 @@
             this.createObstacleToolStripMenuItem.Name = "createObstacleToolStripMenuItem";
             this.createObstacleToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.createObstacleToolStripMenuItem.Text = "New";
+            this.createObstacleToolStripMenuItem.Click += new System.EventHandler(this.createObstacleToolStripMenuItem_Click);
             // 
             // editObstacleToolStripMenuItem
             // 
             this.editObstacleToolStripMenuItem.Name = "editObstacleToolStripMenuItem";
             this.editObstacleToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.editObstacleToolStripMenuItem.Text = "Open";
+            this.editObstacleToolStripMenuItem.Click += new System.EventHandler(this.editObstacleToolStripMenuItem_Click);
             // 
             // destrouObstacleToolStripMenuItem
             // 
             this.destrouObstacleToolStripMenuItem.Name = "destrouObstacleToolStripMenuItem";
             this.destrouObstacleToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.destrouObstacleToolStripMenuItem.Text = "Delete";
+            this.destrouObstacleToolStripMenuItem.Click += new System.EventHandler(this.destrouObstacleToolStripMenuItem_Click);
             // 
             // deleteAllToolStripMenuItem
             // 
             this.deleteAllToolStripMenuItem.Name = "deleteAllToolStripMenuItem";
             this.deleteAllToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.deleteAllToolStripMenuItem.Text = "Delete All";
+            this.deleteAllToolStripMenuItem.Click += new System.EventHandler(this.deleteAllToolStripMenuItem_Click);
             // 
             // followForToolStripMenuItem
             // 
@@ -318,22 +332,25 @@
             // 
             // Klabel
             // 
-            this.Klabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.Klabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Klabel.AutoSize = true;
             this.Klabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Klabel.Location = new System.Drawing.Point(3, 17);
+            this.Klabel.Location = new System.Drawing.Point(3, 0);
             this.Klabel.Name = "Klabel";
-            this.Klabel.Size = new System.Drawing.Size(204, 20);
+            this.Klabel.Size = new System.Drawing.Size(208, 54);
             this.Klabel.TabIndex = 9;
             this.Klabel.Text = "Divide the trajectory into ";
+            this.Klabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // comboBox1
             // 
             this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(213, 16);
+            this.comboBox1.Location = new System.Drawing.Point(217, 16);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(46, 21);
+            this.comboBox1.Size = new System.Drawing.Size(38, 21);
             this.comboBox1.TabIndex = 10;
             this.comboBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
             this.comboBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.comboBox1_MouseDown);
@@ -348,6 +365,22 @@
             this.label3.Size = new System.Drawing.Size(201, 20);
             this.label3.TabIndex = 11;
             this.label3.Text = "Trajectory lenght = 0 cm";
+            // 
+            // pbCanvas
+            // 
+            this.pbCanvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbCanvas.InitialImage = ((System.Drawing.Image)(resources.GetObject("pbCanvas.InitialImage")));
+            this.pbCanvas.Location = new System.Drawing.Point(3, 3);
+            this.pbCanvas.Name = "pbCanvas";
+            this.pbCanvas.Size = new System.Drawing.Size(672, 543);
+            this.pbCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbCanvas.TabIndex = 15;
+            this.pbCanvas.TabStop = false;
+            this.pbCanvas.WaitOnLoad = true;
+            this.pbCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
+            this.pbCanvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseMove);
             // 
             // backgroundWorker1
             // 
@@ -364,6 +397,14 @@
             this.computetionProgressBar.Name = "computetionProgressBar";
             this.computetionProgressBar.Size = new System.Drawing.Size(223, 27);
             this.computetionProgressBar.TabIndex = 12;
+            // 
+            // showMotionProgressBar
+            // 
+            this.showMotionProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.showMotionProgressBar.Location = new System.Drawing.Point(3, 12);
+            this.showMotionProgressBar.Name = "showMotionProgressBar";
+            this.showMotionProgressBar.Size = new System.Drawing.Size(666, 23);
+            this.showMotionProgressBar.TabIndex = 0;
             // 
             // CancelMoveBtn
             // 
@@ -383,45 +424,28 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chart1.BackImageAlignment = System.Windows.Forms.DataVisualization.Charting.ChartImageAlignmentStyle.Center;
-            chartArea2.AxisX.Title = "iteration";
-            chartArea2.AxisX.TitleAlignment = System.Drawing.StringAlignment.Far;
-            chartArea2.AxisX.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            chartArea2.AxisX.TitleForeColor = System.Drawing.Color.Red;
-            chartArea2.AxisY.Title = "Delta, cm";
-            chartArea2.AxisY.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            chartArea2.AxisY.TitleForeColor = System.Drawing.Color.Red;
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
+            chartArea1.AxisX.Title = "iteration";
+            chartArea1.AxisX.TitleAlignment = System.Drawing.StringAlignment.Far;
+            chartArea1.AxisX.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea1.AxisX.TitleForeColor = System.Drawing.Color.Red;
+            chartArea1.AxisY.Title = "Delta, cm";
+            chartArea1.AxisY.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea1.AxisY.TitleForeColor = System.Drawing.Color.Red;
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
             this.chart1.Location = new System.Drawing.Point(3, 169);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
             this.chart1.Size = new System.Drawing.Size(328, 320);
             this.chart1.TabIndex = 14;
             this.chart1.Text = "delta";
-            title2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            title2.Name = "Title1";
-            title2.Text = "Delta = ||p(i+1) - p\'(i+1)||";
-            this.chart1.Titles.Add(title2);
-            // 
-            // pbCanvas
-            // 
-            this.pbCanvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbCanvas.InitialImage = ((System.Drawing.Image)(resources.GetObject("pbCanvas.InitialImage")));
-            this.pbCanvas.Location = new System.Drawing.Point(3, 3);
-            this.pbCanvas.Name = "pbCanvas";
-            this.pbCanvas.Size = new System.Drawing.Size(672, 540);
-            this.pbCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbCanvas.TabIndex = 15;
-            this.pbCanvas.TabStop = false;
-            this.pbCanvas.WaitOnLoad = true;
-            this.pbCanvas.Layout += new System.Windows.Forms.LayoutEventHandler(this.pictureBox_Layout);
-            this.pbCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseDown);
-            this.pbCanvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseMove);
+            title1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            title1.Name = "Title1";
+            title1.Text = "Delta = ||p(i+1) - p\'(i+1)||";
+            this.chart1.Titles.Add(title1);
             // 
             // label4
             // 
@@ -438,9 +462,9 @@
             // 
             this.comboBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(213, 70);
+            this.comboBox2.Location = new System.Drawing.Point(217, 70);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(46, 21);
+            this.comboBox2.Size = new System.Drawing.Size(38, 21);
             this.comboBox2.TabIndex = 17;
             this.comboBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox2_KeyDown);
             // 
@@ -464,7 +488,7 @@
             // 
             // CancelBtn
             // 
-            this.CancelBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.CancelBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.CancelBtn.Location = new System.Drawing.Point(3, 3);
             this.CancelBtn.Name = "CancelBtn";
             this.CancelBtn.Size = new System.Drawing.Size(108, 31);
@@ -476,7 +500,7 @@
             // CreateManipulator
             // 
             this.CreateManipulator.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CreateManipulator.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.CreateManipulator.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.CreateManipulator.Location = new System.Drawing.Point(117, 3);
             this.CreateManipulator.Name = "CreateManipulator";
             this.CreateManipulator.Size = new System.Drawing.Size(108, 31);
@@ -484,6 +508,42 @@
             this.CreateManipulator.Text = "Create";
             this.CreateManipulator.UseVisualStyleBackColor = true;
             this.CreateManipulator.Click += new System.EventHandler(this.CreateManipulator_Click);
+            // 
+            // startMotion
+            // 
+            this.startMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.startMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.startMotion.Location = new System.Drawing.Point(32, 3);
+            this.startMotion.Name = "startMotion";
+            this.startMotion.Size = new System.Drawing.Size(101, 36);
+            this.startMotion.TabIndex = 0;
+            this.startMotion.Text = "START";
+            this.startMotion.UseVisualStyleBackColor = true;
+            this.startMotion.Click += new System.EventHandler(this.startMotion_Click);
+            // 
+            // stopMotion
+            // 
+            this.stopMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.stopMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.stopMotion.Location = new System.Drawing.Point(198, 3);
+            this.stopMotion.Name = "stopMotion";
+            this.stopMotion.Size = new System.Drawing.Size(101, 36);
+            this.stopMotion.TabIndex = 1;
+            this.stopMotion.Text = "STOP";
+            this.stopMotion.UseVisualStyleBackColor = true;
+            this.stopMotion.Click += new System.EventHandler(this.stopMotion_Click);
+            // 
+            // restartMotion
+            // 
+            this.restartMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.restartMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.restartMotion.Location = new System.Drawing.Point(364, 3);
+            this.restartMotion.Name = "restartMotion";
+            this.restartMotion.Size = new System.Drawing.Size(101, 36);
+            this.restartMotion.TabIndex = 2;
+            this.restartMotion.Text = "RESTART";
+            this.restartMotion.UseVisualStyleBackColor = true;
+            this.restartMotion.Click += new System.EventHandler(this.restartMotion_Click);
             // 
             // label1
             // 
@@ -496,146 +556,10 @@
             this.label1.TabIndex = 19;
             this.label1.Text = "Number of Units";
             // 
-            // NumOfUnitsTextBox
-            // 
-            this.NumOfUnitsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.NumOfUnitsTextBox.Location = new System.Drawing.Point(148, 7);
-            this.NumOfUnitsTextBox.Name = "NumOfUnitsTextBox";
-            this.NumOfUnitsTextBox.Size = new System.Drawing.Size(28, 20);
-            this.NumOfUnitsTextBox.TabIndex = 20;
-            this.NumOfUnitsTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NumOfUnitsTextBox_KeyDown);
-            // 
-            // GoBtn
-            // 
-            this.GoBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.GoBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.GoBtn.Location = new System.Drawing.Point(182, 4);
-            this.GoBtn.Name = "GoBtn";
-            this.GoBtn.Size = new System.Drawing.Size(43, 27);
-            this.GoBtn.TabIndex = 21;
-            this.GoBtn.Text = "OK";
-            this.GoBtn.UseVisualStyleBackColor = true;
-            this.GoBtn.Click += new System.EventHandler(this.GoBtn_Click);
-            // 
-            // centerTableLayoutPanel
-            // 
-            this.centerTableLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.centerTableLayoutPanel.AutoSize = true;
-            this.centerTableLayoutPanel.ColumnCount = 1;
-            this.centerTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.centerTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.centerTableLayoutPanel.Controls.Add(this.tableLayoutPanel1, 0, 1);
-            this.centerTableLayoutPanel.Controls.Add(this.pbCanvas, 0, 0);
-            this.centerTableLayoutPanel.Location = new System.Drawing.Point(243, 3);
-            this.centerTableLayoutPanel.Name = "centerTableLayoutPanel";
-            this.centerTableLayoutPanel.RowCount = 2;
-            this.centerTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 84.46154F));
-            this.centerTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15.53846F));
-            this.centerTableLayoutPanel.Size = new System.Drawing.Size(678, 647);
-            this.centerTableLayoutPanel.TabIndex = 25;
-            // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.AutoSize = true;
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Controls.Add(this.showMotionProgressBar, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 1);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 549);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(672, 95);
-            this.tableLayoutPanel1.TabIndex = 16;
-            // 
-            // showMotionProgressBar
-            // 
-            this.showMotionProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.showMotionProgressBar.Location = new System.Drawing.Point(3, 12);
-            this.showMotionProgressBar.Name = "showMotionProgressBar";
-            this.showMotionProgressBar.Size = new System.Drawing.Size(666, 23);
-            this.showMotionProgressBar.TabIndex = 0;
-            // 
-            // tableLayoutPanel4
-            // 
-            this.tableLayoutPanel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel4.ColumnCount = 4;
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.Controls.Add(this.startMotion, 0, 0);
-            this.tableLayoutPanel4.Controls.Add(this.stopMotion, 1, 0);
-            this.tableLayoutPanel4.Controls.Add(this.restartMotion, 2, 0);
-            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel7, 3, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 50);
-            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 1;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(666, 42);
-            this.tableLayoutPanel4.TabIndex = 1;
-            // 
-            // startMotion
-            // 
-            this.startMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.startMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.startMotion.Location = new System.Drawing.Point(32, 3);
-            this.startMotion.Name = "startMotion";
-            this.startMotion.Size = new System.Drawing.Size(101, 36);
-            this.startMotion.TabIndex = 0;
-            this.startMotion.Text = "START";
-            this.startMotion.UseVisualStyleBackColor = true;
-            // 
-            // stopMotion
-            // 
-            this.stopMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.stopMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.stopMotion.Location = new System.Drawing.Point(198, 3);
-            this.stopMotion.Name = "stopMotion";
-            this.stopMotion.Size = new System.Drawing.Size(101, 36);
-            this.stopMotion.TabIndex = 1;
-            this.stopMotion.Text = "STOP";
-            this.stopMotion.UseVisualStyleBackColor = true;
-            // 
-            // restartMotion
-            // 
-            this.restartMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.restartMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.restartMotion.Location = new System.Drawing.Point(364, 3);
-            this.restartMotion.Name = "restartMotion";
-            this.restartMotion.Size = new System.Drawing.Size(101, 36);
-            this.restartMotion.TabIndex = 2;
-            this.restartMotion.Text = "RESTART";
-            this.restartMotion.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel7
-            // 
-            this.tableLayoutPanel7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel7.ColumnCount = 2;
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel7.Controls.Add(this.speedMotion, 0, 0);
-            this.tableLayoutPanel7.Controls.Add(this.comboBox3, 1, 0);
-            this.tableLayoutPanel7.Location = new System.Drawing.Point(501, 3);
-            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
-            this.tableLayoutPanel7.RowCount = 1;
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(162, 36);
-            this.tableLayoutPanel7.TabIndex = 3;
-            // 
             // speedMotion
             // 
-            this.speedMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.speedMotion.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.speedMotion.AutoSize = true;
             this.speedMotion.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -663,6 +587,27 @@
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(75, 21);
             this.comboBox3.TabIndex = 1;
+            // 
+            // NumOfUnitsTextBox
+            // 
+            this.NumOfUnitsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.NumOfUnitsTextBox.Location = new System.Drawing.Point(148, 7);
+            this.NumOfUnitsTextBox.Name = "NumOfUnitsTextBox";
+            this.NumOfUnitsTextBox.Size = new System.Drawing.Size(28, 20);
+            this.NumOfUnitsTextBox.TabIndex = 20;
+            this.NumOfUnitsTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.NumOfUnitsTextBox_KeyDown);
+            // 
+            // GoBtn
+            // 
+            this.GoBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.GoBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.GoBtn.Location = new System.Drawing.Point(182, 4);
+            this.GoBtn.Name = "GoBtn";
+            this.GoBtn.Size = new System.Drawing.Size(43, 27);
+            this.GoBtn.TabIndex = 21;
+            this.GoBtn.Text = "OK";
+            this.GoBtn.UseVisualStyleBackColor = true;
+            this.GoBtn.Click += new System.EventHandler(this.OKBtn_Click);
             // 
             // rightTableLayoutPanel
             // 
@@ -694,9 +639,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 80.05249F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 19.94751F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 65F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 82.94574F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 17.05426F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 69F));
             this.tableLayoutPanel2.Controls.Add(this.label6, 2, 1);
             this.tableLayoutPanel2.Controls.Add(this.Klabel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label5, 2, 0);
@@ -716,7 +661,7 @@
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(265, 71);
+            this.label6.Location = new System.Drawing.Point(261, 71);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 20);
             this.label6.TabIndex = 18;
@@ -724,14 +669,17 @@
             // 
             // label5
             // 
-            this.label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(265, 17);
+            this.label5.Location = new System.Drawing.Point(261, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(58, 20);
+            this.label5.Size = new System.Drawing.Size(64, 54);
             this.label5.TabIndex = 10;
             this.label5.Text = "points";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tableLayoutPanel3
             // 
@@ -839,6 +787,80 @@
             this.mainTableLayoutPanel.TabIndex = 28;
             this.mainTableLayoutPanel.CellPaint += new System.Windows.Forms.TableLayoutCellPaintEventHandler(this.mainTableLayoutPanel_CellPaint);
             // 
+            // centerTableLayoutPanel
+            // 
+            this.centerTableLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.centerTableLayoutPanel.AutoSize = true;
+            this.centerTableLayoutPanel.ColumnCount = 1;
+            this.centerTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.centerTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.centerTableLayoutPanel.Controls.Add(this.tableLayoutPanel1, 0, 1);
+            this.centerTableLayoutPanel.Controls.Add(this.pbCanvas, 0, 0);
+            this.centerTableLayoutPanel.Location = new System.Drawing.Point(243, 3);
+            this.centerTableLayoutPanel.Name = "centerTableLayoutPanel";
+            this.centerTableLayoutPanel.RowCount = 2;
+            this.centerTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 84.46154F));
+            this.centerTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15.53846F));
+            this.centerTableLayoutPanel.Size = new System.Drawing.Size(678, 651);
+            this.centerTableLayoutPanel.TabIndex = 25;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Controls.Add(this.showMotionProgressBar, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 1);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 552);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(672, 96);
+            this.tableLayoutPanel1.TabIndex = 16;
+            // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel4.ColumnCount = 4;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel4.Controls.Add(this.startMotion, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.stopMotion, 1, 0);
+            this.tableLayoutPanel4.Controls.Add(this.restartMotion, 2, 0);
+            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel7, 3, 0);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 51);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(666, 42);
+            this.tableLayoutPanel4.TabIndex = 1;
+            // 
+            // tableLayoutPanel7
+            // 
+            this.tableLayoutPanel7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel7.ColumnCount = 2;
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.Controls.Add(this.speedMotion, 0, 0);
+            this.tableLayoutPanel7.Controls.Add(this.comboBox3, 1, 0);
+            this.tableLayoutPanel7.Location = new System.Drawing.Point(501, 3);
+            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
+            this.tableLayoutPanel7.RowCount = 1;
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(162, 36);
+            this.tableLayoutPanel7.TabIndex = 3;
+            // 
             // ProjARM
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -854,29 +876,28 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProjectARM";
             this.Load += new System.EventHandler(this.ProjARM_Load);
-            this.Layout += new System.Windows.Forms.LayoutEventHandler(this.ProjARM_Layout);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.units)).EndInit();
-            this.centerTableLayoutPanel.ResumeLayout(false);
-            this.centerTableLayoutPanel.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel7.ResumeLayout(false);
-            this.tableLayoutPanel7.PerformLayout();
             this.rightTableLayoutPanel.ResumeLayout(false);
             this.rightTableLayoutPanel.PerformLayout();
-            this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
             this.leftTableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
             this.mainTableLayoutPanel.ResumeLayout(false);
             this.mainTableLayoutPanel.PerformLayout();
+            this.centerTableLayoutPanel.ResumeLayout(false);
+            this.centerTableLayoutPanel.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel7.ResumeLayout(false);
+            this.tableLayoutPanel7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -946,6 +967,8 @@
         private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Timer timerMotion;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
     }
 }
 
