@@ -100,6 +100,7 @@
   <ItemGroup>
     <Content Include="ManipConfig\MyDefaultMan.txt" />
     <Content Include="ManipConfig\OctopusTentacle.txt" />
+    <Content Include="ManipConfig\templateManipConfig.txt" />
     <Content Include="window_icon.ico" />
   </ItemGroup>
   <ItemGroup />
