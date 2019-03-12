@@ -12,6 +12,7 @@ namespace ProjectARM
         public ExplicitMathModel(int _N)
         {
             N = _N;
+            type = new char[N];
             len = new double[N];
             angle = new double[N];
             a = new double[N];

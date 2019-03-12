@@ -10,6 +10,13 @@ namespace ProjectARM
 {
     public partial class ProjARM : Form
     {
+        #region ENVIRONMENT
+        // MatrixMathModel if true
+        // ExplicitMathModel if false
+        bool mathModelType = false;
+        
+        #endregion
+
         #region COMPUTATION
 
         List<Dpoint> DeltaPoints;
@@ -26,6 +33,7 @@ namespace ProjectARM
         Graphics PicBoxGraphics;
         byte MousePressed;
         //TODO: if it possible remove Flag and index
+        bool IsUnitsDataGridCellChanged;
         byte Flag;
         int index;
 
@@ -38,6 +46,7 @@ namespace ProjectARM
             DeltaPoints = new List<Dpoint>();
             modelMan = new MatrixMathModel(NumOfUnits);
             PicBoxGraphics = pbCanvas.CreateGraphics();
+            IsUnitsDataGridCellChanged = false;
             MousePressed = 0;
             NumOfUnits = 0;
             Flag = 0;
@@ -48,25 +57,32 @@ namespace ProjectARM
         private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
-            DataGridViewLoad();
-        }
-
-        private void DataGridViewLoad()
-        {
-            if (byte.TryParse(NumOfUnitsTextBox.Text, out NumOfUnits))
+            byte currNumOfUnits = 0;
+            if (byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
+                throw new Exception("Not correct input of the Number of Units");
+            if (NumOfUnits != currNumOfUnits)
             {
-                UnitsFilling(NumOfUnits);
-            }
-            else
-            {
-                MessageBox.Show("Not correct input of the Number of Units");
-                return;
+                UnitsDataGridViewPreparation(currNumOfUnits);
+                if (mathModelType)
+                    modelMan = new MatrixMathModel(NumOfUnits);
+                else
+                    modelMan = new ExplicitMathModel(NumOfUnits);
             }
         }
 
         private void OKBtn_Click(object sender, EventArgs e)
         {
-            DataGridViewLoad();
+            byte currNumOfUnits = 0;
+            if (!byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
+                throw new Exception("Not correct input of the Number of Units");
+            if (NumOfUnits != currNumOfUnits)
+            {
+                UnitsDataGridViewPreparation(currNumOfUnits);
+                if (mathModelType)
+                    modelMan = new MatrixMathModel(NumOfUnits);
+                else
+                    modelMan = new ExplicitMathModel(NumOfUnits);
+            }
         }
 
         private void CancelBtn_Click(object sender, EventArgs e)
@@ -78,27 +94,34 @@ namespace ProjectARM
 
         private void CreateManipulator_Click(object sender, EventArgs e)
         {
-            modelMan = new MatrixMathModel(NumOfUnits);
-            for (int i = 0; i < NumOfUnits; i++)
+            if (IsUnitsDataGridCellChanged)
             {
-                MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
-                MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
-                MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
+                byte currNumOfUnits = 0;
+                if (!byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
+                    throw new Exception("Not correct input of the Number of Units");
+                if (NumOfUnits != currNumOfUnits)
+                {
+                    UnitsDataGridViewPreparation(NumOfUnits);
+                }
+                for (int i = 0; i < NumOfUnits; i++)
+                {
+                    MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
+                    MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
+                    MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
+                }
             }
-            NumOfUnitsTextBox.Text = NumOfUnits.ToString();
-            UnitsFilling(NumOfUnits);
-            ManipulatorConfigShow(NumOfUnits);
+            ManipulatorConfigShow();
             ShowManipulator();
         }
 
-        private void UnitsFilling(int NumOfUnits)
+        private void UnitsDataGridViewPreparation(int NumOfUnits)
         {
             units.Visible = true;
             CancelBtn.Visible = true;
             CreateManipulator.Visible = true;
             units.ColumnCount = 4;
             units.RowCount = NumOfUnits;
-            units.Height = 23 + NumOfUnits * 20;
+            units.Height = 25 + NumOfUnits * 25;
             CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
             CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
             units.Columns[0].Name = "Num";
@@ -107,14 +130,24 @@ namespace ProjectARM
             units.Columns[1].Name = "Type";
             units.Columns["Type"].Width = 48;
             units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[2].Name = "Lenght, cm";
-            units.Columns["Lenght, cm"].Width = 85;
-            units.Columns["Lenght, cm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[3].Name = "Angle, °";
-            units.Columns["Angle, °"].Width = 77;
-            units.Columns["Angle, °"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[2].Name = "Lenght(cm)";
+            units.Columns["Lenght(cm)"].Width = 77;
+            units.Columns["Lenght(cm)"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            units.Columns[3].Name = "Angle";
+            units.Columns["Angle"].Width = 67;
+            units.Columns["Angle"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             for (int i = 0; i < NumOfUnits; i++)
                 units.Rows[i].Cells[0].Value = i;
+        }
+
+        private void ManipulatorConfigShow()
+        {
+            for (int i = 0; i < NumOfUnits; i++)
+            {
+                units.Rows[i].Cells[1].Value = MathModel.type[i];
+                units.Rows[i].Cells[2].Value = MathModel.len[i];
+                units.Rows[i].Cells[3].Value = MathModel.angle[i];
+            }
         }
 
         #endregion
@@ -269,9 +302,9 @@ namespace ProjectARM
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string path = @"\ManipConfig";
+            string manConfigDir = @"\ManipConfig";
             var currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            var varFileFullName = currentDirectory + path;
+            var varFileFullName = currentDirectory + manConfigDir;
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
             dialog.Title = "Open manipulator configuration file";
@@ -282,18 +315,28 @@ namespace ProjectARM
                 string filename = dialog.FileName;
                 string[] filelines = File.ReadAllLines(filename);
 
+                NumOfUnitsTextBox.Text = filelines[0];
+
                 NumOfUnits = Convert.ToByte(filelines[0].Trim());
-                modelMan = new MatrixMathModel(NumOfUnits);
+
+                UnitsDataGridViewPreparation(NumOfUnits);
+
+                if (mathModelType)
+                    modelMan = new MatrixMathModel(NumOfUnits);
+                else
+                    modelMan = new ExplicitMathModel(NumOfUnits);
 
                 int CurrUnitLine = 0;
                 for (int i = 1; i < filelines.Length; i++)
                 {
                     MathModel.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
                     MathModel.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    MathModel.angle[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
+                    MathModel.angle[CurrUnitLine] = -MathModel.DegreeToRadian(Convert.ToDouble(filelines[++i].Trim()));
                     CurrUnitLine++;
                 }
-                ShowManipulator();
+                UnitsDataGridViewPreparation(NumOfUnits);
+                ManipulatorConfigShow();
+                IsUnitsDataGridCellChanged = false;
             }
         }
 
@@ -497,16 +540,6 @@ namespace ProjectARM
             }
             Man.Show(PicBoxGraphics); // Отображение манипулятора в начальном положении
         }
-        
-        private void ManipulatorConfigShow(int NumOfUnits)
-        {
-            for (int i = 0; i < NumOfUnits; i++)
-            {
-                units.Rows[i].Cells[1].Value = MathModel.type[i];
-                units.Rows[i].Cells[2].Value = MathModel.len[i];
-                units.Rows[i].Cells[3].Value = MathModel.angle[i];
-            }
-        }
 
         private void ProjARM_Load(object sender, EventArgs e)
         {
@@ -539,6 +572,12 @@ namespace ProjectARM
 
                 e.Graphics.DrawRectangle(pen, rectangle);
             }
+        }
+
+        private void units_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            // Событие начала редактирования ячейки (не нашёл событие "Ячейка изменена")
+            IsUnitsDataGridCellChanged = true;
         }
     }
 }
