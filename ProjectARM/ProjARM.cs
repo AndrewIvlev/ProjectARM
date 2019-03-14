@@ -77,7 +77,8 @@ namespace ProjectARM
                 throw new Exception("Not correct input of the Number of Units");
             if (NumOfUnits != currNumOfUnits)
             {
-                UnitsDataGridViewPreparation(currNumOfUnits);
+                NumOfUnits = currNumOfUnits;
+                UnitsDataGridViewPreparation(NumOfUnits);
                 if (mathModelType)
                     modelMan = new MatrixMathModel(NumOfUnits);
                 else
@@ -96,13 +97,6 @@ namespace ProjectARM
         {
             if (IsUnitsDataGridCellChanged)
             {
-                byte currNumOfUnits = 0;
-                if (!byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
-                    throw new Exception("Not correct input of the Number of Units");
-                if (NumOfUnits != currNumOfUnits)
-                {
-                    UnitsDataGridViewPreparation(NumOfUnits);
-                }
                 for (int i = 0; i < NumOfUnits; i++)
                 {
                     MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());

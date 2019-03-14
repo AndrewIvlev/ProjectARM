@@ -27,4 +27,4 @@ C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.GenerateResource.cache
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.CoreCompileInputs.cache
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.exe
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.pdb
-C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.fdsgs.resources
+C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.ProjARM.resources

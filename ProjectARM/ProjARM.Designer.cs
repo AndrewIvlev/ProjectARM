@@ -160,42 +160,44 @@
             // ctreateMnpltrToolStripMenuItem
             // 
             this.ctreateMnpltrToolStripMenuItem.Name = "ctreateMnpltrToolStripMenuItem";
-            this.ctreateMnpltrToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ctreateMnpltrToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.ctreateMnpltrToolStripMenuItem.Text = "New";
             this.ctreateMnpltrToolStripMenuItem.Click += new System.EventHandler(this.newMnpltrToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.saveAsToolStripMenuItem.Text = "Save as";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // moveManipulatorToolStripMenuItem
             // 
+            this.moveManipulatorToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.moveManipulatorToolStripMenuItem.ForeColor = System.Drawing.Color.Red;
             this.moveManipulatorToolStripMenuItem.Name = "moveManipulatorToolStripMenuItem";
-            this.moveManipulatorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.moveManipulatorToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.moveManipulatorToolStripMenuItem.Text = "Move by Trajectory";
             this.moveManipulatorToolStripMenuItem.Click += new System.EventHandler(this.moveManipulatorToolStripMenuItem_Click);
             // 
             // destroyManipulatorToolStripMenuItem
             // 
             this.destroyManipulatorToolStripMenuItem.Name = "destroyManipulatorToolStripMenuItem";
-            this.destroyManipulatorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.destroyManipulatorToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.destroyManipulatorToolStripMenuItem.Text = "Delete";
             this.destroyManipulatorToolStripMenuItem.Click += new System.EventHandler(this.destroyManipulatorToolStripMenuItem_Click);
             // 
@@ -216,49 +218,49 @@
             // createTrajectoryToolStripMenuItem
             // 
             this.createTrajectoryToolStripMenuItem.Name = "createTrajectoryToolStripMenuItem";
-            this.createTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.createTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.createTrajectoryToolStripMenuItem.Text = "New";
             this.createTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.newTrajectoryToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem1
             // 
             this.openToolStripMenuItem1.Name = "openToolStripMenuItem1";
-            this.openToolStripMenuItem1.Size = new System.Drawing.Size(131, 22);
+            this.openToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem1.Text = "Open";
             this.openToolStripMenuItem1.Click += new System.EventHandler(this.openToolStripMenuItem1_Click);
             // 
             // saveToolStripMenuItem1
             // 
             this.saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
-            this.saveToolStripMenuItem1.Size = new System.Drawing.Size(131, 22);
+            this.saveToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem1.Text = "Save";
             this.saveToolStripMenuItem1.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
             // 
             // sToolStripMenuItem
             // 
             this.sToolStripMenuItem.Name = "sToolStripMenuItem";
-            this.sToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.sToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.sToolStripMenuItem.Text = "Save as";
             this.sToolStripMenuItem.Click += new System.EventHandler(this.sToolStripMenuItem_Click);
             // 
             // editTrajectoryToolStripMenuItem
             // 
             this.editTrajectoryToolStripMenuItem.Name = "editTrajectoryToolStripMenuItem";
-            this.editTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.editTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.editTrajectoryToolStripMenuItem.Text = "Edit";
             this.editTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.editTrajectoryToolStripMenuItem_Click);
             // 
             // interpolateTrajectoryToolStripMenuItem
             // 
             this.interpolateTrajectoryToolStripMenuItem.Name = "interpolateTrajectoryToolStripMenuItem";
-            this.interpolateTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.interpolateTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.interpolateTrajectoryToolStripMenuItem.Text = "Interpolate";
             this.interpolateTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.interpolateTrajectoryToolStripMenuItem_Click);
             // 
             // deleteTrajectoryToolStripMenuItem
             // 
             this.deleteTrajectoryToolStripMenuItem.Name = "deleteTrajectoryToolStripMenuItem";
-            this.deleteTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.deleteTrajectoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deleteTrajectoryToolStripMenuItem.Text = "Delete";
             this.deleteTrajectoryToolStripMenuItem.Click += new System.EventHandler(this.deleteTrajectoryToolStripMenuItem_Click);
             // 
@@ -339,7 +341,7 @@
             this.Klabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Klabel.Location = new System.Drawing.Point(3, 0);
             this.Klabel.Name = "Klabel";
-            this.Klabel.Size = new System.Drawing.Size(208, 54);
+            this.Klabel.Size = new System.Drawing.Size(207, 54);
             this.Klabel.TabIndex = 9;
             this.Klabel.Text = "Divide the trajectory into ";
             this.Klabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -348,7 +350,7 @@
             // 
             this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(217, 16);
+            this.comboBox1.Location = new System.Drawing.Point(216, 16);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(37, 21);
             this.comboBox1.TabIndex = 10;
@@ -462,7 +464,7 @@
             // 
             this.comboBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(217, 70);
+            this.comboBox2.Location = new System.Drawing.Point(216, 70);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(37, 21);
             this.comboBox2.TabIndex = 17;
@@ -639,7 +641,7 @@
             this.tableLayoutPanel2.ColumnCount = 3;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 82.94574F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 17.05426F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 71F));
             this.tableLayoutPanel2.Controls.Add(this.label6, 2, 1);
             this.tableLayoutPanel2.Controls.Add(this.Klabel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label5, 2, 0);
@@ -659,7 +661,7 @@
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(260, 71);
+            this.label6.Location = new System.Drawing.Point(259, 71);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 20);
             this.label6.TabIndex = 18;
@@ -672,9 +674,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(260, 0);
+            this.label5.Location = new System.Drawing.Point(259, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 54);
+            this.label5.Size = new System.Drawing.Size(66, 54);
             this.label5.TabIndex = 10;
             this.label5.Text = "points";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -867,7 +869,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(1280, 720);
+            this.MinimumSize = new System.Drawing.Size(1278, 720);
             this.Name = "ProjARM";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProjectARM";
