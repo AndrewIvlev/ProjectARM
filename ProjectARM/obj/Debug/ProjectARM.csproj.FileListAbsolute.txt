@@ -17,7 +17,6 @@ D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.pdb
 D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe.config
 D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe
 D:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.pdb
-D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csprojAssemblyReference.cache
 C:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe.config
 C:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.exe
 C:\repo\ProjectARM\ProjectARM\bin\Debug\ProjectARM.pdb

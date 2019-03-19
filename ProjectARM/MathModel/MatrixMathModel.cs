@@ -8,6 +8,8 @@ namespace ProjectARM
 {
     public class MatrixMathModel : MathModel
     {
+        public double[] q;
+        delegate double function(double[] q);
 
         public MatrixMathModel(int _N)
         {
@@ -34,6 +36,25 @@ namespace ProjectARM
                 len[i] = _len[i];
                 angle[i] = _angle[i];
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public double[][,] getMatrixDescription()
+        {
+            // Матрица T, определяющая правила пересчёта координат из системы хвата в систему нулевого звена;
+            // представляет собой произведение матриц B и S, для наглядности храним в виде массива матриц, где
+            // последовательно представлены матрицы B0, S1, B1, S2, B2, S3, ..., Sn, Bn
+            double[][,] T = new double[N][,];
+            
+            for(int i = 0; i < N; i++)
+            {
+                T[i] = new double[4, 4];
+            }
+
+            return T;
+
         }
 
         public override double MaxL(double[] UnitTypePmaxLen)

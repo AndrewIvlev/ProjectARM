@@ -1,4 +1,4 @@
-﻿6 //Number of Units of the Manipulator
+﻿5 //Number of Units of the Manipulator
 S //Type of unit
 0 //Lenght of unit
 0 //Angle of unit
@@ -14,10 +14,3 @@ P
 R
 20
 0
-G
-0
-0
-
-Notes: The first unit must be of type C,
-	which means that the starting static unit.
-	And the last unit should be type G which means a grip.

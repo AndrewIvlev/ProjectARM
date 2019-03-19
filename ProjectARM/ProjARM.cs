@@ -88,8 +88,8 @@ namespace ProjectARM
         private void CancelBtn_Click(object sender, EventArgs e)
         {
             //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
-            units.Rows.Clear();
-            units.Refresh();
+            unitsDataGridView.Rows.Clear();
+            unitsDataGridView.Refresh();
         }
 
         private void CreateManipulator_Click(object sender, EventArgs e)
@@ -105,9 +105,9 @@ namespace ProjectARM
                 }
                 for (int i = 0; i < NumOfUnits; i++)
                 {
-                    MathModel.type[i] = Convert.ToChar(units.Rows[i].Cells[1].Value.ToString());
-                    MathModel.len[i] = Convert.ToDouble(units.Rows[i + 1].Cells[2].Value.ToString());
-                    MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(units.Rows[i + 1].Cells[3].Value.ToString()));
+                    MathModel.type[i] = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
+                    MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[2].Value.ToString());
+                    MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[3].Value.ToString()));
                 }
             }
             ManipulatorConfigShow();
@@ -116,37 +116,37 @@ namespace ProjectARM
 
         private void UnitsDataGridViewPreparation(int NumOfUnits)
         {
-            units.Visible = true;
+            unitsDataGridView.Visible = true;
             CancelBtn.Visible = true;
             CreateManipulator.Visible = true;
-            units.ColumnCount = 4;
-            units.RowCount = NumOfUnits;
-            units.Height = 25 + NumOfUnits * 25;
-            CancelBtn.Location = new Point(CancelBtn.Location.X, units.Location.Y + units.Height + 15);
-            CreateManipulator.Location = new Point(CreateManipulator.Location.X, units.Location.Y + units.Height + 15);
-            units.Columns[0].Name = "Num";
-            units.Columns["Num"].Width = 40;
-            units.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[1].Name = "Type";
-            units.Columns["Type"].Width = 48;
-            units.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[2].Name = "Lenght(cm)";
-            units.Columns["Lenght(cm)"].Width = 77;
-            units.Columns["Lenght(cm)"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            units.Columns[3].Name = "Angle";
-            units.Columns["Angle"].Width = 67;
-            units.Columns["Angle"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            unitsDataGridView.ColumnCount = 4;
+            unitsDataGridView.RowCount = NumOfUnits;
+            unitsDataGridView.Height = 25 + NumOfUnits * 25;
+            CancelBtn.Location = new Point(CancelBtn.Location.X, unitsDataGridView.Location.Y + unitsDataGridView.Height + 15);
+            CreateManipulator.Location = new Point(CreateManipulator.Location.X, unitsDataGridView.Location.Y + unitsDataGridView.Height + 15);
+            unitsDataGridView.Columns[0].Name = "Num";
+            unitsDataGridView.Columns["Num"].Width = 40;
+            unitsDataGridView.Columns["Num"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            unitsDataGridView.Columns[1].Name = "Type";
+            unitsDataGridView.Columns["Type"].Width = 48;
+            unitsDataGridView.Columns["Type"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            unitsDataGridView.Columns[2].Name = "Lenght(cm)";
+            unitsDataGridView.Columns["Lenght(cm)"].Width = 77;
+            unitsDataGridView.Columns["Lenght(cm)"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            unitsDataGridView.Columns[3].Name = "Angle";
+            unitsDataGridView.Columns["Angle"].Width = 67;
+            unitsDataGridView.Columns["Angle"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             for (int i = 0; i < NumOfUnits; i++)
-                units.Rows[i].Cells[0].Value = i;
+                unitsDataGridView.Rows[i].Cells[0].Value = i;
         }
 
         private void ManipulatorConfigShow()
         {
             for (int i = 0; i < NumOfUnits; i++)
             {
-                units.Rows[i].Cells[1].Value = MathModel.type[i];
-                units.Rows[i].Cells[2].Value = MathModel.len[i];
-                units.Rows[i].Cells[3].Value = MathModel.angle[i];
+                unitsDataGridView.Rows[i].Cells[1].Value = MathModel.type[i];
+                unitsDataGridView.Rows[i].Cells[2].Value = MathModel.len[i];
+                unitsDataGridView.Rows[i].Cells[3].Value = MathModel.angle[i];
             }
         }
 

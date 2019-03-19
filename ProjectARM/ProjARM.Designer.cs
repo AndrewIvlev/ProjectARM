@@ -71,7 +71,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.units = new System.Windows.Forms.DataGridView();
+            this.unitsDataGridView = new System.Windows.Forms.DataGridView();
             this.CancelBtn = new System.Windows.Forms.Button();
             this.CreateManipulator = new System.Windows.Forms.Button();
             this.startMotion = new System.Windows.Forms.Button();
@@ -89,8 +89,16 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
             this.leftTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.anchorPointsDataGridView = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
+            this.trajectoryPointsCount = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.mainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.centerTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -101,13 +109,16 @@
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.units)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).BeginInit();
             this.rightTableLayoutPanel.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.leftTableLayoutPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.anchorPointsDataGridView)).BeginInit();
             this.tableLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
+            this.tableLayoutPanel8.SuspendLayout();
+            this.tableLayoutPanel9.SuspendLayout();
             this.mainTableLayoutPanel.SuspendLayout();
             this.centerTableLayoutPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -127,7 +138,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(328, 55);
             this.label2.TabIndex = 5;
-            this.label2.Text = "Current Generalized Coordinates Q=(0,0,0,0)";
+            this.label2.Text = "Current Generalized Coordinates Q=(*,*, ... ,*)";
             // 
             // menuStrip1
             // 
@@ -160,42 +171,42 @@
             // ctreateMnpltrToolStripMenuItem
             // 
             this.ctreateMnpltrToolStripMenuItem.Name = "ctreateMnpltrToolStripMenuItem";
-            this.ctreateMnpltrToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ctreateMnpltrToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.ctreateMnpltrToolStripMenuItem.Text = "New";
             this.ctreateMnpltrToolStripMenuItem.Click += new System.EventHandler(this.newMnpltrToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.saveAsToolStripMenuItem.Text = "Save as";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // moveManipulatorToolStripMenuItem
             // 
             this.moveManipulatorToolStripMenuItem.Name = "moveManipulatorToolStripMenuItem";
-            this.moveManipulatorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.moveManipulatorToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.moveManipulatorToolStripMenuItem.Text = "Move by Trajectory";
             this.moveManipulatorToolStripMenuItem.Click += new System.EventHandler(this.moveManipulatorToolStripMenuItem_Click);
             // 
             // destroyManipulatorToolStripMenuItem
             // 
             this.destroyManipulatorToolStripMenuItem.Name = "destroyManipulatorToolStripMenuItem";
-            this.destroyManipulatorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.destroyManipulatorToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.destroyManipulatorToolStripMenuItem.Text = "Delete";
             this.destroyManipulatorToolStripMenuItem.Click += new System.EventHandler(this.destroyManipulatorToolStripMenuItem_Click);
             // 
@@ -339,7 +350,7 @@
             this.Klabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Klabel.Location = new System.Drawing.Point(3, 0);
             this.Klabel.Name = "Klabel";
-            this.Klabel.Size = new System.Drawing.Size(208, 54);
+            this.Klabel.Size = new System.Drawing.Size(204, 54);
             this.Klabel.TabIndex = 9;
             this.Klabel.Text = "Divide the trajectory into ";
             this.Klabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -348,7 +359,7 @@
             // 
             this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(217, 16);
+            this.comboBox1.Location = new System.Drawing.Point(213, 16);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(37, 21);
             this.comboBox1.TabIndex = 10;
@@ -371,6 +382,7 @@
             this.pbCanvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbCanvas.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pbCanvas.InitialImage = null;
             this.pbCanvas.Location = new System.Drawing.Point(3, 3);
             this.pbCanvas.Name = "pbCanvas";
@@ -462,7 +474,7 @@
             // 
             this.comboBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(217, 70);
+            this.comboBox2.Location = new System.Drawing.Point(213, 70);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(37, 21);
             this.comboBox2.TabIndex = 17;
@@ -472,24 +484,26 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // units
+            // unitsDataGridView
             // 
-            this.units.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.units.Location = new System.Drawing.Point(3, 43);
-            this.units.Name = "units";
-            this.units.RowHeadersVisible = false;
-            this.units.RowHeadersWidth = 20;
-            this.units.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.units.Size = new System.Drawing.Size(228, 561);
-            this.units.TabIndex = 18;
-            this.units.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.units_CellBeginEdit);
+            this.unitsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.unitsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.unitsDataGridView.Location = new System.Drawing.Point(3, 43);
+            this.unitsDataGridView.Name = "unitsDataGridView";
+            this.unitsDataGridView.RowHeadersVisible = false;
+            this.unitsDataGridView.RowHeadersWidth = 20;
+            this.unitsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.unitsDataGridView.Size = new System.Drawing.Size(228, 239);
+            this.unitsDataGridView.TabIndex = 18;
+            this.unitsDataGridView.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.units_CellBeginEdit);
             // 
             // CancelBtn
             // 
             this.CancelBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.CancelBtn.Location = new System.Drawing.Point(3, 3);
             this.CancelBtn.Name = "CancelBtn";
-            this.CancelBtn.Size = new System.Drawing.Size(108, 31);
+            this.CancelBtn.Size = new System.Drawing.Size(108, 28);
             this.CancelBtn.TabIndex = 23;
             this.CancelBtn.Text = "Cancel";
             this.CancelBtn.UseVisualStyleBackColor = true;
@@ -501,7 +515,7 @@
             this.CreateManipulator.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.CreateManipulator.Location = new System.Drawing.Point(117, 3);
             this.CreateManipulator.Name = "CreateManipulator";
-            this.CreateManipulator.Size = new System.Drawing.Size(108, 31);
+            this.CreateManipulator.Size = new System.Drawing.Size(108, 28);
             this.CreateManipulator.TabIndex = 22;
             this.CreateManipulator.Text = "Create";
             this.CreateManipulator.UseVisualStyleBackColor = true;
@@ -639,7 +653,7 @@
             this.tableLayoutPanel2.ColumnCount = 3;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 82.94574F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 17.05426F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 70F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 74F));
             this.tableLayoutPanel2.Controls.Add(this.label6, 2, 1);
             this.tableLayoutPanel2.Controls.Add(this.Klabel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label5, 2, 0);
@@ -659,7 +673,7 @@
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(260, 71);
+            this.label6.Location = new System.Drawing.Point(256, 71);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 20);
             this.label6.TabIndex = 18;
@@ -672,9 +686,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(260, 0);
+            this.label5.Location = new System.Drawing.Point(256, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 54);
+            this.label5.Size = new System.Drawing.Size(69, 54);
             this.label5.TabIndex = 10;
             this.label5.Text = "points";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -716,33 +730,50 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.leftTableLayoutPanel.ColumnCount = 1;
             this.leftTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.leftTableLayoutPanel.Controls.Add(this.anchorPointsDataGridView, 0, 4);
             this.leftTableLayoutPanel.Controls.Add(this.tableLayoutPanel6, 0, 2);
             this.leftTableLayoutPanel.Controls.Add(this.tableLayoutPanel5, 0, 0);
-            this.leftTableLayoutPanel.Controls.Add(this.units, 0, 1);
+            this.leftTableLayoutPanel.Controls.Add(this.unitsDataGridView, 0, 1);
+            this.leftTableLayoutPanel.Controls.Add(this.tableLayoutPanel8, 0, 3);
+            this.leftTableLayoutPanel.Controls.Add(this.tableLayoutPanel9, 0, 5);
             this.leftTableLayoutPanel.Location = new System.Drawing.Point(3, 3);
             this.leftTableLayoutPanel.Name = "leftTableLayoutPanel";
-            this.leftTableLayoutPanel.RowCount = 3;
+            this.leftTableLayoutPanel.RowCount = 6;
             this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.leftTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.leftTableLayoutPanel.Size = new System.Drawing.Size(234, 651);
             this.leftTableLayoutPanel.TabIndex = 27;
             // 
+            // anchorPointsDataGridView
+            // 
+            this.anchorPointsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.anchorPointsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.anchorPointsDataGridView.Location = new System.Drawing.Point(3, 368);
+            this.anchorPointsDataGridView.Name = "anchorPointsDataGridView";
+            this.anchorPointsDataGridView.RowHeadersVisible = false;
+            this.anchorPointsDataGridView.RowHeadersWidth = 20;
+            this.anchorPointsDataGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.anchorPointsDataGridView.Size = new System.Drawing.Size(228, 239);
+            this.anchorPointsDataGridView.TabIndex = 30;
+            // 
             // tableLayoutPanel6
             // 
-            this.tableLayoutPanel6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanel6.ColumnCount = 2;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.Controls.Add(this.CreateManipulator, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.CancelBtn, 0, 0);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 610);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 288);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(228, 38);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(228, 34);
             this.tableLayoutPanel6.TabIndex = 28;
             // 
             // tableLayoutPanel5
@@ -751,15 +782,99 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.Controls.Add(this.NumOfUnitsTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.GoBtn, 2, 0);
+            this.tableLayoutPanel5.Controls.Add(this.NumOfUnitsTextBox, 1, 0);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(228, 34);
             this.tableLayoutPanel5.TabIndex = 28;
+            // 
+            // tableLayoutPanel8
+            // 
+            this.tableLayoutPanel8.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel8.ColumnCount = 3;
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel8.Controls.Add(this.textBox1, 1, 0);
+            this.tableLayoutPanel8.Controls.Add(this.button1, 2, 0);
+            this.tableLayoutPanel8.Controls.Add(this.trajectoryPointsCount, 0, 0);
+            this.tableLayoutPanel8.Location = new System.Drawing.Point(3, 328);
+            this.tableLayoutPanel8.Name = "tableLayoutPanel8";
+            this.tableLayoutPanel8.RowCount = 1;
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel8.Size = new System.Drawing.Size(228, 34);
+            this.tableLayoutPanel8.TabIndex = 29;
+            // 
+            // trajectoryPointsCount
+            // 
+            this.trajectoryPointsCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.trajectoryPointsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.trajectoryPointsCount.Location = new System.Drawing.Point(3, 7);
+            this.trajectoryPointsCount.Name = "trajectoryPointsCount";
+            this.trajectoryPointsCount.Size = new System.Drawing.Size(125, 20);
+            this.trajectoryPointsCount.TabIndex = 19;
+            this.trajectoryPointsCount.Text = "Points count";
+            // 
+            // button1
+            // 
+            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button1.Location = new System.Drawing.Point(182, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(43, 27);
+            this.button1.TabIndex = 21;
+            this.button1.Text = "OK";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(134, 7);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(42, 20);
+            this.textBox1.TabIndex = 20;
+            // 
+            // tableLayoutPanel9
+            // 
+            this.tableLayoutPanel9.ColumnCount = 2;
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel9.Controls.Add(this.button2, 1, 0);
+            this.tableLayoutPanel9.Controls.Add(this.button3, 0, 0);
+            this.tableLayoutPanel9.Location = new System.Drawing.Point(3, 613);
+            this.tableLayoutPanel9.Name = "tableLayoutPanel9";
+            this.tableLayoutPanel9.RowCount = 1;
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(228, 33);
+            this.tableLayoutPanel9.TabIndex = 31;
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button2.Location = new System.Drawing.Point(117, 3);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(108, 27);
+            this.button2.TabIndex = 22;
+            this.button2.Text = "Create";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button3.Location = new System.Drawing.Point(3, 3);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(108, 27);
+            this.button3.TabIndex = 23;
+            this.button3.Text = "Cancel";
+            this.button3.UseVisualStyleBackColor = true;
             // 
             // mainTableLayoutPanel
             // 
@@ -830,10 +945,10 @@
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel4.Controls.Add(this.startMotion, 0, 0);
-            this.tableLayoutPanel4.Controls.Add(this.stopMotion, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.restartMotion, 2, 0);
             this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel7, 3, 0);
+            this.tableLayoutPanel4.Controls.Add(this.stopMotion, 1, 0);
+            this.tableLayoutPanel4.Controls.Add(this.startMotion, 0, 0);
             this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 51);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
@@ -876,16 +991,20 @@
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.units)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).EndInit();
             this.rightTableLayoutPanel.ResumeLayout(false);
             this.rightTableLayoutPanel.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.leftTableLayoutPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.anchorPointsDataGridView)).EndInit();
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
+            this.tableLayoutPanel8.ResumeLayout(false);
+            this.tableLayoutPanel8.PerformLayout();
+            this.tableLayoutPanel9.ResumeLayout(false);
             this.mainTableLayoutPanel.ResumeLayout(false);
             this.mainTableLayoutPanel.PerformLayout();
             this.centerTableLayoutPanel.ResumeLayout(false);
@@ -900,8 +1019,17 @@
         }
 
         #endregion
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label Klabel;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label speedMotion;
+        private System.Windows.Forms.Label trajectoryPointsCount;
         private System.Windows.Forms.ToolStripMenuItem manipulatorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ctreateMnpltrToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem moveManipulatorToolStripMenuItem;
@@ -914,16 +1042,6 @@
         private System.Windows.Forms.ToolStripMenuItem createObstacleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editObstacleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem destrouObstacleToolStripMenuItem;
-        private System.Windows.Forms.Label Klabel;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label3;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.ProgressBar computetionProgressBar;
-        private System.Windows.Forms.Button CancelMoveBtn;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
-        private System.Windows.Forms.PictureBox pbCanvas;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ToolStripMenuItem followForToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem interpolateTrajectoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
@@ -933,38 +1051,47 @@
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem sToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
+        private System.Windows.Forms.ProgressBar computetionProgressBar;
+        private System.Windows.Forms.ProgressBar showMotionProgressBar;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.DataGridView units;
-        private System.Windows.Forms.Button CancelBtn;
-        private System.Windows.Forms.Button CreateManipulator;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox NumOfUnitsTextBox;
-        private System.Windows.Forms.Button GoBtn;
         private System.Windows.Forms.TableLayoutPanel centerTableLayoutPanel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel rightTableLayoutPanel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel leftTableLayoutPanel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.TableLayoutPanel mainTableLayoutPanel;
-        private System.Windows.Forms.ProgressBar showMotionProgressBar;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel8;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
         private System.Windows.Forms.Button startMotion;
         private System.Windows.Forms.Button stopMotion;
         private System.Windows.Forms.Button restartMotion;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
-        private System.Windows.Forms.Label speedMotion;
+        private System.Windows.Forms.Button GoBtn;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button CancelBtn;
+        private System.Windows.Forms.Button CancelMoveBtn;
+        private System.Windows.Forms.Button CreateManipulator;
+        private System.Windows.Forms.DataGridView unitsDataGridView;
+        private System.Windows.Forms.DataGridView anchorPointsDataGridView;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox NumOfUnitsTextBox;
         private System.Windows.Forms.ComboBox comboBox3;
-        private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem russianToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Timer timerMotion;
-        private System.ComponentModel.BackgroundWorker backgroundWorker2;
+        private System.Windows.Forms.PictureBox pbCanvas;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
     }
 }
 
