@@ -35,7 +35,5 @@ namespace ProjectARM
             start.Hide(gr);
             end.Hide(gr);
         }
-
-        public void Move(Graphics gr) { }
     }
 }

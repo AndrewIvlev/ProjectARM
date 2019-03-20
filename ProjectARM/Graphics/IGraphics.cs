@@ -11,6 +11,5 @@ namespace ProjectARM
     {
         void Show(Graphics gr);
         void Hide(Graphics gr);
-        void Move(Graphics gr);
     }
 }

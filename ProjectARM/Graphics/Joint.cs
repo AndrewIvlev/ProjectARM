@@ -86,6 +86,5 @@ namespace ProjectARM
             }
         }
         public void Hide(Graphics gr) => gr.FillEllipse(new SolidBrush(System.Drawing.Color.LightBlue), new Rectangle(Dot.X - 5, Dot.Y - 5, 10, 10));
-        public void Move(Graphics gr) { }
     }
 }
