@@ -15,9 +15,10 @@ namespace ProjectARM
         public static double[] angle;
         public static double[] a;
         public static int N;
+        public double[] q;
 
         public abstract double MaxL(double[] UnitTypePmaxLen);
-        public abstract void LagrangeMethodToThePoint(Dpoint p);
+        public abstract double[] LagrangeMethodToThePoint(Dpoint p);
         public abstract double GetPointError(Dpoint p);
 
         public static void SetA(double[] A)

@@ -10,12 +10,12 @@ namespace ProjectARM
 {
     public partial class ProjARM : Form
     {
-        #region ENVIRONMENT
         // MatrixMathModel if true
         // ExplicitMathModel if false
         bool mathModelType = false;
-        
-        #endregion
+
+        // Вектора обобщённых координат
+        List<double[]> q;
 
         #region COMPUTATION
 
@@ -31,9 +31,12 @@ namespace ProjectARM
         Manipulator Man;
         Point OffSet;
         Graphics PicBoxGraphics;
+        double SpeedMotion;
         byte MousePressed;
         //TODO: if it possible remove Flag and index
         bool IsUnitsDataGridCellChanged;
+        bool DoesItStop;
+        bool IsItRestarted;
         byte Flag;
         int index;
 
@@ -44,9 +47,13 @@ namespace ProjectARM
             InitializeComponent();
 
             DeltaPoints = new List<Dpoint>();
+            q = new List<double[]>();
             modelMan = new MatrixMathModel(NumOfUnits);
             PicBoxGraphics = pbCanvas.CreateGraphics();
             IsUnitsDataGridCellChanged = false;
+            DoesItStop = false;
+            IsItRestarted = false;
+            SpeedMotion = 1;
             MousePressed = 0;
             NumOfUnits = 0;
             Flag = 0;
@@ -88,7 +95,7 @@ namespace ProjectARM
 
         private void CancelBtn_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА,НЕТ,ОТМЕНА
+            //MessageBox.Show("Save manipulator '' ?"); Сделать диалог ДА, НЕТ, ОТМЕНА
             unitsDataGridView.Rows.Clear();
             unitsDataGridView.Refresh();
         }
@@ -101,7 +108,14 @@ namespace ProjectARM
                 {
                     MathModel.type[i] = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
                     MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[2].Value.ToString());
-                    MathModel.angle[i] = -MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[3].Value.ToString()));
+                    MathModel.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[3].Value.ToString()));
+                    if (MathModel.type[i] == 'R')
+                        modelMan.q[i] = MathModel.angle[i];
+                    else
+                    {
+                        if (MathModel.type[i] == 'P')
+                            modelMan.q[i] = MathModel.len[i];
+                    }
                 }
             }
             ManipulatorConfigShow();
@@ -147,6 +161,24 @@ namespace ProjectARM
         #endregion
 
         #region Center Layout
+        
+        private void pbCanvas_Paint(object sender, PaintEventArgs e)
+        {
+            var rectangle = e.ClipRectangle;
+
+            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            e.Graphics.FillRectangle(new SolidBrush(Color.LightBlue), rectangle);
+        }
+
+        private void pbCanvas_MouseEnter(object sender, EventArgs e)
+        {
+            pbCanvas.Cursor = Cursors.Hand;
+        }
+
+        private void pbCanvas_MouseLeave(object sender, EventArgs e)
+        {
+            pbCanvas.Cursor = Cursors.Default;
+        }
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
@@ -161,12 +193,7 @@ namespace ProjectARM
                 case 2:
                     if (MousePressed == 0)
                     {
-                        //Находим ближайшую опорную точку
                         index = Way.NearestPointIndex(e.Location);
-                        /*Нажал ли пользователь на опорную точку, если да, то её координаты
-                        должны удовлетворять уравнению  (x - x')^2 + (y - y')^2 <= R^2
-                        В нашей графической реализации радиус равен 6, но для удобства возьмём окрестность большего радиуса
-                        */
                         if (Math.Pow((e.Location.X - Way.AnchorPoints[index].X), 2) +
                             Math.Pow((e.Location.Y + Way.AnchorPoints[index].Y), 2) <= 40)
                         {
@@ -203,15 +230,38 @@ namespace ProjectARM
 
         private void startMotion_Click(object sender, EventArgs e)
         {
+            int i = 0;
+            while (i < Way.NumOfExtraPoints)
+            {
+                if (DoesItStop)
+                    while (DoesItStop) ;
+                if (IsItRestarted)
+                    i = 0;
+                Thread.Sleep((int)(1000 / SpeedMotion));
+                Man.Move(PicBoxGraphics, q[i]);
 
+                label2.Text = $"Generalized Coordinates \nQ=({(int)MathModel.RadianToDegree(modelMan.q[0])}, {(int)MathModel.RadianToDegree(modelMan.q[1])}," +
+                              $" {(int)modelMan.q[2]}, {(int)MathModel.RadianToDegree(modelMan.q[3])})";
+            }
         }
-
+        
         private void stopMotion_Click(object sender, EventArgs e)
         {
-
+            DoesItStop = true;
         }
 
         private void restartMotion_Click(object sender, EventArgs e)
+        {
+            IsItRestarted = true;
+        }
+
+        private void comboBox3_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            SpeedMotion = Convert.ToDouble(comboBox3.Text);
+        }
+
+        private void comboBox3_MouseDown(object sender, MouseEventArgs e)
         {
 
         }
@@ -255,9 +305,27 @@ namespace ProjectARM
             comboBox1.Items.Add($"{(int)len / 5}");
         }
 
+
+        private void pathPlanningBtn_Click(object sender, EventArgs e)
+        {
+            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
+            else
+            {
+                if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
+                else
+                {
+                    //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly"); else
+                    {
+                        Way.TransferFunction(OffSet, CoeftoRealW());
+                        backgroundWorker1.RunWorkerAsync();
+                    }
+                }
+            }
+        }
+
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            DeltaPoints = MathEngine.MovingAlongTheTrajectory(Way, modelMan, backgroundWorker1);
+            q.Add(MathEngine.MovingAlongTheTrajectory(Way, modelMan, DeltaPoints, backgroundWorker1));
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -272,8 +340,6 @@ namespace ProjectARM
             chart1.Series[0].Points.Clear();
             foreach (Dpoint p in DeltaPoints)
                 chart1.Series[0].Points.AddXY(p.x, (int)(CoeftoRealW() * p.y));
-            label2.Text = $"Generalized Coordinates Q=({(int)MathModel.RadianToDegree(Man.Q[0])}, {(int)MathModel.RadianToDegree(Man.Q[1])}," +
-                          $" {(int)Man.Q[2]}, {(int)MathModel.RadianToDegree(Man.Q[3])})";
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -342,15 +408,6 @@ namespace ProjectARM
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-        }
-
-        private void moveManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (Man == null) MessageBox.Show("Firstly Create Manipulator");
-            if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
-            //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly");
-            Way.TransferFunction(OffSet, CoeftoRealW());
-            backgroundWorker1.RunWorkerAsync();
         }
 
         private void destroyManipulatorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -457,23 +514,7 @@ namespace ProjectARM
         /// <returns>Возвращает коэффициент перевода из графического мира в реальный</returns>
         public double CoeftoRealW() => 1f / CoefToGraphic();
 
-        private void followForToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Flag = 3;
-        }
-
-        public void PictureBoxShow(bool AsSolid)
-        {
-            Pen p = new Pen(Color.Black, 7);
-            Graphics gr = pbCanvas.CreateGraphics();
-            if (AsSolid)
-                gr.FillRectangle(new SolidBrush(Color.LightBlue), 0, 0, pbCanvas.Width, pbCanvas.Height);
-
-            gr.DrawLine(p, new Point(0, 0), new Point(pbCanvas.Width, 0));
-            gr.DrawLine(p, new Point(0, pbCanvas.Height), new Point(pbCanvas.Width, pbCanvas.Height));
-            gr.DrawLine(p, new Point(0, 0), new Point(0, pbCanvas.Height));
-            gr.DrawLine(p, new Point(pbCanvas.Width, 0), new Point(pbCanvas.Width, pbCanvas.Height));
-        }
+        private void followForToolStripMenuItem_Click(object sender, EventArgs e) => Flag = 3;
 
         private void MathModelConfig()
         {
@@ -523,11 +564,6 @@ namespace ProjectARM
                         Man.AddUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
                         tmpJstart.TransferFunction(len, anglemnpltr);
                         break;
-                    case 'G':
-                        tmpJstart.type = tmpJend.type = 'G';
-                        tmpJend.TransferFunction(len, anglemnpltr);
-                        Man.AddUnit(new Unit(tmpJstart, tmpJend, len, anglemnpltr));
-                        break;
                     default:
                         break;
                 }
@@ -537,35 +573,7 @@ namespace ProjectARM
 
         private void ProjARM_Load(object sender, EventArgs e)
         {
-        }
 
-        private void mainTableLayoutPanel_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
-        {
-            paindBorder(sender, e);
-        }
-
-        private void paindBorder(object sender, TableLayoutCellPaintEventArgs e)
-        {
-            var panel = sender as TableLayoutPanel;
-            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-            var rectangle = e.CellBounds;
-            using (var pen = new Pen(Color.Black, 1))
-            {
-                pen.Alignment = System.Drawing.Drawing2D.PenAlignment.Center;
-                pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-
-                if (e.Row == (panel.RowCount - 1))
-                {
-                    rectangle.Height -= 1;
-                }
-
-                if (e.Column == (panel.ColumnCount - 1))
-                {
-                    rectangle.Width -= 1;
-                }
-
-                e.Graphics.DrawRectangle(pen, rectangle);
-            }
         }
 
         private void units_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)

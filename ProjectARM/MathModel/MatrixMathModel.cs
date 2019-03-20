@@ -96,7 +96,10 @@ namespace ProjectARM
         public double NormaVectora(Dpoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
 
 
-        public override void LagrangeMethodToThePoint(Dpoint p) { }
+        public override double[] LagrangeMethodToThePoint(Dpoint p) {
+            double[] q = new double[N];
+            return q;
+        }
 
         public override double GetPointError(Dpoint p)
         {

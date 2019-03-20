@@ -4,7 +4,6 @@ namespace ProjectARM
 {
     public class ExplicitMathModel : MathModel
     {
-        public double[] q;
         delegate double function(double[] q);
         static function[] dFxpodqi = {new function(dFxpodq1), new function(dFxpodq2), new function(dFxpodq3), new function(dFxpodq4)};
         static function[] dFypodqi = {new function(dFypodq1), new function(dFypodq2), new function(dFypodq3), new function(dFypodq4)};
@@ -15,8 +14,9 @@ namespace ProjectARM
             type = new char[N];
             len = new double[N];
             angle = new double[N];
-            a = new double[N];
-            for (int i = 0; i < N; i++)
+            q = new double[N - 1];
+            a = new double[N - 1];
+            for (int i = 0; i < N - 1; i++)
                 a[i] = 1;
         }
         public ExplicitMathModel(double[] _len, double[] _angle)
@@ -43,7 +43,7 @@ namespace ProjectARM
             return MaxL;
         }
 
-        public override void LagrangeMethodToThePoint(Dpoint p)
+        public override double[] LagrangeMethodToThePoint(Dpoint p)
         {
             double diag = dFxpodq1(q) * dFypodq1(q) + dFxpodq2(q) * dFypodq2(q) + dFxpodq3(q) * dFypodq3(q) + dFxpodq4(q) * dFypodq4(q);
             double[,] A = {
@@ -58,6 +58,7 @@ namespace ProjectARM
 
             for (int i = 0; i < 4; i++)
                 q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
+            return q;
         }
         private double MagicFunc(Dpoint μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.x * dFxpodqi(q) + μ.y * dFypodqi(q)) / (2 * a);
         public Dpoint CramerMethod(double[,] A, Dpoint b)

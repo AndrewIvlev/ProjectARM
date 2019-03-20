@@ -14,19 +14,20 @@ namespace ProjectARM
         //будет одна функция перевода траектории для вычислений в траекторию для графики (из одних координат в другие)
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 
-        public static List<Dpoint> MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, BackgroundWorker worker)
+        public static double[] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
         {
-            List<Dpoint> DeltaPoints = new List<Dpoint>();
+            double[] q = new double[MathModel.N];
+
             for (int i = 1; i < S.NumOfExtraPoints; i++)
             {
                 worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
 
-                modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i]);
+                q = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i]);
 
                 DeltaPoints.Add(new Dpoint(i, modelMnpltr.GetPointError(S.ExactExtraPoints[i])));
             }
 
-            return DeltaPoints;
+            return q;
         }
     }
 }
