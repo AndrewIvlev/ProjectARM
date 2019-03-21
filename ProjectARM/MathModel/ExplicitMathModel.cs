@@ -19,6 +19,7 @@ namespace ProjectARM
             for (int i = 0; i < N - 1; i++)
                 a[i] = 1;
         }
+
         public ExplicitMathModel(double[] _len, double[] _angle)
         {
             len = new double[N];
@@ -50,6 +51,7 @@ namespace ProjectARM
                 { Math.Pow(dFxpodq1(q), 2) + Math.Pow(dFxpodq2(q), 2) + Math.Pow(dFxpodq3(q), 2) + Math.Pow(dFxpodq4(q), 2), diag },
                 { diag, Math.Pow(dFypodq1(q), 2) + Math.Pow(dFypodq2(q), 2) + Math.Pow(dFypodq3(q), 2) + Math.Pow(dFypodq4(q), 2) }
                };
+
             double F = Fx(q);
             Dpoint b = new Dpoint(p.x - Fx(q), p.y - Fy(q));
             Dpoint μ = CramerMethod(A, b);
@@ -58,9 +60,12 @@ namespace ProjectARM
 
             for (int i = 0; i < 4; i++)
                 q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
+
             return q;
         }
+
         private double MagicFunc(Dpoint μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.x * dFxpodqi(q) + μ.y * dFypodqi(q)) / (2 * a);
+
         public Dpoint CramerMethod(double[,] A, Dpoint b)
         {
             Dpoint X = new Dpoint(0, 0);
@@ -72,9 +77,11 @@ namespace ProjectARM
                 double detx2 = A[0, 0] * b.y - b.x * A[1, 0];
                 X.y = detx2 / det;
             }
-            else return new Dpoint(0, 0);
+            else
+                return new Dpoint(0, 0);
             return X;
         }
+
         public Dpoint SolutionVerification(double[,] A, Dpoint b, Dpoint X)
         {
             Dpoint error;
@@ -82,17 +89,29 @@ namespace ProjectARM
             error.y = b.y - A[1, 0] * X.x - A[1, 1] * X.y;
             return error;
         }
+
         public static double Fx(double[] q) => len[0] * Math.Cos(q[0]) + (len[1] + len[2] + q[2]) * Math.Cos(q[0] + q[1]) + len[3] * Math.Cos(q[0] + q[1] + q[3]);
+
         public static double Fy(double[] q) => len[0] * Math.Sin(q[0]) + (len[1] + len[2] + q[2]) * Math.Sin(q[0] + q[1]) + len[3] * Math.Sin(q[0] + q[1] + q[3]);
+
         private static double dFxpodq1(double[] q) => -len[0] * Math.Sin(q[0]) - (len[1] + len[2] + q[2]) * Math.Sin(q[0] + q[1]) - len[3] * Math.Sin(q[0] + q[1] + q[3]);
+
         private static double dFxpodq2(double[] q) => -(len[1] + len[2] + q[2]) * Math.Sin(q[0] + q[1]) - len[3] * Math.Sin(q[0] + q[1] + q[3]);
+
         private static double dFxpodq3(double[] q) => Math.Cos(q[0] + q[1]);
+
         private static double dFxpodq4(double[] q) => -len[3] * Math.Sin(q[0] + q[1] + q[3]);
+
         private static double dFypodq1(double[] q) => len[0] * Math.Cos(q[0]) + (len[1] + len[2] + q[2]) * Math.Cos(q[0] + q[1]) + len[3] * Math.Cos(q[0] + q[1] + q[3]);
+
         private static double dFypodq2(double[] q) => (len[1] + len[2] + q[2]) * Math.Cos(q[0] + q[1]) + len[3] * Math.Cos(q[0] + q[1] + q[3]);
+
         private static double dFypodq3(double[] q) => Math.Sin(q[0] + q[1]);
+
         private static double dFypodq4(double[] q) => len[3] * Math.Cos(q[0] + q[1] + q[3]);
+
         public override double GetPointError(Dpoint p) => NormaVectora(new Dpoint((p.x - Fx(q)), (p.y - Fy(q))));
+
         public static double NormaVectora(Dpoint p) =>  Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
     }
 }

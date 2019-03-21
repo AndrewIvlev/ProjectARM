@@ -7,27 +7,42 @@ namespace ProjectARM
 {
     class MathEngine
     {
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-        //Здесь не должно быть графики, только вычисления.
-        //графику написать в другом месте
-        //Видимо точки также нужно разделить. на те что нужны для вычисления обобщенных координат и те что нужны для отрисовки
-        //будет одна функция перевода траектории для вычислений в траекторию для графики (из одних координат в другие)
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
-        public static double[] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
+        // Начало планирования со следующей точки пути
+        public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
         {
-            double[] q = new double[MathModel.N];
-
+            double[][] q = new double[S.NumOfExtraPoints][];
+            for (int i = 0; i < S.NumOfExtraPoints; i++)
+                q[i] = new double[MathModel.N - 1];
+            
             for (int i = 1; i < S.NumOfExtraPoints; i++)
             {
                 worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
+                for (int j = 0; j < MathModel.N - 1; j++)
+                    q[i - 1][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i - 1])[j];
 
-                q = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i]);
+                DeltaPoints.Add(new Dpoint(i -  1, modelMnpltr.GetPointError(S.ExactExtraPoints[i - 1])));
+            }
+
+            return q;
+        }
+
+        // Начало планирования с текущей точки пути
+        /*public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
+        {
+            double[][] q = new double[S.NumOfExtraPoints][];
+            for (int i = 0; i < S.NumOfExtraPoints; i++)
+                q[i] = new double[MathModel.N - 1];
+
+            for (int i = 0; i < S.NumOfExtraPoints; i++)
+            {
+                worker.ReportProgress((int)((float)(i + 1) / S.NumOfExtraPoints * 100));
+                for (int j = 0; j < MathModel.N - 1; j++)
+                    q[i][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i])[j];
 
                 DeltaPoints.Add(new Dpoint(i, modelMnpltr.GetPointError(S.ExactExtraPoints[i])));
             }
 
             return q;
-        }
+        }*/
     }
 }

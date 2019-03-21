@@ -41,12 +41,14 @@ namespace ProjectARM
                         anglemnpltr -= q[i - 1];
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(mnp[i].lenght, anglemnpltr);
-                        mnp[i + 1].start.DotClone(mnp[i].end);
+                        if (i + 1 != numOfUnits)
+                            mnp[i + 1].start.DotClone(mnp[i].end);
                         break;
                     case 'P':
                         mnp[i].end.DotClone(mnp[i].start);
                         mnp[i].end.TransferFunction(mnp[i].lenght + q[i - 1], anglemnpltr);
-                        mnp[i + 1].start.DotClone(mnp[i].end);
+                        if (i + 1 != numOfUnits)
+                            mnp[i + 1].start.DotClone(mnp[i].end);
                         break;
                     default:
                         break;

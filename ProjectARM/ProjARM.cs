@@ -15,7 +15,7 @@ namespace ProjectARM
         bool mathModelType = false;
 
         // Вектора обобщённых координат
-        List<double[]> q;
+        double[][] q;
 
         #region COMPUTATION
 
@@ -47,7 +47,7 @@ namespace ProjectARM
             InitializeComponent();
 
             DeltaPoints = new List<Dpoint>();
-            q = new List<double[]>();
+            q = new double[1024][];
             modelMan = new MatrixMathModel(NumOfUnits);
             PicBoxGraphics = pbCanvas.CreateGraphics();
             IsUnitsDataGridCellChanged = false;
@@ -64,9 +64,11 @@ namespace ProjectARM
         private void NumOfUnitsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
+
             byte currNumOfUnits = 0;
             if (byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
                 throw new Exception("Not correct input of the Number of Units");
+
             if (NumOfUnits != currNumOfUnits)
             {
                 UnitsDataGridViewPreparation(currNumOfUnits);
@@ -82,6 +84,7 @@ namespace ProjectARM
             byte currNumOfUnits = 0;
             if (!byte.TryParse(NumOfUnitsTextBox.Text, out currNumOfUnits))
                 throw new Exception("Not correct input of the Number of Units");
+
             if (NumOfUnits != currNumOfUnits)
             {
                 NumOfUnits = currNumOfUnits;
@@ -107,14 +110,14 @@ namespace ProjectARM
                 for (int i = 0; i < NumOfUnits; i++)
                 {
                     MathModel.type[i] = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
-                    MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[2].Value.ToString());
-                    MathModel.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i + 1].Cells[3].Value.ToString()));
+                    MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
+                    MathModel.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString()));
                     if (MathModel.type[i] == 'R')
-                        modelMan.q[i] = MathModel.angle[i];
+                        modelMan.q[i - 1] = MathModel.angle[i];
                     else
                     {
                         if (MathModel.type[i] == 'P')
-                            modelMan.q[i] = MathModel.len[i];
+                            modelMan.q[i - 1] = MathModel.len[i];
                     }
                 }
             }
@@ -230,19 +233,7 @@ namespace ProjectARM
 
         private void startMotion_Click(object sender, EventArgs e)
         {
-            int i = 0;
-            while (i < Way.NumOfExtraPoints)
-            {
-                if (DoesItStop)
-                    while (DoesItStop) ;
-                if (IsItRestarted)
-                    i = 0;
-                Thread.Sleep((int)(1000 / SpeedMotion));
-                Man.Move(PicBoxGraphics, q[i]);
-
-                label2.Text = $"Generalized Coordinates \nQ=({(int)MathModel.RadianToDegree(modelMan.q[0])}, {(int)MathModel.RadianToDegree(modelMan.q[1])}," +
-                              $" {(int)modelMan.q[2]}, {(int)MathModel.RadianToDegree(modelMan.q[3])})";
-            }
+            backgroundWorker2.RunWorkerAsync();
         }
         
         private void stopMotion_Click(object sender, EventArgs e)
@@ -262,6 +253,39 @@ namespace ProjectARM
         }
 
         private void comboBox3_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            for ( int i = 0; i < q.Length; i++)
+            {
+                if (DoesItStop)
+                    while (DoesItStop) ;
+
+                if (IsItRestarted)
+                    i = 0;
+
+                Man.Move(PicBoxGraphics, q[i]);
+
+                Thread.Sleep((int)(1000 / SpeedMotion));
+
+                label2.Invoke((MethodInvoker)delegate {
+                    label2.Text = $"Generalized Coordinates \nQ=({(int)MathModel.RadianToDegree(modelMan.q[0])}," +
+                    $"{(int)MathModel.RadianToDegree(modelMan.q[1])}, {(int)modelMan.q[2]}, {(int)MathModel.RadianToDegree(modelMan.q[3])})";
+                });
+
+                backgroundWorker2.ReportProgress((int)((float)(i + 1) / q.Length * 100));
+            }
+        }
+
+        private void backgroundWorker2_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            showMotionProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
 
         }
@@ -325,7 +349,7 @@ namespace ProjectARM
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            q.Add(MathEngine.MovingAlongTheTrajectory(Way, modelMan, DeltaPoints, backgroundWorker1));
+            q = MathEngine.MovingAlongTheTrajectory(Way, modelMan, DeltaPoints, backgroundWorker1);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
