@@ -6,6 +6,10 @@ using System.IO;
 using System.Windows.Forms;
 using System.Threading;
 
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+
 namespace ProjectARM
 {
     public partial class ProjARM : Form
@@ -30,6 +34,8 @@ namespace ProjectARM
 
         Manipulator Man;
         Point OffSet;
+        PlotModel myModel;
+        LineSeries lineSeries;
         Graphics PicBoxGraphics;
         double SpeedMotion;
         byte MousePressed;
@@ -49,6 +55,10 @@ namespace ProjectARM
             DeltaPoints = new List<Dpoint>();
             q = new double[1024][];
             modelMan = new MatrixMathModel(NumOfUnits);
+            myModel = new PlotModel { Title = "Δ = ||P(i+1)-P'(i+1)||" };
+            myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "iteration" });
+            myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Δ, cm" });
+            lineSeries = new LineSeries { Color = OxyColors.Blue };
             PicBoxGraphics = pbCanvas.CreateGraphics();
             IsUnitsDataGridCellChanged = false;
             DoesItStop = false;
@@ -361,9 +371,16 @@ namespace ProjectARM
         {
             if (!e.Cancelled) ;
             computetionProgressBar.Value = 0;
-            chart1.Series[0].Points.Clear();
+            lineSeries.Points.Clear();
             foreach (Dpoint p in DeltaPoints)
-                chart1.Series[0].Points.AddXY(p.x, (int)(CoeftoRealW() * p.y));
+                lineSeries.Points.Add(new DataPoint(p.x, (int)(CoeftoRealW() * p.y)));
+
+            myModel.Series.Clear();
+            myModel.Series.Add(lineSeries);
+
+            this.plotView.Model = myModel;
+            this.plotView.Refresh();
+            this.plotView.Show();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
