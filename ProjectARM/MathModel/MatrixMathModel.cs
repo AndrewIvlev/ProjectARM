@@ -37,25 +37,7 @@ namespace ProjectARM
                 angle[i] = _angle[i];
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public double[][,] getMatrixDescription()
-        {
-            // Матрица T, определяющая правила пересчёта координат из системы хвата в систему нулевого звена;
-            // представляет собой произведение матриц B и S, для наглядности храним в виде массива матриц, где
-            // последовательно представлены матрицы B0, S1, B1, S2, B2, S3, ..., Sn, Bn
-            double[][,] T = new double[N][,];
-            
-            for(int i = 0; i < N; i++)
-            {
-                T[i] = new double[4, 4];
-            }
-
-            return T;
-
-        }
+        
 
         public override double MaxL(double[] UnitTypePmaxLen)
         {
@@ -66,9 +48,6 @@ namespace ProjectARM
                 MaxL += d;
             return MaxL;
         }
-
-        public static double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
-        public static double RadianToDegree(double angle) => angle * (180.0 / Math.PI);
        
 
         public Dpoint CramerMethod(double[,] A, Dpoint b)
