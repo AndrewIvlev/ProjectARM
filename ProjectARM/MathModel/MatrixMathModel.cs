@@ -8,7 +8,6 @@ namespace ProjectARM
 {
     public class MatrixMathModel : MathModel
     {
-        public double[] q;
         delegate double function(double[] q);
 
         public MatrixMathModel(int _N)
@@ -49,6 +48,7 @@ namespace ProjectARM
             return MaxL;
         }
        
+        //public 
 
         public Dpoint CramerMethod(double[,] A, Dpoint b)
         {
