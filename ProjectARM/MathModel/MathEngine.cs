@@ -8,7 +8,7 @@ namespace ProjectARM
     class MathEngine
     {
         // Начало планирования со следующей точки пути
-        public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
+        public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<DPoint> DeltaPoints, BackgroundWorker worker)
         {
             double[][] q = new double[S.NumOfExtraPoints][];
             for (int i = 0; i < S.NumOfExtraPoints; i++)
@@ -20,14 +20,14 @@ namespace ProjectARM
                 for (int j = 0; j < MathModel.N - 1; j++)
                     q[i - 1][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i - 1])[j];
 
-                DeltaPoints.Add(new Dpoint(i -  1, modelMnpltr.GetPointError(S.ExactExtraPoints[i - 1])));
+                DeltaPoints.Add(new DPoint(i -  1, modelMnpltr.GetPointError(S.ExactExtraPoints[i - 1])));
             }
 
             return q;
         }
 
         // Начало планирования с текущей точки пути
-        /*public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<Dpoint> DeltaPoints, BackgroundWorker worker)
+        /*public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel modelMnpltr, List<DPoint> DeltaPoints, BackgroundWorker worker)
         {
             double[][] q = new double[S.NumOfExtraPoints][];
             for (int i = 0; i < S.NumOfExtraPoints; i++)
@@ -39,7 +39,7 @@ namespace ProjectARM
                 for (int j = 0; j < MathModel.N - 1; j++)
                     q[i][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i])[j];
 
-                DeltaPoints.Add(new Dpoint(i, modelMnpltr.GetPointError(S.ExactExtraPoints[i])));
+                DeltaPoints.Add(new DPoint(i, modelMnpltr.GetPointError(S.ExactExtraPoints[i])));
             }
 
             return q;

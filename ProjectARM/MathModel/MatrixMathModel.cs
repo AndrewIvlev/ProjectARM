@@ -9,6 +9,7 @@ namespace ProjectARM
     public class MatrixMathModel : MathModel
     {
         delegate double function(double[] q);
+        public BlockMatrix[] T;
 
         public MatrixMathModel(int _N)
         {
@@ -47,12 +48,10 @@ namespace ProjectARM
                 MaxL += d;
             return MaxL;
         }
-       
-        //public 
 
-        public Dpoint CramerMethod(double[,] A, Dpoint b)
+        public DPoint CramerMethod(double[,] A, DPoint b)
         {
-            Dpoint X = new Dpoint(0, 0);
+            DPoint X = new DPoint(0, 0, 0);
             double det = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0];
             if (det != 0)
             {
@@ -61,26 +60,72 @@ namespace ProjectARM
                 double detx2 = A[0, 0] * b.y - b.x * A[1, 0];
                 X.y = detx2 / det;
             }
-            else return new Dpoint(0, 0);
+            else return new DPoint(0, 0, 0);
             return X;
         }
-        public Dpoint SolutionVerification(double[,] A, Dpoint b, Dpoint X)
+        public DPoint SolutionVerification(double[,] A, DPoint b, DPoint X)
         {
-            Dpoint error;
-            error.x = b.x - A[0, 0] * X.x - A[0, 1] * X.y;
-            error.y = b.y - A[1, 0] * X.x - A[1, 1] * X.y;
-            return error;
+            throw new NotImplementedException();
         }
-        //public double GetPointError(double[] q, Dpoint p) => NormaVectora(new Dpoint((p.x - Fx(q)), (p.y - Fy(q))));
-        public double NormaVectora(Dpoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
+        //public double GetPointError(double[] q, DPoint p) => NormaVectora(new DPoint((p.x - Fx(q)), (p.y - Fy(q))));
+        public double NormaVectora(DPoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
 
 
-        public override double[] LagrangeMethodToThePoint(Dpoint p) {
-            double[] q = new double[N];
+        public override double[] LagrangeMethodToThePoint(DPoint p) {
+            
+            DPoint b = new DPoint(p.x - F(q).x, p.y - F(q).y, p.z - F(q).z);
+            DPoint μ = CramerMethod(A, b);
+            
+            for (int i = 0; i < 4; i++)
+                q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
+
             return q;
         }
 
-        public override double GetPointError(Dpoint p)
+        public DPoint F(double[] q)
+        {
+            return GetT(N) * new double[4]{ 0, 0, 0, 1};
+        }
+        
+        public double[] GetT(int N)
+        {
+        }
+
+        public void calcT(double q)
+        {
+            T = new BlockMatrix[N];
+            BlockMatrix B = new BlockMatrix();
+            BlockMatrix S = new BlockMatrix();
+
+            for (int i = 0; i < N; i++)
+            {
+                T[i] = new BlockMatrix();
+                switch (type[i])
+                {
+                    if (type[i] == 'R' || type[i] == 'C')
+                    {
+                             = new double[3, 4] {
+                            { Math.Cos(q), -Math.Sin(q), 0, 0 },
+                            { Math.Sin(q), Math.Cos(q), 0, 0 },
+                            {0, 0, 1, 0 }
+                        };
+                    }
+                    else
+                    {
+                        if (type[i] == 'P')
+                        {
+                                 = new double[3, 4] {
+                                { 1, 0, 0, 0 },
+                                { 0, 1, 0, 0 },
+                                {0, 0, 1, q }
+                            };
+                        }
+                    }
+                }
+            }
+        }
+
+        public override double GetPointError(DPoint p)
         {
             throw new NotImplementedException();
         }

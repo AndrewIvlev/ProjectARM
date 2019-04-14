@@ -8,14 +8,13 @@ namespace ProjectARM
 {
     class Vector
     {
+        /*
         double[] v;
 
         public Vector()
         {
-            /*
             v = new double[4];
             v[3] = 1;
-            */
             v = new double[3];
             v[2] = 1;
         }   //2D - (0,0,1); 3D - (0,0,0,1)
@@ -51,14 +50,13 @@ namespace ProjectARM
             R.v[2] = 1;
             return R;
         }
-        /*public static Vector operator *(Vector V, Vector W)
+        public static Vector operator *(Vector V, Vector W)
         {
             Vector R = new Vector(V);
             for (int i = 0; i < 2; i++)
                 R.v[i] = V.v[i] + W.v[i];
             R.v[2] = 1;
             return R;
-        }*/
         public static double op_ScalarMultiply(Vector V, Vector W)
         {
             return (V.v[0] * W.v[0] + V.v[1] * W.v[1] + V.v[2] * W.v[2]) / (V.v[3] * W.v[3]);
@@ -71,7 +69,7 @@ namespace ProjectARM
         {
             return v[1] / v[2];
         }
-        /*public double GetZ()
+        public double GetZ()
         {
             return v[2] / v[3];
         }*/

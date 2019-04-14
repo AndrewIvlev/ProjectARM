@@ -44,19 +44,16 @@ namespace ProjectARM
             return MaxL;
         }
 
-        public override double[] LagrangeMethodToThePoint(Dpoint p)
+        public override double[] LagrangeMethodToThePoint(DPoint p)
         {
             double diag = dFxpodq1(q) * dFypodq1(q) + dFxpodq2(q) * dFypodq2(q) + dFxpodq3(q) * dFypodq3(q) + dFxpodq4(q) * dFypodq4(q);
             double[,] A = {
                 { Math.Pow(dFxpodq1(q), 2) + Math.Pow(dFxpodq2(q), 2) + Math.Pow(dFxpodq3(q), 2) + Math.Pow(dFxpodq4(q), 2), diag },
                 { diag, Math.Pow(dFypodq1(q), 2) + Math.Pow(dFypodq2(q), 2) + Math.Pow(dFypodq3(q), 2) + Math.Pow(dFypodq4(q), 2) }
                };
-
-            double F = Fx(q);
-            Dpoint b = new Dpoint(p.x - Fx(q), p.y - Fy(q));
-            Dpoint μ = CramerMethod(A, b);
             
-            /*dpoint error = SolutionVerification(A, b, μ); double er = Math.Sqrt(error.x * error.x + error.y * error.y);*/
+            DPoint b = new DPoint(p.x - Fx(q), p.y - Fy(q), 0);
+            DPoint μ = CramerMethod(A, b);
 
             for (int i = 0; i < 4; i++)
                 q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
@@ -64,11 +61,11 @@ namespace ProjectARM
             return q;
         }
 
-        private double MagicFunc(Dpoint μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.x * dFxpodqi(q) + μ.y * dFypodqi(q)) / (2 * a);
+        private double MagicFunc(DPoint μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.x * dFxpodqi(q) + μ.y * dFypodqi(q)) / (2 * a);
 
-        public Dpoint CramerMethod(double[,] A, Dpoint b)
+        public DPoint CramerMethod(double[,] A, DPoint b)
         {
-            Dpoint X = new Dpoint(0, 0);
+            DPoint X = new DPoint(0, 0, 0);
             double det = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0];
             if (det != 0)
             {
@@ -78,17 +75,15 @@ namespace ProjectARM
                 X.y = detx2 / det;
             }
             else
-                return new Dpoint(0, 0);
+                return new DPoint(0, 0, 0);
             return X;
         }
 
-        public Dpoint SolutionVerification(double[,] A, Dpoint b, Dpoint X)
-        {
-            Dpoint error;
-            error.x = b.x - A[0, 0] * X.x - A[0, 1] * X.y;
-            error.y = b.y - A[1, 0] * X.x - A[1, 1] * X.y;
-            return error;
-        }
+        public DPoint SolutionVerification(double[,] A, DPoint b, DPoint X) =>
+            new DPoint(
+                b.x - A[0, 0] * X.x - A[0, 1] * X.y,
+                b.y - A[1, 0] * X.x - A[1, 1] * X.y,
+                0);
 
         public static double Fx(double[] q) => len[0] * Math.Cos(q[0]) + (len[1] + len[2] + q[2]) * Math.Cos(q[0] + q[1]) + len[3] * Math.Cos(q[0] + q[1] + q[3]);
 
@@ -110,8 +105,8 @@ namespace ProjectARM
 
         private static double dFypodq4(double[] q) => len[3] * Math.Cos(q[0] + q[1] + q[3]);
 
-        public override double GetPointError(Dpoint p) => NormaVectora(new Dpoint((p.x - Fx(q)), (p.y - Fy(q))));
+        public override double GetPointError(DPoint p) => NormaVectora(new DPoint((p.x - Fx(q)), (p.y - Fy(q))));
 
-        public static double NormaVectora(Dpoint p) =>  Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
+        public static double NormaVectora(DPoint p) =>  Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
     }
 }

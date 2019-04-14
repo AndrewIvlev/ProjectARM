@@ -62,6 +62,7 @@
     <Compile Include="Graphics\Manipulator.cs" />
     <Compile Include="Graphics\Unit.cs" />
     <Compile Include="MathModel\BlockMatrix.cs" />
+    <Compile Include="MathModel\DPoint.cs" />
     <Compile Include="MathModel\GausMethod.cs" />
     <Compile Include="MathModel\MathModel.cs" />
     <Compile Include="MathModel\MathEngine.cs" />

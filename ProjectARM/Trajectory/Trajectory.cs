@@ -4,18 +4,6 @@ using System.Drawing;
 
 namespace ProjectARM
 {
-    public struct Dpoint
-    {
-        public double x;
-        public double y;
-
-        public Dpoint(double _x, double _y)
-        {
-            x = _x;
-            y = _y;
-        }
-    }
-
     class Trajectory
     {
         /// <summary>
@@ -28,35 +16,40 @@ namespace ProjectARM
         /// Список хранит координаты  в графических координатах
         /// </summary>
         public List<Point> ExtraPoints;
-        public Dpoint[] ExactExtraPoints; // Точные дополнительные точки
+        public DPoint[] ExactExtraPoints; // Точные дополнительные точки
         public int NumOfExtraPoints;
+
+        public bool IsSplit;
 
         public Trajectory()
         {
+            IsSplit = false;
             AnchorPoints = new List<Point>();
             ExtraPoints = new List<Point>();
-            ExactExtraPoints = new Dpoint[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
+            ExactExtraPoints = new DPoint[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
             NumOfExtraPoints = 0;
         }
 
         public Trajectory(Point StartPoint)
         {
+            IsSplit = false;
             AnchorPoints = new List<Point>() { StartPoint };
             ExtraPoints = new List<Point>();
-            ExactExtraPoints = new Dpoint[1024];
+            ExactExtraPoints = new DPoint[1024];
             NumOfExtraPoints = 0;
         }
 
         public void Clear()
         {
+            IsSplit = false;
             AnchorPoints.Clear();
             ExtraPoints.Clear();
             Array.Clear(ExactExtraPoints, 0, ExactExtraPoints.Length);
         }
 
         public double DistanceBetweenPoints(Point A, Point B) => Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
-        public double DistanceBetweenDPoints(Dpoint p1, Dpoint p2) => Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
-        public double DistanceBerweenPointAndDpoint(Point P, Dpoint dp) => Math.Sqrt(Math.Pow(dp.x - P.X, 2) + Math.Pow(dp.y - P.Y, 2));
+        public double DistanceBetweenDPoints(DPoint p1, DPoint p2) => Math.Sqrt(Math.Pow(p2.x - p1.x, 2) + Math.Pow(p2.y - p1.y, 2));
+        public double DistanceBerweenPointAndDpoint(Point P, DPoint dp) => Math.Sqrt(Math.Pow(dp.x - P.X, 2) + Math.Pow(dp.y - P.Y, 2));
 
         public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
         {
@@ -84,7 +77,7 @@ namespace ProjectARM
             return len;
         }
 
-        public Dpoint ToDpoint(Point P) => new Dpoint(P.X, P.Y);
+        public DPoint ToDpoint(Point P) => new DPoint(P.X, P.Y, 0);
 
         public void ExactExtraPointsClear() => Array.Clear(ExactExtraPoints, 0, NumOfExtraPoints);
 
@@ -105,6 +98,7 @@ namespace ProjectARM
         }
 
         #region Split Trajectory
+
         public void SplitTrajectory(double step)
         {
             int index = 0;
@@ -120,16 +114,18 @@ namespace ProjectARM
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtraPoints[index++] = new Dpoint(x, y);
+                    ExactExtraPoints[index++] = new DPoint(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new Dpoint(x, y)) + step < dist);
+                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new DPoint(x, y, 0)) + step < dist);
             }
             ExactExtraPoints[index++] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
+            IsSplit = true;
         }
+
         public void SplitTrajectory(int k)
         {
             int index = 0;
@@ -146,35 +142,18 @@ namespace ProjectARM
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtraPoints[index++] = new Dpoint(x, y);
+                    ExactExtraPoints[index++] = new DPoint(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new Dpoint(x, y)) + step < dist);
+                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new DPoint(x, y, 0)) + step < dist);
             }
             ExactExtraPoints[index++] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
-            /*NumOfExtraPoints = k + AnchorPoints.Count;
-            if (index == NumOfExtraPoints)
-                ;//Ни одной точки не потерялось
-            else
-                ;//Потерялось NumOfExtraPoints - index точек
-            */
-            /* Другой вариант:
-             * k = _k; 
-            int i = 0;
-            double[] steps = GetSteps();
-            for (int j = 0; j < k; j++)
-            {
-                double step = (1.0 / k) * j;
-                if (step > steps[i]) i++;
-                if (i >= AnchorPoints.Count - 1) break;
-                ExactExtraPoints[j].x = AnchorPoints[i].X + (step - steps[i]) / (steps[i + 1] - steps[i]) * (AnchorPoints[i + 1].X - AnchorPoints[i].X);
-                ExactExtraPoints[j].y = AnchorPoints[i].Y + (step - steps[i]) / (steps[i + 1] - steps[i]) * (AnchorPoints[i + 1].Y - AnchorPoints[i].Y);
-            }
-            */
+            IsSplit = true;
         }
+
         #endregion
 
         public void ExactExtraPointOffset(Point offset)

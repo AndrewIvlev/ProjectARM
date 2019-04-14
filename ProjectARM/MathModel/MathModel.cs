@@ -7,10 +7,12 @@ namespace ProjectARM
         /// <summary>
         ///  S - Static
         ///  R - Revolute
+        ///  C - Cylindrical
         ///  P - Prismatic
         ///  G - Gripper
         /// </summary>
         public static char[] type;
+
         public static double[] len;
         public static double[] angle;
         public static double[] a;
@@ -18,8 +20,8 @@ namespace ProjectARM
         public double[] q;
 
         public abstract double MaxL(double[] UnitTypePmaxLen);
-        public abstract double[] LagrangeMethodToThePoint(Dpoint p);
-        public abstract double GetPointError(Dpoint p);
+        public abstract double[] LagrangeMethodToThePoint(DPoint p);
+        public abstract double GetPointError(DPoint p);
 
         public static void SetA(double[] A)
         {

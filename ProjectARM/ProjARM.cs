@@ -14,16 +14,9 @@ namespace ProjectARM
 {
     public partial class ProjARM : Form
     {
-        // MatrixMathModel if true
-        // ExplicitMathModel if false
-        bool mathModelType = false;
-
-        // Вектора обобщённых координат
-        double[][] q;
-
         #region COMPUTATION
 
-        List<Dpoint> DeltaPoints;
+        List<DPoint> DeltaPoints;
         MathModel modelMan;
         byte NumOfUnits;
         Trajectory Way;
@@ -37,12 +30,14 @@ namespace ProjectARM
         PlotModel myModel;
         LineSeries lineSeries;
         Graphics PicBoxGraphics;
+        double[][] q; // Вектора обобщённых координат
         double SpeedMotion;
         byte MousePressed;
         //TODO: if it possible remove Flag and index
         bool IsUnitsDataGridCellChanged;
         bool DoesItStop;
         bool IsItRestarted;
+        bool mathModelType = false; // MatrixMathModel if true, ExplicitMathModel if false
         byte Flag;
         int index;
 
@@ -52,9 +47,8 @@ namespace ProjectARM
         {
             InitializeComponent();
 
-            DeltaPoints = new List<Dpoint>();
+            DeltaPoints = new List<DPoint>();
             q = new double[1024][];
-            modelMan = new MatrixMathModel(NumOfUnits);
             myModel = new PlotModel { Title = "Δ = ||P(i+1)-P'(i+1)||" };
             myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "iteration" });
             myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Δ, cm" });
@@ -122,17 +116,15 @@ namespace ProjectARM
                     MathModel.type[i] = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
                     MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
                     MathModel.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString()));
-                    if (MathModel.type[i] == 'R')
+
+                    if (MathModel.type[i] == 'R' || MathModel.type[i] == 'C')
                         modelMan.q[i - 1] = MathModel.angle[i];
-                    else
-                    {
-                        if (MathModel.type[i] == 'P')
+                    else if (MathModel.type[i] == 'P')
                             modelMan.q[i - 1] = MathModel.len[i];
-                    }
                 }
             }
             ManipulatorConfigShow();
-            ShowManipulator();
+            //ShowManipulator();
         }
 
         private void UnitsDataGridViewPreparation(int NumOfUnits)
@@ -348,11 +340,13 @@ namespace ProjectARM
                 if (Way == null) MessageBox.Show("Firstly Create a Trajectory");
                 else
                 {
-                    //if (S.IsSplit()) MessageBox.Show("Please split trajectory firstly"); else
+                    if (Way.IsSplit)
                     {
                         Way.TransferFunction(OffSet, CoeftoRealW());
                         backgroundWorker1.RunWorkerAsync();
                     }
+                    else
+                        MessageBox.Show("Please split trajectory firstly");
                 }
             }
         }
@@ -369,10 +363,11 @@ namespace ProjectARM
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled) ;
+            if (!e.Cancelled)
+                ;
             computetionProgressBar.Value = 0;
             lineSeries.Points.Clear();
-            foreach (Dpoint p in DeltaPoints)
+            foreach (DPoint p in DeltaPoints)
                 lineSeries.Points.Add(new DataPoint(p.x, (int)(CoeftoRealW() * p.y)));
 
             myModel.Series.Clear();
