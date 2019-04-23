@@ -6,48 +6,13 @@ using System.Threading.Tasks;
 
 namespace ProjectARM
 {
+    //Матричное описание модели манипулятора
     public class MatrixMathModel : MathModel
     {
-        delegate double function(double[] q);
-        public BlockMatrix[] T;
+        //public BlockMatrix[] T;
 
-        public MatrixMathModel(int _N)
-        {
-            N = _N;
-            type = new char[N];
-            len = new double[N];
-            angle = new double[N];
-            a = new double[N];
-            for (int i = 0; i < N; i++)
-                a[i] = 1;
-        }
-        public MatrixMathModel(char[] _type, double[] _len, double[] _angle)
-        {
-            N = _type.Length;
-            type = new char[N];
-            len = new double[N];
-            angle = new double[N];
-            a = new double[N];
-
-            for (int i = 0; i < N; i++)
-            {
-                a[i] = 1;
-                type[i] = _type[i];
-                len[i] = _len[i];
-                angle[i] = _angle[i];
-            }
-        }
-        
-
-        public override double MaxL(double[] UnitTypePmaxLen)
-        {
-            double MaxL = 0;
-            for (int i = 0; i < N; i++)             //Вычисление максимально возможной длины
-                MaxL += len[i];                     //манипулятора, которая равна сумме длин всех звеньев
-            foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
-                MaxL += d;
-            return MaxL;
-        }
+        public MatrixMathModel(int n) : base(n) { }
+        public MatrixMathModel(int n, unit[] units) : base(n, units) { }
 
         public DPoint CramerMethod(double[,] A, DPoint b)
         {
@@ -71,57 +36,56 @@ namespace ProjectARM
         public double NormaVectora(DPoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
 
 
-        public override double[] LagrangeMethodToThePoint(DPoint p) {
-            
+        public override void LagrangeMethodToThePoint(DPoint p)
+        {
             DPoint b = new DPoint(p.x - F(q).x, p.y - F(q).y, p.z - F(q).z);
-            DPoint μ = CramerMethod(A, b);
+            //DPoint μ = CramerMethod(A, b);
             
-            for (int i = 0; i < 4; i++)
-                q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
-
-            return q;
+            //for (int i = 0; i < 4; i++)
+                //q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
         }
 
         public DPoint F(double[] q)
         {
-            return GetT(N) * new double[4]{ 0, 0, 0, 1};
+            return GetT(n) * new double[4] { 0, 0, 0, 1 };
         }
-        
-        public double[] GetT(int N)
+
+        public double[] GetT(int i)
         {
+            return new double[i];
         }
 
         public void calcT(double q)
         {
-            T = new BlockMatrix[N];
+            //T = new BlockMatrix[n];
             BlockMatrix B = new BlockMatrix();
             BlockMatrix S = new BlockMatrix();
 
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < n; i++)
             {
-                T[i] = new BlockMatrix();
-                switch (type[i])
-                {
-                    if (type[i] == 'R' || type[i] == 'C')
-                    {
-                             = new double[3, 4] {
-                            { Math.Cos(q), -Math.Sin(q), 0, 0 },
-                            { Math.Sin(q), Math.Cos(q), 0, 0 },
-                            {0, 0, 1, 0 }
-                        };
-                    }
-                    else
-                    {
-                        if (type[i] == 'P')
-                        {
-                                 = new double[3, 4] {
-                                { 1, 0, 0, 0 },
-                                { 0, 1, 0, 0 },
-                                {0, 0, 1, q }
-                            };
-                        }
-                    }
-                }
+                //[i] = new BlockMatrix();
+                //switch (type[i])
+                //{
+                //    if (type[i] == 'R' || type[i] == 'C')
+                //    {
+                //             = new double[3, 4] {
+                //            { Math.Cos(q), -Math.Sin(q), 0, 0 },
+                //            { Math.Sin(q), Math.Cos(q), 0, 0 },
+                //            {0, 0, 1, 0 }
+                //        };
+                //    }
+                //    else
+                //    {
+                //        if (type[i] == 'P')
+                //        {
+                //                 = new double[3, 4] {
+                //                { 1, 0, 0, 0 },
+                //                { 0, 1, 0, 0 },
+                //                {0, 0, 1, q }
+                //            };
+                //        }
+                //    }
+                //}
             }
         }
 

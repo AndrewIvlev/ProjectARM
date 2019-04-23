@@ -7,44 +7,16 @@ namespace ProjectARM
         delegate double function(double[] q);
         static function[] dFxpodqi = {new function(dFxpodq1), new function(dFxpodq2), new function(dFxpodq3), new function(dFxpodq4)};
         static function[] dFypodqi = {new function(dFypodq1), new function(dFypodq2), new function(dFypodq3), new function(dFypodq4)};
+        private static double[] len;
 
-        public ExplicitMathModel(int _N)
+        public ExplicitMathModel(int n) : base(n) { }
+        public ExplicitMathModel(int n, unit[] units) : base(n, units)
         {
-            N = _N;
-            type = new char[N];
-            len = new double[N];
-            angle = new double[N];
-            q = new double[N - 1];
-            a = new double[N - 1];
-            for (int i = 0; i < N - 1; i++)
-                a[i] = 1;
+            for (int i = 0; i < n; i++)
+                len[i] = units[i].len;
         }
 
-        public ExplicitMathModel(double[] _len, double[] _angle)
-        {
-            len = new double[N];
-            angle = new double[N];
-            a = new double[N];
-
-            for (int i = 0; i < N; i++)
-            {
-                a[i] = 1;
-                len[i] = _len[i];
-                angle[i] = _angle[i];
-            }
-        }
-
-        public override double MaxL(double[] UnitTypePmaxLen)
-        {
-            double MaxL = 0;
-            for (int i = 0; i < N; i++)             //Вычисление максимально возможной длины
-                MaxL += len[i];                     //манипулятора, которая равна сумме длин всех звеньев
-            foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
-                MaxL += d;
-            return MaxL;
-        }
-
-        public override double[] LagrangeMethodToThePoint(DPoint p)
+        public override void LagrangeMethodToThePoint(DPoint p)
         {
             double diag = dFxpodq1(q) * dFypodq1(q) + dFxpodq2(q) * dFypodq2(q) + dFxpodq3(q) * dFypodq3(q) + dFxpodq4(q) * dFypodq4(q);
             double[,] A = {
@@ -57,8 +29,6 @@ namespace ProjectARM
 
             for (int i = 0; i < 4; i++)
                 q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
-
-            return q;
         }
 
         private double MagicFunc(DPoint μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.x * dFxpodqi(q) + μ.y * dFypodqi(q)) / (2 * a);
@@ -105,7 +75,7 @@ namespace ProjectARM
 
         private static double dFypodq4(double[] q) => len[3] * Math.Cos(q[0] + q[1] + q[3]);
 
-        public override double GetPointError(DPoint p) => NormaVectora(new DPoint((p.x - Fx(q)), (p.y - Fy(q))));
+        public override double GetPointError(DPoint p) => NormaVectora(new DPoint((p.x - Fx(q)), (p.y - Fy(q)), 0));
 
         public static double NormaVectora(DPoint p) =>  Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
     }

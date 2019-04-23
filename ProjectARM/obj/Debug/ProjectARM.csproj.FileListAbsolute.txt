@@ -27,4 +27,12 @@ C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.CoreCompileInputs.cach
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.exe
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.pdb
 C:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.ProjARM.resources
-D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csprojAssemblyReference.cache
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.dll
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.WindowsForms.dll
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.pdb
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.xml
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.WindowsForms.pdb
+D:\repo\ProjectARM\ProjectARM\bin\Debug\OxyPlot.WindowsForms.xml
+D:\repo\ProjectARM\ProjectARM\obj\Debug\ProjectARM.csproj.CopyComplete
+D:\repo\ProjectARM\ProjectARM\bin\Debug\Newtonsoft.Json.dll
+D:\repo\ProjectARM\ProjectARM\bin\Debug\Newtonsoft.Json.xml

@@ -113,14 +113,14 @@ namespace ProjectARM
             {
                 for (int i = 0; i < NumOfUnits; i++)
                 {
-                    MathModel.type[i] = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
-                    MathModel.len[i] = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
-                    MathModel.angle[i] = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString()));
+                    modelMan.units[i].type = Convert.ToChar(unitsDataGridView.Rows[i].Cells[1].Value.ToString());
+                    modelMan.units[i].len = Convert.ToDouble(unitsDataGridView.Rows[i].Cells[2].Value.ToString());
+                    modelMan.units[i].angle = - MathModel.DegreeToRadian(Convert.ToDouble(unitsDataGridView.Rows[i].Cells[3].Value.ToString()));
 
-                    if (MathModel.type[i] == 'R' || MathModel.type[i] == 'C')
-                        modelMan.q[i - 1] = MathModel.angle[i];
-                    else if (MathModel.type[i] == 'P')
-                            modelMan.q[i - 1] = MathModel.len[i];
+                    if (modelMan.units[i].type == 'R' || modelMan.units[i].type == 'C')
+                        modelMan.q[i - 1] = modelMan.units[i].angle;
+                    else if (modelMan.units[i].type == 'P')
+                            modelMan.q[i - 1] = modelMan.units[i].len;
                 }
             }
             ManipulatorConfigShow();
@@ -157,9 +157,9 @@ namespace ProjectARM
         {
             for (int i = 0; i < NumOfUnits; i++)
             {
-                unitsDataGridView.Rows[i].Cells[1].Value = MathModel.type[i];
-                unitsDataGridView.Rows[i].Cells[2].Value = MathModel.len[i];
-                unitsDataGridView.Rows[i].Cells[3].Value = MathModel.angle[i];
+                unitsDataGridView.Rows[i].Cells[1].Value = modelMan.units[i].type;
+                unitsDataGridView.Rows[i].Cells[2].Value = modelMan.units[i].len;
+                unitsDataGridView.Rows[i].Cells[3].Value = modelMan.units[i].angle;
             }
         }
 
@@ -363,8 +363,7 @@ namespace ProjectARM
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled)
-                ;
+            if (!e.Cancelled) ;
             computetionProgressBar.Value = 0;
             lineSeries.Points.Clear();
             foreach (DPoint p in DeltaPoints)
@@ -425,9 +424,9 @@ namespace ProjectARM
                 int CurrUnitLine = 0;
                 for (int i = 1; i < filelines.Length; i++)
                 {
-                    MathModel.type[CurrUnitLine] = Convert.ToChar(filelines[i].Trim());
-                    MathModel.len[CurrUnitLine] = Convert.ToDouble(filelines[++i].Trim());
-                    MathModel.angle[CurrUnitLine] = -MathModel.DegreeToRadian(Convert.ToDouble(filelines[++i].Trim()));
+                    modelMan.units[CurrUnitLine].type = Convert.ToChar(filelines[i].Trim());
+                    modelMan.units[CurrUnitLine].len = Convert.ToDouble(filelines[++i].Trim());
+                    modelMan.units[CurrUnitLine].angle = -MathModel.DegreeToRadian(Convert.ToDouble(filelines[++i].Trim()));
                     CurrUnitLine++;
                 }
                 UnitsDataGridViewPreparation(NumOfUnits);
@@ -561,7 +560,7 @@ namespace ProjectARM
             }
             a[2] = Math.Pow(1f / 4, 2) / 25;
 
-            MathModel.SetA(a);
+            modelMan.SetA(a);
         }
 
         private void ShowManipulator()
@@ -574,9 +573,9 @@ namespace ProjectARM
 
             for (int i = 0; i < NumOfUnits; i++)
             {
-                char type = MathModel.type[i];
-                double len = CoefToGraphic() * MathModel.len[i];
-                double angle = MathModel.angle[i];
+                char type = modelMan.units[i].type;
+                double len = CoefToGraphic() * modelMan.units[i].len;
+                double angle = modelMan.units[i].angle;
 
                 switch (type)
                 {

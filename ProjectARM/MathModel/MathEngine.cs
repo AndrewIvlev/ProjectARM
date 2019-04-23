@@ -12,15 +12,18 @@ namespace ProjectARM
         {
             double[][] q = new double[S.NumOfExtraPoints][];
             for (int i = 0; i < S.NumOfExtraPoints; i++)
-                q[i] = new double[MathModel.N - 1];
+                q[i] = new double[modelMnpltr.n - 1];
             
             for (int i = 1; i < S.NumOfExtraPoints; i++)
             {
                 worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
-                for (int j = 0; j < MathModel.N - 1; j++)
-                    q[i - 1][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i - 1])[j];
+                for (int j = 0; j < modelMnpltr.n - 1; j++)
+                {
+                    modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i - 1]);
+                    q[i - 1][j] = modelMnpltr.q[j];
+                }
 
-                DeltaPoints.Add(new DPoint(i -  1, modelMnpltr.GetPointError(S.ExactExtraPoints[i - 1])));
+                 DeltaPoints.Add(new DPoint(i -  1, modelMnpltr.GetPointError(S.ExactExtraPoints[i - 1]), 0));
             }
 
             return q;
@@ -31,12 +34,12 @@ namespace ProjectARM
         {
             double[][] q = new double[S.NumOfExtraPoints][];
             for (int i = 0; i < S.NumOfExtraPoints; i++)
-                q[i] = new double[MathModel.N - 1];
+                q[i] = new double[modelMnpltr.n - 1];
 
             for (int i = 0; i < S.NumOfExtraPoints; i++)
             {
                 worker.ReportProgress((int)((float)(i + 1) / S.NumOfExtraPoints * 100));
-                for (int j = 0; j < MathModel.N - 1; j++)
+                for (int j = 0; j < modelMnpltr.n - 1; j++)
                     q[i][j] = modelMnpltr.LagrangeMethodToThePoint(S.ExactExtraPoints[i])[j];
 
                 DeltaPoints.Add(new DPoint(i, modelMnpltr.GetPointError(S.ExactExtraPoints[i])));
