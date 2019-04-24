@@ -14,21 +14,22 @@ namespace ProjectARM_Tests
         [SetUp]
         public void SetUp()
         {
-            ManipConfigDirectory = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "ManipConfig");
+            //ManipConfigDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "ManipConfig");
+            ManipConfigDirectory = @"D:\repo\ProjectARM\ProjectARM\ManipConfig\";
         }
 
         //[TestCase("SRRPR.json", 100, 0, 0)]
         [TestCase("SRRPR.json", 99, 1, 0)]
         //[TestCase("SRCRPRPR.json")]
-        public void TestMethod(string fileName, double px, double py, double pz)
+        public void LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
-            var sr = new StreamReader(Path.Combine(ManipConfigDirectory, fileName));
+            var path = Path.Combine(ManipConfigDirectory, fileName);
+            var sr = new StreamReader(path);
             var jsonString = sr.ReadToEnd();
             var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonString);
-            var model = manipConfig;
-            var nextP = new DPoint(px, py, pz);
-
-            model.LagrangeMethodToThePoint(nextP);
+            var model = new MatrixMathModel(manipConfig);
+            
+            model.LagrangeMethodToThePoint(new DPoint(px, py, pz));
 
             Assert.IsTrue(model.q.Equals(new double[] {0, 1, 0, 1})); //TODO: calc real q for that assert
         }

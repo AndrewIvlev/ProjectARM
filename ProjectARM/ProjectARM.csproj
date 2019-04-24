@@ -94,6 +94,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="ManipConfig\anotherSRRPR.json" />
     <None Include="ManipConfig\SRRPR.json" />
     <None Include="ManipConfig\SRCRPRPR.json" />
     <None Include="packages.config" />
