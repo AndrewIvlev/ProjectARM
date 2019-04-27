@@ -367,7 +367,7 @@ namespace ProjectARM
             computetionProgressBar.Value = 0;
             lineSeries.Points.Clear();
             foreach (DPoint p in DeltaPoints)
-                lineSeries.Points.Add(new DataPoint(p.x, (int)(CoeftoRealW() * p.y)));
+                lineSeries.Points.Add(new DataPoint(p.X, (int)(CoeftoRealW() * p.Y)));
 
             myModel.Series.Clear();
             myModel.Series.Add(lineSeries);

@@ -11,11 +11,11 @@ namespace ProjectARM
     //Матричное описание модели манипулятора
     public class MatrixMathModel : MathModel
     {
-        public ArrayList T;
-        public ArrayList dT;
-        public BlockMatrix[] B;
-        public BlockMatrix[] S;
-        public BlockMatrix[] dS;
+        private ArrayList T;
+        private ArrayList dT;
+        private BlockMatrix[] B;
+        private BlockMatrix[] S;
+        private BlockMatrix[] dS;
 
         public MatrixMathModel() { }
 
@@ -32,7 +32,7 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            calcBSq();
+            CalcBSq();
         }
 
         public MatrixMathModel(int n) : base(n)
@@ -48,7 +48,7 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            calcBSq();
+            CalcBSq();
         }
 
         public MatrixMathModel(int n, unit[] units) : base(n, units)
@@ -64,25 +64,26 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            calcBSq();
+            CalcBSq();
         }
 
         public override void LagrangeMethodToThePoint(DPoint p)
         {
-            calcT();
+            CalcT();
             var F = this.F(n - 1);
-            calcdS();
-            calcdT();
-            var D = calcD();
-
-            DPoint d = new DPoint(p.x - F.x, p.y - F.y, p.z - F.z);
-            //DPoint μ = CramerMethod(A, d);
-
+            CalcdS();
+            CalcdT();
+            var D = CalcD();
+            var Dt = Matrix.Transp(D);
+            var At = Matrix.Transp(A);
+            DPoint d = new DPoint(p.X - F.X, p.Y - F.Y, p.Z - F.Z);
+            //var q = At * Dt * (D * a
+            ;
             //for (int i = 0; i < 4; i++)
             //q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
         }
 
-        public DPoint SolutionVerification(double[,] A, DPoint b, DPoint X)
+        public DPoint SolutionVerification(Matrix A, DPoint b, DPoint X)
         {
             throw new NotImplementedException();
         }
@@ -92,29 +93,14 @@ namespace ProjectARM
             throw new NotImplementedException();
         }
 
-        public double GetPointError(double[] q, DPoint p) => NormaVectora(new DPoint(p.x - F(n).x, p.y - F(n).y, p.z - F(n).z));
+        public double GetPointError(double[] q, DPoint p) => NormaVectora(new DPoint(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
 
-        public double NormaVectora(DPoint p) => Math.Sqrt(Math.Pow(p.x, 2) + Math.Pow(p.y, 2));
-
-        private DPoint CramerMethod(double[,] A, DPoint b)
-        {
-            DPoint X = new DPoint(0, 0, 0);
-            double det = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0];
-            if (det != 0)
-            {
-                double detx1 = b.x * A[1, 1] - A[0, 1] * b.y;
-                X.x = detx1 / det;
-                double detx2 = A[0, 0] * b.y - b.x * A[1, 0];
-                X.y = detx2 / det;
-            }
-            else return new DPoint(0, 0, 0);
-            return X;
-        }
+        public double NormaVectora(DPoint p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
         
         // Составляем матрицы S и B для каждого звена по их типу
-        private void calcBSq()
+        private void CalcBSq()
         {
-            int i = 0;
+            var i = 0;
             foreach (var unit in units)
             {
                 //var i = Array.IndexOf(units, unit);
@@ -122,25 +108,25 @@ namespace ProjectARM
                 {
                     case 'S':
                         B[i] = new BlockMatrix();
-                        B[i].SetByIJ(0, 0, Math.Cos(unit.angle));
-                        B[i].SetByIJ(0, 1, -Math.Sin(unit.angle));
-                        B[i].SetByIJ(1, 0, Math.Sin(unit.angle));
-                        B[i].SetByIJ(1, 1, Math.Cos(unit.angle));
-                        B[i].SetByIJ(2, 3, unit.len);
+                        B[i][0, 0] = Math.Cos(unit.angle);
+                        B[i][0, 1] = - Math.Sin(unit.angle);
+                        B[i][1, 0] = Math.Sin(unit.angle);
+                        B[i][1, 1] = Math.Cos(unit.angle);
+                        B[i][2, 3] = unit.len;
                         break;
                     case 'R':
                         S[i] = new BlockMatrix();
-                        S[i].SetByIJ(0, 0, Math.Cos(q[i - 1]));
-                        S[i].SetByIJ(0, 1, -Math.Sin(q[i - 1]));
-                        S[i].SetByIJ(1, 0, Math.Sin(q[i - 1]));
-                        S[i].SetByIJ(1, 1, Math.Cos(q[i - 1]));
+                        S[i][0, 0] = Math.Cos(q[i - 1]);
+                        S[i][0, 1] = - Math.Sin(q[i - 1]);
+                        S[i][1, 0] = Math.Sin(q[i - 1]);
+                        S[i][1, 1] = Math.Cos(q[i - 1]);
 
                         B[i] = new BlockMatrix();
-                        B[i].SetByIJ(2, 3, unit.len);
+                        B[i][2, 3] = unit.len;
                         break;
                     case 'P':
                         S[i] = new BlockMatrix();
-                        S[i].SetByIJ(2, 3, q[i - 1]);
+                        S[i][2, 3] = unit.len + q[i - 1];
 
                         B[i] = new BlockMatrix();
                         break;
@@ -149,90 +135,76 @@ namespace ProjectARM
             }
         }
 
-        private void calcT()
+        private void CalcT()
         {
             T = new ArrayList();
             var tmp = new BlockMatrix();
 
             T.Add(tmp = B[0]);
 
-            for (int i = 1; i < n; i++)
+            for (var i = 1; i < n; i++)
                 T.Add(tmp *= S[i] * B[i]);
         }
 
-        private DPoint GetT(int i)
-        {
-            var T = this.T[i] as BlockMatrix;
-            return T.GetLastColumn();
-        }
-        // Maybe concat this two(up/down) methods?
-        private DPoint F(int i)
-        {
-            return GetT(i);
-        }
+        private DPoint F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
 
-        private DPoint getb(int i)
-        {
-            var dT = this.dT[i] as BlockMatrix;
-            return dT.GetLastColumn();
-        }
+        private DPoint GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
 
-        private BlockMatrix getdF(int i)
+        private BlockMatrix GetdF(int i)
         {
-            var dF = new BlockMatrix();
-            dF = B[0];
+            var dF = B[0];
 
-            for (int k = 1; k < n; k++)
+            for (var k = 1; k < n; k++)
                 dF *= k == i ? dS[i] * B[i] : S[i] * B[i];
 
             return dF;
         }
 
-        private void calcdT()
+        private void CalcdT()
         {
             dT = new ArrayList();
-            for (int i = 1; i < n; i++)
-                dT.Add(getdF(i));
+            for (var i = 1; i < n; i++)
+                dT.Add(GetdF(i));
         }
 
-        private void calcdS()
+        private void CalcdS()
         {
             var i = 0;
-            foreach( var unit in units)
+            foreach (var unit in units)
             {
                 //var i = Array.IndexOf(units, unit);
                 switch (unit.type)
                 {
                     case 'R':
                         dS[i] = new BlockMatrix();
-                        dS[i].SetByIJ(0, 0, -Math.Sin(q[i - 1]));
-                        dS[i].SetByIJ(0, 1, -Math.Cos(q[i - 1]));
-                        dS[i].SetByIJ(1, 0, Math.Cos(q[i - 1]));
-                        dS[i].SetByIJ(1, 1, -Math.Sin(q[i - 1]));
-                        dS[i].SetByIJ(2, 2, 0);
+                        dS[i][0, 0] = - Math.Sin(q[i - 1]);
+                        dS[i][0, 1] = - Math.Cos(q[i - 1]);
+                        dS[i][1, 0] = Math.Cos(q[i - 1]);
+                        dS[i][1, 1] = - Math.Sin(q[i - 1]);
+                        dS[i][2, 2] = 0;
                         break;
                     case 'P':
                         dS[i] = new BlockMatrix();
-                        dS[i].SetByIJ(0, 0, 0);
-                        dS[i].SetByIJ(1, 1, 0);
-                        dS[i].SetByIJ(2, 2, 0);
-                        dS[i].SetByIJ(2, 3, 1);
+                        dS[i][0, 0] = 0;
+                        dS[i][1, 1] = 0;
+                        dS[i][2, 2] = 0;
+                        dS[i][2, 3] = 1;
                         break;
                 }
                 i++;
             }
         }
 
-        private double[,] calcD()
+        private Matrix CalcD()
         {
-            var D = new double[3, n];
+            var D = new Matrix(3, n - 1);
 
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n - 1; i++)
             {
-                var b = getb(i);
-                D[0, i] = b.x;
-                D[1, i] = b.y;
-                D[2, i] = b.z;
+                var b = GetB(i);
+                D[0, i] = b.X;
+                D[1, i] = b.Y;
+                D[2, i] = b.Z;
             }
 
             return D;

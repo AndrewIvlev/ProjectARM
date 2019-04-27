@@ -8,23 +8,18 @@ namespace ProjectARM
 {
     public class DPoint
     {
-        public double x;
-        public double y;
-        public double z;
+        public double X;
+        public double Y;
+        public double Z;
 
         public DPoint(double x, double y, double z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
         }
 
-        public DPoint ConvertToDPoint(double[] vector)
-        {
-            DPoint point = null;
-            if (vector.Length == 3)
-                point = new DPoint(vector[0], vector[1], vector[2]);
-            return point;
-        }
+        public DPoint ConvertToDPoint(double[] vector) =>
+            vector.Length == 3 ? new DPoint(vector[0], vector[1], vector[2]) : null;
     }
 }

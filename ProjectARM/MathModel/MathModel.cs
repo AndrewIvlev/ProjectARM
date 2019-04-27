@@ -18,7 +18,7 @@ namespace ProjectARM
     public abstract class MathModel
     {
         public double[] q;
-        public double[] a;
+        public Matrix A;
         public unit[] units;
         public int n;
 
@@ -29,13 +29,13 @@ namespace ProjectARM
             n = model.n;
             units = new unit[n];
             q = new double[n - 1];
-            a = new double[n - 1];
+            A = new Matrix(n - 1, n - 1);
             for (int i = 0; i < n; i++)
                 units[i] = model.units[i];
             for (int i = 0; i < n - 1; i++)
             {
                 q[i] = model.q[i];
-                a[i] = model.a[i];
+                A[i, i] = model.A[i, i];
             }
         }
 
@@ -44,13 +44,14 @@ namespace ProjectARM
             this.n = n;
             units = new unit[n];
             q = new double[n - 1];
-            a = new double[n - 1];
+            A = new Matrix(n - 1, n - 1);
             for (int i = 0; i < n; i++)
                 units[i] = new unit { type = '0', len = 0, angle = 0 };
             for (int i = 0; i < n - 1; i++)
             {
                 q[i] = 0;
-                a[i] = 1;
+                for (int j = 0; j < n - 1; j++)
+                    A[i, j] = i == j ? 1 : 0;
             }
         }
 
@@ -59,13 +60,14 @@ namespace ProjectARM
             this.n = n;
             this.units = new unit[n];
             q = new double[n - 1];
-            a = new double[n - 1];
+            A = new Matrix(n - 1, n - 1);
             for (int i = 0; i < n; i++)
                 this.units[i] = units[i];
             for (int i = 0; i < n - 1; i++)
             {
                 q[i] = 0;
-                a[i] = 1;
+                for (int j = 0; j < n - 1; j++)
+                    A[i, j] = i == j ? 1 : 0;
             }
         }
 
@@ -88,7 +90,7 @@ namespace ProjectARM
             for (int i = 0; i < n; i++)
             {
                 if (A[i] == 0) throw new Exception("The coefficient must be non-zero.");
-                a[i] = A[i];
+                this.A[i, i] = A[i];
             }
         }
 

@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -66,12 +67,12 @@
     <Compile Include="Graphics\Unit.cs" />
     <Compile Include="MathModel\BlockMatrix.cs" />
     <Compile Include="MathModel\DPoint.cs" />
-    <Compile Include="MathModel\GausMethod.cs" />
+    <Compile Include="MathModel\LinearSystemSolver.cs" />
     <Compile Include="MathModel\MathModel.cs" />
     <Compile Include="MathModel\MathEngine.cs" />
     <Compile Include="MathModel\ExplicitMathModel.cs" />
+    <Compile Include="MathModel\Matrix.cs" />
     <Compile Include="MathModel\MatrixMathModel.cs" />
-    <Compile Include="MathModel\Vector.cs" />
     <Compile Include="Trajectory\LagrangeInterpolation.cs" />
     <Compile Include="Trajectory\Trajectory.cs" />
     <Compile Include="ProjARM.cs">
@@ -94,7 +95,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="ManipConfig\anotherSRRPR.json" />
     <None Include="ManipConfig\SRRPR.json" />
     <None Include="ManipConfig\SRCRPRPR.json" />
     <None Include="packages.config" />
