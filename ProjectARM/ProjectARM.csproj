@@ -40,12 +40,6 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="OxyPlot, Version=1.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
-      <HintPath>..\packages\OxyPlot.Core.1.0.0\lib\net45\OxyPlot.dll</HintPath>
-    </Reference>
-    <Reference Include="OxyPlot.WindowsForms, Version=1.0.0.0, Culture=neutral, PublicKeyToken=245eacd6b5d2d338, processorArchitecture=MSIL">
-      <HintPath>..\packages\OxyPlot.WindowsForms.1.0.0\lib\net45\OxyPlot.WindowsForms.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -65,13 +59,13 @@
     <Compile Include="Graphics\Joint.cs" />
     <Compile Include="Graphics\Manipulator.cs" />
     <Compile Include="Graphics\Unit.cs" />
-    <Compile Include="MathModel\BlockMatrix.cs" />
-    <Compile Include="MathModel\DPoint.cs" />
-    <Compile Include="MathModel\LinearSystemSolver.cs" />
+    <Compile Include="Matrix\BlockMatrix.cs" />
+    <Compile Include="Matrix\Vector3D.cs" />
+    <Compile Include="Matrix\LinearSystemSolver.cs" />
     <Compile Include="MathModel\MathModel.cs" />
-    <Compile Include="MathModel\MathEngine.cs" />
+    <Compile Include="MathEngine.cs" />
     <Compile Include="MathModel\ExplicitMathModel.cs" />
-    <Compile Include="MathModel\Matrix.cs" />
+    <Compile Include="Matrix\Matrix.cs" />
     <Compile Include="MathModel\MatrixMathModel.cs" />
     <Compile Include="Trajectory\LagrangeInterpolation.cs" />
     <Compile Include="Trajectory\Trajectory.cs" />
@@ -85,19 +79,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ProjARM.resx">
       <DependentUpon>ProjARM.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="ManipConfig\SRRPR.json" />
     <None Include="ManipConfig\SRCRPRPR.json" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -115,7 +107,6 @@
     <Content Include="ManipConfig\ConfigFromGreenBook.txt" />
     <Content Include="ManipConfig\MyDefaultMan.txt" />
     <Content Include="ManipConfig\OctopusTentacle.txt" />
-    <Content Include="ManipConfig\templateManipConfig.txt" />
     <Content Include="window_icon.ico" />
   </ItemGroup>
   <ItemGroup />

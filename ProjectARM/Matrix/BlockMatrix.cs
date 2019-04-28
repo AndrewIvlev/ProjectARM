@@ -20,7 +20,7 @@ namespace ProjectARM
             M = new double[,] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 } };
         }
 
-        public DPoint GetLastColumn() => new DPoint(M[0, 3], M[1, 3], M[2, 3]);
+        public Vector3D GetLastColumn() => new Vector3D(M[0, 3], M[1, 3], M[2, 3]);
         
         public static BlockMatrix operator *(BlockMatrix A, BlockMatrix B) => new BlockMatrix
             {

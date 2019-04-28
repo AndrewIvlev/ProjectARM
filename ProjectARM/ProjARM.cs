@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
-
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
+using Newtonsoft.Json;
 
 namespace ProjectARM
 {
@@ -16,10 +14,10 @@ namespace ProjectARM
     {
         #region COMPUTATION
 
-        List<DPoint> DeltaPoints;
         MathModel modelMan;
-        byte NumOfUnits;
+        List<double[]> q; // Вектора обобщённых координат
         Trajectory Way;
+        List<Vector3D> DeltaPoints;
 
         #endregion
 
@@ -27,19 +25,19 @@ namespace ProjectARM
 
         Manipulator Man;
         Point OffSet;
-        PlotModel myModel;
-        LineSeries lineSeries;
+        //PlotModel myModel;
+        //LineSeries lineSeries;
+        private byte NumOfUnits;
         Graphics PicBoxGraphics;
-        double[][] q; // Вектора обобщённых координат
         double SpeedMotion;
+        //TODO: if it possible remove Flags and index
         byte MousePressed;
-        //TODO: if it possible remove Flag and index
         bool IsUnitsDataGridCellChanged;
         bool DoesItStop;
         bool IsItRestarted;
-        bool mathModelType = false; // MatrixMathModel if true, ExplicitMathModel if false
         byte Flag;
         int index;
+        private int moveIndex;
 
         #endregion
 
@@ -47,20 +45,21 @@ namespace ProjectARM
         {
             InitializeComponent();
 
-            DeltaPoints = new List<DPoint>();
-            q = new double[1024][];
-            myModel = new PlotModel { Title = "Δ = ||P(i+1)-P'(i+1)||" };
-            myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "iteration" });
-            myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Δ, cm" });
-            lineSeries = new LineSeries { Color = OxyColors.Blue };
+            DeltaPoints = new List<Vector3D>();
+            q = new List<double[]>();
+            NumOfUnits = 0;
+            //myModel = new PlotModel { Title = "Δ = ||P(i+1)-P'(i+1)||" };
+            //myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "iteration" });
+            //myModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Δ, cm" });
+            //lineSeries = new LineSeries { Color = OxyColors.Blue };
             PicBoxGraphics = pbCanvas.CreateGraphics();
             IsUnitsDataGridCellChanged = false;
             DoesItStop = false;
             IsItRestarted = false;
             SpeedMotion = 1;
             MousePressed = 0;
-            NumOfUnits = 0;
             Flag = 0;
+            moveIndex = 0;
         }
 
         #region Left Layout
@@ -76,10 +75,7 @@ namespace ProjectARM
             if (NumOfUnits != currNumOfUnits)
             {
                 UnitsDataGridViewPreparation(currNumOfUnits);
-                if (mathModelType)
-                    modelMan = new MatrixMathModel(NumOfUnits);
-                else
-                    modelMan = new ExplicitMathModel(NumOfUnits);
+                modelMan = new ExplicitMathModel(NumOfUnits);
             }
         }
 
@@ -93,10 +89,7 @@ namespace ProjectARM
             {
                 NumOfUnits = currNumOfUnits;
                 UnitsDataGridViewPreparation(NumOfUnits);
-                if (mathModelType)
-                    modelMan = new MatrixMathModel(NumOfUnits);
-                else
-                    modelMan = new ExplicitMathModel(NumOfUnits);
+                modelMan = new ExplicitMathModel(NumOfUnits);
             }
         }
 
@@ -235,7 +228,24 @@ namespace ProjectARM
 
         private void startMotion_Click(object sender, EventArgs e)
         {
-            backgroundWorker2.RunWorkerAsync();
+            for (moveIndex = 0; moveIndex < q.Count; moveIndex++)
+            {
+                if (DoesItStop)
+                    while (DoesItStop) ;
+
+                if (IsItRestarted)
+                    moveIndex = 0;
+
+                Man.Move(PicBoxGraphics, q[moveIndex]);
+
+                Thread.Sleep((int)(1000 / SpeedMotion));
+
+                //label2.Invoke((MethodInvoker)delegate {
+                    label2.Text = $"Generalized Coordinates \nQ=({q})";
+                //});
+
+                trackBar1.Value = trackBar1.Maximum * (int)((float)(moveIndex + 1) / q.Count);
+            }
         }
         
         private void stopMotion_Click(object sender, EventArgs e)
@@ -257,34 +267,6 @@ namespace ProjectARM
         private void comboBox3_MouseDown(object sender, MouseEventArgs e)
         {
 
-        }
-
-        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
-        {
-            for ( int i = 0; i < q.Length; i++)
-            {
-                if (DoesItStop)
-                    while (DoesItStop) ;
-
-                if (IsItRestarted)
-                    i = 0;
-
-                Man.Move(PicBoxGraphics, q[i]);
-
-                Thread.Sleep((int)(1000 / SpeedMotion));
-
-                label2.Invoke((MethodInvoker)delegate {
-                    label2.Text = $"Generalized Coordinates \nQ=({(int)MathModel.RadianToDegree(modelMan.q[0])}," +
-                    $"{(int)MathModel.RadianToDegree(modelMan.q[1])}, {(int)modelMan.q[2]}, {(int)MathModel.RadianToDegree(modelMan.q[3])})";
-                });
-
-                backgroundWorker2.ReportProgress((int)((float)(i + 1) / q.Length * 100));
-            }
-        }
-
-        private void backgroundWorker2_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
-        {
-            showMotionProgressBar.Value = e.ProgressPercentage;
         }
 
         private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -353,7 +335,7 @@ namespace ProjectARM
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            q = MathEngine.MovingAlongTheTrajectory(Way, modelMan, DeltaPoints, backgroundWorker1);
+            q.AddRange(MathEngine.MovingAlongTheTrajectory(Way, modelMan, DeltaPoints, backgroundWorker1));
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -363,18 +345,19 @@ namespace ProjectARM
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled) ;
+            if (!e.Cancelled)
+                ;
             computetionProgressBar.Value = 0;
-            lineSeries.Points.Clear();
-            foreach (DPoint p in DeltaPoints)
-                lineSeries.Points.Add(new DataPoint(p.X, (int)(CoeftoRealW() * p.Y)));
+            //lineSeries.Points.Clear();
+            //foreach (Vector3D p in DeltaPoints)
+            //    lineSeries.Points.Add(new DataPoint(p.X, (int)(CoeftoRealW() * p.Y)));
 
-            myModel.Series.Clear();
-            myModel.Series.Add(lineSeries);
+            //myModel.Series.Clear();
+            //myModel.Series.Add(lineSeries);
 
-            this.plotView.Model = myModel;
-            this.plotView.Refresh();
-            this.plotView.Show();
+            //this.plotView.Model = myModel;
+            //this.plotView.Refresh();
+            //this.plotView.Show();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -401,34 +384,15 @@ namespace ProjectARM
             var currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var varFileFullName = currentDirectory + manConfigDir;
             OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            dialog.Filter = "json files (*.json)|*.json|All files (*.*)|*.*";
             dialog.Title = "Open manipulator configuration file";
             dialog.InitialDirectory = varFileFullName;
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                string filename = dialog.FileName;
-                string[] filelines = File.ReadAllLines(filename);
-
-                NumOfUnitsTextBox.Text = filelines[0];
-
-                NumOfUnits = Convert.ToByte(filelines[0].Trim());
-
-                UnitsDataGridViewPreparation(NumOfUnits);
-
-                if (mathModelType)
-                    modelMan = new MatrixMathModel(NumOfUnits);
-                else
-                    modelMan = new ExplicitMathModel(NumOfUnits);
-
-                int CurrUnitLine = 0;
-                for (int i = 1; i < filelines.Length; i++)
-                {
-                    modelMan.units[CurrUnitLine].type = Convert.ToChar(filelines[i].Trim());
-                    modelMan.units[CurrUnitLine].len = Convert.ToDouble(filelines[++i].Trim());
-                    modelMan.units[CurrUnitLine].angle = -MathModel.DegreeToRadian(Convert.ToDouble(filelines[++i].Trim()));
-                    CurrUnitLine++;
-                }
+                var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(new StreamReader(dialog.FileName).ReadToEnd());
+                var modelMan = new MatrixMathModel(manipConfig);
+                
                 UnitsDataGridViewPreparation(NumOfUnits);
                 ManipulatorConfigShow();
                 IsUnitsDataGridCellChanged = false;

@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProjectARM
 {
@@ -67,36 +62,82 @@ namespace ProjectARM
             CalcBSq();
         }
 
-        public override void LagrangeMethodToThePoint(DPoint p)
+        public Vector3D F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
+
+        public override void LagrangeMethodToThePoint(Vector3D p)
         {
+            DefaultA();
+
             CalcT();
             var F = this.F(n - 1);
+
             CalcdS();
             CalcdT();
             var D = CalcD();
-            var Dt = Matrix.Transp(D);
-            var At = Matrix.Transp(A);
-            DPoint d = new DPoint(p.X - F.X, p.Y - F.Y, p.Z - F.Z);
-            //var q = At * Dt * (D * a
-            ;
-            //for (int i = 0; i < 4; i++)
-            //q[i] += MagicFunc(μ, q, a[i], dFxpodqi[i], dFypodqi[i]);
-        }
 
-        public DPoint SolutionVerification(Matrix A, DPoint b, DPoint X)
+            var transpD = Matrix.Transpose(D);
+            var inverseA = Matrix.Inverse(A);
+
+            var vector3D = new Matrix(3, 1)
+            {
+                [0, 0] = p.X - F.X,
+                [1, 0] = p.Y - F.Y,
+                [2, 0] = p.Z - F.Z
+            };
+
+            var inverseAtranspD = inverseA * transpD;
+            //var dq = inverseAtranspD * Matrix.Inverse(D * inverseAtranspD) * vector3D;
+            var DinverseAtranspD = D * inverseAtranspD;
+            var inverseDinverseAtranspD = Matrix.Inverse(DinverseAtranspD); // there is trouble
+            var inverseAtranspDinverseDinverseAtranspD = inverseAtranspD * inverseDinverseAtranspD;
+            var dq = inverseAtranspDinverseDinverseAtranspD * vector3D;
+
+            for (int i = 0; i < n - 1; i++)
+                q[i] += dq[i, 0];
+        //}
+        //public override void LagrangeMethodToThePoint(Vector3D p)
+        //{
+        //    DefaultA();
+
+        //    CalcT();
+        //    var F = this.F(n - 1);
+
+        //    CalcdS();
+        //    CalcdT();
+        //    var D = CalcD();
+
+        //    var transpD = Matrix.Transpose(D);
+        //    var inverseA = Matrix.Inverse(A);
+
+        //    var d = new Matrix(3, 1)
+        //    {
+        //        [0, 0] = p.X - F.X,
+        //        [1, 0] = p.Y - F.Y,
+        //        [2, 0] = p.Z - F.Z
+        //    };
+
+        //    var μ = Matrix.Inverse(D) * d;
+
+        //    for (int i = 0; i<n - 1; i++)
+        //        q[i] += μFunction(μ, i);
+        //}
+
+    public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D X)
         {
             throw new NotImplementedException();
         }
 
-        public override double GetPointError(DPoint p)
+        public override double GetPointError(Vector3D p)
         {
             throw new NotImplementedException();
         }
 
-        public double GetPointError(double[] q, DPoint p) => NormaVectora(new DPoint(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
+        public double GetPointError(double[] q, Vector3D p) => NormaVectora(new Vector3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
 
-        public double NormaVectora(DPoint p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
-        
+        public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
+
+        private double μFunction(Matrix μ, int i) => (μ[0, 0] * GetB(i).X + μ[1, 0] * GetB(i).Y + μ[2, 0] * GetB(i).Z) / (2 * A[i, i]);
+
         // Составляем матрицы S и B для каждого звена по их типу
         private void CalcBSq()
         {
@@ -146,9 +187,8 @@ namespace ProjectARM
                 T.Add(tmp *= S[i] * B[i]);
         }
 
-        private DPoint F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
-
-        private DPoint GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
+        //That function return vector ( dFxqi, dFyqi, dFzqi )
+        private Vector3D GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
 
         private BlockMatrix GetdF(int i)
         {

@@ -53,7 +53,6 @@
             this.pbCanvas = new System.Windows.Forms.PictureBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.computetionProgressBar = new System.Windows.Forms.ProgressBar();
-            this.showMotionProgressBar = new System.Windows.Forms.ProgressBar();
             this.CancelMoveBtn = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -91,8 +90,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
-            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
-            this.plotView = new OxyPlot.WindowsForms.PlotView();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).BeginInit();
@@ -110,6 +108,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
@@ -318,12 +317,12 @@
             // 
             // Klabel
             // 
-            this.Klabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.Klabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.Klabel.AutoSize = true;
             this.Klabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Klabel.Location = new System.Drawing.Point(3, 1);
+            this.Klabel.Location = new System.Drawing.Point(3, 11);
             this.Klabel.Name = "Klabel";
-            this.Klabel.Size = new System.Drawing.Size(169, 40);
+            this.Klabel.Size = new System.Drawing.Size(205, 20);
             this.Klabel.TabIndex = 9;
             this.Klabel.Text = "Divide the trajectory into ";
             this.Klabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -332,9 +331,9 @@
             // 
             this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(212, 10);
+            this.comboBox1.Location = new System.Drawing.Point(214, 10);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(34, 21);
+            this.comboBox1.Size = new System.Drawing.Size(30, 21);
             this.comboBox1.TabIndex = 10;
             this.comboBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
             this.comboBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.comboBox1_MouseDown);
@@ -387,14 +386,6 @@
             this.computetionProgressBar.Size = new System.Drawing.Size(331, 21);
             this.computetionProgressBar.TabIndex = 12;
             // 
-            // showMotionProgressBar
-            // 
-            this.showMotionProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.showMotionProgressBar.Location = new System.Drawing.Point(3, 8);
-            this.showMotionProgressBar.Name = "showMotionProgressBar";
-            this.showMotionProgressBar.Size = new System.Drawing.Size(663, 23);
-            this.showMotionProgressBar.TabIndex = 0;
-            // 
             // CancelMoveBtn
             // 
             this.CancelMoveBtn.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -425,9 +416,9 @@
             // 
             this.comboBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(212, 52);
+            this.comboBox2.Location = new System.Drawing.Point(214, 52);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(34, 21);
+            this.comboBox2.Size = new System.Drawing.Size(30, 21);
             this.comboBox2.TabIndex = 17;
             this.comboBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox2_KeyDown);
             // 
@@ -603,7 +594,6 @@
             this.rightTableLayoutPanel.Controls.Add(this.label2, 0, 5);
             this.rightTableLayoutPanel.Controls.Add(this.computetionProgressBar, 0, 3);
             this.rightTableLayoutPanel.Controls.Add(this.tableLayoutPanel3, 0, 4);
-            this.rightTableLayoutPanel.Controls.Add(this.plotView, 0, 2);
             this.rightTableLayoutPanel.Location = new System.Drawing.Point(924, 3);
             this.rightTableLayoutPanel.Name = "rightTableLayoutPanel";
             this.rightTableLayoutPanel.RowCount = 6;
@@ -622,9 +612,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 83.73016F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.26984F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 81F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 85.4251F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.5749F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 83F));
             this.tableLayoutPanel2.Controls.Add(this.label6, 2, 1);
             this.tableLayoutPanel2.Controls.Add(this.Klabel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label5, 2, 0);
@@ -644,7 +634,7 @@
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(252, 53);
+            this.label6.Location = new System.Drawing.Point(250, 53);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 20);
             this.label6.TabIndex = 18;
@@ -655,7 +645,7 @@
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label5.Location = new System.Drawing.Point(252, 11);
+            this.label5.Location = new System.Drawing.Point(250, 11);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(58, 20);
             this.label5.TabIndex = 10;
@@ -904,8 +894,8 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Controls.Add(this.showMotionProgressBar, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.trackBar1, 0, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 569);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
@@ -949,28 +939,13 @@
             this.tableLayoutPanel7.Size = new System.Drawing.Size(162, 28);
             this.tableLayoutPanel7.TabIndex = 3;
             // 
-            // backgroundWorker2
+            // trackBar1
             // 
-            this.backgroundWorker2.WorkerReportsProgress = true;
-            this.backgroundWorker2.WorkerSupportsCancellation = true;
-            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
-            this.backgroundWorker2.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker2_ProgressChanged);
-            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
-            // 
-            // plotView
-            // 
-            this.plotView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.plotView.Location = new System.Drawing.Point(3, 134);
-            this.plotView.Name = "plotView";
-            this.plotView.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.plotView.Size = new System.Drawing.Size(331, 297);
-            this.plotView.TabIndex = 28;
-            this.plotView.Text = "plotView1";
-            this.plotView.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
-            this.plotView.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
-            this.plotView.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
+            this.trackBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.trackBar1.Location = new System.Drawing.Point(3, 3);
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(663, 33);
+            this.trackBar1.TabIndex = 2;
             // 
             // ProjARM
             // 
@@ -1009,9 +984,11 @@
             this.centerTableLayoutPanel.ResumeLayout(false);
             this.centerTableLayoutPanel.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1053,7 +1030,6 @@
         private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ProgressBar computetionProgressBar;
-        private System.Windows.Forms.ProgressBar showMotionProgressBar;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.TableLayoutPanel centerTableLayoutPanel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
@@ -1087,8 +1063,7 @@
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.PictureBox pbCanvas;
         private System.Windows.Forms.Button pathPlanningBtn;
-        private System.ComponentModel.BackgroundWorker backgroundWorker2;
-        private OxyPlot.WindowsForms.PlotView plotView;
+        private System.Windows.Forms.TrackBar trackBar1;
     }
 }
 

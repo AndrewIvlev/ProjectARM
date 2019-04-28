@@ -18,7 +18,7 @@ namespace ProjectARM
         /// </summary>
         public List<Point> ExtraPoints;
 
-        public DPoint[] ExactExtraPoints; // Точные дополнительные точки
+        public Vector3D[] ExactExtra; // Точные дополнительные точки
 
         public int NumOfExtraPoints;
 
@@ -29,16 +29,16 @@ namespace ProjectARM
             IsSplit = false;
             AnchorPoints = new List<Point>();
             ExtraPoints = new List<Point>();
-            ExactExtraPoints = new DPoint[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
+            ExactExtra = new Vector3D[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
             NumOfExtraPoints = 0;
         }
 
         public Trajectory(Point StartPoint)
         {
             IsSplit = false;
-            AnchorPoints = new List<Point>() { StartPoint };
+            AnchorPoints = new List<Point> { StartPoint };
             ExtraPoints = new List<Point>();
-            ExactExtraPoints = new DPoint[1024];
+            ExactExtra = new Vector3D[1024];
             NumOfExtraPoints = 0;
         }
 
@@ -47,12 +47,12 @@ namespace ProjectARM
             IsSplit = false;
             AnchorPoints.Clear();
             ExtraPoints.Clear();
-            Array.Clear(ExactExtraPoints, 0, ExactExtraPoints.Length);
+            Array.Clear(ExactExtra, 0, ExactExtra.Length);
         }
 
         public double DistanceBetweenPoints(Point A, Point B) => Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
-        public double DistanceBetweenDPoints(DPoint p1, DPoint p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
-        public double DistanceBerweenPointAndDpoint(Point P, DPoint dp) => Math.Sqrt(Math.Pow(dp.X - P.X, 2) + Math.Pow(dp.Y - P.Y, 2));
+        public double DistanceBetweenPoints(Vector3D p1, Vector3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        public double DistanceBerweenPoints(Point P, Vector3D dp) => Math.Sqrt(Math.Pow(dp.X - P.X, 2) + Math.Pow(dp.Y - P.Y, 2));
 
         public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
         {
@@ -80,9 +80,9 @@ namespace ProjectARM
             return len;
         }
 
-        public DPoint ToDpoint(Point P) => new DPoint(P.X, P.Y, 0);
+        public Vector3D ToVector3D(Point P) => new Vector3D(P.X, P.Y, 0);
 
-        public void ExactExtraPointsClear() => Array.Clear(ExactExtraPoints, 0, NumOfExtraPoints);
+        public void ExactExtraPointsClear() => Array.Clear(ExactExtra, 0, NumOfExtraPoints);
 
         public static void Swap<T>(IList<T> list, int indexA, int indexB)
         {
@@ -117,13 +117,13 @@ namespace ProjectARM
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtraPoints[index++] = new DPoint(x, y, 0);
+                    ExactExtra[index++] = new Vector3D(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new DPoint(x, y, 0)) + step < dist);
+                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Vector3D(x, y, 0)) + step < dist);
             }
-            ExactExtraPoints[index++] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
+            ExactExtra[index++] = ToVector3D(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
             IsSplit = true;
@@ -145,13 +145,13 @@ namespace ProjectARM
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtraPoints[index++] = new DPoint(x, y, 0);
+                    ExactExtra[index++] = new Vector3D(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPointAndDpoint(AnchorPoints[i - 1], new DPoint(x, y, 0)) + step < dist);
+                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Vector3D(x, y, 0)) + step < dist);
             }
-            ExactExtraPoints[index++] = ToDpoint(AnchorPoints[AnchorPoints.Count - 1]);
+            ExactExtra[index++] = ToVector3D(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
             IsSplit = true;
@@ -163,26 +163,26 @@ namespace ProjectARM
         {
             for (int i = 0; i < NumOfExtraPoints; i++)
             {
-                ExactExtraPoints[i].X -= offset.X;
-                ExactExtraPoints[i].Y = offset.Y - ExactExtraPoints[i].Y;
+                ExactExtra[i].X -= offset.X;
+                ExactExtra[i].Y = offset.Y - ExactExtra[i].Y;
             }
         }
         public void TransExactExtraPoints(int k, double CoeftoRealW)
         {
             for ( int i = 0; i < k; i++)
             {
-                ExactExtraPoints[i].X *= CoeftoRealW;
-                ExactExtraPoints[i].Y *= CoeftoRealW;
+                ExactExtra[i].X *= CoeftoRealW;
+                ExactExtra[i].Y *= CoeftoRealW;
             }
         }
         public void TransferFunction(Point offset, double CoeftoRealW)
         {
             for (int i = 0; i < NumOfExtraPoints; i++)
             {
-                ExactExtraPoints[i].X = ExactExtraPoints[i].X - offset.X;
-                ExactExtraPoints[i].Y = offset.Y - ExactExtraPoints[i].Y;
-                ExactExtraPoints[i].X *= CoeftoRealW;
-                ExactExtraPoints[i].Y *= CoeftoRealW;
+                ExactExtra[i].X = ExactExtra[i].X - offset.X;
+                ExactExtra[i].Y = offset.Y - ExactExtra[i].Y;
+                ExactExtra[i].X *= CoeftoRealW;
+                ExactExtra[i].Y *= CoeftoRealW;
             }
         }
 
@@ -300,30 +300,30 @@ namespace ProjectARM
             int j = 0;
             for (int i = 0; i < NumOfExtraPoints - 1; i++)
             {
-                double Xcurr = ExactExtraPoints[i].X;
-                double Xnext = ExactExtraPoints[i + 1].X;
+                double Xcurr = ExactExtra[i].X;
+                double Xnext = ExactExtra[i + 1].X;
                 if (Xcurr == Xnext) continue;
-                ExactExtraPoints[i].Y = interpolate[j].InterpolateX(Xcurr);
-                ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtraPoints[i].Y));
+                ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
+                ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtra[i].Y));
                 if (Xnext > Xcurr) continue;
                 else if(interpolate[0].GetCount() != 1) j++;
                 do
                 {
-                    ExactExtraPoints[i].Y = interpolate[j].InterpolateX(Xcurr);
-                    ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtraPoints[i].Y));
+                    ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
+                    ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtra[i].Y));
                     if (++i == NumOfExtraPoints - 1) break;
-                    Xcurr = ExactExtraPoints[i].X;
-                    Xnext = ExactExtraPoints[i + 1].X;
+                    Xcurr = ExactExtra[i].X;
+                    Xnext = ExactExtra[i + 1].X;
                     if (Xcurr == Xnext) i++;
                 } while (Xnext < Xcurr);
-                ExactExtraPoints[i].Y = interpolate[j].InterpolateX(Xcurr);
-                ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtraPoints[i].Y));
+                ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
+                ExtraPoints.Add(new Point((int)Xcurr, (int)ExactExtra[i].Y));
                 if (i == NumOfExtraPoints - 1) break;
                 i--;
                 j++;
             }
-            ExactExtraPoints[NumOfExtraPoints - 1].Y = interpolate[j].InterpolateX(ExactExtraPoints[NumOfExtraPoints - 1].X);
-            ExtraPoints.Add(new Point((int)ExactExtraPoints[NumOfExtraPoints - 1].X, (int)ExactExtraPoints[NumOfExtraPoints - 1].Y));
+            ExactExtra[NumOfExtraPoints - 1].Y = interpolate[j].InterpolateX(ExactExtra[NumOfExtraPoints - 1].X);
+            ExtraPoints.Add(new Point((int)ExactExtra[NumOfExtraPoints - 1].X, (int)ExactExtra[NumOfExtraPoints - 1].Y));
         }
         
         #endregion

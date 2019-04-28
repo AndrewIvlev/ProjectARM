@@ -18,7 +18,7 @@ namespace ProjectARM
     public abstract class MathModel
     {
         public double[] q;
-        public Matrix A;
+        protected Matrix A;
         public unit[] units;
         public int n;
 
@@ -33,10 +33,7 @@ namespace ProjectARM
             for (int i = 0; i < n; i++)
                 units[i] = model.units[i];
             for (int i = 0; i < n - 1; i++)
-            {
                 q[i] = model.q[i];
-                A[i, i] = model.A[i, i];
-            }
         }
 
         public MathModel(int n)
@@ -48,11 +45,7 @@ namespace ProjectARM
             for (int i = 0; i < n; i++)
                 units[i] = new unit { type = '0', len = 0, angle = 0 };
             for (int i = 0; i < n - 1; i++)
-            {
                 q[i] = 0;
-                for (int j = 0; j < n - 1; j++)
-                    A[i, j] = i == j ? 1 : 0;
-            }
         }
 
         public MathModel(int n, unit[] units)
@@ -64,27 +57,42 @@ namespace ProjectARM
             for (int i = 0; i < n; i++)
                 this.units[i] = units[i];
             for (int i = 0; i < n - 1; i++)
-            {
                 q[i] = 0;
-                for (int j = 0; j < n - 1; j++)
-                    A[i, j] = i == j ? 1 : 0;
-            }
         }
+        //public static MathModel Deserialize(string jsonContents)
+        //{
+        //    var local = ... // Do the JSON deserialization
+        //    local.PostCreateLogic();
+        //    return local;
+        //}
 
         public  double MaxL(double[] UnitTypePmaxLen)
         {
             double MaxL = 0;
+
             for (int i = 0; i < n; i++) //Вычисление максимально возможной длины
-                MaxL += units[i].len;                     //манипулятора, которая равна сумме длин всех звеньев
+                MaxL += units[i].len;               //манипулятора, которая равна сумме длин всех звеньев
             foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
                 MaxL += d;
+
             return MaxL;
         }
 
-        public abstract void LagrangeMethodToThePoint(DPoint p);
+        public void AllAngleToRadianFromDegree()
+        {
+            for (int i = 0; i < n; i++)
+                units[i].angle = - DegreeToRadian(units[i].angle);
+        }
+        public abstract void LagrangeMethodToThePoint(Vector3D p);
 
-        public abstract double GetPointError(DPoint p);
+        public abstract double GetPointError(Vector3D p);
 
+        public void DefaultA()
+        {
+            for (int i = 0; i < n - 1; i++)
+                for (int j = 0; j < n - 1; j++)
+                    A[i, j] = i == j ? 1 : 0;
+        }
         public void SetA(double[] A)
         {
             for (int i = 0; i < n; i++)
