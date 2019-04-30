@@ -85,8 +85,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="ManipConfig\SRRPR.json" />
-    <None Include="ManipConfig\SRCRPRPR.json" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -104,9 +102,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ManipConfig\ConfigFromGreenBook.txt" />
-    <Content Include="ManipConfig\MyDefaultMan.txt" />
-    <Content Include="ManipConfig\OctopusTentacle.txt" />
     <Content Include="window_icon.ico" />
   </ItemGroup>
   <ItemGroup />

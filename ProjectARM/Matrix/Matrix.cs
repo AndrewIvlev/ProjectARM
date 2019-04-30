@@ -113,6 +113,21 @@ namespace ProjectARM
             }
         }
 
+        public int IndexOfMaxElemInRow(int row)
+        {
+            int indexOfMax = 0;
+            var max = M[row, 0];
+            for (int i = 1; i < columns; i++)
+            {
+                if (M[row, i] > max)
+                {
+                    max = M[row, i];
+                    indexOfMax = i;
+                }
+            }
+            return indexOfMax;
+        }
+
         public static Matrix Inverse(Matrix M)
         {
             // assumes determinant is not 0
@@ -313,6 +328,7 @@ namespace ProjectARM
             }
             else throw new ArgumentException();
         }
+
         static unsafe double Det(double* rmX, int n)
         {
             double* mtx_u_ii, mtx_ii_j;
@@ -325,11 +341,11 @@ namespace ProjectARM
                 // Ищем максимальный элемент в столбце(под ведущим) 
                 {
                     //Ищем максимальный элемент и его позицию
-                    val = System.Math.Abs(*(mtx_ii_j = rmX));
+                    val = Math.Abs(*(mtx_ii_j = rmX));
                     for (mtx_u_ii = rmX + n; mtx_u_ii < mtx_end; mtx_u_ii += n)
                     {
-                        if (val < System.Math.Abs(*mtx_u_ii))
-                            val = System.Math.Abs(*(mtx_ii_j = mtx_u_ii));
+                        if (val < Math.Abs(*mtx_u_ii))
+                            val = Math.Abs(*(mtx_ii_j = mtx_u_ii));
                     }
                     //Если максимальный эдемент = 0 -> матрица вырожденная
                     if (val == 0) return double.NaN;
@@ -356,6 +372,7 @@ namespace ProjectARM
             }
             return det *= *rmX;
         }
+
         static unsafe double Det(double[,] A)
         {
             int n = A.GetLength(0);
@@ -367,6 +384,7 @@ namespace ProjectARM
             }
             else throw new RankException();
         }
+
         static unsafe bool SolveSqSysEq(double* result, int rcol, double* mtx, int n)
         {
             double* mtx_u_ii, mtx_ii_j;
@@ -376,12 +394,12 @@ namespace ProjectARM
             for (double* mtx_ii = mtx, mtx_ii_end = mtx + n, result_i_end = result + rcol; mtx_ii < mtx_end; result = result_i_end, result_i_end += rcol, mtx_ii += n + 1, mtx_ii_end += n, d++)
             {
                 {
-                    val = System.Math.Abs(*(mtx_ii_j = mtx_ii));
+                    val = Math.Abs(*(mtx_ii_j = mtx_ii));
                     for (mtx_u_ii = mtx_ii + n, result_i = result + rcol; mtx_u_ii < mtx_end; mtx_u_ii += n, result_i += rcol)
                     {
-                        if (val < System.Math.Abs(*mtx_u_ii))
+                        if (val < Math.Abs(*mtx_u_ii))
                         {
-                            val = System.Math.Abs(*(mtx_ii_j = mtx_u_ii));
+                            val = Math.Abs(*(mtx_ii_j = mtx_u_ii));
                             mtx_u_ii_j = result_i;
                         }
                     }
@@ -415,6 +433,7 @@ namespace ProjectARM
             }
             return true;
         }
+
         static unsafe double[,] Inverse(double[,] A)
         {
             int n = A.GetLength(0);

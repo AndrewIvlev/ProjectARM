@@ -78,23 +78,23 @@ namespace ProjectARM
             var transpD = Matrix.Transpose(D);
             var inverseA = Matrix.Inverse(A);
 
-            var vector3D = new Matrix(3, 1)
+            var d = new Matrix(3, 1)
             {
                 [0, 0] = p.X - F.X,
                 [1, 0] = p.Y - F.Y,
                 [2, 0] = p.Z - F.Z
             };
-
+            //There we need to solve linear equations system (D|d) and get dq - solution of this system
             var inverseAtranspD = inverseA * transpD;
-            //var dq = inverseAtranspD * Matrix.Inverse(D * inverseAtranspD) * vector3D;
-            var DinverseAtranspD = D * inverseAtranspD;
-            var inverseDinverseAtranspD = Matrix.Inverse(DinverseAtranspD); // there is trouble
-            var inverseAtranspDinverseDinverseAtranspD = inverseAtranspD * inverseDinverseAtranspD;
-            var dq = inverseAtranspDinverseDinverseAtranspD * vector3D;
+            var dq = inverseAtranspD * Matrix.Inverse(D * inverseAtranspD) * d;
+            //var DinverseAtranspD = D * inverseAtranspD;
+            //var inverseDinverseAtranspD = Matrix.Inverse(DinverseAtranspD); // there is trouble
+            //var inverseAtranspDinverseDinverseAtranspD = inverseAtranspD * inverseDinverseAtranspD;
+            //var dq = inverseAtranspDinverseDinverseAtranspD * d;
 
             for (int i = 0; i < n - 1; i++)
                 q[i] += dq[i, 0];
-        //}
+        }
         //public override void LagrangeMethodToThePoint(Vector3D p)
         //{
         //    DefaultA();
@@ -122,7 +122,7 @@ namespace ProjectARM
         //        q[i] += μFunction(μ, i);
         //}
 
-    public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D X)
+        public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D X)
         {
             throw new NotImplementedException();
         }

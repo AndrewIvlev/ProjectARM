@@ -23,30 +23,33 @@ namespace ProjectARM
             return X;
         }
 
-        //public static double[] GausMethod(double[,] A, double[] b)
+        //public static double[] GaussMethod(Matrix A, Matrix b)
         //{
-        //    var x = new double[]
+        //    var x = new double[A.columns];
         //    int i, j, k = 1;
         //    double alpha, sum = 0;
-
-        //    for (j = 0; j < size; j++)
+        //    for (j = 0; j < A.columns; j++)
         //    {
-        //        if (A[j][j] == 0)
+        //        if (A[j, j] == 0)
         //        {
-        //            int i = MaxElemInStr(A, size, j);
-        //            SwapString(A, size, j, i);
-        //            int tmp = b[j];
-        //            b[j] = b[i];
-        //            b[i] = tmp;
-                    
+        //            i = A.IndexOfMaxElemInRow(j);
+        //            A.SwapRows(j, i);
+        //            var tmp = b[j, 0];
+        //            b[j, 0] = b[i, 0];
+        //            b[i, 0] = tmp;
         //        }
-        //        if (A[j][j] == 0) { cout << "No solutions of the system.\n"; k = 0; break; }
+        //        if (A[j, j] == 0)
+        //        {
+        //            Console.WriteLine("No solutions of the system.");
+        //            k = 0;
+        //            break;
+        //        }
         //        for (i = j + 1; i < size; i++)
         //        {
-        //            alpha = A[i][j] / A[j][j];
+        //            alpha = A[i, j] / A[j, j];
         //            for (k = j; k < size; k++)
-        //                A[i][k] -= alpha * A[j][k];
-        //            b[i] -= alpha * b[j];
+        //                A[i, k] -= alpha * A[j, k];
+        //            b[i, 0] -= alpha * b[j, 0];
         //        }
         //    }
         //    if (k != 0)
@@ -54,24 +57,18 @@ namespace ProjectARM
         //        for (i = size - 1; i >= 0; i--)
         //        {
         //            sum = 0;
-        //            for (j = i + 1; j < size; j++)
-        //                sum += (A[i][j] * x[j]);
-        //            x[i] = (b[i] - sum) / (A[i][i]);
-        //        }
-        //        //output x
-        //        for (i = 0; i < size; i++)
-        //        {
-        //            cout << "x" << i + 1 << "=";
-        //            cout << x[i];
+        //            for (j = i + 1; j < A.columns; j++)
+        //                sum += (A[i, j] * x[j]);
+        //            x[i] = (b[i, 0] - sum) / (A[i, i]);
         //        }
         //    }
+        //    return x;
         //}
 
         //void Check(double** A, double* b, double* x, int size)
         //{
         //    double sum = 0, error = -1;
         //    double* Ab = new double[size];
-
         //    int f;
         //    cout << "1.Solution x\n2.My x\n";
         //    cin >> f;
@@ -82,10 +79,8 @@ namespace ProjectARM
         //        {
         //            cout << "x" << i + 1 << "=";
         //            cin >> x[i];
-        //            cout << endl;
         //        }
         //    }
-
         //    for (int i = 0; i < size; i++)
         //    {
         //        sum = 0;

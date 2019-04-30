@@ -14,13 +14,13 @@ namespace ProjectARM_Tests
         [SetUp]
         public void SetUp()
         {
-            //ManipConfigDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "ManipConfig");
-            ManipConfigDirectory = @"D:\repo\ProjectARM\ProjectARM\ManipConfig\";
+            ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfig");
         }
 
         //[TestCase("SRCRPRPR.json")]
         //[TestCase("SRRPR.json", 100, 0, 0)]
-        [TestCase("SRRPR.json", 0, 10, 90)]
+        //[TestCase("SRRPR.json", 0, 10, 90)]
+        [TestCase("SRPR.json", 0, 4, 96)]
         public void LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
             var path = Path.Combine(ManipConfigDirectory, fileName);
