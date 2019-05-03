@@ -59,12 +59,6 @@ namespace ProjectARM
             for (int i = 0; i < n - 1; i++)
                 q[i] = 0;
         }
-        //public static MathModel Deserialize(string jsonContents)
-        //{
-        //    var local = ... // Do the JSON deserialization
-        //    local.PostCreateLogic();
-        //    return local;
-        //}
 
         public  double MaxL(double[] UnitTypePmaxLen)
         {
