@@ -64,37 +64,6 @@ namespace ProjectARM
 
         public Vector3D F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
 
-        public override void LagrangeMethodToThePoint(Vector3D p)
-        {
-            DefaultA();
-
-            CalcT();
-            var F = this.F(n - 1);
-
-            CalcdS();
-            CalcdT();
-            var D = CalcD();
-
-            var transpD = Matrix.Transpose(D);
-            var inverseA = Matrix.Inverse(A);
-
-            var d = new Matrix(3, 1)
-            {
-                [0, 0] = p.X - F.X,
-                [1, 0] = p.Y - F.Y,
-                [2, 0] = p.Z - F.Z
-            };
-            //There we need to solve linear equations system (D|d) and get dq - solution of this system
-            var inverseAtranspD = inverseA * transpD;
-            var dq = inverseAtranspD * Matrix.Inverse(D * inverseAtranspD) * d;
-            //var DinverseAtranspD = D * inverseAtranspD;
-            //var inverseDinverseAtranspD = Matrix.Inverse(DinverseAtranspD); // there is trouble
-            //var inverseAtranspDinverseDinverseAtranspD = inverseAtranspD * inverseDinverseAtranspD;
-            //var dq = inverseAtranspDinverseDinverseAtranspD * d;
-
-            for (int i = 0; i < n - 1; i++)
-                q[i] += dq[i, 0];
-        }
         //public override void LagrangeMethodToThePoint(Vector3D p)
         //{
         //    DefaultA();
@@ -115,12 +84,49 @@ namespace ProjectARM
         //        [1, 0] = p.Y - F.Y,
         //        [2, 0] = p.Z - F.Z
         //    };
+        //    //There we need to solve linear equations system (D|d) and get dq - solution of this system
+        //    var inverseAtranspD = inverseA * transpD;
+        //    var dq = inverseAtranspD * Matrix.GeneralInverse(D * inverseAtranspD) * d; //TODO: Use generalized inverse in this case
 
-        //    var μ = Matrix.Inverse(D) * d;
-
-        //    for (int i = 0; i<n - 1; i++)
-        //        q[i] += μFunction(μ, i);
+        //    for (int i = 0; i < n - 1; i++)
+        //        q[i] += dq[i, 0];
         //}
+
+        public override void LagrangeMethodToThePoint(Vector3D p)
+        {
+            DefaultA();
+
+            CalcT();
+            var F = this.F(n - 1);
+
+            CalcdS();
+            CalcdT();
+            var D = CalcD();
+
+            //var transpD = Matrix.Transpose(D);
+
+            var d = new Vector3D
+            (
+                p.X - F.X,
+                p.Y - F.Y,
+                p.Z - F.Z
+            );
+
+            var C = CalcC();
+            var detC = Det3D(C);
+            var Cx = new Matrix(C);
+            var Cy = new Matrix(C);
+            var Cz = new Matrix(C);
+
+            var μ = new Vector3D(
+                Det3D(Cx) / detC,
+                Det3D(Cy) / detC,
+                Det3D(Cz) / detC
+            );
+
+            for (int i = 0; i < n - 1; i++)
+                q[i] += μFunction(μ, i);
+        }
 
         public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D X)
         {
@@ -136,43 +142,72 @@ namespace ProjectARM
 
         public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
 
-        private double μFunction(Matrix μ, int i) => (μ[0, 0] * GetB(i).X + μ[1, 0] * GetB(i).Y + μ[2, 0] * GetB(i).Z) / (2 * A[i, i]);
+        private double μFunction(Vector3D μ, int i) => (μ.X * GetB(i).X + μ.Y * GetB(i).Y + μ.Z * GetB(i).Z) / (2 * A[i, i]);
 
         // Составляем матрицы S и B для каждого звена по их типу
         private void CalcBSq()
         {
-            var i = 0;
-            foreach (var unit in units)
+            if (units[0].type == 'S')
             {
-                //var i = Array.IndexOf(units, unit);
+                var unit = units[0];
+                B[0] = new BlockMatrix();
+                B[0][0, 0] = Math.Cos(unit.angle);
+                B[0][0, 1] = -Math.Sin(unit.angle);
+                B[0][1, 0] = Math.Sin(unit.angle);
+                B[0][1, 1] = Math.Cos(unit.angle);
+                B[0][2, 3] = unit.len;  
+            }
+
+            for (var i = 1; i < n; i++)
+            {
+                var unit = units[i];
                 switch (unit.type)
                 {
-                    case 'S':
-                        B[i] = new BlockMatrix();
-                        B[i][0, 0] = Math.Cos(unit.angle);
-                        B[i][0, 1] = - Math.Sin(unit.angle);
-                        B[i][1, 0] = Math.Sin(unit.angle);
-                        B[i][1, 1] = Math.Cos(unit.angle);
-                        B[i][2, 3] = unit.len;
-                        break;
                     case 'R':
                         S[i] = new BlockMatrix();
                         S[i][0, 0] = Math.Cos(q[i - 1]);
                         S[i][0, 1] = - Math.Sin(q[i - 1]);
                         S[i][1, 0] = Math.Sin(q[i - 1]);
                         S[i][1, 1] = Math.Cos(q[i - 1]);
-
-                        B[i] = new BlockMatrix();
-                        B[i][2, 3] = unit.len;
                         break;
                     case 'P':
                         S[i] = new BlockMatrix();
-                        S[i][2, 3] = unit.len + q[i - 1];
-
-                        B[i] = new BlockMatrix();
+                        S[i][2, 3] = q[i - 1];
                         break;
+                    default:
+                        throw new Exception("Unexpected unit type");
                 }
-                i++;
+                B[i] = new BlockMatrix();
+                B[i][2, 3] = unit.len;
+            }
+        }
+
+        private void CalcdS()
+        {
+
+            for (var i = 1; i < n; i++)
+            {
+                var unit = units[i];
+                switch (unit.type)
+                {
+                    case 'R':
+                        dS[i] = new BlockMatrix();
+                        dS[i][0, 0] = -Math.Sin(q[i - 1]);
+                        dS[i][0, 1] = -Math.Cos(q[i - 1]);
+                        dS[i][1, 0] = Math.Cos(q[i - 1]);
+                        dS[i][1, 1] = -Math.Sin(q[i - 1]);
+                        dS[i][2, 2] = 0;
+                        break;
+                    case 'P':
+                        dS[i] = new BlockMatrix();
+                        dS[i][0, 0] = 0;
+                        dS[i][1, 1] = 0;
+                        dS[i][2, 2] = 0;
+                        dS[i][2, 3] = 1;
+                        break;
+                    default:
+                        throw new Exception("Unexpected unit type");
+                }
             }
         }
 
@@ -187,15 +222,12 @@ namespace ProjectARM
                 T.Add(tmp *= S[i] * B[i]);
         }
 
-        //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Vector3D GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
-
         private BlockMatrix GetdF(int i)
         {
             var dF = B[0];
 
             for (var k = 1; k < n; k++)
-                dF *= k == i ? dS[i] * B[i] : S[i] * B[i];
+                dF *= k == i ? dS[k] * B[k] : S[k] * B[k];
 
             return dF;
         }
@@ -207,33 +239,8 @@ namespace ProjectARM
                 dT.Add(GetdF(i));
         }
 
-        private void CalcdS()
-        {
-            var i = 0;
-            foreach (var unit in units)
-            {
-                //var i = Array.IndexOf(units, unit);
-                switch (unit.type)
-                {
-                    case 'R':
-                        dS[i] = new BlockMatrix();
-                        dS[i][0, 0] = - Math.Sin(q[i - 1]);
-                        dS[i][0, 1] = - Math.Cos(q[i - 1]);
-                        dS[i][1, 0] = Math.Cos(q[i - 1]);
-                        dS[i][1, 1] = - Math.Sin(q[i - 1]);
-                        dS[i][2, 2] = 0;
-                        break;
-                    case 'P':
-                        dS[i] = new BlockMatrix();
-                        dS[i][0, 0] = 0;
-                        dS[i][1, 1] = 0;
-                        dS[i][2, 2] = 0;
-                        dS[i][2, 3] = 1;
-                        break;
-                }
-                i++;
-            }
-        }
+        //That function return vector ( dFxqi, dFyqi, dFzqi )
+        private Vector3D GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
 
         private Matrix CalcD()
         {
@@ -248,6 +255,20 @@ namespace ProjectARM
             }
 
             return D;
+        }
+
+        private Matrix CalcC()
+        {
+            var C = new Matrix();
+
+            return C;
+        }
+
+        private double Det3D(Matrix M)
+        {
+            double det = 0;
+
+            return det;
         }
     }
 }

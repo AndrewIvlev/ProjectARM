@@ -20,7 +20,7 @@ namespace ProjectARM_Tests
         //[TestCase("SRCRPRPR.json")]
         //[TestCase("SRRPR.json", 100, 0, 0)]
         //[TestCase("SRRPR.json", 0, 10, 90)]
-        [TestCase("SRPR.json", 0, 4, 96)]
+        [TestCase("SRPR.json", 0, 1, 64)]
         public void LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
             var path = Path.Combine(ManipConfigDirectory, fileName);

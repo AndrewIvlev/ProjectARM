@@ -17,6 +17,13 @@ namespace ProjectARM
             M = new double[rows = 0, columns = 0];
         }
 
+        public Matrix(Matrix A)
+        {
+            M = A.M;
+            rows = A.rows;
+            columns = A.columns;
+        }
+
         public Matrix(int rows, int columns)
         {
             M = new double[this.rows = rows, this.columns = columns];
