@@ -17,11 +17,12 @@ namespace ProjectARM
             M = new double[rows = 0, columns = 0];
         }
 
-        public Matrix(Matrix A)
+        public Matrix(int n)
         {
-            M = A.M;
-            rows = A.rows;
-            columns = A.columns;
+            M = new double[rows = n, columns = n];
+            for (int i = 0; i < rows; i++)
+            for (int j = 0; j < columns; j++)
+                M[i, j] = 0;
         }
 
         public Matrix(int rows, int columns)
@@ -30,6 +31,13 @@ namespace ProjectARM
             for (int i = 0; i < rows; i++)
             for (int j = 0; j < columns; j++)
                 M[i, j] = 0;
+        }
+
+        public Matrix(Matrix A)
+        {
+            M = A.M;
+            rows = A.rows;
+            columns = A.columns;
         }
 
         public double this[int i, int j]

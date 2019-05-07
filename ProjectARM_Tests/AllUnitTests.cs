@@ -19,9 +19,9 @@ namespace ProjectARM_Tests
 
         //[TestCase("SRCRPRPR.json")]
         //[TestCase("SRRPR.json", 100, 0, 0)]
-        //[TestCase("SRRPR.json", 0, 10, 90)]
-        [TestCase("SRPR.json", 0, 1, 64)]
-        public void LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
+        [TestCase("SRRPR.json", 1, 0, 98)]
+        //[TestCase("SRPR.json", 2, 2, 63)]
+        public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
             var path = Path.Combine(ManipConfigDirectory, fileName);
             var sr = new StreamReader(path);
@@ -35,6 +35,23 @@ namespace ProjectARM_Tests
             Console.WriteLine($"After one iteration q = {model.q}");
 
             Assert.IsTrue(model.q.Equals(new double[] {0, 1, 0, 1})); //TODO: calc real q for that assert
+        }
+
+        [TestCase("SRRPR.json", 1, 99, 0)]
+        public void ExplicitMM_LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
+        {
+            var path = Path.Combine(ManipConfigDirectory, fileName);
+            var sr = new StreamReader(path);
+            var jsonString = sr.ReadToEnd();
+            var manipConfig = JsonConvert.DeserializeObject<ExplicitMathModel>(jsonString);
+            manipConfig.AllAngleToRadianFromDegree();
+            var model = new ExplicitMathModel(manipConfig);
+
+            Console.WriteLine($"Current q = {model.q}");
+            model.LagrangeMethodToThePoint(new Vector3D(px, py, pz));
+            Console.WriteLine($"After one iteration q = {model.q}");
+
+            Assert.IsTrue(model.q.Equals(new double[] { 0, 1, 0, 1 })); //TODO: calc real q for that assert
         }
 
         [Test]
@@ -53,7 +70,7 @@ namespace ProjectARM_Tests
                 new unit{type = 'R', len = 20, angle = 0}
             });
             
-            string acturalJSON = JsonConvert.SerializeObject(model); ;
+            var acturalJSON = JsonConvert.SerializeObject(model);
             
             Assert.AreEqual(expectedJSON, acturalJSON);
         }
@@ -82,30 +99,6 @@ namespace ProjectARM_Tests
             var actualAB = A * B;
 
             Assert.IsTrue(expectedAb == actualAB);
-        }
-
-        [Test]
-        public void InversMatrix()
-        {
-            var M = new Matrix(4, 4)
-            {
-                [0, 0] = 3, [0, 1] = 7, [0, 2] = 2, [0, 3] = 5,
-                [1, 0] = 1, [1, 1] = 8, [1, 2] = 4, [1, 3] = 2,
-                [2, 0] = 2, [2, 1] = 1, [2, 2] = 9, [2, 3] = 3,
-                [3, 0] = 5, [3, 1] = 4, [3, 2] = 7, [3, 3] = 1,
-            };
-            var expectedInverseM = new Matrix(4, 4)
-            {
-                [0, 0] = 0.097,  [0, 1] = -0.183, [0, 2] = -0.115, [0, 3] = 0.224,
-                [1, 0] = -0.019, [1, 1] = 0.146,  [1, 2] = -0.068, [1, 3] = 0.010,
-                [2, 0] = -0.087, [2, 1] = 0.064,  [2, 2] = 0.103,  [2, 3] = -0.002,
-                [3, 0] = 0.204,  [3, 1] = -0.120, [3, 2] = 0.123,  [3, 3] = -0.147,
-            };
-
-            var actualInveseM = Matrix.Inverse(M);
-
-            //TODO: сделать сравнение матриц с выбором погрешности
-            Assert.IsTrue(expectedInverseM == actualInveseM);
         }
     }
 }

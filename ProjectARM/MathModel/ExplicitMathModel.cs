@@ -7,15 +7,26 @@ namespace ProjectARM
         delegate double function(double[] q);
         static readonly function[] dFxpodqi = { dFxpodq1, dFxpodq2, dFxpodq3, dFxpodq4 };
         static readonly function[] dFypodqi = { dFypodq1, dFypodq2, dFypodq3, dFypodq4 };
-        private static readonly double[] Len;
+        private static double[] Len;
+
+        public ExplicitMathModel() { }
 
         public ExplicitMathModel(int n) : base(n)
         {
+            Len = new double[n];
             for (int i = 0; i < n; i++)
                 Len[i] = units[i].len;
         }
         public ExplicitMathModel(int n, unit[] units) : base(n, units)
         {
+            Len = new double[n];
+            for (int i = 0; i < n; i++)
+                Len[i] = units[i].len;
+        }
+
+        public ExplicitMathModel(MathModel model) : base(model)
+        {
+            Len = new double[n];
             for (int i = 0; i < n; i++)
                 Len[i] = units[i].len;
         }

@@ -6,6 +6,7 @@ namespace ProjectARM
     //Матричное описание модели манипулятора
     public class MatrixMathModel : MathModel
     {
+        private Matrix D;
         private ArrayList T;
         private ArrayList dT;
         private BlockMatrix[] B;
@@ -16,6 +17,7 @@ namespace ProjectARM
 
         public MatrixMathModel(MathModel model) : base(model)
         {
+            D = new Matrix(3, n - 1);
             B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
@@ -27,11 +29,11 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            CalcBSq();
         }
 
         public MatrixMathModel(int n) : base(n)
         {
+            D = new Matrix(3, n - 1);
             B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
@@ -43,11 +45,11 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            CalcBSq();
         }
 
         public MatrixMathModel(int n, unit[] units) : base(n, units)
         {
+            D = new Matrix(3, n - 1);
             B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
@@ -59,64 +61,31 @@ namespace ProjectARM
             }
             S[0] = null;
             dS[0] = null;
-            CalcBSq();
         }
 
         public Vector3D F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
-
-        //public override void LagrangeMethodToThePoint(Vector3D p)
-        //{
-        //    DefaultA();
-
-        //    CalcT();
-        //    var F = this.F(n - 1);
-
-        //    CalcdS();
-        //    CalcdT();
-        //    var D = CalcD();
-
-        //    var transpD = Matrix.Transpose(D);
-        //    var inverseA = Matrix.Inverse(A);
-
-        //    var d = new Matrix(3, 1)
-        //    {
-        //        [0, 0] = p.X - F.X,
-        //        [1, 0] = p.Y - F.Y,
-        //        [2, 0] = p.Z - F.Z
-        //    };
-        //    //There we need to solve linear equations system (D|d) and get dq - solution of this system
-        //    var inverseAtranspD = inverseA * transpD;
-        //    var dq = inverseAtranspD * Matrix.GeneralInverse(D * inverseAtranspD) * d; //TODO: Use generalized inverse in this case
-
-        //    for (int i = 0; i < n - 1; i++)
-        //        q[i] += dq[i, 0];
-        //}
-
+        
         public override void LagrangeMethodToThePoint(Vector3D p)
         {
             DefaultA();
-
+            CalcBSq();
             CalcT();
+
             var F = this.F(n - 1);
-
-            CalcdS();
-            CalcdT();
-            var D = CalcD();
-
-            //var transpD = Matrix.Transpose(D);
-
-            var d = new Vector3D
-            (
+            var d = new Vector3D(
                 p.X - F.X,
                 p.Y - F.Y,
                 p.Z - F.Z
             );
 
+            CalcdS();
+            CalcdT();
+            CalcD();
             var C = CalcC();
             var detC = Det3D(C);
-            var Cx = new Matrix(C);
-            var Cy = new Matrix(C);
-            var Cz = new Matrix(C);
+            var Cx = ConcatAsColumn(C, d, 0);
+            var Cy = ConcatAsColumn(C, d, 1);
+            var Cz = ConcatAsColumn(C, d, 2);
 
             var μ = new Vector3D(
                 Det3D(Cx) / detC,
@@ -124,8 +93,11 @@ namespace ProjectARM
                 Det3D(Cz) / detC
             );
 
-            for (int i = 0; i < n - 1; i++)
-                q[i] += μFunction(μ, i);
+            for (var i = 0; i < n - 1; i++)
+            {
+                var dF = GetdF(i);
+                q[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
+            }
         }
 
         public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D X)
@@ -133,16 +105,9 @@ namespace ProjectARM
             throw new NotImplementedException();
         }
 
-        public override double GetPointError(Vector3D p)
-        {
-            throw new NotImplementedException();
-        }
-
-        public double GetPointError(double[] q, Vector3D p) => NormaVectora(new Vector3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
+        public override double GetPointError(Vector3D p) => NormaVectora(new Vector3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
 
         public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
-
-        private double μFunction(Vector3D μ, int i) => (μ.X * GetB(i).X + μ.Y * GetB(i).Y + μ.Z * GetB(i).Z) / (2 * A[i, i]);
 
         // Составляем матрицы S и B для каждого звена по их типу
         private void CalcBSq()
@@ -222,7 +187,7 @@ namespace ProjectARM
                 T.Add(tmp *= S[i] * B[i]);
         }
 
-        private BlockMatrix GetdF(int i)
+        private BlockMatrix CalcdF(int i)
         {
             var dF = B[0];
 
@@ -236,39 +201,68 @@ namespace ProjectARM
         {
             dT = new ArrayList();
             for (var i = 1; i < n; i++)
-                dT.Add(GetdF(i));
+                dT.Add(CalcdF(i));
         }
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Vector3D GetB(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
+        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
 
-        private Matrix CalcD()
+        /// <summary>
+        /// D is Matrix of gradients Fx, Fy and Fz
+        /// ( Fxq1 Fxq2 ... Fxqn )
+        /// ( Fyq1 Fyq2 ... Fyqn )
+        /// ( Fzq1 Fzq2 ... Fzqn )
+        /// </summary>
+        private void CalcD()
         {
-            var D = new Matrix(3, n - 1);
-
             for (var i = 0; i < n - 1; i++)
             {
-                var b = GetB(i);
+                var b = GetdF(i);
                 D[0, i] = b.X;
                 D[1, i] = b.Y;
                 D[2, i] = b.Z;
             }
-
-            return D;
         }
 
+        // Вычисляем матрицу коэффициентов
         private Matrix CalcC()
         {
-            var C = new Matrix();
+            var C = new Matrix(3);
+
+            for (var i = 0; i < n - 1; i++)
+            {
+                C[0, 0] += D[0, i] * D[0, i];
+                C[0, 1] += D[0, i] * D[1, i];
+                C[0, 2] += D[0, i] * D[2, i];
+                C[1, 1] += D[1, i] * D[1, i];
+                C[1, 2] += D[1, i] * D[2, i];
+                C[2, 2] += D[2, i] * D[2, i];
+            }
+            C[1, 0] = C[0, 1];
+            C[2, 0] = C[0, 2];
+            C[2, 1] = C[1, 2];
 
             return C;
         }
 
-        private double Det3D(Matrix M)
-        {
-            double det = 0;
+        private double Det3D(Matrix M) =>
+            M[0, 0] * (M[1, 1] * M[2, 2] - M[2, 1] * M[1, 2])
+            - M[0, 1] * (M[1, 0] * M[2, 2] - M[1, 2] * M[2, 0])
+            + M[0, 2] * (M[1, 0] * M[2, 2] - M[2, 0] * M[1, 1]);
 
-            return det;
+        private Matrix ConcatAsColumn(Matrix A, Vector3D v, int j)
+        {
+            if (A.rows != 3)
+                throw new ArgumentOutOfRangeException();
+
+            var res = new Matrix(A)
+            {
+                [0, j] = v.X,
+                [1, j] = v.Y,
+                [2, j] = v.Z
+            };
+            
+            return res;
         }
     }
 }
