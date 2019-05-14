@@ -9,7 +9,6 @@ namespace ProjectARM
         private Matrix D;
         private ArrayList T;
         private ArrayList dT;
-        private BlockMatrix[] B;
         private BlockMatrix[] S;
         private BlockMatrix[] dS;
 
@@ -18,12 +17,10 @@ namespace ProjectARM
         public MatrixMathModel(MathModel model) : base(model)
         {
             D = new Matrix(3, n - 1);
-            B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
             for (int i = 0; i < n; i++)
             {
-                B[i] = new BlockMatrix();
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
@@ -34,12 +31,10 @@ namespace ProjectARM
         public MatrixMathModel(int n) : base(n)
         {
             D = new Matrix(3, n - 1);
-            B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
             for (int i = 0; i < n; i++)
             {
-                B[i] = new BlockMatrix();
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
@@ -50,12 +45,10 @@ namespace ProjectARM
         public MatrixMathModel(int n, unit[] units) : base(n, units)
         {
             D = new Matrix(3, n - 1);
-            B = new BlockMatrix[n];
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
             for (int i = 0; i < n; i++)
             {
-                B[i] = new BlockMatrix();
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
@@ -68,7 +61,7 @@ namespace ProjectARM
         public override void LagrangeMethodToThePoint(Vector3D p)
         {
             DefaultA();
-            CalcBSq();
+            CalcS();
             CalcT();
 
             var F = this.F(n - 1);
@@ -110,18 +103,8 @@ namespace ProjectARM
         public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
 
         // Составляем матрицы S и B для каждого звена по их типу
-        private void CalcBSq()
+        private void CalcS()
         {
-            if (units[0].type == 'S')
-            {
-                var unit = units[0];
-                B[0] = new BlockMatrix();
-                B[0][0, 0] = Math.Cos(unit.angle);
-                B[0][0, 1] = -Math.Sin(unit.angle);
-                B[0][1, 0] = Math.Sin(unit.angle);
-                B[0][1, 1] = Math.Cos(unit.angle);
-                B[0][2, 3] = unit.len;  
-            }
 
             for (var i = 1; i < n; i++)
             {
@@ -142,8 +125,6 @@ namespace ProjectARM
                     default:
                         throw new Exception("Unexpected unit type");
                 }
-                B[i] = new BlockMatrix();
-                B[i][2, 3] = unit.len;
             }
         }
 
@@ -181,18 +162,18 @@ namespace ProjectARM
             T = new ArrayList();
             var tmp = new BlockMatrix();
 
-            T.Add(tmp = B[0]);
+            T.Add(tmp = units[0].B);
 
             for (var i = 1; i < n; i++)
-                T.Add(tmp *= S[i] * B[i]);
+                T.Add(tmp *= S[i] * units[i].B);
         }
 
         private BlockMatrix CalcdF(int i)
         {
-            var dF = B[0];
+            var dF = units[0].B;
 
             for (var k = 1; k < n; k++)
-                dF *= k == i ? dS[k] * B[k] : S[k] * B[k];
+                dF *= k == i ? dS[k] * units[k].B : S[k] * units[k].B;
 
             return dF;
         }

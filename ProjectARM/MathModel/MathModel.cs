@@ -14,6 +14,7 @@ namespace ProjectARM
         public char type;
         public double len;
         public double angle;
+        public BlockMatrix B;
     }
     public abstract class MathModel
     {

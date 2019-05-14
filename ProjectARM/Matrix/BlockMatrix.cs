@@ -19,6 +19,13 @@ namespace ProjectARM
         {
             M = new double[,] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 } };
         }
+        public BlockMatrix(double[,] mDoubles)
+        {
+            M = new double[3, 4];
+            for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 4; j++)
+                M[i, j] = mDoubles[i, j];
+        }
 
         public Vector3D GetLastColumn() => new Vector3D(M[0, 3], M[1, 3], M[2, 3]);
         

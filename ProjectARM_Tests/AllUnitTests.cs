@@ -16,18 +16,12 @@ namespace ProjectARM_Tests
         {
             ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfig");
         }
-
-        //[TestCase("SRCRPRPR.json")]
-        //[TestCase("SRRPR.json", 100, 0, 0)]
-        [TestCase("SRRPR.json", 1, 0, 98)]
-        //[TestCase("SRPR.json", 2, 2, 63)]
+        
+        [TestCase("SRCPR.json", 2, 42, 2)]
         public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
-            var path = Path.Combine(ManipConfigDirectory, fileName);
-            var sr = new StreamReader(path);
-            var jsonString = sr.ReadToEnd();
-            var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonString);
-            manipConfig.AllAngleToRadianFromDegree();
+            var jsonStringMatrixMathModel = new StreamReader(Path.Combine(ManipConfigDirectory, fileName)).ReadToEnd();
+            var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
             var model = new MatrixMathModel(manipConfig);
             
             Console.WriteLine($"Current q = {model.q}");
@@ -57,22 +51,68 @@ namespace ProjectARM_Tests
         [Test]
         public void ManipConfigToJson()
         {
-            string expectedJSON =
-                "{\"q\":[0.0,0.0,0.0,0.0],\"A\":{\"M\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]]," +
-                "\"rows\":4,\"columns\":4},\"units\":[{\"type\":\"S\",\"len\":0.0,\"angle\":0.0},{\"type\":\"R\",\"len\":25.0,\"angle\":0.0}," +
-                "{\"type\":\"R\",\"len\":25.0,\"angle\":0.0},{\"type\":\"P\",\"len\":30.0,\"angle\":0.0},{\"type\":\"R\",\"len\":20.0,\"angle\":0.0}],\"n\":5}";
+            #region Expected Json string
+
+            const string expectedJson = 
+                "{\"q\":[0.0,0.0,0.0,0.0],\"units\":[{\"type\":\"S\",\"len\":0.0,\"angle\":0.0," +
+                "\"B\":{\"M\":[[0.0,0.0,1.0,0.0],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]],\"rows\":" +
+                "0,\"columns\":0}},{\"type\":\"R\",\"len\":13.0,\"angle\":0.0,\"B\":{\"M\":[[1." +
+                "0,0.0,0.0,13.0],[0.0,0.0,-1.0,0.0],[0.0,1.0,0.0,0.0]],\"rows\":0,\"columns\":0" +
+                "}},{\"type\":\"C\",\"len\":16.0,\"angle\":0.0,\"B\":{\"M\":[[0.0,0.0,1.0,16.0]" +
+                ",[0.0,1.0,0.0,0.0],[-1.0,0.0,0.0,0.0]],\"rows\":0,\"columns\":0}},{\"type\":\"" +
+                "P\",\"len\":4.0,\"angle\":0.0,\"B\":{\"M\":[[-1.0,0.0,0.0,0.0],[0.0,0.0,1.0,0." +
+                "0],[0.0,1.0,0.0,4.0]],\"rows\":0,\"columns\":0}},{\"type\":\"R\",\"len\":11.0," +
+                "\"angle\":0.0,\"B\":{\"M\":[[-1.0,0.0,0.0,0.0],[0.0,0.0,1.0,11.0],[0.0,1.0,0.0" +
+                ",0.0]],\"rows\":0,\"columns\":0}}],\"n\":5}";
+
+            #endregion
+
+            #region Actual Matrix Math Model
+
             MatrixMathModel model = new MatrixMathModel(5, new[]
             {
-                new unit{type = 'S', len = 0,  angle = 0},
-                new unit{type = 'R', len = 25, angle = 0},
-                new unit{type = 'R', len = 25, angle = 0},
-                new unit{type = 'P', len = 30, angle = 0},
-                new unit{type = 'R', len = 20, angle = 0}
+                new unit{type = 'S', len = 0,  angle = 0, B = new BlockMatrix(
+                    new double[,]{
+                        {0, 0, 1, 0},
+                        {1, 0, 0, 0},
+                        {0, 1, 0, 0}
+                    })
+                },
+                new unit{type = 'R', len = 13, angle = 0, B = new BlockMatrix(
+                    new double[,]{
+                        {1, 0, 0, 13},
+                        {0, 0, -1, 0},
+                        {0, 1, 0, 0}
+                    })
+                },
+                new unit{type = 'C', len = 16, angle = 0, B = new BlockMatrix(
+                    new double[,]{
+                        {0, 0, 1, 16},
+                        {0, 1, 0, 0},
+                        {-1, 0, 0, 0}
+                    })
+                },
+                new unit{type = 'P', len = 4, angle = 0, B = new BlockMatrix(
+                    new double[,]{
+                        {-1, 0, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 1, 0, 4}
+                    })
+                },
+                new unit{type = 'R', len = 11, angle = 0, B = new BlockMatrix(
+                    new double[,]{
+                        {-1, 0, 0, 0},
+                        {0, 0, 1, 11},
+                        {0, 1, 0, 0}
+                    })
+                }
             });
+
+            #endregion
+
+            var acturalJson = JsonConvert.SerializeObject(model);
             
-            var acturalJSON = JsonConvert.SerializeObject(model);
-            
-            Assert.AreEqual(expectedJSON, acturalJSON);
+            Assert.AreEqual(expectedJson, acturalJson);
         }
 
         [Test]

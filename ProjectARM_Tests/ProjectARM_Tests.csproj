@@ -60,15 +60,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ManipConfig\SRCRPRPR.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="ManipConfig\SRPR.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="ManipConfig\SRRPR.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="ManipConfig\SCRCP .json" />
+    <None Include="ManipConfig\SRCPR.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
