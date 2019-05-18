@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
@@ -51,7 +52,7 @@ namespace ManipulationSystemLibrary
         }
 
         //Use this method for draw graphics
-        public Vector3D F(int i) => (T[i] as BlockMatrix)?.GetLastColumn();
+        public Vector3D F(int i) => (T[i] as BlockMatrix).GetLastColumn();
         
         public override void LagrangeMethodToThePoint(Vector3D p)
         {
@@ -185,7 +186,7 @@ namespace ManipulationSystemLibrary
         }
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix)?.GetLastColumn();
+        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix).GetLastColumn();
 
         /// <summary>
         /// D is Matrix of gradients Fx, Fy and Fz

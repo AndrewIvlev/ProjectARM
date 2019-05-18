@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ManipulationSystemLibrary</RootNamespace>
     <AssemblyName>ManipulationSystemLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -42,14 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MathEngine.cs" />
     <Compile Include="MathModel\ExplicitMathModel.cs" />
     <Compile Include="MathModel\MathModel.cs" />
     <Compile Include="MathModel\MatrixMathModel.cs" />
     <Compile Include="Matrix\BlockMatrix.cs" />
     <Compile Include="Matrix\LinearSystemSolver.cs" />
     <Compile Include="Matrix\Matrix.cs" />
-    <Compile Include="Matrix\Vector3D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Trajectory\LagrangeInterpolation.cs" />
     <Compile Include="Trajectory\Trajectory.cs" />

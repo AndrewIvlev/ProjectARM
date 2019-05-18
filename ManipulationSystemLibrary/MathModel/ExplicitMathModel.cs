@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
@@ -48,7 +49,7 @@ namespace ManipulationSystemLibrary
                 q[i] += MagicFunc(μ, q, D[i, i], dFxpodqi[i], dFypodqi[i]);
         }
 
-        public override double GetPointError(Vector3D p) => Vector3D.NormaVectora(new Vector3D(p.X - Fx(q), p.Y - Fy(q), 0));
+        public override double GetPointError(Vector3D p) => NormaVectora(new Vector3D(p.X - Fx(q), p.Y - Fy(q), 0));
         
         public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D x) =>
             new Vector3D(

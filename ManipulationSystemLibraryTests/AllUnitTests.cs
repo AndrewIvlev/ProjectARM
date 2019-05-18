@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Windows.Media.Media3D;
 using ManipulationSystemLibrary;
 using Newtonsoft.Json;
 using NUnit.Framework;

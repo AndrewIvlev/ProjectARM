@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ManipulationSystemLibrary
 {
-    class LagrangeInterpolate
+    public class LagrangeInterpolate
     {
         private List<double> allX = new List<double>();
         private List<double> allY = new List<double>();

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
-    class Trajectory
+    public class Trajectory
     {
         /// <summary>
         /// Опорные точки

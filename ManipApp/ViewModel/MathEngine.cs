@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using System.Windows.Media.Media3D;
+using ManipulationSystemLibrary;
 
-namespace ManipulationSystemLibrary
+namespace ManipApp.ViewModel
 {
     class MathEngine
     {

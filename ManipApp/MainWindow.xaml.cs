@@ -15,6 +15,9 @@ using System.Windows.Shapes;
 
 namespace ManipApp
 {
+    using System.Collections.Generic;
+
+    using OxyPlot;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -23,6 +26,26 @@ namespace ManipApp
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void OpenManipulatorFile_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+        
+        private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SplitPathWithStep_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

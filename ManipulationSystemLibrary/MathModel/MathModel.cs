@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
@@ -100,5 +101,6 @@ namespace ManipulationSystemLibrary
 
         public static double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
         public static double RadianToDegree(double angle) => angle * (180.0 / Math.PI);
+        public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2) + Math.Pow(p.Z, 2));
     }
 }
