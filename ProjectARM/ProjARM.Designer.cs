@@ -21,6 +21,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProjARM));
             this.label2 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -91,6 +94,7 @@
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.delta = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCanvas)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unitsDataGridView)).BeginInit();
@@ -109,6 +113,7 @@
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.delta)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
@@ -594,6 +599,7 @@
             this.rightTableLayoutPanel.Controls.Add(this.label2, 0, 5);
             this.rightTableLayoutPanel.Controls.Add(this.computetionProgressBar, 0, 3);
             this.rightTableLayoutPanel.Controls.Add(this.tableLayoutPanel3, 0, 4);
+            this.rightTableLayoutPanel.Controls.Add(this.delta, 0, 2);
             this.rightTableLayoutPanel.Location = new System.Drawing.Point(924, 3);
             this.rightTableLayoutPanel.Name = "rightTableLayoutPanel";
             this.rightTableLayoutPanel.RowCount = 6;
@@ -614,7 +620,7 @@
             this.tableLayoutPanel2.ColumnCount = 3;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 85.4251F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.5749F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 83F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 84F));
             this.tableLayoutPanel2.Controls.Add(this.label6, 2, 1);
             this.tableLayoutPanel2.Controls.Add(this.Klabel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label5, 2, 0);
@@ -947,6 +953,30 @@
             this.trackBar1.Size = new System.Drawing.Size(663, 33);
             this.trackBar1.TabIndex = 2;
             // 
+            // delta
+            // 
+            this.delta.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            chartArea1.AxisX.Title = "iteration";
+            chartArea1.AxisX.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea1.AxisY.Title = "Δ";
+            chartArea1.AxisY.TitleFont = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            chartArea1.Name = "ChartArea1";
+            this.delta.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.delta.Legends.Add(legend1);
+            this.delta.Location = new System.Drawing.Point(3, 134);
+            this.delta.Name = "delta";
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.delta.Series.Add(series1);
+            this.delta.Size = new System.Drawing.Size(331, 297);
+            this.delta.TabIndex = 28;
+            this.delta.Text = "chart1";
+            // 
             // ProjARM
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -989,6 +1019,7 @@
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.delta)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1064,6 +1095,7 @@
         private System.Windows.Forms.PictureBox pbCanvas;
         private System.Windows.Forms.Button pathPlanningBtn;
         private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart delta;
     }
 }
 

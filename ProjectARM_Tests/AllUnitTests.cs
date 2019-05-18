@@ -17,18 +17,24 @@ namespace ProjectARM_Tests
             ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfig");
         }
         
-        [TestCase("SRCPR.json", 2, 42, 2)]
-        public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
+        [TestCase("SRRPR.json", 1, 44, 1)]
+        public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double pX, double pY, double pZ)
         {
-            var jsonStringMatrixMathModel = new StreamReader(Path.Combine(ManipConfigDirectory, fileName)).ReadToEnd();
+            var error = 0.01;
+            var filePath = Path.Combine(ManipConfigDirectory, fileName);
+            var sr = new StreamReader(filePath);
+            var jsonStringMatrixMathModel = sr.ReadToEnd();
             var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
             var model = new MatrixMathModel(manipConfig);
             
             Console.WriteLine($"Current q = {model.q}");
-            model.LagrangeMethodToThePoint(new Vector3D(px, py, pz));
+            model.LagrangeMethodToThePoint(new Vector3D(pX, pY, pZ));
             Console.WriteLine($"After one iteration q = {model.q}");
 
-            Assert.IsTrue(model.q.Equals(new double[] {0, 1, 0, 1})); //TODO: calc real q for that assert
+            var Fq = model.F(model.n - 1);
+            Assert.True(Fq.X < pX + error && Fq.X > pX - error);
+            Assert.True(Fq.Y < pY + error && Fq.Y > pY - error);
+            Assert.True(Fq.Z < pZ + error && Fq.Z > pZ - error);
         }
 
         [TestCase("SRRPR.json", 1, 99, 0)]

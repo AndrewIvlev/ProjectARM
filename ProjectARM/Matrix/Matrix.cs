@@ -35,9 +35,10 @@ namespace ProjectARM
 
         public Matrix(Matrix A)
         {
-            M = A.M;
-            rows = A.rows;
-            columns = A.columns;
+            M = new double[rows = A.rows, columns = A.columns];
+            for (int i = 0; i < rows; i++)
+            for (int j = 0; j < columns; j++)
+                M[i, j] = A.M[i, j];
         }
 
         public double this[int i, int j]

@@ -281,7 +281,7 @@ namespace ProjectARM
         private void comboBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
-            int k = Convert.ToInt32(comboBox1.Text);
+            var k = Convert.ToInt32(comboBox1.Text);
         //if (k < (int)S.GetLen() || (S.GetLen() / k == 0))
         //  MessageBox.Show("k should be longer than trajectory lenght or it is too big");
         //  MessageBox.Show("Число К должно быть больше длины пути или оно слишком большое");
@@ -296,7 +296,7 @@ namespace ProjectARM
         private void comboBox2_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter) return;
-            double step = CoefToGraphic() * Convert.ToDouble(comboBox2.Text);
+            var step = CoefToGraphic() * Convert.ToDouble(comboBox2.Text);
             Way.ExactExtraPointsClear();
             Way.SplitTrajectory(step);
             Way.ShowExtraPoints(PicBoxGraphics);
@@ -305,7 +305,7 @@ namespace ProjectARM
         private void comboBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (Way == null) return;
-            double len = Way.GetLen();
+            var len = Way.GetLen();
             comboBox1.Items.Add($"{(int)len}");
             comboBox1.Items.Add($"{(int)len / 2}");
             comboBox1.Items.Add($"{(int)len / 3}");
