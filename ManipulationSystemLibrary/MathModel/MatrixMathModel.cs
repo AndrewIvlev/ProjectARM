@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace ProjectARM
+namespace ManipulationSystemLibrary
 {
     //Матричное описание модели манипулятора
     public class MatrixMathModel : MathModel

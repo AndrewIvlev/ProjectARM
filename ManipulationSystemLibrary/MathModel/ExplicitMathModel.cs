@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ProjectARM
+namespace ManipulationSystemLibrary
 {
     public class ExplicitMathModel : MathModel
     {
