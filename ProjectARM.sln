@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManipulationSystemLibraryTests", "ProjectARM_Tests\ManipulationSystemLibraryTests.csproj", "{BBA8ED97-5C6A-43E2-AD46-9CECD82407C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManipulationSystemLibraryTests", "ManipulationSystemLibraryTests\ManipulationSystemLibraryTests.csproj", "{BBA8ED97-5C6A-43E2-AD46-9CECD82407C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManipApp", "ManipApp\ManipApp.csproj", "{A6671868-A744-446D-84DB-86675EEE7250}"
 EndProject

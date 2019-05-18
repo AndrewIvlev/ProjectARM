@@ -9,8 +9,8 @@
     <ProjectGuid>{BBA8ED97-5C6A-43E2-AD46-9CECD82407C0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProjectARM_Tests</RootNamespace>
-    <AssemblyName>ProjectARM_Tests</AssemblyName>
+    <RootNamespace>ManipulationSystemLibraryTests</RootNamespace>
+    <AssemblyName>ManipulationSystemLibraryTests</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
