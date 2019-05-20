@@ -29,9 +29,18 @@ namespace ManipApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 0 - camera rotation;
+        /// 1 - path creation;
+        /// 2 - path editing;
+        /// </summary>
+        private byte MouseMod;
+        private Point MousePos;
+
         public MainWindow()
         {
             InitializeComponent();
+            MouseMod = 0;
         }
 
         private void OpenManipulatorFile_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -59,60 +68,69 @@ namespace ManipApp
         }
 
         /// <summary>
-        /// On mouse click, select the specific board 
-        /// where the click happened.
+        /// По клику ЛКМ по сцене мы либо перемещаем камеру,
+        /// либо создаём траекторию пути, либо редактируем траекторию пути.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        //public void OnViewportMouseDown(object sender, MouseEventArgs args)
-        //{
-        //    //if (vstuff.models == null)
-        //    //{
-        //    //    return;
-        //    //}
+        private void Canvas_MouseLeftButtonDown(object sender, MouseEventArgs e)
+        {
+            switch (MouseMod)
+            {
+                case 0:
+                    break;
+                case 1:
+                    //path.AddAnchorPoint(e.GetPosition());
+                    //if (path.GetLen() != 0) label3.Text = $"Trajectory lenght = {(CoeftoRealW() * path.GetLen()).ToString("#.0000000000")}cm";
+                    //comboBox1.Items.Clear();
+                    //path.Show(PicBoxGraphics);
+                    break;
+                case 2:
+                    //if (MousePressed == 0)
+                    //{
+                    //    index = path.NearestPointIndex(e.Location);
+                    //    if (Math.Pow((e.Location.X - path.AnchorPoints[index].X), 2) +
+                    //        Math.Pow((e.Location.Y + path.AnchorPoints[index].Y), 2) <= 40)
+                    //    {
+                    //        path.AnchorPoints[index] = e.Location;
+                    //    }
+                    //    MousePressed = 1;
+                    //    return;
+                    //}
+                    //if (MousePressed == 1)
+                    //{
+                    //    MousePressed = 0;
+                    //    return;
+                    //}
+                    break;
+                case 3:
+                    //following the cursor
+                    break;
+                default:
+                    break;
+            }
+            this.Viewport3D.Camera = new PerspectiveCamera() { };
+        }
 
-        //    if (
-        //        Keyboard.IsKeyDown(Key.LeftCtrl)
-        //        || Keyboard.IsKeyDown(Key.RightCtrl)
-        //    )
-        //    {
-        //        // extending the selection.  
-        //        // don't unselect all first.
-        //    }
-        //    else
-        //    {
-        //        //UnselectAll();
-        //    }
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
 
-        //    RayMeshGeometry3DHitTestResult rayMeshResult =
-        //        (RayMeshGeometry3DHitTestResult)
-        //        VisualTreeHelper.HitTest(myVP, args.GetPosition(myVP));
+                txt.Text = $"tmp = {tmp} holding...";
+                tmp++;
+            }
+            else if (e.LeftButton == MouseButtonState.Released)
+            {
+                txt.Text = $"tmp = {tmp} released!";
+            }
+        }
 
-        //    if (rayMeshResult != null)
-        //    {
-        //        PartialModel found = null;
-        //        foreach (PartialModel pm in vstuff.models)
-        //        {
-        //            if (pm.mesh == rayMeshResult.MeshHit)
-        //            {
-        //                found = pm;
-        //                break;
-        //            }
-        //        }
+        private void Canvas_MouseLeftButtonUp(object sender, MouseEventArgs e)
+        {
+        }
 
-        //        if (found != null)
-        //        {
-        //            if (IsSelected(found.bag.solid))
-        //            {
-        //                Unselect(found.bag.solid);
-        //            }
-        //            else
-        //            {
-        //                Select(found.bag.solid);
-        //            }
-        //        }
-        //      }
-        //this.Viewport3D.Camera = new PerspectiveCamera()
-        //}
+        private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // Camera zoom
+        }
     }
 }
