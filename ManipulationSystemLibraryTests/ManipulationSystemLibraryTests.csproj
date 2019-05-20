@@ -62,23 +62,26 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ManipConfig\SRRRP.json">
+    <None Include="ManipConfigFiles\SRRRP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="ManipConfig\SRRPR.json">
+    <None Include="ManipConfigFiles\SRRPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ManipConfig\ConfigFromGreenBook.txt" />
-    <Content Include="ManipConfig\OctopusTentacle.txt" />
+    <Content Include="ManipConfigFiles\ConfigFromGreenBook.txt" />
+    <Content Include="ManipConfigFiles\OctopusTentacle.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ManipulationSystemLibrary\ManipulationSystemLibrary.csproj">
       <Project>{B8C12AED-DC70-4EBD-AA78-5551DC3CCEBB}</Project>
       <Name>ManipulationSystemLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Test Tracks\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

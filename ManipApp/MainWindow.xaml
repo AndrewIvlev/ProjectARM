@@ -9,39 +9,130 @@
         Icon="window_icon.ico"
         Title="ProjARM" Height="768" Width="1024">
     <Grid>
-        <Menu x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <MenuItem Header="Manipulator">
-                <MenuItem Header="New"></MenuItem>
-                <MenuItem Header="Open" Click="OpenManipulatorFile_MenuItem_Click"></MenuItem>
-                <MenuItem Header="Edit"></MenuItem>
-                <Separator />
-                <MenuItem Header="Exit"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Path">
-                <MenuItem Header="New"></MenuItem>
-                <MenuItem Header="Open"></MenuItem>
-                <MenuItem Header="Split path">
-                    <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
-                    <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
+        <DockPanel LastChildFill="True">
+            <Menu DockPanel.Dock="Top" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <MenuItem Header="Manipulator">
+                    <MenuItem Header="New"></MenuItem>
+                    <MenuItem Header="Open" Click="OpenManipulatorFile_MenuItem_Click"></MenuItem>
+                    <MenuItem Header="Edit"></MenuItem>
+                    <Separator />
+                    <MenuItem Header="Exit"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Edit"></MenuItem>
-                <MenuItem Header="Interpolate"></MenuItem>
-                <Separator />
-                <MenuItem Header="Clear"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Obstacle">
-                <MenuItem Header="New"></MenuItem>
-                <MenuItem Header="Open"></MenuItem>
-                <MenuItem Header="Edit"></MenuItem>
-                <Separator />
-                <MenuItem Header="Delete all"></MenuItem>
-            </MenuItem>
-        </Menu>
-        <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,18,0,0"/>
-        <Label x:Name="PathLenght" Content="Path lenght = 0 cm" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,51,0,0"/>
-        <oxy:Plot Title="DeltaChart" Height="88" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="185,18,0,0"></oxy:Plot>
-        <ProgressBar HorizontalAlignment="Right" Height="20" Margin="0,31,10,0" VerticalAlignment="Top" Width="222"/>
-        <Button x:Name="PathPlanningButton" Content="Path planning" HorizontalAlignment="Left" Margin="784,72,0,0" VerticalAlignment="Top" Width="126" Height="34" Click="PathPlanningButton_Click"/>
-        <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="929,72,0,0" VerticalAlignment="Top" Width="77" Height="34"/>
+                <MenuItem Header="Path">
+                    <MenuItem Header="New"></MenuItem>
+                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Split path">
+                        <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
+                        <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Edit"></MenuItem>
+                    <MenuItem Header="Interpolate"></MenuItem>
+                    <Separator />
+                    <MenuItem Header="Clear"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Obstacle">
+                    <MenuItem Header="New"></MenuItem>
+                    <MenuItem Header="Open"></MenuItem>
+                    <MenuItem Header="Edit"></MenuItem>
+                    <Separator />
+                    <MenuItem Header="Delete all"></MenuItem>
+                </MenuItem>
+            </Menu>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                <Grid DockPanel.Dock="Left">
+                    <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
+                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,42,0,0"/>
+                </Grid>
+                <Grid DockPanel.Dock="Right">
+                    <ProgressBar Height="31" HorizontalAlignment ="Center" VerticalAlignment="Center" Margin="0,10,10,47" Width="212"/>
+                    <Grid VerticalAlignment="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35*" />
+                            <ColumnDefinition Width="7*"/>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="31*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="PathPlanningButton" Content="Path planning" Width="126" Height="34" Click="PathPlanningButton_Click" Grid.ColumnSpan="2"/>
+                        <GridSplitter Grid.Column="2" ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+                        <Button Grid.Column="3" x:Name="PathPlanningCancelButton" Content="Cancel" Width="77" Height="34" Margin="8,0"/>
+                    </Grid>
+                </Grid>
+                <oxy:Plot Title="DeltaChart" Height="88"></oxy:Plot>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+                <Button x:Name="DrawingCancelButton" Content="Cancel" Width="77" Height="34"/>
+            </DockPanel>
+
+            <Grid>
+                <!-- The Viewport3D provides a rendering surface for 3-D visual content. -->
+                <Viewport3D x:Name="Viewport3D" ClipToBounds="False" Grid.Row="0" Grid.Column="0" >
+
+                    <!-- Defines the camera used to view the 3D object. -->
+                    <Viewport3D.Camera>
+                        <PerspectiveCamera x:Name="Camera" Position="0,1,4" LookDirection="0,-1,-4" FieldOfView="60" />
+                    </Viewport3D.Camera>
+
+                    <!-- The ModelVisual3D children contain the 3D models -->
+                    <Viewport3D.Children>
+
+                        <!-- This ModelVisual3D defines the light cast in the scene. Without light, the 3D 
+                     object cannot be seen. Also, the direction of the lights affect shadowing. If desired,
+                     you can create multiple lights with different colors that shine from different directions. -->
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <DirectionalLight Color="#FFFFFF" Direction="local:Camera,-0.5,-0.612372" />
+                            </ModelVisual3D.Content>
+                        </ModelVisual3D>
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <GeometryModel3D>
+
+                                    <!-- The geometry specifies the shape of the 3D plane. In this sample, a flat sheet is created. -->
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D
+                         TriangleIndices="0,1,2 3,4,5 "
+                         Normals="0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 "
+                         TextureCoordinates="0,0 1,0 1,1 1,1 0,1 0,0 "
+                         Positions="-2,0,2 2,0,2 2,0,-2 2,0,-2 -2,0,-2 -2,0,2 " />
+                                    </GeometryModel3D.Geometry>
+
+                                    <!-- The material specifies the material applied to the 3D object. In this sample a linear gradient 
+                           covers the surface of the 3D object.-->
+                                    <GeometryModel3D.Material>
+                                        <MaterialGroup>
+                                            <DiffuseMaterial>
+                                                <DiffuseMaterial.Brush>
+                                                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                                        <LinearGradientBrush.GradientStops>
+                                                            <GradientStop Color="Blue" Offset="0.75" />
+                                                        </LinearGradientBrush.GradientStops>
+                                                    </LinearGradientBrush>
+                                                </DiffuseMaterial.Brush>
+                                            </DiffuseMaterial>
+                                        </MaterialGroup>
+                                    </GeometryModel3D.Material>
+
+                                    <!-- Apply a transform to the object. In this sample, a rotation transform is applied, rendering the 
+                           3D object rotated. -->
+                                    <GeometryModel3D.Transform>
+                                        <RotateTransform3D>
+                                            <RotateTransform3D.Rotation>
+                                                <AxisAngleRotation3D Axis="0,3,0" Angle="40" />
+                                            </RotateTransform3D.Rotation>
+                                        </RotateTransform3D>
+                                    </GeometryModel3D.Transform>
+                                </GeometryModel3D>
+                            </ModelVisual3D.Content>
+                        </ModelVisual3D>
+                    </Viewport3D.Children>
+
+                </Viewport3D>
+                <Canvas Grid.Row="0" Grid.Column="0" 
+                        Background="Transparent" 
+                        MouseUp="OnViewportMouseUp" 
+                        MouseDown="OnViewportMouseDown" 
+                        MouseMove="OnViewportMouseMove"  />
+            </Grid>
+        </DockPanel>
     </Grid>
 </Window>

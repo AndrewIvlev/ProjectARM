@@ -11,6 +11,7 @@ namespace ProjectARM_Tests
     public class AllUnitTests
     {
         public string ManipConfigDirectory;
+        private readonly double error = 0.01;
 
         [SetUp]
         public void SetUp()
@@ -21,7 +22,6 @@ namespace ProjectARM_Tests
         [TestCase("SRRPR.json", 1, 44, 1)]
         public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double pX, double pY, double pZ)
         {
-            var error = 0.01;
             var filePath = Path.Combine(ManipConfigDirectory, fileName);
             var sr = new StreamReader(filePath);
             var jsonStringMatrixMathModel = sr.ReadToEnd();

@@ -59,7 +59,7 @@ namespace ManipulationSystemLibrary
         {
             int index = -1;
             double MinDist = 8192;
-            foreach (Point P in AnchorPoints)
+            foreach (var P in AnchorPoints)
             {
                 double dist = DistanceBetweenPoints(O, P);
                 if (dist < MinDist)
