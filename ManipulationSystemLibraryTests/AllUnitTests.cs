@@ -16,10 +16,10 @@ namespace ProjectARM_Tests
         [SetUp]
         public void SetUp()
         {
-            ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfig");
+            ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfigFiles");
         }
         
-        [TestCase("SRRPR.json", 1, 44, 1)]
+        [TestCase("SRRPR.json", 42, 1, 1)]
         public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double pX, double pY, double pZ)
         {
             var filePath = Path.Combine(ManipConfigDirectory, fileName);

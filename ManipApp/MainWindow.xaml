@@ -42,7 +42,6 @@
                 <Grid DockPanel.Dock="Left">
                     <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
                     <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,42,0,0"/>
-                    <TextBlock x:Name="txt" VerticalAlignment="Top" Text="TextForMouse" Margin="0,65,0,0"/>
                 </Grid>
                 <Grid DockPanel.Dock="Right">
                     <ProgressBar Height="31" HorizontalAlignment ="Center" VerticalAlignment="Center" Margin="0,10,10,47" Width="212"/>
@@ -61,79 +60,147 @@
                 <oxy:Plot Title="DeltaChart" Height="88"></oxy:Plot>
             </DockPanel>
             <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
-                <Button x:Name="DrawingCancelButton" Content="Cancel" Width="77" Height="34"/>
+                <Button x:Name="StartStopButton" DockPanel.Dock="Left" Content="Start" Width="50" VerticalAlignment="Center"/>
+                <Separator Width="5"/>
+                <Button x:Name="PauseButton" DockPanel.Dock="Left" Content="Pause" Width="50" VerticalAlignment="Center"/>
+                <Separator Width="5"/>
+                <Slider x:Name="SliderSpeed" DockPanel.Dock="Right" Width="103" VerticalAlignment="Center"/>
+                <Label x:Name="SpeedLabel" DockPanel.Dock="Right" Width="43" Content="Speed" VerticalAlignment="Center"/>
+                <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
             </DockPanel>
 
             <Grid>
-                <!-- The Viewport3D provides a rendering surface for 3-D visual content. -->
-                <Viewport3D x:Name="Viewport3D" ClipToBounds="False" Grid.Row="0" Grid.Column="0" >
-
-                    <!-- Defines the camera used to view the 3D object. -->
+                <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
                     <Viewport3D.Camera>
-                        <PerspectiveCamera x:Name="Camera" Position="0,1,4" LookDirection="0,-1,-4" FieldOfView="60" />
+                        <PerspectiveCamera x:Name="Camera"  Position="6,2,6" LookDirection="-6,-2,-6" FieldOfView="60">
+                            <PerspectiveCamera.Transform>
+                                <Transform3DGroup>
+                                    <TranslateTransform3D OffsetX="0" OffsetY="0" OffsetZ="0"></TranslateTransform3D>
+                                    <RotateTransform3D>
+                                        <RotateTransform3D.Rotation>
+                                            <AxisAngleRotation3D x:Name="RotY"
+                                                                 Axis="0 1 0" />
+                                        </RotateTransform3D.Rotation>
+                                    </RotateTransform3D>
+                                    <RotateTransform3D>
+                                        <RotateTransform3D.Rotation>
+                                            <AxisAngleRotation3D x:Name="RotX"
+                                                                 Axis="1 0 0" 
+                                                                 Angle="0"/> 
+                                        </RotateTransform3D.Rotation>
+                                    </RotateTransform3D>
+                                    <RotateTransform3D>
+                                        <RotateTransform3D.Rotation>
+                                            <AxisAngleRotation3D x:Name="RotZ"
+                                                                 Axis="0 0 1" />
+                                        </RotateTransform3D.Rotation>
+                                    </RotateTransform3D>
+                                    <ScaleTransform3D>
+                                        <!-->Camera zoom here</-->
+                                    </ScaleTransform3D>
+                                </Transform3DGroup>
+                            </PerspectiveCamera.Transform>
+                        </PerspectiveCamera>
                     </Viewport3D.Camera>
 
-                    <!-- The ModelVisual3D children contain the 3D models -->
                     <Viewport3D.Children>
-
-                        <!-- This ModelVisual3D defines the light cast in the scene. Without light, the 3D 
-                     object cannot be seen. Also, the direction of the lights affect shadowing. If desired,
-                     you can create multiple lights with different colors that shine from different directions. -->
+                        
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <DirectionalLight Color="#FFFFFF" Direction="0,-1,-4" />
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
+                        
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <GeometryModel3D>
-
-                                    <!-- The geometry specifies the shape of the 3D plane. In this sample, a flat sheet is created. -->
                                     <GeometryModel3D.Geometry>
-                                        <MeshGeometry3D
-                         TriangleIndices="0,1,2 3,4,5 "
-                         Normals="0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 "
-                         TextureCoordinates="0,0 1,0 1,1 1,1 0,1 0,0 "
-                         Positions="-2,0,2 2,0,2 2,0,-2 2,0,-2 -2,0,-2 -2,0,2 " />
+                                        <MeshGeometry3D TriangleIndices="0,1,2 3,4,5"
+                                                         Normals="0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 "
+                                                         TextureCoordinates="0,0 1,0 1,1 1,1 0,1 0,0 "
+                                                         Positions="-3,0,3 3,0,3 3,0,-3 3,0,-3 -3,0,-3 -3,0,3 " />
                                     </GeometryModel3D.Geometry>
-
-                                    <!-- The material specifies the material applied to the 3D object. In this sample a linear gradient 
-                           covers the surface of the 3D object.-->
                                     <GeometryModel3D.Material>
                                         <MaterialGroup>
                                             <DiffuseMaterial>
                                                 <DiffuseMaterial.Brush>
                                                     <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
                                                         <LinearGradientBrush.GradientStops>
-                                                            <GradientStop Color="Blue" Offset="0.75" />
+                                                            <GradientStop Color="SlateGray" Offset="0.75" />
                                                         </LinearGradientBrush.GradientStops>
                                                     </LinearGradientBrush>
                                                 </DiffuseMaterial.Brush>
                                             </DiffuseMaterial>
                                         </MaterialGroup>
                                     </GeometryModel3D.Material>
-
-                                    <!-- Apply a transform to the object. In this sample, a rotation transform is applied, rendering the 
-                           3D object rotated. -->
-                                    <GeometryModel3D.Transform>
-                                        <RotateTransform3D>
-                                            <RotateTransform3D.Rotation>
-                                                <AxisAngleRotation3D Axis="0,3,0" Angle="40" />
-                                            </RotateTransform3D.Rotation>
-                                        </RotateTransform3D>
-                                    </GeometryModel3D.Transform>
+                                </GeometryModel3D>
+                            </ModelVisual3D.Content>
+                            
+                        </ModelVisual3D>
+                        <!-->Oz axis</-->
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <GeometryModel3D>
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D Positions="-0.05,0,0 0.05,0,0 -0.05,0.1,0 0.05,0.1,0 
+                                                           -0.05,0,4 0.05,0,4 -0.05,0.1,4 0.05,0.1,4"
+                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
+                                                       0,1,4 1,5,4 1,7,5 1,3,7
+                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
+                                    </GeometryModel3D.Geometry>
+                                    <GeometryModel3D.Material>
+                                        <DiffuseMaterial Brush="Blue" />
+                                    </GeometryModel3D.Material>
                                 </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
+                        
+                        <!-->Ox axis</-->
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <GeometryModel3D>
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D Positions="0,0,-0.05 4,0,-0.05 0,0.1,-0.05 4,0.1,-0.05 
+                                                           0,0,0.05 4,0,0.05 0,0.1,0.05 4,0.1,0.05"
+                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
+                                                       0,1,4 1,5,4 1,7,5 1,3,7
+                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
+                                    </GeometryModel3D.Geometry>
+                                    <GeometryModel3D.Material>
+                                        <DiffuseMaterial Brush="Green" />
+                                    </GeometryModel3D.Material>
+                                </GeometryModel3D>
+                            </ModelVisual3D.Content>
+                        </ModelVisual3D>
+                        
+                        <!-->Oy axis</-->
+                        <ModelVisual3D>
+                            <ModelVisual3D.Content>
+                                <GeometryModel3D>
+                                    <GeometryModel3D.Geometry>
+                                        <MeshGeometry3D Positions="-0.05,0,-0.05 0.05,0,-0.05 -0.05,4,-0.05 0.05,4,-0.05 
+                                                           -0.05,0,0.05 0.05,0,0.05 -0.05,4,0.05 0.05,4,0.05"
+                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
+                                                       0,1,4 1,5,4 1,7,5 1,3,7
+                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
+                                    </GeometryModel3D.Geometry>
+                                    <GeometryModel3D.Material>
+                                        <DiffuseMaterial Brush="Red" />
+                                    </GeometryModel3D.Material>
+                                </GeometryModel3D>
+                            </ModelVisual3D.Content>
+                        </ModelVisual3D>
+
                     </Viewport3D.Children>
 
                 </Viewport3D>
+                
                 <Canvas Grid.Row="0" Grid.Column="0" 
                         Background="Transparent" 
                         MouseLeftButtonUp="Canvas_MouseLeftButtonUp" 
                         MouseLeftButtonDown="Canvas_MouseLeftButtonDown" 
                         MouseMove="Canvas_MouseMove"
-                        MouseWheel="Canvas_MouseWheel"/>
+                        MouseWheel="Canvas_MouseWheel" />
             </Grid>
         </DockPanel>
     </Grid>
