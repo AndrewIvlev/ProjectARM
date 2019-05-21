@@ -82,7 +82,10 @@
                                                                  Axis="1 0 0" />
                                         </RotateTransform3D.Rotation>
                                     </RotateTransform3D>
-                                    <ScaleTransform3D x:Name="ScaleTransform3D" />
+                                    <ScaleTransform3D x:Name="ScaleTransform3D" 
+                                                      CenterX="0"
+                                                      CenterY="0"
+                                                      CenterZ="0"/>
                                 </Transform3DGroup>
                             </PerspectiveCamera.Transform>
                         </PerspectiveCamera>

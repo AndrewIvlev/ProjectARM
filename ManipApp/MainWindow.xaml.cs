@@ -42,10 +42,12 @@ namespace ManipApp
         private ModelVisual3D manipModelVisual3D;
 
         private MatrixMathModel model;
+        private List<double[]> listQ; // Generalized coordinates vector
 
         public MainWindow()
         {
             InitializeComponent();
+            listQ = new List<double[]>();
             offset = new Point(540, 405);
             MouseMod = 0;
         }
@@ -92,19 +94,24 @@ namespace ManipApp
         {
             if (model == null)
                 MessageBox.Show("Firstly create manipulator model!");
-            var listPathPoints = new List<Point3D>();
-            listPathPoints.Add(new Point3D(43, 0, 0));
-            listPathPoints.Add(new Point3D(42.5, 0.5, 0.3));
-            listPathPoints.Add(new Point3D(42, 0.7, 0.5));
-            listPathPoints.Add(new Point3D(42, 1, 0.8));
-            listPathPoints.Add(new Point3D(42, 2, 1));
-            listPathPoints.Add(new Point3D(42, 2, 1));
-            listPathPoints.Add(new Point3D(42, 2, 1));
-            listPathPoints.Add(new Point3D(42, 2, 1));
+
+            var listPathPoints = new List<Point3D>
+            {
+                new Point3D(43, 0, 0),
+                new Point3D(42.5, 0.5, 0.3),
+                new Point3D(42, 0.7, 0.5),
+                new Point3D(42, 1, 0.8),
+                new Point3D(42, 2, 1),
+                new Point3D(42, 2, 1),
+                new Point3D(42, 2, 1),
+                new Point3D(42, 2, 1)
+            };
+
+            listQ.Clear();
             foreach (var pathPoint in listPathPoints)
             {
                 model.LagrangeMethodToThePoint(pathPoint);
-                ManipulatorMove(1500);
+                listQ.Add(model.q);
             }
         }
 
@@ -141,7 +148,9 @@ namespace ManipApp
             manipModelVisual3D.Content = myModel3DGroup;
             this.Viewport3D.Children.Add(manipModelVisual3D);
         }
-        
+
+        #region Canvas Events
+
         /// <summary>
         /// По клику ЛКМ по сцене мы либо перемещаем камеру,
         /// либо создаём траекторию пути, либо редактируем траекторию пути.
@@ -236,13 +245,16 @@ namespace ManipApp
         {
         }
 
+        // TODO: fix this method
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
-            //this.ScaleTransform3D.ScaleX = something
-            //this.ScaleTransform3D.ScaleY
-            //this.ScaleTransform3D.ScaleX
+            this.ScaleTransform3D.ScaleX += e.Delta / 120;
+            this.ScaleTransform3D.ScaleY += e.Delta / 120;
+            this.ScaleTransform3D.ScaleZ += e.Delta / 120;
         }
+        
+        #endregion
 
         #region Graphics
 
