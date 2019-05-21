@@ -29,7 +29,7 @@ namespace ProjectARM_Tests
             var model = new MatrixMathModel(manipConfig);
             
             Console.WriteLine($"Current q = {model.q}");
-            model.LagrangeMethodToThePoint(new Vector3D(pX, pY, pZ));
+            model.LagrangeMethodToThePoint(new Point3D(pX, pY, pZ));
             Console.WriteLine($"After one iteration q = {model.q}");
 
             var Fq = model.F(model.n - 1);
@@ -49,7 +49,7 @@ namespace ProjectARM_Tests
             var model = new ExplicitMathModel(manipConfig);
 
             Console.WriteLine($"Current q = {model.q}");
-            model.LagrangeMethodToThePoint(new Vector3D(px, py, pz));
+            model.LagrangeMethodToThePoint(new Point3D(px, py, pz));
             Console.WriteLine($"After one iteration q = {model.q}");
 
             Assert.IsTrue(model.q.Equals(new double[] { 0, 1, 0, 1 })); //TODO: calc real q for that assert

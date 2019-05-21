@@ -52,16 +52,16 @@ namespace ManipulationSystemLibrary
         }
 
         //Use this method for draw graphics
-        public Vector3D F(int i) => (T[i] as BlockMatrix).GetLastColumn();
+        public Point3D F(int i) => (T[i] as BlockMatrix).GetLastColumn();
         
-        public override void LagrangeMethodToThePoint(Vector3D p)
+        public override void LagrangeMethodToThePoint(Point3D p)
         {
             DefaultA();
             CalcS();
             CalcT();
 
             var f = this.F(n - 1);
-            var d = new Vector3D(
+            var d = new Point3D(
                 p.X - f.X,
                 p.Y - f.Y,
                 p.Z - f.Z
@@ -81,7 +81,7 @@ namespace ManipulationSystemLibrary
             var Cz = ConcatAsColumn(C, d, 2);
             var detCz = Det3D(Cz);
 
-            var μ = new Vector3D(
+            var μ = new Point3D(
                 detCx / detC,
                 detCy / detC,
                 detCz / detC
@@ -94,14 +94,14 @@ namespace ManipulationSystemLibrary
             }
         }
 
-        public Vector3D SolutionVerification(Matrix a, Vector3D b, Vector3D x)
+        public Point3D SolutionVerification(Matrix a, Point3D b, Point3D x)
         {
             throw new NotImplementedException();
         }
 
-        public override double GetPointError(Vector3D p) => NormaVectora(new Vector3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
+        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
 
-        public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
+        public double NormaVectora(Point3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
         
         private void CalcS()
         {
@@ -186,7 +186,7 @@ namespace ManipulationSystemLibrary
         }
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix).GetLastColumn();
+        private Point3D GetdF(int i) => (dT[i] as BlockMatrix).GetLastColumn();
 
         /// <summary>
         /// D is Matrix of gradients Fx, Fy and Fz
@@ -231,7 +231,7 @@ namespace ManipulationSystemLibrary
             - M[0, 1] * (M[1, 0] * M[2, 2] - M[1, 2] * M[2, 0])
             + M[0, 2] * (M[1, 0] * M[2, 2] - M[2, 0] * M[1, 1]);
 
-        private static Matrix ConcatAsColumn(Matrix A, Vector3D v, int j)
+        private static Matrix ConcatAsColumn(Matrix A, Point3D v, int j)
         {
             if (A.rows != 3)
                 throw new ArgumentOutOfRangeException();

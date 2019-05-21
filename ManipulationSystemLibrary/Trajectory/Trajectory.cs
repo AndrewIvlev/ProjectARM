@@ -19,7 +19,7 @@ namespace ManipulationSystemLibrary
         /// </summary>
         public List<Point> ExtraPoints;
 
-        public Vector3D[] ExactExtra; // Точные дополнительные точки
+        public Point3D[] ExactExtra; // Точные дополнительные точки
 
         public int NumOfExtraPoints;
 
@@ -30,7 +30,7 @@ namespace ManipulationSystemLibrary
             IsSplit = false;
             AnchorPoints = new List<Point>();
             ExtraPoints = new List<Point>();
-            ExactExtra = new Vector3D[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
+            ExactExtra = new Point3D[3333]; // 3333 is magic number // p.s. it is the max number of ExactExtraPoint
             NumOfExtraPoints = 0;
         }
 
@@ -39,7 +39,7 @@ namespace ManipulationSystemLibrary
             IsSplit = false;
             AnchorPoints = new List<Point> { StartPoint };
             ExtraPoints = new List<Point>();
-            ExactExtra = new Vector3D[1024];
+            ExactExtra = new Point3D[1024];
             NumOfExtraPoints = 0;
         }
 
@@ -52,8 +52,8 @@ namespace ManipulationSystemLibrary
         }
 
         public double DistanceBetweenPoints(Point A, Point B) => Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
-        public double DistanceBetweenPoints(Vector3D p1, Vector3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
-        public double DistanceBerweenPoints(Point P, Vector3D dp) => Math.Sqrt(Math.Pow(dp.X - P.X, 2) + Math.Pow(dp.Y - P.Y, 2));
+        public double DistanceBetweenPoints(Point3D p1, Point3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        public double DistanceBerweenPoints(Point P, Point3D dp) => Math.Sqrt(Math.Pow(dp.X - P.X, 2) + Math.Pow(dp.Y - P.Y, 2));
 
         public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
         {
@@ -81,7 +81,7 @@ namespace ManipulationSystemLibrary
             return len;
         }
 
-        public Vector3D ToVector3D(Point P) => new Vector3D(P.X, P.Y, 0);
+        public Point3D ToPoint3D(Point P) => new Point3D(P.X, P.Y, 0);
 
         public void ExactExtraPointsClear() => Array.Clear(ExactExtra, 0, NumOfExtraPoints);
 
@@ -118,13 +118,13 @@ namespace ManipulationSystemLibrary
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtra[index++] = new Vector3D(x, y, 0);
+                    ExactExtra[index++] = new Point3D(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Vector3D(x, y, 0)) + step < dist);
+                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Point3D(x, y, 0)) + step < dist);
             }
-            ExactExtra[index++] = ToVector3D(AnchorPoints[AnchorPoints.Count - 1]);
+            ExactExtra[index++] = ToPoint3D(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
             IsSplit = true;
@@ -146,13 +146,13 @@ namespace ManipulationSystemLibrary
                     lambda = (step * j) / (dist - step * j);
                     x = (AnchorPoints[i - 1].X + lambda * AnchorPoints[i].X) / (1 + lambda);
                     y = (AnchorPoints[i - 1].Y + lambda * AnchorPoints[i].Y) / (1 + lambda);
-                    ExactExtra[index++] = new Vector3D(x, y, 0);
+                    ExactExtra[index++] = new Point3D(x, y, 0);
                     ExtraPoints.Add(new Point((int)x, (int)y));
                     j++;
                 }
-                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Vector3D(x, y, 0)) + step < dist);
+                while (DistanceBerweenPoints(AnchorPoints[i - 1], new Point3D(x, y, 0)) + step < dist);
             }
-            ExactExtra[index++] = ToVector3D(AnchorPoints[AnchorPoints.Count - 1]);
+            ExactExtra[index++] = ToPoint3D(AnchorPoints[AnchorPoints.Count - 1]);
             ExtraPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
             NumOfExtraPoints = index;
             IsSplit = true;

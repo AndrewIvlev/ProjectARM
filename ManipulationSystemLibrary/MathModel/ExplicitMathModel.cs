@@ -32,7 +32,7 @@ namespace ManipulationSystemLibrary
                 Len[i] = units[i].len;
         }
 
-        public override void LagrangeMethodToThePoint(Vector3D p)
+        public override void LagrangeMethodToThePoint(Point3D p)
         {
             double diag = dFxpodq1(q) * dFypodq1(q) + dFxpodq2(q) * dFypodq2(q) + 
                 dFxpodq3(q) * dFypodq3(q) + dFxpodq4(q) * dFypodq4(q);
@@ -41,23 +41,23 @@ namespace ManipulationSystemLibrary
                 { Math.Pow(dFxpodq1(q), 2) + Math.Pow(dFxpodq2(q), 2) + Math.Pow(dFxpodq3(q), 2) + Math.Pow(dFxpodq4(q), 2), diag },
                 { diag, Math.Pow(dFypodq1(q), 2) + Math.Pow(dFypodq2(q), 2) + Math.Pow(dFypodq3(q), 2) + Math.Pow(dFypodq4(q), 2) }
                };
-            
-            Vector3D d = new Vector3D(p.X - Fx(q), p.Y - Fy(q), 0);
-            Vector3D μ = LinearSystemSolver.CramerMethod(D, d);
+
+            Point3D d = new Point3D(p.X - Fx(q), p.Y - Fy(q), 0);
+            Point3D μ = LinearSystemSolver.CramerMethod(D, d);
 
             for (int i = 0; i < 4; i++)
                 q[i] += MagicFunc(μ, q, D[i, i], dFxpodqi[i], dFypodqi[i]);
         }
 
-        public override double GetPointError(Vector3D p) => NormaVectora(new Vector3D(p.X - Fx(q), p.Y - Fy(q), 0));
+        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - Fx(q), p.Y - Fy(q), 0));
         
-        public Vector3D SolutionVerification(Matrix A, Vector3D b, Vector3D x) =>
-            new Vector3D(
+        public Point3D SolutionVerification(Matrix A, Point3D b, Point3D x) =>
+            new Point3D(
                 b.X - A[0, 0] * x.X - A[0, 1] * x.Y,
                 b.Y - A[1, 0] * x.X - A[1, 1] * x.Y,
                 0);
 
-        private static double MagicFunc(Vector3D μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.X * dFxpodqi(q) + μ.Y * dFypodqi(q)) / (2 * a);
+        private static double MagicFunc(Point3D μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.X * dFxpodqi(q) + μ.Y * dFypodqi(q)) / (2 * a);
 
         private static double Fx(double[] q) => Len[0] * Math.Cos(q[0]) + (Len[1] + Len[2] + q[2]) * Math.Cos(q[0] + q[1]) + Len[3] * Math.Cos(q[0] + q[1] + q[3]);
 

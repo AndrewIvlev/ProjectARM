@@ -9,9 +9,9 @@ namespace ManipulationSystemLibrary
 {
     public static class LinearSystemSolver
     {
-        public static Vector3D CramerMethod(double[,] A, Vector3D b)
+        public static Point3D CramerMethod(double[,] A, Point3D b)
         {
-            Vector3D X = new Vector3D(0, 0, 0);
+            Point3D X = new Point3D(0, 0, 0);
             double det = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0];
             if (det != 0)
             {
@@ -20,7 +20,7 @@ namespace ManipulationSystemLibrary
                 double detx2 = A[0, 0] * b.Y - b.X * A[1, 0];
                 X.Y = detx2 / det;
             }
-            else return new Vector3D(0, 0, 0);
+            else return new Point3D(0, 0, 0);
             return X;
         }
     }

@@ -28,7 +28,7 @@ namespace ManipulationSystemLibrary
                 M[i, j] = mDoubles[i, j];
         }
 
-        public Vector3D GetLastColumn() => new Vector3D(M[0, 3], M[1, 3], M[2, 3]);
+        public Point3D GetLastColumn() => new Point3D(M[0, 3], M[1, 3], M[2, 3]);
         
         public static BlockMatrix operator *(BlockMatrix A, BlockMatrix B) => new BlockMatrix
             {

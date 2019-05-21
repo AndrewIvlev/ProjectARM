@@ -79,9 +79,9 @@ namespace ManipulationSystemLibrary
             for (int i = 0; i < n; i++)
                 units[i].angle = - DegreeToRadian(units[i].angle);
         }
-        public abstract void LagrangeMethodToThePoint(Vector3D p);
+        public abstract void LagrangeMethodToThePoint(Point3D p);
 
-        public abstract double GetPointError(Vector3D p);
+        public abstract double GetPointError(Point3D p);
 
         public void DefaultA()
         {
@@ -101,6 +101,6 @@ namespace ManipulationSystemLibrary
 
         public static double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
         public static double RadianToDegree(double angle) => angle * (180.0 / Math.PI);
-        public double NormaVectora(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2) + Math.Pow(p.Z, 2));
+        public double NormaVectora(Point3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2) + Math.Pow(p.Z, 2));
     }
 }

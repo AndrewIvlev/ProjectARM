@@ -19,7 +19,7 @@
                     <MenuItem Header="Exit"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Path">
-                    <MenuItem Header="New"></MenuItem>
+                    <MenuItem Header="New" Click="NewPath_MenuItem_Click"></MenuItem>
                     <MenuItem Header="Open"></MenuItem>
                     <MenuItem Header="Split path">
                         <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
@@ -44,18 +44,12 @@
                     <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,42,0,0"/>
                 </Grid>
                 <Grid DockPanel.Dock="Right">
-                    <ProgressBar Height="31" HorizontalAlignment ="Center" VerticalAlignment="Center" Margin="0,10,10,47" Width="212"/>
-                    <Grid VerticalAlignment="Bottom">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35*" />
-                            <ColumnDefinition Width="7*"/>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="31*" />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" x:Name="PathPlanningButton" Content="Path planning" Width="126" Height="34" Click="PathPlanningButton_Click" Grid.ColumnSpan="2"/>
-                        <GridSplitter Grid.Column="2" ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-                        <Button Grid.Column="3" x:Name="PathPlanningCancelButton" Content="Cancel" Width="77" Height="34" Margin="8,0"/>
-                    </Grid>
+                    <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,10,37" Width="212"/>
+                    <DockPanel VerticalAlignment="Bottom">
+                        <Button Grid.Column="0" x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click" Grid.ColumnSpan="2"/>
+                        <Separator Width="52"/>
+                        <Button Grid.Column="1" x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center" RenderTransformOrigin="1,0.583"/>
+                    </DockPanel>
                 </Grid>
                 <oxy:Plot Title="DeltaChart" Height="88"></oxy:Plot>
             </DockPanel>
@@ -72,7 +66,7 @@
             <Grid>
                 <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
                     <Viewport3D.Camera>
-                        <PerspectiveCamera x:Name="Camera"  Position="6,2,6" LookDirection="-6,-2,-6" FieldOfView="60">
+                        <PerspectiveCamera x:Name="Camera"  Position="13,4,13" LookDirection="-13,-4,-13" FieldOfView="60">
                             <PerspectiveCamera.Transform>
                                 <Transform3DGroup>
                                     <TranslateTransform3D OffsetX="0" OffsetY="0" OffsetZ="0"></TranslateTransform3D>
@@ -85,19 +79,10 @@
                                     <RotateTransform3D>
                                         <RotateTransform3D.Rotation>
                                             <AxisAngleRotation3D x:Name="RotX"
-                                                                 Axis="1 0 0" 
-                                                                 Angle="0"/> 
+                                                                 Axis="1 0 0" />
                                         </RotateTransform3D.Rotation>
                                     </RotateTransform3D>
-                                    <RotateTransform3D>
-                                        <RotateTransform3D.Rotation>
-                                            <AxisAngleRotation3D x:Name="RotZ"
-                                                                 Axis="0 0 1" />
-                                        </RotateTransform3D.Rotation>
-                                    </RotateTransform3D>
-                                    <ScaleTransform3D>
-                                        <!-->Camera zoom here</-->
-                                    </ScaleTransform3D>
+                                    <ScaleTransform3D x:Name="ScaleTransform3D" />
                                 </Transform3DGroup>
                             </PerspectiveCamera.Transform>
                         </PerspectiveCamera>
@@ -107,37 +92,31 @@
                         
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
-                                <DirectionalLight Color="#FFFFFF" Direction="0,-1,-4" />
+                                <AmbientLight Color="#FFFFFF" />
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
-                        
-                        <ModelVisual3D>
+
+                        <!--> Scene plane </-->
+                        <ModelVisual3D x:Name="ScenePlane">
                             <ModelVisual3D.Content>
                                 <GeometryModel3D>
                                     <GeometryModel3D.Geometry>
                                         <MeshGeometry3D TriangleIndices="0,1,2 3,4,5"
                                                          Normals="0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 "
                                                          TextureCoordinates="0,0 1,0 1,1 1,1 0,1 0,0 "
-                                                         Positions="-3,0,3 3,0,3 3,0,-3 3,0,-3 -3,0,-3 -3,0,3 " />
+                                                         Positions="-7,0,7 7,0,7 7,0,-7 7,0,-7 -7,0,-7 -7,0,7 " />
                                     </GeometryModel3D.Geometry>
                                     <GeometryModel3D.Material>
                                         <MaterialGroup>
-                                            <DiffuseMaterial>
-                                                <DiffuseMaterial.Brush>
-                                                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
-                                                        <LinearGradientBrush.GradientStops>
-                                                            <GradientStop Color="SlateGray" Offset="0.75" />
-                                                        </LinearGradientBrush.GradientStops>
-                                                    </LinearGradientBrush>
-                                                </DiffuseMaterial.Brush>
-                                            </DiffuseMaterial>
+                                            <DiffuseMaterial Brush="DimGray" />
+                                            <SpecularMaterial Brush="LightSlateGray" SpecularPower="19" />
                                         </MaterialGroup>
                                     </GeometryModel3D.Material>
                                 </GeometryModel3D>
                             </ModelVisual3D.Content>
-                            
                         </ModelVisual3D>
-                        <!-->Oz axis</-->
+                        
+                        <!--> Oz axis </-->
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <GeometryModel3D>
@@ -155,7 +134,7 @@
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
                         
-                        <!-->Ox axis</-->
+                        <!--> Ox axis </-->
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <GeometryModel3D>
