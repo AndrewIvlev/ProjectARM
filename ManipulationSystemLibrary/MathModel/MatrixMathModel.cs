@@ -8,7 +8,7 @@ namespace ManipulationSystemLibrary
     public class MatrixMathModel : MathModel
     {
         private Matrix D;
-        private ArrayList T;
+        public ArrayList T;
         private ArrayList dT;
         private BlockMatrix[] S;
         private BlockMatrix[] dS;
@@ -51,15 +51,17 @@ namespace ManipulationSystemLibrary
             }
         }
 
+        public void CalculationMetaData()
+        {
+            CalcS();
+            CalcT();
+        }
+
         //Use this method for draw graphics
         public Point3D F(int i) => (T[i] as BlockMatrix).GetLastColumn();
         
         public override void LagrangeMethodToThePoint(Point3D p)
         {
-            DefaultA();
-            CalcS();
-            CalcT();
-
             var f = this.F(n - 1);
             var d = new Point3D(
                 p.X - f.X,

@@ -29,6 +29,8 @@ namespace ProjectARM_Tests
             var model = new MatrixMathModel(manipConfig);
             
             Console.WriteLine($"Current q = {model.q}");
+            model.DefaultA();
+            model.CalculationMetaData();
             model.LagrangeMethodToThePoint(new Point3D(pX, pY, pZ));
             Console.WriteLine($"After one iteration q = {model.q}");
 
@@ -49,6 +51,7 @@ namespace ProjectARM_Tests
             var model = new ExplicitMathModel(manipConfig);
 
             Console.WriteLine($"Current q = {model.q}");
+            model.DefaultA();
             model.LagrangeMethodToThePoint(new Point3D(px, py, pz));
             Console.WriteLine($"After one iteration q = {model.q}");
 
