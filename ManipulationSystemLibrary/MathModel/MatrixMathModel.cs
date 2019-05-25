@@ -10,7 +10,7 @@ namespace ManipulationSystemLibrary
         private Matrix D;
         public ArrayList T;
         private ArrayList dT;
-        private BlockMatrix[] S;
+        public BlockMatrix[] S; //temporary public, but change to private
         private BlockMatrix[] dS;
 
         public MatrixMathModel() { }
@@ -162,8 +162,10 @@ namespace ManipulationSystemLibrary
         {
             T = new ArrayList();
             var tmp = new BlockMatrix();
+
             for (var i = 0; i < n - 1; i++)
                 T.Add(tmp *= units[i].B * S[i]);
+
             T.Add(tmp *= units[n - 1].B);
         }
 

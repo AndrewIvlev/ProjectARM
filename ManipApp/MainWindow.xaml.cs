@@ -38,6 +38,8 @@ namespace ManipApp
         private byte MouseMod;
         private Point MousePos;
         private Point offset;
+        private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        private double OffsetY = 0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
         private ModelVisual3D pathPointCursor;
         private List<ModelVisual3D> manipModelVisual3D;
 
@@ -50,6 +52,7 @@ namespace ManipApp
             manipModelVisual3D = new List<ModelVisual3D>();
             listQ = new List<double[]>();
             offset = new Point(540, 405);
+            coeff = 0.5;
             MouseMod = 0;
         }
 
@@ -67,6 +70,7 @@ namespace ManipApp
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
+            AddMatrixTransformationForManipulator();
         }
 
         #endregion
@@ -257,22 +261,28 @@ namespace ManipApp
         /// </summary>
         private void AddMatrixTransformationForManipulator()
         {
-            foreach (var arm in manipModelVisual3D)
+            model.q[0] = DegreeToRadian(45); // R
+            model.q[1] = DegreeToRadian(70); // R
+            model.q[2] = 3;                  // Pr
+            model.q[3] = DegreeToRadian(50); // R
+            model.CalculationMetaData();
+
+            for (int i = 1; i < model.n; i++)
             {
-                var i = manipModelVisual3D.IndexOf(arm);
-                var matrixTransform3D = new MatrixTransform3D();
-                var endMatrix3D = BlockMatrixConvert(model.T[i] as BlockMatrix);
-                matrixTransform3D.Matrix = endMatrix3D;
-                arm.Transform = matrixTransform3D;
+                var matrixTransform3D1 = new MatrixTransform3D();
+                var endMatrix3D = BlockMatrixConvert(model.T[i - 1] as BlockMatrix, coeff);
+                matrixTransform3D1.Matrix = endMatrix3D;
+                manipModelVisual3D[i].Transform = matrixTransform3D1;
             }
-            var shit = this.Viewport3D;
         }
 
-        private Matrix3D BlockMatrixConvert(BlockMatrix bm) => new Matrix3D
+        private double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
+
+        private Matrix3D BlockMatrixConvert(BlockMatrix bm, double coeffTranslate) => new Matrix3D
         {
-            M11 = bm[0, 0], M21 = bm[0, 1], M31 = bm[0, 2], OffsetX = bm[0, 3],
-            M12 = bm[1, 0], M22 = bm[1, 1], M32 = bm[1, 2], OffsetY = bm[1, 3],
-            M13 = bm[2, 0], M23 = bm[2, 1], M33 = bm[2, 2], OffsetZ = bm[2, 3],
+            M11 = bm[0, 0], M21 = bm[0, 1], M31 = bm[0, 2], OffsetX = bm[0, 3] * coeffTranslate,
+            M12 = bm[1, 0], M22 = bm[1, 1], M32 = bm[1, 2], OffsetY = bm[1, 3] * coeffTranslate,
+            M13 = bm[2, 0], M23 = bm[2, 1], M33 = bm[2, 2], OffsetZ = bm[2, 3] * coeffTranslate,
             M14 = 0,        M24 = 0,        M34 = 0,        M44 = 1
         };
 
@@ -283,9 +293,6 @@ namespace ManipApp
                 foreach (var arm in manipModelVisual3D)
                     this.Viewport3D.Children.Remove(arm);
             }
-            
-            var coeff = 0.5;
-            var OffsetY = 0.5;
             var sup = new Point3D(0, 0, 0); // startUnitPoint
             for (int i = 0; i < model.n; i++)
             {
@@ -295,7 +302,8 @@ namespace ManipApp
                 var joint = new MeshGeometry3D();
 
                 var eup = model.F(i); // endUnitPoint
-                LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff), new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff));
+                LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
+                                      new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff));
                 AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
