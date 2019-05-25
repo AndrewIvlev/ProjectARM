@@ -39,7 +39,6 @@ namespace ManipApp
         private Point MousePos;
         private Point offset;
         private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
-        private double OffsetY = 0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
         private ModelVisual3D pathPointCursor;
         private List<ModelVisual3D> manipModelVisual3D;
 
@@ -52,7 +51,7 @@ namespace ManipApp
             manipModelVisual3D = new List<ModelVisual3D>();
             listQ = new List<double[]>();
             offset = new Point(540, 405);
-            coeff = 0.5;
+            coeff = 1;// 0.5;
             MouseMod = 0;
         }
 
@@ -262,17 +261,17 @@ namespace ManipApp
         private void AddMatrixTransformationForManipulator()
         {
             model.q[0] = DegreeToRadian(45); // R
-            model.q[1] = DegreeToRadian(70); // R
+            model.q[1] = DegreeToRadian(45); // R
             model.q[2] = 3;                  // Pr
             model.q[3] = DegreeToRadian(50); // R
             model.CalculationMetaData();
 
             for (int i = 1; i < model.n; i++)
             {
-                var matrixTransform3D1 = new MatrixTransform3D();
+                var matrixTransform3D = new MatrixTransform3D();
                 var endMatrix3D = BlockMatrixConvert(model.T[i - 1] as BlockMatrix, coeff);
-                matrixTransform3D1.Matrix = endMatrix3D;
-                manipModelVisual3D[i].Transform = matrixTransform3D1;
+                matrixTransform3D.Matrix = endMatrix3D;
+                manipModelVisual3D[i].Transform = matrixTransform3D;
             }
         }
 
@@ -280,11 +279,41 @@ namespace ManipApp
 
         private Matrix3D BlockMatrixConvert(BlockMatrix bm, double coeffTranslate) => new Matrix3D
         {
-            M11 = bm[0, 0], M21 = bm[0, 1], M31 = bm[0, 2], OffsetX = bm[0, 3] * coeffTranslate,
-            M12 = bm[1, 0], M22 = bm[1, 1], M32 = bm[1, 2], OffsetY = bm[1, 3] * coeffTranslate,
-            M13 = bm[2, 0], M23 = bm[2, 1], M33 = bm[2, 2], OffsetZ = bm[2, 3] * coeffTranslate,
+            M11 = bm[0, 0], M21 = bm[0, 1], M31 = bm[0, 2], OffsetX = GetOffset(bm).X * coeffTranslate,
+            M12 = bm[1, 0], M22 = bm[1, 1], M32 = bm[1, 2], OffsetY = GetOffset(bm).Y * coeffTranslate,
+            M13 = bm[2, 0], M23 = bm[2, 1], M33 = bm[2, 2], OffsetZ = GetOffset(bm).Z * coeffTranslate,
             M14 = 0,        M24 = 0,        M34 = 0,        M44 = 1
         };
+
+        private Vector3D GetOffset(BlockMatrix m)
+        {
+            var offset = new Vector3D();
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (m[i, 3] != 0)
+                    {
+                        switch (j)
+                        {
+                            case 0:
+                                if (m[i, j] != 0)
+                                    offset.X = m[i, 3];
+                                break;
+                            case 1:
+                                if (m[i, j] != 0)
+                                    offset.Y = m[i, 3];
+                                break;
+                            case 2:
+                                if (m[i, j] != 0)
+                                    offset.Z = m[i, 3];
+                                break;
+                        }
+                    }
+                }
+            }
+            return offset;
+        }
 
         private void CreateManipulator3DVisualModel(MatrixMathModel model)
         {
@@ -293,6 +322,7 @@ namespace ManipApp
                 foreach (var arm in manipModelVisual3D)
                     this.Viewport3D.Children.Remove(arm);
             }
+            double OffsetY = 0;//0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
             var sup = new Point3D(0, 0, 0); // startUnitPoint
             for (int i = 0; i < model.n; i++)
             {
@@ -300,7 +330,7 @@ namespace ManipApp
                 var jointsAndUnitsModelGroup = new Model3DGroup();
                 var unit = new MeshGeometry3D();
                 var joint = new MeshGeometry3D();
-
+                
                 var eup = model.F(i); // endUnitPoint
                 LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
                                       new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff));
