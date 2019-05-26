@@ -43,13 +43,13 @@ namespace ManipApp
         private List<ModelVisual3D> manipModelVisual3D;
 
         private MatrixMathModel model;
-        private List<double[]> listQ; // Generalized coordinates vector
+        private double[][] listQ; // Generalized coordinates vector
 
         public MainWindow()
         {
             InitializeComponent();
             manipModelVisual3D = new List<ModelVisual3D>();
-            listQ = new List<double[]>();
+            listQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(540, 405);
             coeff = 1;// 0.5;
             MouseMod = 0;
@@ -69,7 +69,7 @@ namespace ManipApp
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
-            AddMatrixTransformationForManipulator();
+            AddTransformationsForManipulator();
         }
 
         #endregion
@@ -92,7 +92,7 @@ namespace ManipApp
         {
             throw new NotImplementedException();
         }
-        
+
         #endregion
 
         #endregion
@@ -117,12 +117,13 @@ namespace ManipApp
                 new Point3D(42, 2, 1)
             };
 
-            listQ.Clear();
-            foreach (var pathPoint in listPathPoints)
+            //listQ.Clear();
+            for (int i = 0; i < listPathPoints.Count; i++)
             {
+                Point3D pathPoint = listPathPoints[i];
                 model.CalculationMetaData();
                 model.LagrangeMethodToThePoint(pathPoint);
-                listQ.Add(model.q);
+                listQ[i] = model.q; // check that different values added
             }
         }
 
@@ -203,7 +204,7 @@ namespace ManipApp
                     }
                     break;
                 case 1:
-                    if(pathPointCursor != null)
+                    if (pathPointCursor != null)
                         this.Viewport3D.Children.Remove(pathPointCursor);
                     var myModel3DGroup = new Model3DGroup();
                     pathPointCursor = new ModelVisual3D();
@@ -256,64 +257,71 @@ namespace ManipApp
         }
 
         /// <summary>
-        /// Add MatrixTransform3D for each unit of manipulatorModelVisual3D
+        /// Add transformations for each unit of manipulatorModelVisual3D
         /// </summary>
-        private void AddMatrixTransformationForManipulator()
+        private void AddTransformationsForManipulator()
         {
+            listQ[0] = new double[model.n - 1](model.q);
             model.q[0] = DegreeToRadian(45); // R
-            model.q[1] = DegreeToRadian(45); // R
+            model.q[1] = DegreeToRadian(90); // R
             model.q[2] = 3;                  // Pr
             model.q[3] = DegreeToRadian(50); // R
+            listQ[1] = model.q; // there is my error, listQ[0] == listQ[1] ;(  TODO: fix it
             model.CalculationMetaData();
 
-            for (int i = 1; i < model.n; i++)
+            var transformGroup = new Transform3DGroup[model.n - 1];
+            for (int i = 0; i < model.n - 1; i++)
+                transformGroup[i] = new Transform3DGroup();
+
+            for (int i = 0; i < model.n - 1; i++)
             {
-                var matrixTransform3D = new MatrixTransform3D();
-                var endMatrix3D = BlockMatrixConvert(model.T[i - 1] as BlockMatrix, coeff);
-                matrixTransform3D.Matrix = endMatrix3D;
-                manipModelVisual3D[i].Transform = matrixTransform3D;
+                var transformation = GetTransformationByUnitType(i);
+
+                for (int j = i; j < model.n - 1; j++)
+                    transformGroup[j].Children.Add(transformation as Transform3D);
             }
+
+            // трансформация должна влиять на все последующие звенья
+            for (int i = 1; i < model.n; i++)
+                manipModelVisual3D[i].Transform = transformGroup[i - 1];
+        }
+
+        private Transform3D GetTransformationByUnitType(int unitIndex)
+        {
+            Transform3D transformation = null;
+
+            var center = model.F(unitIndex);
+            switch (model.units[unitIndex + 1].type)
+            { 
+                case 'R':
+                    transformation = new RotateTransform3D();
+                    (transformation as RotateTransform3D).CenterX = center.X;
+                    (transformation as RotateTransform3D).CenterY = center.Y;
+                    (transformation as RotateTransform3D).CenterZ = center.Z;
+
+                    var angleRotation = new AxisAngleRotation3D();
+                    angleRotation.Axis = model.GetZAxis(unitIndex);
+                    angleRotation.Angle = RadianToDegree(model.q[unitIndex]);
+                    (transformation as RotateTransform3D).Rotation = angleRotation;
+                    break;
+                case 'P':
+                    transformation = new ScaleTransform3D();
+                    (transformation as ScaleTransform3D).CenterX = center.X;
+                    (transformation as ScaleTransform3D).CenterY = center.Y;
+                    (transformation as ScaleTransform3D).CenterZ = center.Z;
+                    var prismaticAxis = model.GetZAxis(unitIndex);
+                    (transformation as ScaleTransform3D).ScaleX = prismaticAxis.X + listQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleY = prismaticAxis.Y + listQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleZ = prismaticAxis.Z + listQ[0][unitIndex] / model.q[unitIndex];
+                    break;
+            }
+
+            return transformation;
         }
 
         private double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
 
-        private Matrix3D BlockMatrixConvert(BlockMatrix bm, double coeffTranslate) => new Matrix3D
-        {
-            M11 = bm[0, 0], M21 = bm[0, 1], M31 = bm[0, 2], OffsetX = GetOffset(bm).X * coeffTranslate,
-            M12 = bm[1, 0], M22 = bm[1, 1], M32 = bm[1, 2], OffsetY = GetOffset(bm).Y * coeffTranslate,
-            M13 = bm[2, 0], M23 = bm[2, 1], M33 = bm[2, 2], OffsetZ = GetOffset(bm).Z * coeffTranslate,
-            M14 = 0,        M24 = 0,        M34 = 0,        M44 = 1
-        };
-
-        private Vector3D GetOffset(BlockMatrix m)
-        {
-            var offset = new Vector3D();
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (m[i, 3] != 0)
-                    {
-                        switch (j)
-                        {
-                            case 0:
-                                if (m[i, j] != 0)
-                                    offset.X = m[i, 3];
-                                break;
-                            case 1:
-                                if (m[i, j] != 0)
-                                    offset.Y = m[i, 3];
-                                break;
-                            case 2:
-                                if (m[i, j] != 0)
-                                    offset.Z = m[i, 3];
-                                break;
-                        }
-                    }
-                }
-            }
-            return offset;
-        }
+        private double RadianToDegree(double angle) => 180.0 * angle / Math.PI;
 
         private void CreateManipulator3DVisualModel(MatrixMathModel model)
         {
@@ -323,7 +331,7 @@ namespace ManipApp
                     this.Viewport3D.Children.Remove(arm);
             }
             double OffsetY = 0;//0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
-            var sup = new Point3D(0, 0, 0); // startUnitPoint
+            var sup = new Vector3D(0, 0, 0); // startUnitPoint
             for (int i = 0; i < model.n; i++)
             {
                 var arm = new ModelVisual3D();

@@ -10,7 +10,7 @@ namespace ManipulationSystemLibrary
         private Matrix D;
         public ArrayList T;
         private ArrayList dT;
-        public BlockMatrix[] S; //temporary public, but change to private
+        private BlockMatrix[] S;
         private BlockMatrix[] dS;
 
         public MatrixMathModel() { }
@@ -58,8 +58,10 @@ namespace ManipulationSystemLibrary
         }
 
         //Use this method for draw graphics
-        public Point3D F(int i) => (T[i] as BlockMatrix).GetLastColumn();
-        
+        public Vector3D F(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(3);
+
+        public Vector3D GetZAxis(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(2);
+
         public override void LagrangeMethodToThePoint(Point3D p)
         {
             var f = this.F(n - 1);
@@ -190,7 +192,7 @@ namespace ManipulationSystemLibrary
         }
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Point3D GetdF(int i) => (dT[i] as BlockMatrix).GetLastColumn();
+        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix).ColumnAsVector3D(3);
 
         /// <summary>
         /// D is Matrix of gradients Fx, Fy and Fz
