@@ -62,10 +62,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ManipConfigFiles\SR.json">
+    <None Include="ManipConfigFiles\SPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="ManipConfigFiles\SRR.json">
+    <None Include="ManipConfigFiles\SRRRR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="ManipConfigFiles\SRRPR.json">

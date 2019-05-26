@@ -50,8 +50,8 @@ namespace ManipApp
             InitializeComponent();
             manipModelVisual3D = new List<ModelVisual3D>();
             arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
-            offset = new Point(540, 405);
-            coeff = 1;// 0.5;
+            offset = new Point(504, 403);
+            coeff = 1; // 0.5;
             MouseMod = 0;
         }
 
@@ -78,7 +78,7 @@ namespace ManipApp
 
         private void NewPath_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            RotX.Angle = -78;
+            RotX.Angle = -71;
             RotY.Angle = -45;
             MouseMod = 1;
         }
@@ -117,13 +117,15 @@ namespace ManipApp
                 new Point3D(42, 2, 1)
             };
 
-            //listQ.Clear();
+            Array.Clear(arrayQ, 0, arrayQ.Length);
             for (int i = 0; i < listPathPoints.Count; i++)
             {
-                Point3D pathPoint = listPathPoints[i];
                 model.CalculationMetaData();
+                Point3D pathPoint = listPathPoints[i];
                 model.LagrangeMethodToThePoint(pathPoint);
-                arrayQ[i] = model.q; // check that different values added
+                var tmpQ = new double[model.n - 1];
+                model.q.CopyTo(tmpQ, 0);
+                arrayQ[i] = tmpQ;
             }
         }
 
@@ -148,6 +150,7 @@ namespace ManipApp
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var myGeometryModel = GetCircleModel(0.1, new Vector3D(0, 1, 0),
                         new Point3D((hitParams.HitPoint.X - offset.X) * 0.0216049, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0216049), 14);
+
                     myModel3DGroup.Children.Add(myGeometryModel);
                     myModelVisual3D.Content = myModel3DGroup;
                     this.Viewport3D.Children.Add(myModelVisual3D);
@@ -210,8 +213,8 @@ namespace ManipApp
                     pathPointCursor = new ModelVisual3D();
 
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
-                    var myGeometryModel = GetCircleModel(0.1, new Vector3D(0, 1, 0),
-                        new Point3D((hitParams.HitPoint.X - offset.X) * 0.0216049, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0216049), 14);
+                    var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
+                        new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
                     myModel3DGroup.Children.Add(myGeometryModel);
                     pathPointCursor.Content = myModel3DGroup;
                     this.Viewport3D.Children.Add(pathPointCursor);
@@ -266,8 +269,8 @@ namespace ManipApp
             arrayQ[0] = tmpQ;
             model.q[0] = DegreeToRadian(45); // R
             model.q[1] = DegreeToRadian(90); // R
-            model.q[2] = 3;                  // Pr
-            model.q[3] = DegreeToRadian(50); // R
+            model.q[2] = DegreeToRadian(30); // R
+            model.q[3] = DegreeToRadian(90); // R
             arrayQ[1] = model.q;
             model.CalculationMetaData();
 
@@ -283,7 +286,8 @@ namespace ManipApp
                     transformGroup[j].Children.Add(transformation as Transform3D);
             }
 
-            // трансформация должна влиять на все последующие звенья
+            // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
+            // а для звена 'P' только ScaleTransform3D и для всех последующих TranslateTransform3D
             for (int i = 1; i < model.n; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
@@ -312,9 +316,9 @@ namespace ManipApp
                     (transformation as ScaleTransform3D).CenterY = center.Y;
                     (transformation as ScaleTransform3D).CenterZ = center.Z;
                     var prismaticAxis = model.GetZAxis(unitIndex);
-                    (transformation as ScaleTransform3D).ScaleX = prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleY = prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleZ = prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleX = 1.2; // prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleY = 1.2; // prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleZ = 1.2; // prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
                     break;
             }
 
