@@ -43,13 +43,13 @@ namespace ManipApp
         private List<ModelVisual3D> manipModelVisual3D;
 
         private MatrixMathModel model;
-        private double[][] listQ; // Generalized coordinates vector
+        private double[][] arrayQ; // Generalized coordinates vector
 
         public MainWindow()
         {
             InitializeComponent();
             manipModelVisual3D = new List<ModelVisual3D>();
-            listQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
+            arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(540, 405);
             coeff = 1;// 0.5;
             MouseMod = 0;
@@ -123,7 +123,7 @@ namespace ManipApp
                 Point3D pathPoint = listPathPoints[i];
                 model.CalculationMetaData();
                 model.LagrangeMethodToThePoint(pathPoint);
-                listQ[i] = model.q; // check that different values added
+                arrayQ[i] = model.q; // check that different values added
             }
         }
 
@@ -261,12 +261,14 @@ namespace ManipApp
         /// </summary>
         private void AddTransformationsForManipulator()
         {
-            listQ[0] = new double[model.n - 1](model.q);
+            var tmpQ = new double[model.n - 1];
+            model.q.CopyTo(tmpQ, 0);
+            arrayQ[0] = tmpQ;
             model.q[0] = DegreeToRadian(45); // R
             model.q[1] = DegreeToRadian(90); // R
             model.q[2] = 3;                  // Pr
             model.q[3] = DegreeToRadian(50); // R
-            listQ[1] = model.q; // there is my error, listQ[0] == listQ[1] ;(  TODO: fix it
+            arrayQ[1] = model.q;
             model.CalculationMetaData();
 
             var transformGroup = new Transform3DGroup[model.n - 1];
@@ -310,9 +312,9 @@ namespace ManipApp
                     (transformation as ScaleTransform3D).CenterY = center.Y;
                     (transformation as ScaleTransform3D).CenterZ = center.Z;
                     var prismaticAxis = model.GetZAxis(unitIndex);
-                    (transformation as ScaleTransform3D).ScaleX = prismaticAxis.X + listQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleY = prismaticAxis.Y + listQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleZ = prismaticAxis.Z + listQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleX = prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleY = prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as ScaleTransform3D).ScaleZ = prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
                     break;
             }
 
