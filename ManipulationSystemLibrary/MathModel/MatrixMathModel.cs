@@ -56,8 +56,7 @@ namespace ManipulationSystemLibrary
             CalcS();
             CalcT();
         }
-
-        //Use this method for draw graphics
+        
         public Vector3D F(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(3);
 
         public Vector3D GetZAxis(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(2);
@@ -178,8 +177,11 @@ namespace ManipulationSystemLibrary
             var dF = new BlockMatrix();
 
             for (var i = 0; i < n - 1; i++)
-                dF *= i == index ? units[i].B * dS[i] : units[i].B * S[i];
-            dF *= dF * units[n - 1].B;
+            {
+                dF *= units[i].B;
+                dF *= i == index ? dS[i] : S[i];
+            }
+            dF *= units[n - 1].B;
 
             return dF;
         }

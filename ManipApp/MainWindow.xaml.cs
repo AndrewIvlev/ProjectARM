@@ -39,16 +39,19 @@ namespace ManipApp
         private Point MousePos;
         private Point offset;
         private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
         private ModelVisual3D pathPointCursor;
         private List<ModelVisual3D> manipModelVisual3D;
+        private Storyboard storyboard;
 
         private MatrixMathModel model;
-        private double[][] arrayQ; // Generalized coordinates vector
+        private double[][] arrayQ; // Array of the generalized coordinates vectors for moving animation player
 
         public MainWindow()
         {
             InitializeComponent();
             manipModelVisual3D = new List<ModelVisual3D>();
+            storyboard = new Storyboard();
             arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
@@ -69,6 +72,15 @@ namespace ManipApp
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
+            var tmpQ = new double[model.n - 1];
+            model.q.CopyTo(tmpQ, 0);
+            arrayQ[0] = tmpQ;
+            model.q[0] = DegreeToRadian(0); // R
+            model.q[1] = DegreeToRadian(90); // R
+            model.q[2] = DegreeToRadian(30); // R
+            model.q[3] = DegreeToRadian(90); // R
+            arrayQ[1] = model.q;
+            model.CalculationMetaData();
             AddTransformationsForManipulator();
         }
 
@@ -107,25 +119,29 @@ namespace ManipApp
 
             var listPathPoints = new List<Point3D>
             {
-                new Point3D(43, 0, 0),
-                new Point3D(42.5, 0.5, 0.3),
-                new Point3D(42, 0.7, 0.5),
-                new Point3D(42, 1, 0.8),
-                new Point3D(42, 2, 1),
-                new Point3D(42, 2, 1),
-                new Point3D(42, 2, 1),
-                new Point3D(42, 2, 1)
+                new Point3D(8.2, 3.3, 4),
+                new Point3D(7.7, 4, 4.5),
+                new Point3D(7.3, 4.5, 4.65),
+                new Point3D(6, 5, 4.8),
+                new Point3D(5, 5.5, 5),
+                new Point3D(5, 6, 5.5),
+                new Point3D(5, 6.5, 6),
+                new Point3D(4, 7, 6)
             };
 
-            Array.Clear(arrayQ, 0, arrayQ.Length);
+            //Array.Clear(arrayQ, 0, arrayQ.Length);
             for (int i = 0; i < listPathPoints.Count; i++)
             {
                 model.CalculationMetaData();
                 Point3D pathPoint = listPathPoints[i];
                 model.LagrangeMethodToThePoint(pathPoint);
-                var tmpQ = new double[model.n - 1];
-                model.q.CopyTo(tmpQ, 0);
-                arrayQ[i] = tmpQ;
+                //var tmpQ = new double[model.n - 1];
+                //model.q.CopyTo(tmpQ, 0);
+                //arrayQ[i] = tmpQ;
+                //Thread.Sleep(1500);
+                ManipulatorTransformUpdate(model.q);
+                var shvat = model.F(model.n - 1);
+                ;
             }
         }
 
@@ -148,9 +164,14 @@ namespace ManipApp
                     var mesh = new MeshGeometry3D();
 
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
-                    var myGeometryModel = GetCircleModel(0.1, new Vector3D(0, 1, 0),
-                        new Point3D((hitParams.HitPoint.X - offset.X) * 0.0216049, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0216049), 14);
+                    var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
+                    var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
 
+                    var pathPoint = new MeshGeometry3D();
+                    AddSphere(pathPoint, new Point3D(X, 0 + this.OffsetY, Z), 0.4, 8, 8);
+                    var pointBrush = Brushes.OrangeRed;
+                    var jointMaterial = new DiffuseMaterial(pointBrush);
+                    var myGeometryModel = new GeometryModel3D(pathPoint, jointMaterial);
                     myModel3DGroup.Children.Add(myGeometryModel);
                     myModelVisual3D.Content = myModel3DGroup;
                     this.Viewport3D.Children.Add(myModelVisual3D);
@@ -264,16 +285,6 @@ namespace ManipApp
         /// </summary>
         private void AddTransformationsForManipulator()
         {
-            var tmpQ = new double[model.n - 1];
-            model.q.CopyTo(tmpQ, 0);
-            arrayQ[0] = tmpQ;
-            model.q[0] = DegreeToRadian(45); // R
-            model.q[1] = DegreeToRadian(90); // R
-            model.q[2] = DegreeToRadian(30); // R
-            model.q[3] = DegreeToRadian(90); // R
-            arrayQ[1] = model.q;
-            model.CalculationMetaData();
-
             var transformGroup = new Transform3DGroup[model.n - 1];
             for (int i = 0; i < model.n - 1; i++)
                 transformGroup[i] = new Transform3DGroup();
@@ -292,6 +303,28 @@ namespace ManipApp
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
 
+        private void ManipulatorTransformUpdate(double[] q)
+        {
+            for (int j = 0; j < model.n - 1; j++)
+            {
+                for (int i = j + 1; i < model.n; i++)
+                {
+                    switch (model.units[i].type)
+                    {
+                        case 'R':
+                            (((manipModelVisual3D[i]
+                                .Transform as Transform3DGroup)
+                                .Children[j] as RotateTransform3D)
+                                .Rotation as AxisAngleRotation3D)
+                                .Angle = q[j];
+                            break;
+                        case 'P':
+                            break;
+                    }
+                }
+            }
+        }
+
         private Transform3D GetTransformationByUnitType(int unitIndex)
         {
             Transform3D transformation = null;
@@ -305,9 +338,11 @@ namespace ManipApp
                     (transformation as RotateTransform3D).CenterY = center.Y;
                     (transformation as RotateTransform3D).CenterZ = center.Z;
 
-                    var angleRotation = new AxisAngleRotation3D();
-                    angleRotation.Axis = model.GetZAxis(unitIndex);
-                    angleRotation.Angle = RadianToDegree(model.q[unitIndex]);
+                    var angleRotation = new AxisAngleRotation3D
+                    {
+                        Axis = model.GetZAxis(unitIndex),
+                        Angle = RadianToDegree(model.q[unitIndex])
+                    };
                     (transformation as RotateTransform3D).Rotation = angleRotation;
                     break;
                 case 'P':
@@ -336,7 +371,6 @@ namespace ManipApp
                 foreach (var arm in manipModelVisual3D)
                     this.Viewport3D.Children.Remove(arm);
             }
-            double OffsetY = 0;//0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
             var sup = new Vector3D(0, 0, 0); // startUnitPoint
             for (int i = 0; i < model.n; i++)
             {
@@ -362,6 +396,8 @@ namespace ManipApp
                 jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
 
                 arm.Content = jointsAndUnitsModelGroup;
+                var storyBoard = new Storyboard();
+
                 this.Viewport3D.Children.Add(arm);
                 manipModelVisual3D.Add(arm);
             }
