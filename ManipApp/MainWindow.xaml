@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Icon="window_icon.ico"
         Title="ProjARM" Height="768" Width="1024">
-    <Grid>
+    <Grid KeyDown="Viewport3D_KeyDown">
         <DockPanel LastChildFill="True">
             <Menu DockPanel.Dock="Top" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <MenuItem Header="Manipulator">
@@ -42,10 +42,11 @@
                 <Grid DockPanel.Dock="Left">
                     <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
                     <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,42,0,0"/>
+                    <Button Margin="6,68,84,5" Content="Up/Down path points" Click="UpDownPathPoints_Click"/>
                 </Grid>
                 <Grid DockPanel.Dock="Right">
                     <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,10,37" Width="212"/>
-                    <DockPanel VerticalAlignment="Bottom">
+                    <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
                         <Button Grid.Column="0" x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click" Grid.ColumnSpan="2"/>
                         <Separator Width="52"/>
                         <Button Grid.Column="1" x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center" RenderTransformOrigin="1,0.583"/>

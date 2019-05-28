@@ -41,11 +41,25 @@ namespace ManipApp
         private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
         private ModelVisual3D pathPointCursor;
+        private struct PathPoint
+        {
+            public ModelVisual3D pointModelVisual3D;
+            public Point3D center;
+        }
+        private struct PathLine
+        {
+            public ModelVisual3D lineModelVisual3D;
+            public Point3D start;
+            public Point3D end;
+        }
+        private List<PathPoint> pathPointsVisual3D;
+        private List<PathLine> pathLinesVisual3D;
         private List<ModelVisual3D> manipModelVisual3D;
         private Storyboard storyboard;
 
         private MatrixMathModel model;
         private double[][] arrayQ; // Array of the generalized coordinates vectors for moving animation player
+        private List<Point3D> listPathPoints;
 
         public MainWindow()
         {
@@ -90,6 +104,12 @@ namespace ManipApp
 
         private void NewPath_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (model == null)
+            {
+                MessageBox.Show("Firstly create manipulator model!");
+                return;
+            }
+
             RotX.Angle = -71;
             RotY.Angle = -45;
             MouseMod = 1;
@@ -117,7 +137,7 @@ namespace ManipApp
                 return;
             }
 
-            var listPathPoints = new List<Point3D>
+            listPathPoints = new List<Point3D>
             {
                 new Point3D(8.2, 3.3, 4),
                 new Point3D(7.7, 4, 4.5),
@@ -141,8 +161,13 @@ namespace ManipApp
                 //Thread.Sleep(1500);
                 ManipulatorTransformUpdate(model.q);
                 var shvat = model.F(model.n - 1);
-                ;
             }
+        }
+
+        private void UpDownPathPoints_Click(object sender, RoutedEventArgs e)
+        {
+            MouseMod = 0;
+            this.Viewport3D.Children.Remove(pathPointCursor);
         }
 
         #region Canvas Events
@@ -159,47 +184,72 @@ namespace ManipApp
                     MousePos = e.GetPosition(this);
                     break;
                 case 1:
-                    var myModel3DGroup = new Model3DGroup();
-                    var myModelVisual3D = new ModelVisual3D();
-                    var mesh = new MeshGeometry3D();
+                    if (model == null)
+                    {
+                        MessageBox.Show("Firstly create manipulator model!");
+                        return;
+                    }
+                    if (pathPointsVisual3D == null)
+                    {
+                        pathPointsVisual3D = new List<PathPoint>();
+                        pathLinesVisual3D = new List<PathLine>();
+                        var firstPathPoint3D = new ModelVisual3D();
+                        var firstPpathPoint = new MeshGeometry3D();
+                        var p = model.F(model.n - 1);
+                        PathPoint firstPoint;
+                        firstPoint.center = new Point3D(p.X, p.Y + this.OffsetY, p.Z);
+
+                        AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
+                        var firstPointBrush = Brushes.GreenYellow;
+                        var firstPointMaterial = new DiffuseMaterial(firstPointBrush);
+                        var firstPathPointGeometryModel = new GeometryModel3D(firstPpathPoint, firstPointMaterial);
+                        firstPathPoint3D.Content = firstPathPointGeometryModel;
+                        this.Viewport3D.Children.Add(firstPathPoint3D);
+
+                        firstPoint.pointModelVisual3D = firstPathPoint3D;
+                        pathPointsVisual3D.Add(firstPoint);
+                    }
 
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
                     var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
 
-                    var pathPoint = new MeshGeometry3D();
-                    AddSphere(pathPoint, new Point3D(X, 0 + this.OffsetY, Z), 0.4, 8, 8);
-                    var pointBrush = Brushes.OrangeRed;
-                    var jointMaterial = new DiffuseMaterial(pointBrush);
-                    var myGeometryModel = new GeometryModel3D(pathPoint, jointMaterial);
-                    myModel3DGroup.Children.Add(myGeometryModel);
-                    myModelVisual3D.Content = myModel3DGroup;
-                    this.Viewport3D.Children.Add(myModelVisual3D);
-                    //path.AddAnchorPoint(e.GetPosition());
-                    //if (path.GetLen() != 0) label3.Text = $"Trajectory lenght = {(CoeftoRealW() * path.GetLen()).ToString("#.0000000000")}cm";
-                    //comboBox1.Items.Clear();
-                    //path.Show(PicBoxGraphics);
+                    PathPoint pathPoint;
+                    pathPoint.center = new Point3D(X, pathPointsVisual3D.First().center.Y, Z);
+
+                    //TODO: Extract to method next 8 line
+                    var point = new MeshGeometry3D();
+                    AddSphere(point, pathPoint.center, 0.2, 8, 8);
+                    var pointBrush = Brushes.Purple;
+                    var pointMaterial = new DiffuseMaterial(pointBrush);
+                    var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
+                    var pathPointModelVisual3D = new ModelVisual3D();
+                    pathPointModelVisual3D.Content = pathPointGeometryModel;
+                    this.Viewport3D.Children.Add(pathPointModelVisual3D);
+
+                    pathPoint.pointModelVisual3D = pathPointModelVisual3D;
+                    pathPointsVisual3D.Add(pathPoint);
+
+
+                    PathLine pathLine;
+                    pathLine.start = pathPointsVisual3D[pathPointsVisual3D.Count - 2].center;
+                    pathLine.end = pathPointsVisual3D.Last().center;
+
+                    //TODO: Extract to method next 8 line
+                    var line = new MeshGeometry3D();
+                    LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+                    var lineBrush = Brushes.MediumPurple;
+                    var lineMaterial = new DiffuseMaterial(lineBrush);
+                    var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+                    var pathLineModelVisual3D = new ModelVisual3D();
+                    pathLineModelVisual3D.Content = lineGeometryModel;
+                    this.Viewport3D.Children.Add(pathLineModelVisual3D);
+
+                    pathLine.lineModelVisual3D = pathLineModelVisual3D;
+                    pathLinesVisual3D.Add(pathLine);
                     break;
                 case 2:
-                    //if (MousePressed == 0)
-                    //{
-                    //    index = path.NearestPointIndex(e.Location);
-                    //    if (Math.Pow((e.Location.X - path.AnchorPoints[index].X), 2) +
-                    //        Math.Pow((e.Location.Y + path.AnchorPoints[index].Y), 2) <= 40)
-                    //    {
-                    //        path.AnchorPoints[index] = e.Location;
-                    //    }
-                    //    MousePressed = 1;
-                    //    return;
-                    //}
-                    //if (MousePressed == 1)
-                    //{
-                    //    MousePressed = 0;
-                    //    return;
-                    //}
-                    break;
-                case 3:
-                    //following the cursor
+                    //TODO: Editing path mode
                     break;
                 default:
                     break;
@@ -251,9 +301,33 @@ namespace ManipApp
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
-            this.ScaleTransform3D.ScaleX += e.Delta / 120;
-            this.ScaleTransform3D.ScaleY += e.Delta / 120;
-            this.ScaleTransform3D.ScaleZ += e.Delta / 120;
+            if (this.ScaleTransform3D.ScaleX  < 1)
+            {
+                this.ScaleTransform3D.ScaleX += (double)e.Delta / 500;
+                this.ScaleTransform3D.ScaleY += (double)e.Delta / 500;
+                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 500;
+            }
+            else
+            {
+                this.ScaleTransform3D.ScaleX += (double)e.Delta / 240;
+                this.ScaleTransform3D.ScaleY += (double)e.Delta / 240;
+                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 240;
+            }
+        }
+
+        private void Viewport3D_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Up:
+                    break;
+                case Key.Down:
+                    break;
+                case Key.Left:
+                    break;
+                case Key.Right:
+                    break;
+            }
         }
 
         #endregion
@@ -381,7 +455,7 @@ namespace ManipApp
                 
                 var eup = model.F(i); // endUnitPoint
                 LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
-                                      new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff));
+                                      new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
                 AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
@@ -432,17 +506,15 @@ namespace ManipApp
         // If extend is true, extend the segment by half the
         // thickness so segments with the same end points meet nicely.
         private void AddSegment(MeshGeometry3D mesh,
-            Point3D point1, Point3D point2, Vector3D up)
+            Point3D point1, Point3D point2, Vector3D up, double thickness)
         {
-            AddSegment(mesh, point1, point2, up, false);
+            AddSegment(mesh, point1, point2, up, thickness, false);
         }
 
         private void AddSegment(MeshGeometry3D mesh,
-            Point3D point1, Point3D point2, Vector3D up,
+            Point3D point1, Point3D point2, Vector3D up, double thickness,
             bool extend)
         {
-            const double thickness = 0.25;
-
             // Get the segment's vector.
             Vector3D v = point2 - point1;
 
@@ -552,10 +624,10 @@ namespace ManipApp
             }
         }
 
-        private void LineByTwoPoints(MeshGeometry3D mesh, Point3D start, Point3D end)
+        private void LineByTwoPoints(MeshGeometry3D mesh, Point3D start, Point3D end, double thickness)
         {
             Vector3D up = new Vector3D(0, 1, 0);
-            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, true);
+            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness, true);
         }
 
         /// <summary>
