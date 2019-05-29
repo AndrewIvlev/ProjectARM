@@ -225,13 +225,14 @@ namespace ManipApp
 
             (pathPointsVisual3D[indexPathPoint].pointModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
 
-            NeighborhoodLinesRotation(delta);
+            NeighborhoodLinesRotation();
         }
 
-        private void NeighborhoodLinesRotation(double delta)
+        private void NeighborhoodLinesRotation()
         {
             var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
-            var rightLineAngle = Math.Asin(delta / rightLineLenght);
+            var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            var rightLineAngle = Math.Asin(h / rightLineLenght);
             (((pathLinesVisual3D[indexPathPoint - 1]
                 .lineModelVisual3D
                 .Transform as Transform3DGroup)
@@ -240,7 +241,8 @@ namespace ManipApp
                 .Angle = rightLineAngle;
 
             var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
-            var leftLineAngle = Math.Asin(delta / leftLineLenght);
+            h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            var leftLineAngle = Math.Asin(h / leftLineLenght);
             (((pathLinesVisual3D[indexPathPoint]
                 .lineModelVisual3D
                 .Transform as Transform3DGroup)
