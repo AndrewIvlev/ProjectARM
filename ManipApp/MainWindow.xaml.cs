@@ -34,26 +34,40 @@ namespace ManipApp
         /// 0 - camera rotation;
         /// 1 - path creation;
         /// 2 - path editing;
+        /// 3 - up/down path points mod;
         /// </summary>
-        private byte MouseMod;
+        private byte mouseMod;
+        private byte keyboardMod;
         private Point MousePos;
         private Point offset;
         private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
+
+        #region PATH
         private ModelVisual3D pathPointCursor;
+
         private struct PathPoint
         {
             public ModelVisual3D pointModelVisual3D;
             public Point3D center;
+
+            public void SetY(double y)
+            {
+                center.Y = y;
+            }
         }
-        private struct PathLine
+        private List<PathPoint> pathPointsVisual3D;
+        private int indexPathPoint; //TODO: remove it, do smarter
+
+        struct PathLine
         {
             public ModelVisual3D lineModelVisual3D;
             public Point3D start;
             public Point3D end;
         }
-        private List<PathPoint> pathPointsVisual3D;
         private List<PathLine> pathLinesVisual3D;
+        #endregion
+
         private List<ModelVisual3D> manipModelVisual3D;
         private Storyboard storyboard;
 
@@ -69,9 +83,9 @@ namespace ManipApp
             arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
-            MouseMod = 0;
+            mouseMod = 0;
+            keyboardMod = 0;
         }
-
         #region Menu Strip
 
         #region Manipulator
@@ -112,7 +126,7 @@ namespace ManipApp
 
             RotX.Angle = -71;
             RotY.Angle = -45;
-            MouseMod = 1;
+            mouseMod = 1;
         }
 
         private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -166,8 +180,73 @@ namespace ManipApp
 
         private void UpDownPathPoints_Click(object sender, RoutedEventArgs e)
         {
-            MouseMod = 0;
+            mouseMod = 0;
+            keyboardMod = 1;
             this.Viewport3D.Children.Remove(pathPointCursor);
+            indexPathPoint = 1;
+        }
+
+        private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
+        {
+            keyboardMod = 0;
+        }
+
+        private void OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (keyboardMod != 1) return;
+            switch (e.Key)
+            {
+                /*** Raise/lower point along Y axis ***/
+                case Key.W:
+                    ChangePathPointY(true);
+                    break;
+                case Key.S:
+                    ChangePathPointY(false);
+                    break;
+
+                /*** Point selection ***/
+                //Каким-то образом нужно подсвечивать сферу точки, которая выбирается
+                //Можно например применить к сфере ScaleTransform3D увеличив временно её в размерах
+                case Key.N: //Next point
+                    if (indexPathPoint >= pathPointsVisual3D.Count) return;
+                    indexPathPoint++;
+                    break;
+                case Key.P: //Previous point
+                    if (indexPathPoint == 1) return;
+                    indexPathPoint--;
+                    break;
+            }
+        }
+
+        private void ChangePathPointY(bool isUp)
+        {
+            var delta = isUp ? 0.25 : -0.25;
+            pathPointsVisual3D[indexPathPoint].SetY(pathPointsVisual3D[indexPathPoint].center.Y + delta);
+
+            (pathPointsVisual3D[indexPathPoint].pointModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
+
+            NeighborhoodLinesRotation(delta);
+        }
+
+        private void NeighborhoodLinesRotation(double delta)
+        {
+            var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
+            var rightLineAngle = Math.Asin(delta / rightLineLenght);
+            (((pathLinesVisual3D[indexPathPoint - 1]
+                .lineModelVisual3D
+                .Transform as Transform3DGroup)
+                .Children[0] as RotateTransform3D)
+                .Rotation as AxisAngleRotation3D)
+                .Angle = rightLineAngle;
+
+            var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
+            var leftLineAngle = Math.Asin(delta / leftLineLenght);
+            (((pathLinesVisual3D[indexPathPoint]
+                .lineModelVisual3D
+                .Transform as Transform3DGroup)
+                .Children[1] as RotateTransform3D)
+                .Rotation as AxisAngleRotation3D)
+                .Angle = leftLineAngle;
         }
 
         #region Canvas Events
@@ -178,7 +257,7 @@ namespace ManipApp
         /// </summary>
         private void Canvas_MouseLeftButtonDown(object sender, MouseEventArgs e)
         {
-            switch (MouseMod)
+            switch (mouseMod)
             {
                 case 0:
                     MousePos = e.GetPosition(this);
@@ -204,6 +283,7 @@ namespace ManipApp
                         var firstPointMaterial = new DiffuseMaterial(firstPointBrush);
                         var firstPathPointGeometryModel = new GeometryModel3D(firstPpathPoint, firstPointMaterial);
                         firstPathPoint3D.Content = firstPathPointGeometryModel;
+                        firstPathPoint3D.Transform = new TranslateTransform3D();
                         this.Viewport3D.Children.Add(firstPathPoint3D);
 
                         firstPoint.pointModelVisual3D = firstPathPoint3D;
@@ -225,6 +305,7 @@ namespace ManipApp
                     var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
                     var pathPointModelVisual3D = new ModelVisual3D();
                     pathPointModelVisual3D.Content = pathPointGeometryModel;
+                    pathPointModelVisual3D.Transform = new TranslateTransform3D();
                     this.Viewport3D.Children.Add(pathPointModelVisual3D);
 
                     pathPoint.pointModelVisual3D = pathPointModelVisual3D;
@@ -247,6 +328,7 @@ namespace ManipApp
 
                     pathLine.lineModelVisual3D = pathLineModelVisual3D;
                     pathLinesVisual3D.Add(pathLine);
+                    AddRotateTransform(pathLine);
                     break;
                 case 2:
                     //TODO: Editing path mode
@@ -256,9 +338,52 @@ namespace ManipApp
             }
         }
 
+        private void AddRotateTransform(PathLine pathLine)
+        {
+            var transformGroup = new Transform3DGroup();
+
+            var rotateTransformByStart = new RotateTransform3D();
+            rotateTransformByStart.CenterX = pathLine.start.X;
+            rotateTransformByStart.CenterY = pathLine.start.Y;
+            rotateTransformByStart.CenterZ = pathLine.start.Z;
+
+            var rotateTransformByEnd = new RotateTransform3D();
+            rotateTransformByEnd.CenterX = pathLine.end.X;
+            rotateTransformByEnd.CenterY = pathLine.end.Y;
+            rotateTransformByEnd.CenterZ = pathLine.end.Z;
+
+            var angleRotationByStart = new AxisAngleRotation3D
+            {
+                Axis = Vector3D.CrossProduct(
+                    new Vector3D(pathLine.end.X - pathLine.start.X,
+                                 pathLine.end.Y - pathLine.start.Y,
+                                 pathLine.end.Z - pathLine.start.Z),
+                    new Vector3D(0, 1, 0)),
+                Angle = 0
+            };
+
+            var angleRotationByEnd = new AxisAngleRotation3D
+            {
+                Axis = Vector3D.CrossProduct(
+                     new Vector3D(0, 1, 0),
+                     new Vector3D(pathLine.end.X - pathLine.start.X,
+                                  pathLine.end.Y - pathLine.start.Y,
+                                  pathLine.end.Z - pathLine.start.Z)),
+                Angle = 0
+            };
+
+            rotateTransformByStart.Rotation = angleRotationByStart;
+            transformGroup.Children.Add(rotateTransformByStart);
+
+            rotateTransformByEnd.Rotation = angleRotationByEnd;
+            transformGroup.Children.Add(rotateTransformByEnd);
+
+            pathLine.lineModelVisual3D.Transform = transformGroup;
+        }
+
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            switch (MouseMod)
+            switch (mouseMod)
             {
                 case 0:
                     if (e.LeftButton == MouseButtonState.Pressed)
@@ -301,32 +426,17 @@ namespace ManipApp
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
-            if (this.ScaleTransform3D.ScaleX  < 1)
+            if (this.ScaleTransform3D.ScaleX < 1)
             {
-                this.ScaleTransform3D.ScaleX += (double)e.Delta / 500;
-                this.ScaleTransform3D.ScaleY += (double)e.Delta / 500;
-                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 500;
+                this.ScaleTransform3D.ScaleX += (double)e.Delta / 555;
+                this.ScaleTransform3D.ScaleY += (double)e.Delta / 555;
+                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
             }
             else
             {
-                this.ScaleTransform3D.ScaleX += (double)e.Delta / 240;
-                this.ScaleTransform3D.ScaleY += (double)e.Delta / 240;
-                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 240;
-            }
-        }
-
-        private void Viewport3D_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.Up:
-                    break;
-                case Key.Down:
-                    break;
-                case Key.Left:
-                    break;
-                case Key.Right:
-                    break;
+                this.ScaleTransform3D.ScaleX += (double)e.Delta / 333;
+                this.ScaleTransform3D.ScaleY += (double)e.Delta / 333;
+                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
             }
         }
 
@@ -372,7 +482,7 @@ namespace ManipApp
             }
 
             // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
-            // а для звена 'P' только ScaleTransform3D и для всех последующих TranslateTransform3D
+            // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
             for (int i = 1; i < model.n; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }

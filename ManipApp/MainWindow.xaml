@@ -7,8 +7,9 @@
         xmlns:local="clr-namespace:ManipApp"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024">
-    <Grid KeyDown="Viewport3D_KeyDown">
+        Title="ProjARM" Height="768" Width="1024"
+        KeyDown="OnKeyDownHandler">
+    <Grid>
         <DockPanel LastChildFill="True">
             <Menu DockPanel.Dock="Top" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <MenuItem Header="Manipulator">
@@ -39,17 +40,18 @@
                 </MenuItem>
             </Menu>
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Grid DockPanel.Dock="Left">
-                    <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
-                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,42,0,0"/>
-                    <Button Margin="6,68,84,5" Content="Up/Down path points" Click="UpDownPathPoints_Click"/>
+                <Grid DockPanel.Dock="Left" Width="177">
+                    <!--Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/-->
+                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,10,0,0"/>
+                    <Button Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
+                    <Button Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
                 </Grid>
-                <Grid DockPanel.Dock="Right">
-                    <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,10,37" Width="212"/>
+                <Grid DockPanel.Dock="Right" Width="169">
+                    <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
+                    <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
                     <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                        <Button Grid.Column="0" x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click" Grid.ColumnSpan="2"/>
-                        <Separator Width="52"/>
-                        <Button Grid.Column="1" x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center" RenderTransformOrigin="1,0.583"/>
+                        <Button x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
+                        <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
                     </DockPanel>
                 </Grid>
                 <oxy:Plot Title="DeltaChart" Height="88"></oxy:Plot>
@@ -93,7 +95,7 @@
                     </Viewport3D.Camera>
 
                     <Viewport3D.Children>
-                        
+
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <AmbientLight Color="#FFFFFF" />
@@ -119,7 +121,7 @@
                                 </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
-                        
+
                         <!--> Oz axis </-->
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
@@ -137,7 +139,7 @@
                                 </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
-                        
+
                         <!--> Ox axis </-->
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
@@ -155,7 +157,7 @@
                                 </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
-                        
+
                         <!-->Oy axis</-->
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
@@ -177,7 +179,7 @@
                     </Viewport3D.Children>
 
                 </Viewport3D>
-                
+
                 <Canvas Grid.Row="0" Grid.Column="0" 
                         Background="Transparent" 
                         MouseLeftButtonUp="Canvas_MouseLeftButtonUp" 
