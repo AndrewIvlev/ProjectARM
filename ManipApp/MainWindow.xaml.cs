@@ -230,6 +230,7 @@ namespace ManipApp
 
         private void NeighborhoodLinesRotation()
         {
+            //there is the bug :(
             var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
             var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
             var rightLineAngle = Math.Asin(h / rightLineLenght);
@@ -410,6 +411,7 @@ namespace ManipApp
                     var myModel3DGroup = new Model3DGroup();
                     pathPointCursor = new ModelVisual3D();
 
+                    //TODO: fix moving path cursor(when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
                         new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
