@@ -65,6 +65,9 @@
     <None Include="ManipConfigFiles\SPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="ManipConfigFiles\SRRRPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ManipConfigFiles\SRRRR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

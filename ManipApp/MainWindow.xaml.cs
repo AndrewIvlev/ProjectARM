@@ -25,6 +25,7 @@ namespace ManipApp
     using System.Windows.Media.Animation;
     using OxyPlot;
 
+    //TODO: Critically needed refactoring, using MVVM Pattern
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -66,6 +67,9 @@ namespace ManipApp
             public Point3D end;
         }
         private List<PathLine> pathLinesVisual3D;
+        private List<Point3D> listSplitPathPoints;
+
+        private double pathLenght;
         #endregion
 
         private List<ModelVisual3D> manipModelVisual3D;
@@ -73,18 +77,20 @@ namespace ManipApp
 
         private MatrixMathModel model;
         private double[][] arrayQ; // Array of the generalized coordinates vectors for moving animation player
-        private List<Point3D> listPathPoints;
+        private List<Point3D> listPathPoints; // list for spliting path
 
         public MainWindow()
         {
             InitializeComponent();
             manipModelVisual3D = new List<ModelVisual3D>();
+            listPathPoints = new List<Point3D>();
             storyboard = new Storyboard();
             arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
             keyboardMod = 0;
+            pathLenght = 0;
         }
         #region Menu Strip
 
@@ -100,21 +106,33 @@ namespace ManipApp
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
-            var tmpQ = new double[model.n - 1];
-            model.q.CopyTo(tmpQ, 0);
-            arrayQ[0] = tmpQ;
-            model.q[0] = DegreeToRadian(0); // R
-            model.q[1] = DegreeToRadian(90); // R
-            model.q[2] = DegreeToRadian(30); // R
-            model.q[3] = DegreeToRadian(90); // R
-            arrayQ[1] = model.q;
-            model.CalculationMetaData();
+            //var tmpQ = new double[model.n - 1];
+            //model.q.CopyTo(tmpQ, 0);
+            //arrayQ[0] = tmpQ;
+            //model.q[0] = DegreeToRadian(0); // R
+            //model.q[1] = DegreeToRadian(90); // R
+            //model.q[2] = DegreeToRadian(30); // R
+            //model.q[3] = DegreeToRadian(90); // R
+            //arrayQ[1] = model.q;
+            //model.CalculationMetaData();
+
             AddTransformationsForManipulator();
         }
 
         #endregion
 
         #region Path
+        private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SplitingByStepOfPoints_Grid.Visibility = Visibility.Hidden;
+            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Visible;
+        }
+
+        private void SplitPathWithStep_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Hidden;
+            SplitingByStepOfPoints_Grid.Visibility = Visibility.Visible;
+        }
 
         private void NewPath_MenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -129,19 +147,68 @@ namespace ManipApp
             mouseMod = 1;
         }
 
-        private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void SplitPathWithStep_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         #endregion
+
+        private void SplitPathByStep_Button_Click(object sender, RoutedEventArgs e)
+        {
+            double step;
+            if(!double.TryParse(StepInCmToSplit_TextBox.Text, out step))
+            {
+                MessageBox.Show("Invalid input of split step!");
+                return;
+            }
+
+            SplitPath(listPathPoints, step);
+        }
+
+        private void SplitPath(List<Point3D> listPathPoints, double step)
+        {
+            int index = 0;
+            listSplitPathPoints = new List<Point3D>();
+            for (int i = 1; i < listPathPoints.Count; i++)
+            {
+                int j = 0;
+                double lambda = 0;
+                double x = listPathPoints[i - 1].X;
+                double y = listPathPoints[i - 1].Y;
+                double z = listPathPoints[i - 1].Z;
+                double dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
+                do
+                {
+                    lambda = (step * j) / (dist - step * j);
+                    x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
+                    y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
+                    z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
+                    listSplitPathPoints.Add(new Point3D(x, y, z));
+                    index++;
+                    j++;
+                }
+                while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
+            }
+            index++;
+            listSplitPathPoints.Add(listPathPoints[listPathPoints.Count - 1]);
+
+            ShowSplitPath(listSplitPathPoints);
+        }
+
+        private void ShowSplitPath(List<Point3D> listSplitPathPoints)
+        {
+            foreach(var p in listSplitPathPoints)
+            {
+                //TODO: Extract to method next 8 line
+                var point = new MeshGeometry3D();
+                AddSphere(point, new Point3D(p.X, p.Y, p.Z), 0.2, 8, 8);
+                var pointBrush = Brushes.DarkRed;
+                var pointMaterial = new DiffuseMaterial(pointBrush);
+                var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
+                var pathPointModelVisual3D = new ModelVisual3D();
+                pathPointModelVisual3D.Content = pathPointGeometryModel;
+                pathPointModelVisual3D.Transform = new TranslateTransform3D();
+                this.Viewport3D.Children.Add(pathPointModelVisual3D);
+            }
+        }
 
         private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
         {
@@ -151,23 +218,11 @@ namespace ManipApp
                 return;
             }
 
-            listPathPoints = new List<Point3D>
-            {
-                new Point3D(8.2, 3.3, 4),
-                new Point3D(7.7, 4, 4.5),
-                new Point3D(7.3, 4.5, 4.65),
-                new Point3D(6, 5, 4.8),
-                new Point3D(5, 5.5, 5),
-                new Point3D(5, 6, 5.5),
-                new Point3D(5, 6.5, 6),
-                new Point3D(4, 7, 6)
-            };
-
             //Array.Clear(arrayQ, 0, arrayQ.Length);
-            for (int i = 0; i < listPathPoints.Count; i++)
+            for (int i = 1; i < listSplitPathPoints.Count; i++)
             {
                 model.CalculationMetaData();
-                Point3D pathPoint = listPathPoints[i];
+                var pathPoint = listSplitPathPoints[i];
                 model.LagrangeMethodToThePoint(pathPoint);
                 //var tmpQ = new double[model.n - 1];
                 //model.q.CopyTo(tmpQ, 0);
@@ -189,6 +244,9 @@ namespace ManipApp
         private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
         {
             keyboardMod = 0;
+            PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
+            foreach (var p in pathPointsVisual3D)
+                listPathPoints.Add(p.center);
         }
 
         private void OnKeyDownHandler(object sender, KeyEventArgs e)
@@ -336,8 +394,7 @@ namespace ManipApp
                         firstPoint.pointModelVisual3D = firstPathPoint3D;
                         pathPointsVisual3D.Add(firstPoint);
 
-                        UpDownPathPoints_Button.Visibility = Visibility.Visible;
-                        FinishBuildingAPath_Button.Visibility = Visibility.Visible;
+                        PathBuilderGrid_Grid.Visibility = Visibility.Visible;
                     }
 
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
@@ -363,6 +420,8 @@ namespace ManipApp
 
                     AddPathLine(pathPointsVisual3D[pathPointsVisual3D.Count - 2].center, pathPointsVisual3D.Last().center);
 
+                    pathLenght += (pathPointsVisual3D[pathPointsVisual3D.Count - 2].center - pathPointsVisual3D.Last().center).Length;
+                    PathLenght.Content = $"Path lenght = {pathLenght.ToString("#.000")} cm";
                     break;
                 case 2:
                     //TODO: Editing path mode
@@ -586,14 +645,16 @@ namespace ManipApp
                     (transformation as RotateTransform3D).Rotation = angleRotation;
                     break;
                 case 'P':
-                    transformation = new ScaleTransform3D();
-                    (transformation as ScaleTransform3D).CenterX = center.X;
-                    (transformation as ScaleTransform3D).CenterY = center.Y;
-                    (transformation as ScaleTransform3D).CenterZ = center.Z;
+                    transformation = new TranslateTransform3D();
                     var prismaticAxis = model.GetZAxis(unitIndex);
-                    (transformation as ScaleTransform3D).ScaleX = 1.2; // prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleY = 1.2; // prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    (transformation as ScaleTransform3D).ScaleZ = 1.2; // prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    (transformation as TranslateTransform3D).OffsetX = prismaticAxis.X;
+                    (transformation as TranslateTransform3D).OffsetY = prismaticAxis.Y;
+                    (transformation as TranslateTransform3D).OffsetZ = prismaticAxis.Z;
+
+                    //only for 3d line next, but now make temporary solution with removing old line 3d model and insertion new 3d line
+                    //(transformation as ScaleTransform3D).ScaleX = 1.2; // prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    //(transformation as ScaleTransform3D).ScaleY = 1.2; // prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
+                    //(transformation as ScaleTransform3D).ScaleZ = 1.2; // prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
                     break;
             }
 
