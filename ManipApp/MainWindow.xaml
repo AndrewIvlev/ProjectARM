@@ -42,9 +42,16 @@
             <DockPanel DockPanel.Dock="Top" LastChildFill="True">
                 <Grid DockPanel.Dock="Left" Width="177">
                     <!--Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/-->
-                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="0,10,0,0"/>
-                    <Button Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
-                    <Button Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
+                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="10,10,45,0"/>
+                    
+                    <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37" Visibility="Hidden"/>
+                    <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10" Visibility="Hidden"/>
+
+                    <Label x:Name="NumberOfPointsToSplit_Label" Content="Enter the number&#x0a;of points to split" Margin="10,36,45,15" Visibility="Hidden"/>
+                    <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="25" Margin="112,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="36" Visibility="Hidden"/>
+
+                    <Label x:Name="StepInCmToSplit_Label" Content="Enter a step to&#x0a;split in cm" Margin="10,36,45,15"/>
+                    <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="25" Margin="96,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="36"/>
                 </Grid>
                 <Grid DockPanel.Dock="Right" Width="169">
                     <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>

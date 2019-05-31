@@ -335,6 +335,9 @@ namespace ManipApp
 
                         firstPoint.pointModelVisual3D = firstPathPoint3D;
                         pathPointsVisual3D.Add(firstPoint);
+
+                        UpDownPathPoints_Button.Visibility = Visibility.Visible;
+                        FinishBuildingAPath_Button.Visibility = Visibility.Visible;
                     }
 
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
