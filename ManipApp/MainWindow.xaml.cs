@@ -46,7 +46,7 @@ namespace ManipApp
         #region PATH
         private ModelVisual3D pathPointCursor;
 
-        private struct PathPoint
+        private class PathPoint
         {
             public ModelVisual3D pointModelVisual3D;
             public Point3D center;
@@ -208,7 +208,7 @@ namespace ManipApp
                 //Каким-то образом нужно подсвечивать сферу точки, которая выбирается
                 //Можно например применить к сфере ScaleTransform3D увеличив временно её в размерах
                 case Key.N: //Next point
-                    if (indexPathPoint >= pathPointsVisual3D.Count) return;
+                    if (indexPathPoint == pathPointsVisual3D.Count - 1) return;
                     indexPathPoint++;
                     break;
                 case Key.P: //Previous point
@@ -230,26 +230,70 @@ namespace ManipApp
 
         private void NeighborhoodLinesRotation()
         {
-            //there is the bug :(
-            var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
-            var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            var rightLineAngle = Math.Asin(h / rightLineLenght);
-            (((pathLinesVisual3D[indexPathPoint - 1]
-                .lineModelVisual3D
-                .Transform as Transform3DGroup)
-                .Children[0] as RotateTransform3D)
-                .Rotation as AxisAngleRotation3D)
-                .Angle = rightLineAngle;
+            //Temporary solution
+            //Insert new ModelVisual3D model of path line except old
 
-            var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
-            h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            var leftLineAngle = Math.Asin(h / leftLineLenght);
-            (((pathLinesVisual3D[indexPathPoint]
-                .lineModelVisual3D
-                .Transform as Transform3DGroup)
-                .Children[1] as RotateTransform3D)
-                .Rotation as AxisAngleRotation3D)
-                .Angle = leftLineAngle;
+            PathLine pathLine;
+            pathLine.start = pathPointsVisual3D[indexPathPoint - 1].center;
+            pathLine.end = pathPointsVisual3D[indexPathPoint].center;
+
+            //TODO: Extract to method next 8 line
+            var line = new MeshGeometry3D();
+            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            var lineBrush = Brushes.MediumPurple;
+            var lineMaterial = new DiffuseMaterial(lineBrush);
+            var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+            var pathLineModelVisual3D = new ModelVisual3D();
+            pathLineModelVisual3D.Content = lineGeometryModel;
+            this.Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint - 1].lineModelVisual3D);
+            this.Viewport3D.Children.Insert(indexPathPoint - 1, pathLineModelVisual3D);
+
+            pathLine.lineModelVisual3D = pathLineModelVisual3D;
+            pathLinesVisual3D.RemoveAt(indexPathPoint - 1);
+            pathLinesVisual3D.Insert(indexPathPoint - 1, pathLine);
+
+            if (indexPathPoint == pathPointsVisual3D.Count - 1) return;
+            
+            pathLine.start = pathPointsVisual3D[indexPathPoint].center;
+            pathLine.end = pathPointsVisual3D[indexPathPoint + 1].center;
+
+            //TODO: Extract to method next 8 line
+            line = new MeshGeometry3D();
+            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            lineBrush = Brushes.MediumPurple;
+            lineMaterial = new DiffuseMaterial(lineBrush);
+            lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+            pathLineModelVisual3D = new ModelVisual3D();
+            pathLineModelVisual3D.Content = lineGeometryModel;
+            this.Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint].lineModelVisual3D);
+            this.Viewport3D.Children.Insert(indexPathPoint, pathLineModelVisual3D);
+
+            pathLine.lineModelVisual3D = pathLineModelVisual3D;
+            pathLinesVisual3D.RemoveAt(indexPathPoint);
+            pathLinesVisual3D.Insert(indexPathPoint, pathLine);
+
+            //there is the bug :( bug#2
+            //Because lenght changed when we up or down path point
+            //And there is need to use ScaleTransform3D with RotateTransform3D
+            //var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
+            //var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            //var rightLineAngle = Math.Asin(h / rightLineLenght);
+            //(((pathLinesVisual3D[indexPathPoint - 1]
+            //    .lineModelVisual3D
+            //    .Transform as Transform3DGroup)
+            //    .Children[0] as RotateTransform3D)
+            //    .Rotation as AxisAngleRotation3D)
+            //    .Angle = rightLineAngle;
+
+            //var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
+            //h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            //var leftLineAngle = Math.Asin(h / leftLineLenght);
+            //(((pathLinesVisual3D[indexPathPoint]
+            //    .lineModelVisual3D
+            //    .Transform as Transform3DGroup)
+            //    .Children[1] as RotateTransform3D)
+            //    .Rotation as AxisAngleRotation3D)
+            //    .Angle = leftLineAngle;
         }
 
         #region Canvas Events
@@ -278,7 +322,7 @@ namespace ManipApp
                         var firstPathPoint3D = new ModelVisual3D();
                         var firstPpathPoint = new MeshGeometry3D();
                         var p = model.F(model.n - 1);
-                        PathPoint firstPoint;
+                        PathPoint firstPoint = new PathPoint();
                         firstPoint.center = new Point3D(p.X, p.Y + this.OffsetY, p.Z);
 
                         AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
@@ -297,7 +341,7 @@ namespace ManipApp
                     var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
                     var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
 
-                    PathPoint pathPoint;
+                    PathPoint pathPoint = new PathPoint();
                     pathPoint.center = new Point3D(X, pathPointsVisual3D.First().center.Y, Z);
 
                     //TODO: Extract to method next 8 line
@@ -314,24 +358,8 @@ namespace ManipApp
                     pathPoint.pointModelVisual3D = pathPointModelVisual3D;
                     pathPointsVisual3D.Add(pathPoint);
 
+                    AddPathLine(pathPointsVisual3D[pathPointsVisual3D.Count - 2].center, pathPointsVisual3D.Last().center);
 
-                    PathLine pathLine;
-                    pathLine.start = pathPointsVisual3D[pathPointsVisual3D.Count - 2].center;
-                    pathLine.end = pathPointsVisual3D.Last().center;
-
-                    //TODO: Extract to method next 8 line
-                    var line = new MeshGeometry3D();
-                    LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
-                    var lineBrush = Brushes.MediumPurple;
-                    var lineMaterial = new DiffuseMaterial(lineBrush);
-                    var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-                    var pathLineModelVisual3D = new ModelVisual3D();
-                    pathLineModelVisual3D.Content = lineGeometryModel;
-                    this.Viewport3D.Children.Add(pathLineModelVisual3D);
-
-                    pathLine.lineModelVisual3D = pathLineModelVisual3D;
-                    pathLinesVisual3D.Add(pathLine);
-                    AddRotateTransform(pathLine);
                     break;
                 case 2:
                     //TODO: Editing path mode
@@ -339,6 +367,27 @@ namespace ManipApp
                 default:
                     break;
             }
+        }
+
+        private void AddPathLine(Point3D start, Point3D end)
+        {
+            PathLine pathLine;
+            pathLine.start = start;
+            pathLine.end = end;
+
+            //TODO: Extract to method next 8 line
+            var line = new MeshGeometry3D();
+            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            var lineBrush = Brushes.MediumPurple;
+            var lineMaterial = new DiffuseMaterial(lineBrush);
+            var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+            var pathLineModelVisual3D = new ModelVisual3D();
+            pathLineModelVisual3D.Content = lineGeometryModel;
+            this.Viewport3D.Children.Add(pathLineModelVisual3D);
+
+            pathLine.lineModelVisual3D = pathLineModelVisual3D;
+            pathLinesVisual3D.Add(pathLine);
+            //AddRotateTransform(pathLine); uncomment when bug#2 closed
         }
 
         private void AddRotateTransform(PathLine pathLine)
