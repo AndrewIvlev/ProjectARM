@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Delta.cs" />
     <Compile Include="MathModel\ExplicitMathModel.cs" />
     <Compile Include="MathModel\MathModel.cs" />
     <Compile Include="MathModel\MatrixMathModel.cs" />

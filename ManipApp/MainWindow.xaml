@@ -49,7 +49,7 @@
                             <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
                             <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
                         </Grid>
-                    
+
                         <Grid x:Name="SplitingByNumberOfPoints_Grid" Visibility="Hidden">
                             <Label Content="Enter the number of points&#x0a;to split" Margin="10,36,10,15" />
                             <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="22" Margin="58,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
@@ -71,16 +71,15 @@
                         <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
                     </DockPanel>
                 </Grid>
-                <oxy:Plot Title="DeltaChart" Height="88"></oxy:Plot>
-            </DockPanel>
-            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
-                <Button x:Name="StartStopButton" DockPanel.Dock="Left" Content="Start" Width="50" VerticalAlignment="Center"/>
-                <Separator Width="5"/>
-                <Button x:Name="PauseButton" DockPanel.Dock="Left" Content="Pause" Width="50" VerticalAlignment="Center"/>
-                <Separator Width="5"/>
-                <Slider x:Name="SliderSpeed" DockPanel.Dock="Right" Width="103" VerticalAlignment="Center"/>
-                <Label x:Name="SpeedLabel" DockPanel.Dock="Right" Width="43" Content="Speed" VerticalAlignment="Center"/>
-                <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
+                <Grid Height="90">
+                    <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
+                    <Grid VerticalAlignment="Bottom" Height="36">
+                        <Button x:Name="StartStopButton" Content="Start" Margin="246,5,370,11" />
+                        <Button x:Name="PauseButton" Content="Pause" Margin="305,5,311,11"/>
+                        <Slider x:Name="SliderSpeed" Margin="417,5,101,-5"/>
+                        <Label x:Name="SpeedLabel"  Content="Speed" Margin="364,2,242,9"/>
+                    </Grid>
+                </Grid>
             </DockPanel>
 
             <Grid>

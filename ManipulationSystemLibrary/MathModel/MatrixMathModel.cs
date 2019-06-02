@@ -17,10 +17,10 @@ namespace ManipulationSystemLibrary
 
         public MatrixMathModel(MathModel model) : base(model)
         {
-            D = new Matrix(3, n - 1);
-            S = new BlockMatrix[n - 1];
-            dS = new BlockMatrix[n - 1];
-            for (int i = 0; i < n - 1; i++)
+            D = new Matrix(3, n);
+            S = new BlockMatrix[n];
+            dS = new BlockMatrix[n];
+            for (int i = 0; i < n; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
@@ -29,26 +29,32 @@ namespace ManipulationSystemLibrary
 
         public MatrixMathModel(int n) : base(n)
         {
-            D = new Matrix(3, n - 1);
-            S = new BlockMatrix[n - 1];
-            dS = new BlockMatrix[n - 1];
-            for (int i = 0; i < n - 1; i++)
+            D = new Matrix(3, n);
+            S = new BlockMatrix[n];
+            dS = new BlockMatrix[n];
+            for (int i = 0; i < n; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
         }
 
-        public MatrixMathModel(int n, unit[] units) : base(n, units)
+        public MatrixMathModel(int n, Unit[] units) : base(n, units)
         {
-            D = new Matrix(3, n - 1);
-            S = new BlockMatrix[n - 1];
-            dS = new BlockMatrix[n - 1];
-            for (int i = 0; i < n - 1; i++)
+            D = new Matrix(3, n);
+            S = new BlockMatrix[n];
+            dS = new BlockMatrix[n];
+            for (int i = 0; i < n; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
+        }
+
+        public override void SetQ(double[] newQ)
+        {
+            base.SetQ(newQ);
+            CalculationMetaData();
         }
 
         public void CalculationMetaData()
@@ -63,7 +69,7 @@ namespace ManipulationSystemLibrary
 
         public override void LagrangeMethodToThePoint(Point3D p)
         {
-            var f = this.F(n - 1);
+            var f = this.F(n);
             var d = new Point3D(
                 p.X - f.X,
                 p.Y - f.Y,
@@ -90,7 +96,7 @@ namespace ManipulationSystemLibrary
                 detCz / detC
             );
 
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
             {
                 var dF = GetdF(i);
                 q[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
@@ -103,15 +109,12 @@ namespace ManipulationSystemLibrary
         }
 
         public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
-
-        public double NormaVectora(Point3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2));
-        
+                
         private void CalcS()
         {
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
             {
-                var unit = units[i + 1];
-                switch (unit.type)
+                switch (units[i].type)
                 {
                     case 'R':
                         S[i] = new BlockMatrix();
@@ -132,10 +135,9 @@ namespace ManipulationSystemLibrary
 
         private void CalcdS()
         {
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
             {
-                var unit = units[i + 1];
-                switch (unit.type)
+                switch (units[i].type)
                 {
                     case 'R':
                         dS[i] = new BlockMatrix();
@@ -164,8 +166,9 @@ namespace ManipulationSystemLibrary
             T = new ArrayList();
             var tmp = new BlockMatrix();
 
-            for (var i = 0; i < n - 1; i++)
-                T.Add(tmp *= units[i].B * S[i]);
+            T.Add(tmp = rootB * S[0]);
+            for (var i = 1; i < n; i++)
+                T.Add(tmp *= units[i - 1].B * S[i]);
 
             T.Add(tmp *= units[n - 1].B);
         }
@@ -175,13 +178,12 @@ namespace ManipulationSystemLibrary
         private BlockMatrix CalcdF(int index)
         {
             var dF = new BlockMatrix();
-
-            for (var i = 0; i < n - 1; i++)
+            dF *= rootB;
+            for (var i = 1; i < n; i++)
             {
-                dF *= units[i].B;
                 dF *= i == index ? dS[i] : S[i];
+                dF *= units[i].B;
             }
-            dF *= units[n - 1].B;
 
             return dF;
         }
@@ -189,7 +191,7 @@ namespace ManipulationSystemLibrary
         private void CalcdT()
         {
             dT = new ArrayList();
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
                 dT.Add(CalcdF(i));
         }
 
@@ -204,7 +206,7 @@ namespace ManipulationSystemLibrary
         /// </summary>
         private void CalcD()
         {
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
             {
                 var b = GetdF(i);
                 D[0, i] = b.X;
@@ -218,7 +220,7 @@ namespace ManipulationSystemLibrary
         {
             var C = new Matrix(3);
 
-            for (var i = 0; i < n - 1; i++)
+            for (var i = 0; i < n; i++)
             {
                 C[0, 0] += D[0, i] * D[0, i];
                 C[0, 1] += D[0, i] * D[1, i];

@@ -3,25 +3,22 @@ using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
-    public struct unit
+    public struct Unit
     {
         /// <summary>
-        ///  S - Static
         ///  R - Revolute
-        ///  C - Cylindrical
         ///  P - Prismatic
-        ///  G - Gripper
         /// </summary>
         public char type;
-        public double len;
-        public double angle;
         public BlockMatrix B;
     }
+
     public abstract class MathModel
     {
         public double[] q;
         protected Matrix A;
-        public unit[] units;
+        public Unit[] units;
+        public BlockMatrix rootB;
         public int n;
 
         public MathModel() { }
@@ -29,64 +26,81 @@ namespace ManipulationSystemLibrary
         public MathModel(MathModel model)
         {
             n = model.n;
-            units = new unit[n];
-            q = new double[n - 1];
-            A = new Matrix(n - 1, n - 1);
+            rootB = model.rootB;
+            units = new Unit[n];
+            q = new double[n];
+            A = new Matrix(n, n);
             for (int i = 0; i < n; i++)
+            {
                 units[i] = model.units[i];
-            for (int i = 0; i < n - 1; i++)
                 q[i] = model.q[i];
+            }
         }
 
         public MathModel(int n)
         {
             this.n = n;
-            units = new unit[n];
-            q = new double[n - 1];
-            A = new Matrix(n - 1, n - 1);
+            rootB = new BlockMatrix();
+            units = new Unit[n];
+            q = new double[n];
+            A = new Matrix(n, n);
             for (int i = 0; i < n; i++)
-                units[i] = new unit { type = '0', len = 0, angle = 0 };
-            for (int i = 0; i < n - 1; i++)
+            {
+                units[i] = new Unit { type = 'S'};
                 q[i] = 0;
+            }
         }
 
-        public MathModel(int n, unit[] units)
+        public MathModel(int n, Unit[] units)
         {
             this.n = n;
-            this.units = new unit[n];
-            q = new double[n - 1];
-            A = new Matrix(n - 1, n - 1);
+            rootB = new BlockMatrix();
+            this.units = new Unit[n];
+            q = new double[n];
+            A = new Matrix(n, n);
             for (int i = 0; i < n; i++)
+            {
                 this.units[i] = units[i];
-            for (int i = 0; i < n - 1; i++)
                 q[i] = 0;
+            }
         }
 
-        public  double MaxL(double[] UnitTypePmaxLen)
-        {
-            double MaxL = 0;
-
-            for (int i = 0; i < n; i++) //Вычисление максимально возможной длины
-                MaxL += units[i].len;               //манипулятора, которая равна сумме длин всех звеньев
-            foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
-                MaxL += d;
-
-            return MaxL;
-        }
-
-        public void AllAngleToRadianFromDegree()
+        public virtual void SetQ(double[] newQ)
         {
             for (int i = 0; i < n; i++)
-                units[i].angle = - DegreeToRadian(units[i].angle);
+                q[i] = newQ[i];
         }
+        
+        public double GetUnitLen(int unit) => unit == 0 ? 
+            rootB.ColumnAsVector3D(3).Length :
+            units[unit].B.ColumnAsVector3D(3).Length;
+
+        //public  double MaxL(double[] UnitTypePmaxLen)
+        //{
+        //    double MaxL = 0;
+
+        //    for (int i = 0; i < n; i++) //Вычисление максимально возможной длины
+        //        MaxL += units[i].len;               //манипулятора, которая равна сумме длин всех звеньев
+        //    foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
+        //        MaxL += d;
+
+        //    return MaxL;
+        //}
+
+        //public void AllAngleToRadianFromDegree()
+        //{
+        //    for (int i = 0; i < n; i++)
+        //        units[i].angle = - DegreeToRadian(units[i].angle);
+        //}
+
         public abstract void LagrangeMethodToThePoint(Point3D p);
 
         public abstract double GetPointError(Point3D p);
 
         public void DefaultA()
         {
-            for (int i = 0; i < n - 1; i++)
-                for (int j = 0; j < n - 1; j++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
                     A[i, j] = i == j ? 1 : 0;
         }
 

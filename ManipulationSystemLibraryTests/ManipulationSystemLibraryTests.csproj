@@ -65,7 +65,7 @@
     <None Include="ManipConfigFiles\SPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="ManipConfigFiles\SRRRPR.json">
+    <None Include="ManipConfigFiles\3RPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="ManipConfigFiles\SRRRR.json">
@@ -87,6 +87,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Deltas\" />
     <Folder Include="Test Tracks\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

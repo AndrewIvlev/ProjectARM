@@ -21,9 +21,10 @@ using Newtonsoft.Json;
 
 namespace ManipApp
 {
+    using OxyPlot;
+    using OxyPlot.Series;
     using System.Collections.Generic;
     using System.Windows.Media.Animation;
-    using OxyPlot;
 
     //TODO: Critically needed refactoring, using MVVM Pattern
     /// <summary>
@@ -72,7 +73,7 @@ namespace ManipApp
         private double pathLenght;
         #endregion
 
-        private List<ModelVisual3D> manipModelVisual3D;
+        private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
         private Storyboard storyboard;
 
         private MatrixMathModel model;
@@ -106,17 +107,17 @@ namespace ManipApp
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
-            //var tmpQ = new double[model.n - 1];
-            //model.q.CopyTo(tmpQ, 0);
-            //arrayQ[0] = tmpQ;
-            //model.q[0] = DegreeToRadian(0); // R
-            //model.q[1] = DegreeToRadian(90); // R
-            //model.q[2] = DegreeToRadian(30); // R
-            //model.q[3] = DegreeToRadian(90); // R
-            //arrayQ[1] = model.q;
-            //model.CalculationMetaData();
+            
+            model.SetQ(new double[] {
+                DegreeToRadian(-45),
+                DegreeToRadian(30),
+                DegreeToRadian(90),
+                7,
+                DegreeToRadian(60)
+            });
 
             AddTransformationsForManipulator();
+            //ManipulatorTransformUpdate(model.q);
         }
 
         #endregion
@@ -219,18 +220,44 @@ namespace ManipApp
             }
 
             //Array.Clear(arrayQ, 0, arrayQ.Length);
+            var delta = new Delta();
+            var deltaViewModel = new DeltaPlotViewModel();
             for (int i = 1; i < listSplitPathPoints.Count; i++)
             {
                 model.CalculationMetaData();
                 var pathPoint = listSplitPathPoints[i];
                 model.LagrangeMethodToThePoint(pathPoint);
-                //var tmpQ = new double[model.n - 1];
+                //var tmpQ = new double[model.n];
                 //model.q.CopyTo(tmpQ, 0);
                 //arrayQ[i] = tmpQ;
                 //Thread.Sleep(1500);
                 ManipulatorTransformUpdate(model.q);
-                var shvat = model.F(model.n - 1);
+                var p = model.F(model.n);
+
+                delta.DesiredPoints.Add(listSplitPathPoints[i]);
+                delta.RealPoints.Add((Point3D)p);
             }
+
+            delta.CalcDeltas();
+            var serializer = new JsonSerializer();
+            var stringWriter = new StringWriter();
+            using (var writer = new JsonTextWriter(stringWriter))
+            {
+                writer.QuoteName = false;
+                serializer.Serialize(writer, delta);
+            }
+            var json = stringWriter.ToString();
+            var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
+            File.WriteAllText(filePath, json);
+
+            for (int i = 0; i < delta.deltas.Count; i++)
+                deltaViewModel.Points.Add(new DataPoint(delta.deltas[i], i));
+            var plotWindow = new PlotWindow
+            {
+                Owner = this,
+                deltaPlotViewModel = deltaViewModel
+            };
+            plotWindow.Show();
         }
 
         private void UpDownPathPoints_Click(object sender, RoutedEventArgs e)
@@ -379,7 +406,7 @@ namespace ManipApp
                         pathLinesVisual3D = new List<PathLine>();
                         var firstPathPoint3D = new ModelVisual3D();
                         var firstPpathPoint = new MeshGeometry3D();
-                        var p = model.F(model.n - 1);
+                        var p = model.F(model.n);
                         PathPoint firstPoint = new PathPoint();
                         firstPoint.center = new Point3D(p.X, p.Y + this.OffsetY, p.Z);
 
@@ -522,7 +549,7 @@ namespace ManipApp
                     var myModel3DGroup = new Model3DGroup();
                     pathPointCursor = new ModelVisual3D();
 
-                    //TODO: fix moving path cursor(when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
+                    //TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
                     PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
                         new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
@@ -584,81 +611,120 @@ namespace ManipApp
         /// </summary>
         private void AddTransformationsForManipulator()
         {
-            var transformGroup = new Transform3DGroup[model.n - 1];
-            for (int i = 0; i < model.n - 1; i++)
-                transformGroup[i] = new Transform3DGroup();
-
-            for (int i = 0; i < model.n - 1; i++)
+            var transformGroup = new Transform3DGroup[model.n];
+            for (int i = 0; i < model.n; i++)
             {
-                var transformation = GetTransformationByUnitType(i);
+                Transform3D transformation = null;
 
-                for (int j = i; j < model.n - 1; j++)
-                    transformGroup[j].Children.Add(transformation as Transform3D);
+                var center = model.F(i);
+                switch (model.units[i].type)
+                {
+                    #region case R
+                    case 'R':
+                        transformation = new RotateTransform3D();
+                        (transformation as RotateTransform3D).CenterX = center.X;
+                        (transformation as RotateTransform3D).CenterY = center.Y;
+                        (transformation as RotateTransform3D).CenterZ = center.Z;
+
+                        var angleRotation = new AxisAngleRotation3D
+                        {
+                            Axis = model.GetZAxis(i),
+                            Angle = RadianToDegree(model.q[i])
+                        };
+
+                        (transformation as RotateTransform3D).Rotation = angleRotation;
+
+                        transformGroup[i] = new Transform3DGroup();
+                        for (int j = i; j < model.n; j++)
+                            transformGroup[j].Children.Add(transformation as Transform3D);
+
+                        break;
+                    #endregion
+                    case 'P':
+                        transformation = new TranslateTransform3D();
+
+                        transformGroup[i] = new Transform3DGroup();
+                        for (int j = i + 1; j < model.n; j++)
+                            transformGroup[j].Children.Add(transformation as Transform3D);
+
+                        break;
+                }
             }
-
             // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
             // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
-            for (int i = 1; i < model.n; i++)
+            for (int i = 1; i < model.n + 1; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
 
         private void ManipulatorTransformUpdate(double[] q)
         {
-            for (int j = 0; j < model.n - 1; j++)
+            
+            for (int i = 1; i < model.n + 1; i++)
             {
-                for (int i = j + 1; i < model.n; i++)
+
+                switch (model.units[i - 1].type)
                 {
-                    switch (model.units[i].type)
-                    {
-                        case 'R':
-                            (((manipModelVisual3D[i]
+                    case 'R':
+                        for (int j = i + 1; j < model.n; j++)
+                        {
+                            (((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
-                                .Children[j] as RotateTransform3D)
+                                .Children[i] as RotateTransform3D)
                                 .Rotation as AxisAngleRotation3D)
-                                .Angle = q[j];
-                            break;
-                        case 'P':
-                            break;
-                    }
+                                .Angle = q[i];
+                        }
+                        break;
+                    case 'P':
+                        #region Remove old and insert new P unit model visual 3d
+                        Vector3D prismaticAxis = new Vector3D();
+                        var unit = new MeshGeometry3D();
+                        var joint = new MeshGeometry3D();
+
+                        var sup = model.F(i - 1); // startUnitPoint
+                        var eup = model.F(i); // endUnitPoint
+                        LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
+                                              new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
+                        AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
+
+                        var unitBrush = Brushes.CornflowerBlue;
+                        var unitMaterial = new DiffuseMaterial(unitBrush);
+                        var myGeometryModel = new GeometryModel3D(unit, unitMaterial);
+                        var jointsAndUnitsModelGroup = new Model3DGroup();
+                        jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
+
+                        var jointBrush = Brushes.OrangeRed;
+                        var jointMaterial = new DiffuseMaterial(jointBrush);
+                        myGeometryModel = new GeometryModel3D(joint, jointMaterial);
+                        jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
+                        var arm = new ModelVisual3D();
+                        arm.Content = jointsAndUnitsModelGroup;
+
+                        this.Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
+                        this.Viewport3D.Children.Insert(i + 1, arm);
+
+                        manipModelVisual3D.Remove(arm);
+                        manipModelVisual3D.Insert(i + 1, arm);
+                        #endregion
+
+                        prismaticAxis = model.GetZAxis(i);
+                        for (int j = i + 2; j < model.n; j++)
+                        {
+                            ((manipModelVisual3D[j]
+                                .Transform as Transform3DGroup)
+                                .Children[i] as TranslateTransform3D)
+                                .OffsetX += prismaticAxis.X * q[i];
+                            ((manipModelVisual3D[j]
+                                .Transform as Transform3DGroup)
+                                .Children[i] as TranslateTransform3D)
+                                .OffsetY += prismaticAxis.Y * q[i];
+                            ((manipModelVisual3D[j]
+                                .Transform as Transform3DGroup)
+                                .Children[i] as TranslateTransform3D)
+                                .OffsetZ += prismaticAxis.Z * q[i];
+                        }
+                        break;
                 }
             }
-        }
-
-        private Transform3D GetTransformationByUnitType(int unitIndex)
-        {
-            Transform3D transformation = null;
-
-            var center = model.F(unitIndex);
-            switch (model.units[unitIndex + 1].type)
-            { 
-                case 'R':
-                    transformation = new RotateTransform3D();
-                    (transformation as RotateTransform3D).CenterX = center.X;
-                    (transformation as RotateTransform3D).CenterY = center.Y;
-                    (transformation as RotateTransform3D).CenterZ = center.Z;
-
-                    var angleRotation = new AxisAngleRotation3D
-                    {
-                        Axis = model.GetZAxis(unitIndex),
-                        Angle = RadianToDegree(model.q[unitIndex])
-                    };
-                    (transformation as RotateTransform3D).Rotation = angleRotation;
-                    break;
-                case 'P':
-                    transformation = new TranslateTransform3D();
-                    var prismaticAxis = model.GetZAxis(unitIndex);
-                    (transformation as TranslateTransform3D).OffsetX = prismaticAxis.X;
-                    (transformation as TranslateTransform3D).OffsetY = prismaticAxis.Y;
-                    (transformation as TranslateTransform3D).OffsetZ = prismaticAxis.Z;
-
-                    //only for 3d line next, but now make temporary solution with removing old line 3d model and insertion new 3d line
-                    //(transformation as ScaleTransform3D).ScaleX = 1.2; // prismaticAxis.X + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    //(transformation as ScaleTransform3D).ScaleY = 1.2; // prismaticAxis.Y + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    //(transformation as ScaleTransform3D).ScaleZ = 1.2; // prismaticAxis.Z + arrayQ[0][unitIndex] / model.q[unitIndex];
-                    break;
-            }
-
-            return transformation;
         }
 
         private double DegreeToRadian(double angle) => Math.PI * angle / 180.0;
@@ -673,7 +739,7 @@ namespace ManipApp
                     this.Viewport3D.Children.Remove(arm);
             }
             var sup = new Vector3D(0, 0, 0); // startUnitPoint
-            for (int i = 0; i < model.n; i++)
+            for (int i = 0; i < model.n + 1; i++)
             {
                 var arm = new ModelVisual3D();
                 var jointsAndUnitsModelGroup = new Model3DGroup();
@@ -853,8 +919,8 @@ namespace ManipApp
 
         private void LineByTwoPoints(MeshGeometry3D mesh, Point3D start, Point3D end, double thickness)
         {
-            Vector3D up = new Vector3D(0, 1, 0);
-            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness, true);
+            Vector3D up = new Vector3D(0, 0, 1);
+            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness);
         }
 
         /// <summary>

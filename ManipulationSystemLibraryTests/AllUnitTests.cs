@@ -81,35 +81,35 @@ namespace ProjectARM_Tests
 
             MatrixMathModel model = new MatrixMathModel(5, new[]
             {
-                new unit{type = 'S', len = 0,  angle = 0, B = new BlockMatrix(
+                new Unit{type = 'S', len = 0,  angle = 0, B = new BlockMatrix(
                     new double[,]{
                         {0, 0, 1, 0},
                         {1, 0, 0, 0},
                         {0, 1, 0, 0}
                     })
                 },
-                new unit{type = 'R', len = 13, angle = 0, B = new BlockMatrix(
+                new Unit{type = 'R', len = 13, angle = 0, B = new BlockMatrix(
                     new double[,]{
                         {1, 0, 0, 13},
                         {0, 0, -1, 0},
                         {0, 1, 0, 0}
                     })
                 },
-                new unit{type = 'C', len = 16, angle = 0, B = new BlockMatrix(
+                new Unit{type = 'C', len = 16, angle = 0, B = new BlockMatrix(
                     new double[,]{
                         {0, 0, 1, 16},
                         {0, 1, 0, 0},
                         {-1, 0, 0, 0}
                     })
                 },
-                new unit{type = 'P', len = 4, angle = 0, B = new BlockMatrix(
+                new Unit{type = 'P', len = 4, angle = 0, B = new BlockMatrix(
                     new double[,]{
                         {-1, 0, 0, 0},
                         {0, 0, 1, 0},
                         {0, 1, 0, 4}
                     })
                 },
-                new unit{type = 'R', len = 11, angle = 0, B = new BlockMatrix(
+                new Unit{type = 'R', len = 11, angle = 0, B = new BlockMatrix(
                     new double[,]{
                         {-1, 0, 0, 0},
                         {0, 0, 1, 11},

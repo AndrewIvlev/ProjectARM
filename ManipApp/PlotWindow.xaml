@@ -1,0 +1,17 @@
+﻿<Window x:Class="ManipApp.PlotWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:local="clr-namespace:ManipApp"
+        Title="Plot Window" Height="350" Width="525">
+    <Window.DataContext>
+        <local:DeltaPlotViewModel x:Name="deltaPlotViewModel"/>
+    </Window.DataContext>
+    <Grid>
+        <oxy:Plot x:Name="DeltaPlot" Title="{Binding Title}">
+            <oxy:Plot.Series>
+                <oxy:LineSeries ItemsSource="{Binding Points}"/>
+            </oxy:Plot.Series>
+        </oxy:Plot>
+    </Grid>
+</Window>

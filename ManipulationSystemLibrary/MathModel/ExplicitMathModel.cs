@@ -16,20 +16,20 @@ namespace ManipulationSystemLibrary
         {
             Len = new double[n];
             for (int i = 0; i < n; i++)
-                Len[i] = units[i].len;
+                Len[i] = GetUnitLen(i);
         }
-        public ExplicitMathModel(int n, unit[] units) : base(n, units)
+        public ExplicitMathModel(int n, Unit[] units) : base(n, units)
         {
             Len = new double[n];
             for (int i = 0; i < n; i++)
-                Len[i] = units[i].len;
+                Len[i] = GetUnitLen(i);
         }
 
         public ExplicitMathModel(MathModel model) : base(model)
         {
             Len = new double[n];
             for (int i = 0; i < n; i++)
-                Len[i] = units[i].len;
+                Len[i] = GetUnitLen(i);
         }
 
         public override void LagrangeMethodToThePoint(Point3D p)
