@@ -2,30 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ManipulationSystemLibrary;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using OxyPlot;
 
-namespace ManipApp
+namespace MainApp
 {
-    using OxyPlot;
-    using OxyPlot.Series;
-    using System.Collections.Generic;
-    using System.Windows.Media.Animation;
-
     //TODO: Critically needed refactoring, using MVVM Pattern
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -108,15 +96,15 @@ namespace ManipApp
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
             
-            model.SetQ(new double[] {
-                DegreeToRadian(-45),
-                DegreeToRadian(30),
-                DegreeToRadian(90),
-                7,
-                DegreeToRadian(60)
-            });
+            //model.SetQ(new double[] {
+            //    DegreeToRadian(-45),
+            //    DegreeToRadian(30),
+            //    DegreeToRadian(90),
+            //    0,
+            //    DegreeToRadian(60)
+            //});
 
-            AddTransformationsForManipulator();
+            //AddTransformationsForManipulator();
             //ManipulatorTransformUpdate(model.q);
         }
 
@@ -166,16 +154,16 @@ namespace ManipApp
 
         private void SplitPath(List<Point3D> listPathPoints, double step)
         {
-            int index = 0;
+            var index = 0;
             listSplitPathPoints = new List<Point3D>();
-            for (int i = 1; i < listPathPoints.Count; i++)
+            for (var i = 1; i < listPathPoints.Count; i++)
             {
-                int j = 0;
+                var j = 0;
                 double lambda = 0;
-                double x = listPathPoints[i - 1].X;
-                double y = listPathPoints[i - 1].Y;
-                double z = listPathPoints[i - 1].Z;
-                double dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
+                var x = listPathPoints[i - 1].X;
+                var y = listPathPoints[i - 1].Y;
+                var z = listPathPoints[i - 1].Z;
+                var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
                 do
                 {
                     lambda = (step * j) / (dist - step * j);
@@ -207,7 +195,7 @@ namespace ManipApp
                 var pathPointModelVisual3D = new ModelVisual3D();
                 pathPointModelVisual3D.Content = pathPointGeometryModel;
                 pathPointModelVisual3D.Transform = new TranslateTransform3D();
-                this.Viewport3D.Children.Add(pathPointModelVisual3D);
+                Viewport3D.Children.Add(pathPointModelVisual3D);
             }
         }
 
@@ -222,7 +210,7 @@ namespace ManipApp
             //Array.Clear(arrayQ, 0, arrayQ.Length);
             var delta = new Delta();
             var deltaViewModel = new DeltaPlotViewModel();
-            for (int i = 1; i < listSplitPathPoints.Count; i++)
+            for (var i = 1; i < listSplitPathPoints.Count; i++)
             {
                 model.CalculationMetaData();
                 var pathPoint = listSplitPathPoints[i];
@@ -247,10 +235,10 @@ namespace ManipApp
                 serializer.Serialize(writer, delta);
             }
             var json = stringWriter.ToString();
-            var filePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
             File.WriteAllText(filePath, json);
 
-            for (int i = 0; i < delta.deltas.Count; i++)
+            for (var i = 0; i < delta.deltas.Count; i++)
                 deltaViewModel.Points.Add(new DataPoint(delta.deltas[i], i));
             var plotWindow = new PlotWindow
             {
@@ -264,7 +252,7 @@ namespace ManipApp
         {
             mouseMod = 0;
             keyboardMod = 1;
-            this.Viewport3D.Children.Remove(pathPointCursor);
+            Viewport3D.Children.Remove(pathPointCursor);
             indexPathPoint = 1;
         }
 
@@ -330,8 +318,8 @@ namespace ManipApp
             var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
             var pathLineModelVisual3D = new ModelVisual3D();
             pathLineModelVisual3D.Content = lineGeometryModel;
-            this.Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint - 1].lineModelVisual3D);
-            this.Viewport3D.Children.Insert(indexPathPoint - 1, pathLineModelVisual3D);
+            Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint - 1].lineModelVisual3D);
+            Viewport3D.Children.Insert(indexPathPoint - 1, pathLineModelVisual3D);
 
             pathLine.lineModelVisual3D = pathLineModelVisual3D;
             pathLinesVisual3D.RemoveAt(indexPathPoint - 1);
@@ -350,8 +338,8 @@ namespace ManipApp
             lineGeometryModel = new GeometryModel3D(line, lineMaterial);
             pathLineModelVisual3D = new ModelVisual3D();
             pathLineModelVisual3D.Content = lineGeometryModel;
-            this.Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint].lineModelVisual3D);
-            this.Viewport3D.Children.Insert(indexPathPoint, pathLineModelVisual3D);
+            Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint].lineModelVisual3D);
+            Viewport3D.Children.Insert(indexPathPoint, pathLineModelVisual3D);
 
             pathLine.lineModelVisual3D = pathLineModelVisual3D;
             pathLinesVisual3D.RemoveAt(indexPathPoint);
@@ -407,8 +395,8 @@ namespace ManipApp
                         var firstPathPoint3D = new ModelVisual3D();
                         var firstPpathPoint = new MeshGeometry3D();
                         var p = model.F(model.n);
-                        PathPoint firstPoint = new PathPoint();
-                        firstPoint.center = new Point3D(p.X, p.Y + this.OffsetY, p.Z);
+                        var firstPoint = new PathPoint();
+                        firstPoint.center = new Point3D(p.X, p.Y + OffsetY, p.Z);
 
                         AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
                         var firstPointBrush = Brushes.GreenYellow;
@@ -416,7 +404,7 @@ namespace ManipApp
                         var firstPathPointGeometryModel = new GeometryModel3D(firstPpathPoint, firstPointMaterial);
                         firstPathPoint3D.Content = firstPathPointGeometryModel;
                         firstPathPoint3D.Transform = new TranslateTransform3D();
-                        this.Viewport3D.Children.Add(firstPathPoint3D);
+                        Viewport3D.Children.Add(firstPathPoint3D);
 
                         firstPoint.pointModelVisual3D = firstPathPoint3D;
                         pathPointsVisual3D.Add(firstPoint);
@@ -424,11 +412,11 @@ namespace ManipApp
                         PathBuilderGrid_Grid.Visibility = Visibility.Visible;
                     }
 
-                    PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
+                    var hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
                     var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
 
-                    PathPoint pathPoint = new PathPoint();
+                    var pathPoint = new PathPoint();
                     pathPoint.center = new Point3D(X, pathPointsVisual3D.First().center.Y, Z);
 
                     //TODO: Extract to method next 8 line
@@ -440,7 +428,7 @@ namespace ManipApp
                     var pathPointModelVisual3D = new ModelVisual3D();
                     pathPointModelVisual3D.Content = pathPointGeometryModel;
                     pathPointModelVisual3D.Transform = new TranslateTransform3D();
-                    this.Viewport3D.Children.Add(pathPointModelVisual3D);
+                    Viewport3D.Children.Add(pathPointModelVisual3D);
 
                     pathPoint.pointModelVisual3D = pathPointModelVisual3D;
                     pathPointsVisual3D.Add(pathPoint);
@@ -452,8 +440,6 @@ namespace ManipApp
                     break;
                 case 2:
                     //TODO: Editing path mode
-                    break;
-                default:
                     break;
             }
         }
@@ -472,7 +458,7 @@ namespace ManipApp
             var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
             var pathLineModelVisual3D = new ModelVisual3D();
             pathLineModelVisual3D.Content = lineGeometryModel;
-            this.Viewport3D.Children.Add(pathLineModelVisual3D);
+            Viewport3D.Children.Add(pathLineModelVisual3D);
 
             pathLine.lineModelVisual3D = pathLineModelVisual3D;
             pathLinesVisual3D.Add(pathLine);
@@ -545,17 +531,17 @@ namespace ManipApp
                     break;
                 case 1:
                     if (pathPointCursor != null)
-                        this.Viewport3D.Children.Remove(pathPointCursor);
+                        Viewport3D.Children.Remove(pathPointCursor);
                     var myModel3DGroup = new Model3DGroup();
                     pathPointCursor = new ModelVisual3D();
 
                     //TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
-                    PointHitTestParameters hitParams = new PointHitTestParameters(e.GetPosition(this));
+                    var hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
                         new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
                     myModel3DGroup.Children.Add(myGeometryModel);
                     pathPointCursor.Content = myModel3DGroup;
-                    this.Viewport3D.Children.Add(pathPointCursor);
+                    Viewport3D.Children.Add(pathPointCursor);
                     break;
             }
         }
@@ -568,17 +554,17 @@ namespace ManipApp
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
-            if (this.ScaleTransform3D.ScaleX < 1)
+            if (ScaleTransform3D.ScaleX < 1)
             {
-                this.ScaleTransform3D.ScaleX += (double)e.Delta / 555;
-                this.ScaleTransform3D.ScaleY += (double)e.Delta / 555;
-                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
+                ScaleTransform3D.ScaleX += (double)e.Delta / 555;
+                ScaleTransform3D.ScaleY += (double)e.Delta / 555;
+                ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
             }
             else
             {
-                this.ScaleTransform3D.ScaleX += (double)e.Delta / 333;
-                this.ScaleTransform3D.ScaleY += (double)e.Delta / 333;
-                this.ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
+                ScaleTransform3D.ScaleX += (double)e.Delta / 333;
+                ScaleTransform3D.ScaleY += (double)e.Delta / 333;
+                ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
             }
         }
 
@@ -590,7 +576,7 @@ namespace ManipApp
         private void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
-            for (int i = 1; i < model.n; i++)
+            for (var i = 1; i < model.n; i++)
             {
                 var animation1 = new ThicknessAnimation();
                 animation1.From = new Thickness(5);
@@ -612,7 +598,7 @@ namespace ManipApp
         private void AddTransformationsForManipulator()
         {
             var transformGroup = new Transform3DGroup[model.n];
-            for (int i = 0; i < model.n; i++)
+            for (var i = 0; i < model.n; i++)
             {
                 Transform3D transformation = null;
 
@@ -635,8 +621,8 @@ namespace ManipApp
                         (transformation as RotateTransform3D).Rotation = angleRotation;
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (int j = i; j < model.n; j++)
-                            transformGroup[j].Children.Add(transformation as Transform3D);
+                        for (var j = i; j < model.n; j++)
+                            transformGroup[j].Children.Add(transformation);
 
                         break;
                     #endregion
@@ -644,28 +630,28 @@ namespace ManipApp
                         transformation = new TranslateTransform3D();
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (int j = i + 1; j < model.n; j++)
-                            transformGroup[j].Children.Add(transformation as Transform3D);
+                        for (var j = i + 1; j < model.n; j++)
+                            transformGroup[j].Children.Add(transformation);
 
                         break;
                 }
             }
             // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
             // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
-            for (int i = 1; i < model.n + 1; i++)
+            for (var i = 1; i < model.n + 1; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
 
         private void ManipulatorTransformUpdate(double[] q)
         {
             
-            for (int i = 1; i < model.n + 1; i++)
+            for (var i = 1; i < model.n + 1; i++)
             {
 
                 switch (model.units[i - 1].type)
                 {
                     case 'R':
-                        for (int j = i + 1; j < model.n; j++)
+                        for (var j = i + 1; j < model.n; j++)
                         {
                             (((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -676,7 +662,7 @@ namespace ManipApp
                         break;
                     case 'P':
                         #region Remove old and insert new P unit model visual 3d
-                        Vector3D prismaticAxis = new Vector3D();
+                        var prismaticAxis = new Vector3D();
                         var unit = new MeshGeometry3D();
                         var joint = new MeshGeometry3D();
 
@@ -699,15 +685,15 @@ namespace ManipApp
                         var arm = new ModelVisual3D();
                         arm.Content = jointsAndUnitsModelGroup;
 
-                        this.Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
-                        this.Viewport3D.Children.Insert(i + 1, arm);
+                        Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
+                        Viewport3D.Children.Insert(i + 1, arm);
 
                         manipModelVisual3D.Remove(arm);
                         manipModelVisual3D.Insert(i + 1, arm);
                         #endregion
 
                         prismaticAxis = model.GetZAxis(i);
-                        for (int j = i + 2; j < model.n; j++)
+                        for (var j = i + 2; j < model.n; j++)
                         {
                             ((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -736,10 +722,10 @@ namespace ManipApp
             if (manipModelVisual3D.Count > 0)
             {
                 foreach (var arm in manipModelVisual3D)
-                    this.Viewport3D.Children.Remove(arm);
+                    Viewport3D.Children.Remove(arm);
             }
             var sup = new Vector3D(0, 0, 0); // startUnitPoint
-            for (int i = 0; i < model.n + 1; i++)
+            for (var i = 0; i < model.n + 1; i++)
             {
                 var arm = new ModelVisual3D();
                 var jointsAndUnitsModelGroup = new Model3DGroup();
@@ -765,7 +751,7 @@ namespace ManipApp
                 arm.Content = jointsAndUnitsModelGroup;
                 var storyBoard = new Storyboard();
 
-                this.Viewport3D.Children.Add(arm);
+                Viewport3D.Children.Add(arm);
                 manipModelVisual3D.Add(arm);
             }
         }
@@ -773,7 +759,7 @@ namespace ManipApp
         // Set the vector's length.
         private Vector3D ScaleVector(Vector3D vector, double length)
         {
-            double scale = length / vector.Length;
+            var scale = length / vector.Length;
             return new Vector3D(
                 vector.X * scale,
                 vector.Y * scale,
@@ -785,7 +771,7 @@ namespace ManipApp
         private void AddTriangle(MeshGeometry3D mesh, Point3D point1, Point3D point2, Point3D point3)
         {
             // Create the points.
-            int index1 = mesh.Positions.Count;
+            var index1 = mesh.Positions.Count;
             mesh.Positions.Add(point1);
             mesh.Positions.Add(point2);
             mesh.Positions.Add(point3);
@@ -809,33 +795,33 @@ namespace ManipApp
             bool extend)
         {
             // Get the segment's vector.
-            Vector3D v = point2 - point1;
+            var v = point2 - point1;
 
             if (extend)
             {
                 // Increase the segment's length on both ends by thickness / 2.
-                Vector3D n = ScaleVector(v, thickness / 2.0);
+                var n = ScaleVector(v, thickness / 2.0);
                 point1 -= n;
                 point2 += n;
             }
 
             // Get the scaled up vector.
-            Vector3D n1 = ScaleVector(up, thickness / 2.0);
+            var n1 = ScaleVector(up, thickness / 2.0);
 
             // Get another scaled perpendicular vector.
-            Vector3D n2 = Vector3D.CrossProduct(v, n1);
+            var n2 = Vector3D.CrossProduct(v, n1);
             n2 = ScaleVector(n2, thickness / 2.0);
 
             // Make a skinny box.
             // p1pm means point1 PLUS n1 MINUS n2.
-            Point3D p1pp = point1 + n1 + n2;
-            Point3D p1mp = point1 - n1 + n2;
-            Point3D p1pm = point1 + n1 - n2;
-            Point3D p1mm = point1 - n1 - n2;
-            Point3D p2pp = point2 + n1 + n2;
-            Point3D p2mp = point2 - n1 + n2;
-            Point3D p2pm = point2 + n1 - n2;
-            Point3D p2mm = point2 - n1 - n2;
+            var p1pp = point1 + n1 + n2;
+            var p1mp = point1 - n1 + n2;
+            var p1pm = point1 + n1 - n2;
+            var p1mm = point1 - n1 - n2;
+            var p2pp = point2 + n1 + n2;
+            var p2mp = point2 - n1 + n2;
+            var p2pm = point2 + n1 - n2;
+            var p2mm = point2 - n1 - n2;
 
             // Sides.
             AddTriangle(mesh, p1pp, p1mp, p2mp);
@@ -863,39 +849,39 @@ namespace ManipApp
             double radius, int num_phi, int num_theta)
         {
             double phi0, theta0;
-            double dphi = Math.PI / num_phi;
-            double dtheta = 2 * Math.PI / num_theta;
+            var dphi = Math.PI / num_phi;
+            var dtheta = 2 * Math.PI / num_theta;
 
             phi0 = 0;
-            double y0 = radius * Math.Cos(phi0);
-            double r0 = radius * Math.Sin(phi0);
-            for (int i = 0; i < num_phi; i++)
+            var y0 = radius * Math.Cos(phi0);
+            var r0 = radius * Math.Sin(phi0);
+            for (var i = 0; i < num_phi; i++)
             {
-                double phi1 = phi0 + dphi;
-                double y1 = radius * Math.Cos(phi1);
-                double r1 = radius * Math.Sin(phi1);
+                var phi1 = phi0 + dphi;
+                var y1 = radius * Math.Cos(phi1);
+                var r1 = radius * Math.Sin(phi1);
 
                 // Point ptAB has phi value A and theta value B.
                 // For example, pt01 has phi = phi0 and theta = theta1.
                 // Find the points with theta = theta0.
                 theta0 = 0;
-                Point3D pt00 = new Point3D(
+                var pt00 = new Point3D(
                     center.X + r0 * Math.Cos(theta0),
                     center.Y + y0,
                     center.Z + r0 * Math.Sin(theta0));
-                Point3D pt10 = new Point3D(
+                var pt10 = new Point3D(
                     center.X + r1 * Math.Cos(theta0),
                     center.Y + y1,
                     center.Z + r1 * Math.Sin(theta0));
-                for (int j = 0; j < num_theta; j++)
+                for (var j = 0; j < num_theta; j++)
                 {
                     // Find the points with theta = theta1.
-                    double theta1 = theta0 + dtheta;
-                    Point3D pt01 = new Point3D(
+                    var theta1 = theta0 + dtheta;
+                    var pt01 = new Point3D(
                         center.X + r0 * Math.Cos(theta1),
                         center.Y + y0,
                         center.Z + r0 * Math.Sin(theta1));
-                    Point3D pt11 = new Point3D(
+                    var pt11 = new Point3D(
                         center.X + r1 * Math.Cos(theta1),
                         center.Y + y1,
                         center.Z + r1 * Math.Sin(theta1));
@@ -919,7 +905,7 @@ namespace ManipApp
 
         private void LineByTwoPoints(MeshGeometry3D mesh, Point3D start, Point3D end, double thickness)
         {
-            Vector3D up = new Vector3D(0, 0, 1);
+            var up = new Vector3D(0, 0, 1);
             AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness);
         }
 
@@ -940,14 +926,14 @@ namespace ManipApp
             geo.Positions.Add(new Point3D(0, 0, 0));
 
             // Iterate from angle 0 to 2*PI
-            double t = 2 * Math.PI / resolution;
-            for (int i = 0; i < resolution; i++)
+            var t = 2 * Math.PI / resolution;
+            for (var i = 0; i < resolution; i++)
             {
                 geo.Positions.Add(new Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
             }
 
             // Add points to MeshGeoemtry3D
-            for (int i = 0; i < resolution; i++)
+            for (var i = 0; i < resolution; i++)
             {
                 var a = 0;
                 var b = i + 1;

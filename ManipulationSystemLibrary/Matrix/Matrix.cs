@@ -1,44 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ManipulationSystemLibrary
+namespace ManipulationSystemLibrary.Matrix
 {
     public class Matrix
     {
         public double[,] M;
-        public int rows;
-        public int columns;
+
+        public int Rows;
+
+        public int Columns;
 
         public Matrix()
         {
-            M = new double[rows = 0, columns = 0];
+            M = new double[Rows = 0, Columns = 0];
         }
-
         public Matrix(int n)
         {
-            M = new double[rows = n, columns = n];
-            for (int i = 0; i < rows; i++)
-            for (int j = 0; j < columns; j++)
+            M = new double[Rows = n, Columns = n];
+            for (var i = 0; i < Rows; i++)
+            for (var j = 0; j < Columns; j++)
                 M[i, j] = 0;
         }
 
         public Matrix(int rows, int columns)
         {
-            M = new double[this.rows = rows, this.columns = columns];
-            for (int i = 0; i < rows; i++)
-            for (int j = 0; j < columns; j++)
+            M = new double[Rows = rows, Columns = columns];
+            for (var i = 0; i < rows; i++)
+            for (var j = 0; j < columns; j++)
                 M[i, j] = 0;
         }
 
         public Matrix(Matrix A)
         {
-            M = new double[rows = A.rows, columns = A.columns];
-            for (int i = 0; i < rows; i++)
-            for (int j = 0; j < columns; j++)
+            M = new double[Rows = A.Rows, Columns = A.Columns];
+            for (var i = 0; i < Rows; i++)
+            for (var j = 0; j < Columns; j++)
                 M[i, j] = A.M[i, j];
+        }
+
+        protected bool Equals(Matrix other)
+        {
+            return Equals(M, other.M) && Rows == other.Rows && Columns == other.Columns;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Matrix) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (M != null ? M.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Rows;
+                hashCode = (hashCode * 397) ^ Columns;
+                return hashCode;
+            }
         }
 
         public double this[int i, int j]
@@ -49,11 +70,11 @@ namespace ManipulationSystemLibrary
 
         public static bool operator ==(Matrix A, Matrix B)
         {
-            if (A.rows != B.rows || A.columns != B.columns)
+            if (A.Rows != B.Rows || A.Columns != B.Columns)
                 return false;
 
-            for(int i = 0; i < A.rows; i++)
-                for (int j = 0; j < A.columns; j++)
+            for(var i = 0; i < A.Rows; i++)
+                for (var j = 0; j < A.Columns; j++)
                     if (A[i, j] != B[i, j])
                         return false;
 
@@ -62,12 +83,12 @@ namespace ManipulationSystemLibrary
 
         public static bool operator !=(Matrix A, Matrix B)
         {
-            if (A.rows != B.rows || A.columns != B.columns)
+            if (A.Rows != B.Rows || A.Columns != B.Columns)
                 return true;
 
             var isEqual = true;
-            for (int i = 0; i < A.rows; i++)
-            for (int j = 0; j < A.columns; j++)
+            for (var i = 0; i < A.Rows; i++)
+            for (var j = 0; j < A.Columns; j++)
                 if (A[i, j] != B[i, j])
                     isEqual = false;
 
@@ -77,15 +98,15 @@ namespace ManipulationSystemLibrary
         // TODO: use Parallel.For method from the .NET Task Parallel Library
         public static Matrix operator *(Matrix A, Matrix B)
         {
-            if (A.columns != B.rows)
+            if (A.Columns != B.Rows)
                 throw new Exception(
                     "Matrices are not conformable");
 
-            var AB = new Matrix(A.rows, B.columns);
+            var AB = new Matrix(A.Rows, B.Columns);
 
-            for (int j = 0; j < B.columns; j++)
-                for (int i = 0; i < A.rows; i++)
-                for (int k = 0; k < A.columns; k++)
+            for (var j = 0; j < B.Columns; j++)
+                for (var i = 0; i < A.Rows; i++)
+                for (var k = 0; k < A.Columns; k++)
                     AB[i, j] += A[i, k] * B[k, j];
 
             return AB;
@@ -96,10 +117,10 @@ namespace ManipulationSystemLibrary
         /// </summary>
         public static Matrix Transpose(Matrix M)
         {
-            var transpM = new Matrix(M.columns, M.rows);
+            var transpM = new Matrix(M.Columns, M.Rows);
 
-            for (int i = 0; i < M.rows; i++)
-            for (int j = 0; j < M.columns; j++)
+            for (var i = 0; i < M.Rows; i++)
+            for (var j = 0; j < M.Columns; j++)
                 transpM[j, i] = M[i, j];
 
             return transpM;

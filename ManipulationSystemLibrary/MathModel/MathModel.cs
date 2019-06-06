@@ -1,79 +1,81 @@
 ﻿using System;
 using System.Windows.Media.Media3D;
+using ManipulationSystemLibrary.Matrix;
 
-namespace ManipulationSystemLibrary
+namespace ManipulationSystemLibrary.MathModel
 {
     public struct Unit
     {
         /// <summary>
-        ///  R - Revolute
-        ///  P - Prismatic
+        ///  R - Revolute joint
+        ///  P - Prismatic joint
         /// </summary>
-        public char type;
+        public char Type;
+
         public BlockMatrix B;
     }
 
     public abstract class MathModel
     {
-        public double[] q;
-        protected Matrix A;
-        public Unit[] units;
-        public BlockMatrix rootB;
-        public int n;
+        public double[] Q;
+        protected Matrix.Matrix A;
+        public Unit[] Units;
+        public BlockMatrix RootB;
+        public int N;
 
         public MathModel() { }
 
         public MathModel(MathModel model)
         {
-            n = model.n;
-            rootB = model.rootB;
-            units = new Unit[n];
-            q = new double[n];
-            A = new Matrix(n, n);
-            for (int i = 0; i < n; i++)
+            N = model.N;
+            RootB = model.RootB;
+            Units = new Unit[N];
+            Q = new double[N];
+            A = new Matrix.Matrix(N, N);
+            for (var i = 0; i < N; i++)
             {
-                units[i] = model.units[i];
-                q[i] = model.q[i];
+                Units[i] = model.Units[i];
+                Q[i] = model.Q[i];
             }
         }
 
         public MathModel(int n)
         {
-            this.n = n;
-            rootB = new BlockMatrix();
-            units = new Unit[n];
-            q = new double[n];
-            A = new Matrix(n, n);
-            for (int i = 0; i < n; i++)
+            this.N = n;
+            RootB = new BlockMatrix();
+            Units = new Unit[n];
+            Q = new double[n];
+            A = new Matrix.Matrix(n, n);
+            for (var i = 0; i < n; i++)
             {
-                units[i] = new Unit { type = 'S'};
-                q[i] = 0;
+                Units[i] = new Unit { Type = 'S'};
+                Q[i] = 0;
             }
         }
 
         public MathModel(int n, Unit[] units)
         {
-            this.n = n;
-            rootB = new BlockMatrix();
-            this.units = new Unit[n];
-            q = new double[n];
-            A = new Matrix(n, n);
-            for (int i = 0; i < n; i++)
+            this.N = n;
+            RootB = new BlockMatrix();
+            this.Units = new Unit[n];
+            Q = new double[n];
+            A = new Matrix.Matrix(n, n);
+            for (var i = 0; i < n; i++)
             {
-                this.units[i] = units[i];
-                q[i] = 0;
+                this.Units[i] = units[i];
+                Q[i] = 0;
             }
         }
 
         public virtual void SetQ(double[] newQ)
         {
-            for (int i = 0; i < n; i++)
-                q[i] = newQ[i];
+            for (var i = 0; i < N; i++)
+                Q[i] = newQ[i];
         }
         
         public double GetUnitLen(int unit) => unit == 0 ? 
-            rootB.ColumnAsVector3D(3).Length :
-            units[unit].B.ColumnAsVector3D(3).Length;
+            RootB.ColumnAsVector3D(3).Length :
+            Units[unit].B.ColumnAsVector3D(3).Length;
 
         //public  double MaxL(double[] UnitTypePmaxLen)
         //{
@@ -99,14 +101,14 @@ namespace ManipulationSystemLibrary
 
         public void DefaultA()
         {
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
+            for (var i = 0; i < N; i++)
+                for (var j = 0; j < N; j++)
                     A[i, j] = i == j ? 1 : 0;
         }
 
         public void SetA(double[] A)
         {
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
                 if (A[i] == 0) throw new Exception("The coefficient must be non-zero.");
                 this.A[i, i] = A[i];

@@ -2,6 +2,8 @@
 using System.IO;
 using System.Windows.Media.Media3D;
 using ManipulationSystemLibrary;
+using ManipulationSystemLibrary.MathModel;
+using ManipulationSystemLibrary.Matrix;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -28,13 +30,13 @@ namespace ProjectARM_Tests
             var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
             var model = new MatrixMathModel(manipConfig);
             
-            Console.WriteLine($"Current q = {model.q}");
+            Console.WriteLine($"Current q = {model.Q}");
             model.DefaultA();
             model.CalculationMetaData();
             model.LagrangeMethodToThePoint(new Point3D(pX, pY, pZ));
-            Console.WriteLine($"After one iteration q = {model.q}");
+            Console.WriteLine($"After one iteration q = {model.Q}");
 
-            var Fq = model.F(model.n - 1);
+            var Fq = model.F(model.N - 1);
             Assert.True(Fq.X < pX + error && Fq.X > pX - error);
             Assert.True(Fq.Y < pY + error && Fq.Y > pY - error);
             Assert.True(Fq.Z < pZ + error && Fq.Z > pZ - error);
@@ -47,15 +49,15 @@ namespace ProjectARM_Tests
             var sr = new StreamReader(path);
             var jsonString = sr.ReadToEnd();
             var manipConfig = JsonConvert.DeserializeObject<ExplicitMathModel>(jsonString);
-            manipConfig.AllAngleToRadianFromDegree();
+            //manipConfig.AllAngleToRadianFromDegree();
             var model = new ExplicitMathModel(manipConfig);
 
-            Console.WriteLine($"Current q = {model.q}");
+            Console.WriteLine($"Current q = {model.Q}");
             model.DefaultA();
             model.LagrangeMethodToThePoint(new Point3D(px, py, pz));
-            Console.WriteLine($"After one iteration q = {model.q}");
+            Console.WriteLine($"After one iteration q = {model.Q}");
 
-            Assert.IsTrue(model.q.Equals(new double[] { 0, 1, 0, 1 })); //TODO: calc real q for that assert
+            Assert.IsTrue(model.Q.Equals(new double[] { 0, 1, 0, 1 })); //TODO: calc real q for that assert
         }
 
         [Test]
@@ -79,37 +81,37 @@ namespace ProjectARM_Tests
 
             #region Actual Matrix Math Model
 
-            MatrixMathModel model = new MatrixMathModel(5, new[]
+            var model = new MatrixMathModel(5, new[]
             {
-                new Unit{type = 'S', len = 0,  angle = 0, B = new BlockMatrix(
+                new Unit{Type = 'S', B = new BlockMatrix(
                     new double[,]{
                         {0, 0, 1, 0},
                         {1, 0, 0, 0},
                         {0, 1, 0, 0}
                     })
                 },
-                new Unit{type = 'R', len = 13, angle = 0, B = new BlockMatrix(
+                new Unit{Type = 'R', B = new BlockMatrix(
                     new double[,]{
                         {1, 0, 0, 13},
                         {0, 0, -1, 0},
                         {0, 1, 0, 0}
                     })
                 },
-                new Unit{type = 'C', len = 16, angle = 0, B = new BlockMatrix(
+                new Unit{Type = 'C', B = new BlockMatrix(
                     new double[,]{
                         {0, 0, 1, 16},
                         {0, 1, 0, 0},
                         {-1, 0, 0, 0}
                     })
                 },
-                new Unit{type = 'P', len = 4, angle = 0, B = new BlockMatrix(
+                new Unit{Type = 'P', B = new BlockMatrix(
                     new double[,]{
                         {-1, 0, 0, 0},
                         {0, 0, 1, 0},
                         {0, 1, 0, 4}
                     })
                 },
-                new Unit{type = 'R', len = 11, angle = 0, B = new BlockMatrix(
+                new Unit{Type = 'R', B = new BlockMatrix(
                     new double[,]{
                         {-1, 0, 0, 0},
                         {0, 0, 1, 11},
@@ -132,12 +134,12 @@ namespace ProjectARM_Tests
             {
                 [0, 0] = 5, [0, 1] = 3,
                 [1, 0] = 4, [1, 1] = 6,
-                [2, 0] = 2, [2, 1] = 1,
+                [2, 0] = 2, [2, 1] = 1
             };
             var B = new Matrix(2, 5)
             {
                 [0, 0] = 8, [0, 1] = 7, [0, 2] = 1, [0, 3] = 4, [0, 4] = 2,
-                [1, 0] = 2, [1, 1] = 1, [1, 2] = 7, [1, 3] = 0, [1, 4] = 5,
+                [1, 0] = 2, [1, 1] = 1, [1, 2] = 7, [1, 3] = 0, [1, 4] = 5
             };
             var expectedAb = new Matrix(3, 5)
             {

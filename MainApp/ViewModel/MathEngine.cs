@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
 using System.Windows.Media.Media3D;
 using ManipulationSystemLibrary;
 
-namespace ManipApp.ViewModel
+namespace MainApp.ViewModel
 {
     class MathEngine
     {
@@ -14,11 +12,11 @@ namespace ManipApp.ViewModel
         {
             var q = new List<double[]>();
             
-            for (int i = 1; i < S.NumOfExtraPoints; i++)
+            for (var i = 1; i < S.NumOfExtraPoints; i++)
             {
                 var tmpQ = new double[model.n - 1];
                 worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
-                for (int j = 0; j < model.n - 1; j++)
+                for (var j = 0; j < model.n - 1; j++)
                 {
                     model.LagrangeMethodToThePoint(S.ExactExtra[i - 1]);
                     tmpQ[j] = model.q[j];

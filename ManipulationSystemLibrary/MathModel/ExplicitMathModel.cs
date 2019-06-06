@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Windows.Media.Media3D;
+using ManipulationSystemLibrary.MathModel;
+using ManipulationSystemLibrary.Matrix;
 
 namespace ManipulationSystemLibrary
 {
-    public class ExplicitMathModel : MathModel
+    public class ExplicitMathModel : MathModel.MathModel
     {
         delegate double function(double[] q);
         static readonly function[] dFxpodqi = { dFxpodq1, dFxpodq2, dFxpodq3, dFxpodq4 };
@@ -15,46 +17,48 @@ namespace ManipulationSystemLibrary
         public ExplicitMathModel(int n) : base(n)
         {
             Len = new double[n];
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
                 Len[i] = GetUnitLen(i);
         }
         public ExplicitMathModel(int n, Unit[] units) : base(n, units)
         {
             Len = new double[n];
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
                 Len[i] = GetUnitLen(i);
         }
 
-        public ExplicitMathModel(MathModel model) : base(model)
+        public ExplicitMathModel(MathModel.MathModel model) : base(model)
         {
-            Len = new double[n];
-            for (int i = 0; i < n; i++)
+            Len = new double[N];
+            for (var i = 0; i < N; i++)
                 Len[i] = GetUnitLen(i);
         }
 
         public override void LagrangeMethodToThePoint(Point3D p)
         {
-            double diag = dFxpodq1(q) * dFypodq1(q) + dFxpodq2(q) * dFypodq2(q) + 
-                dFxpodq3(q) * dFypodq3(q) + dFxpodq4(q) * dFypodq4(q);
+            var diagonalElement = dFxpodq1(Q) * dFypodq1(Q)
+                                + dFxpodq2(Q) * dFypodq2(Q)
+                                + dFxpodq3(Q) * dFypodq3(Q)
+                                + dFxpodq4(Q) * dFypodq4(Q);
 
-            double[,] D = {
-                { Math.Pow(dFxpodq1(q), 2) + Math.Pow(dFxpodq2(q), 2) + Math.Pow(dFxpodq3(q), 2) + Math.Pow(dFxpodq4(q), 2), diag },
-                { diag, Math.Pow(dFypodq1(q), 2) + Math.Pow(dFypodq2(q), 2) + Math.Pow(dFypodq3(q), 2) + Math.Pow(dFypodq4(q), 2) }
+            double[,] dFs = {
+                { Math.Pow(dFxpodq1(Q), 2) + Math.Pow(dFxpodq2(Q), 2) + Math.Pow(dFxpodq3(Q), 2) + Math.Pow(dFxpodq4(Q), 2), diagonalElement },
+                { diagonalElement, Math.Pow(dFypodq1(Q), 2) + Math.Pow(dFypodq2(Q), 2) + Math.Pow(dFypodq3(Q), 2) + Math.Pow(dFypodq4(Q), 2) }
                };
 
-            Point3D d = new Point3D(p.X - Fx(q), p.Y - Fy(q), 0);
-            Point3D μ = LinearSystemSolver.CramerMethod(D, d);
+            var d = new Point3D(p.X - Fx(Q), p.Y - Fy(Q), 0);
+            var μ = LinearSystemSolver.CramersRule(dFs, d);
 
-            for (int i = 0; i < 4; i++)
-                q[i] += MagicFunc(μ, q, D[i, i], dFxpodqi[i], dFypodqi[i]);
+            for (var i = 0; i < 4; i++)
+                Q[i] += MagicFunc(μ, Q, dFs[i, i], dFxpodqi[i], dFypodqi[i]);
         }
 
-        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - Fx(q), p.Y - Fy(q), 0));
+        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - Fx(Q), p.Y - Fy(Q), 0));
         
-        public Point3D SolutionVerification(Matrix A, Point3D b, Point3D x) =>
+        public Point3D SolutionVerification(Matrix.Matrix a, Point3D b, Point3D x) =>
             new Point3D(
-                b.X - A[0, 0] * x.X - A[0, 1] * x.Y,
-                b.Y - A[1, 0] * x.X - A[1, 1] * x.Y,
+                b.X - a[0, 0] * x.X - a[0, 1] * x.Y,
+                b.Y - a[1, 0] * x.X - a[1, 1] * x.Y,
                 0);
 
         private static double MagicFunc(Point3D μ, double[] q, double a, function dFxpodqi, function dFypodqi) => (μ.X * dFxpodqi(q) + μ.Y * dFypodqi(q)) / (2 * a);

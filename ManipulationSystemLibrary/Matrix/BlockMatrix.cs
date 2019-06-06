@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
+﻿using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary
+namespace ManipulationSystemLibrary.Matrix
 {
     /// <summary>
     /// Block matrices with size 3x4
@@ -23,8 +18,8 @@ namespace ManipulationSystemLibrary
         public BlockMatrix(double[,] mDoubles)
         {
             M = new double[3, 4];
-            for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 4; j++)
+            for (var i = 0; i < 3; i++)
+            for (var j = 0; j < 4; j++)
                 M[i, j] = mDoubles[i, j];
         }
 

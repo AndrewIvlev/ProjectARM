@@ -1,7 +1,7 @@
-﻿<Application x:Class="ManipApp.App"
+﻿<Application x:Class="MainApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:ManipApp"
+             xmlns:local="clr-namespace:MainApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

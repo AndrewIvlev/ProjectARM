@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ManipulationSystemLibrary
 {
@@ -21,11 +17,11 @@ namespace ManipulationSystemLibrary
         public double InterpolateX(double x)
         {
             double y = 0;
-            for (int i = 0; i <= allX.Count - 1; i++)
+            for (var i = 0; i <= allX.Count - 1; i++)
             {
                 double numerator = 1;
                 double denominator = 1;
-                for (int c = 0; c <= allX.Count - 1; c++)
+                for (var c = 0; c <= allX.Count - 1; c++)
                 {
                     if (c != i)
                     {

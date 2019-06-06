@@ -1,15 +1,14 @@
-﻿namespace ManipApp
+﻿using System.Collections.Generic;
+using OxyPlot;
+
+namespace MainApp.ViewModel
 {
-    using System.Collections.Generic;
-
-    using OxyPlot;
-
     public class DeltaPlotViewModel
     {
         public DeltaPlotViewModel()
         {
-            this.Title = "Delta";
-            this.Points = new List<DataPoint>
+            Title = "Delta";
+            Points = new List<DataPoint>
             {
                 new DataPoint(0, 0)
             };

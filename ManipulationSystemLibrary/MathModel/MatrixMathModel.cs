@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Windows.Media.Media3D;
+using ManipulationSystemLibrary.MathModel;
+using ManipulationSystemLibrary.Matrix;
 
 namespace ManipulationSystemLibrary
 {
     //Матричное описание модели манипулятора
-    public class MatrixMathModel : MathModel
+    public class MatrixMathModel : MathModel.MathModel
     {
-        private Matrix D;
+        private Matrix.Matrix D;
         public ArrayList T;
         private ArrayList dT;
         private BlockMatrix[] S;
@@ -15,12 +17,12 @@ namespace ManipulationSystemLibrary
 
         public MatrixMathModel() { }
 
-        public MatrixMathModel(MathModel model) : base(model)
+        public MatrixMathModel(MathModel.MathModel model) : base(model)
         {
-            D = new Matrix(3, n);
-            S = new BlockMatrix[n];
-            dS = new BlockMatrix[n];
-            for (int i = 0; i < n; i++)
+            D = new Matrix.Matrix(3, N);
+            S = new BlockMatrix[N];
+            dS = new BlockMatrix[N];
+            for (var i = 0; i < N; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
@@ -29,10 +31,10 @@ namespace ManipulationSystemLibrary
 
         public MatrixMathModel(int n) : base(n)
         {
-            D = new Matrix(3, n);
+            D = new Matrix.Matrix(3, n);
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
@@ -41,10 +43,10 @@ namespace ManipulationSystemLibrary
 
         public MatrixMathModel(int n, Unit[] units) : base(n, units)
         {
-            D = new Matrix(3, n);
+            D = new Matrix.Matrix(3, n);
             S = new BlockMatrix[n];
             dS = new BlockMatrix[n];
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
@@ -69,7 +71,7 @@ namespace ManipulationSystemLibrary
 
         public override void LagrangeMethodToThePoint(Point3D p)
         {
-            var f = this.F(n);
+            var f = F(N);
             var d = new Point3D(
                 p.X - f.X,
                 p.Y - f.Y,
@@ -96,36 +98,36 @@ namespace ManipulationSystemLibrary
                 detCz / detC
             );
 
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
                 var dF = GetdF(i);
-                q[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
+                Q[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
             }
         }
 
-        public Point3D SolutionVerification(Matrix a, Point3D b, Point3D x)
+        public Point3D SolutionVerification(Matrix.Matrix a, Point3D b, Point3D x)
         {
             throw new NotImplementedException();
         }
 
-        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - F(n).X, p.Y - F(n).Y, p.Z - F(n).Z));
+        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - F(N).X, p.Y - F(N).Y, p.Z - F(N).Z));
                 
         private void CalcS()
         {
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
-                switch (units[i].type)
+                switch (Units[i].Type)
                 {
                     case 'R':
                         S[i] = new BlockMatrix();
-                        S[i][0, 0] = Math.Cos(q[i]);
-                        S[i][0, 1] = - Math.Sin(q[i]);
-                        S[i][1, 0] = Math.Sin(q[i]);
-                        S[i][1, 1] = Math.Cos(q[i]);
+                        S[i][0, 0] = Math.Cos(Q[i]);
+                        S[i][0, 1] = - Math.Sin(Q[i]);
+                        S[i][1, 0] = Math.Sin(Q[i]);
+                        S[i][1, 1] = Math.Cos(Q[i]);
                         break;
                     case 'P':
                         S[i] = new BlockMatrix();
-                        S[i][2, 3] = q[i];
+                        S[i][2, 3] = Q[i];
                         break;
                     default:
                         throw new Exception("Unexpected unit type");
@@ -135,16 +137,16 @@ namespace ManipulationSystemLibrary
 
         private void CalcdS()
         {
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
-                switch (units[i].type)
+                switch (Units[i].Type)
                 {
                     case 'R':
                         dS[i] = new BlockMatrix();
-                        dS[i][0, 0] = -Math.Sin(q[i]);
-                        dS[i][0, 1] = -Math.Cos(q[i]);
-                        dS[i][1, 0] = Math.Cos(q[i]);
-                        dS[i][1, 1] = -Math.Sin(q[i]);
+                        dS[i][0, 0] = -Math.Sin(Q[i]);
+                        dS[i][0, 1] = -Math.Cos(Q[i]);
+                        dS[i][1, 0] = Math.Cos(Q[i]);
+                        dS[i][1, 1] = -Math.Sin(Q[i]);
                         dS[i][2, 2] = 0;
                         break;
                     case 'P':
@@ -166,11 +168,11 @@ namespace ManipulationSystemLibrary
             T = new ArrayList();
             var tmp = new BlockMatrix();
 
-            T.Add(tmp = rootB * S[0]);
-            for (var i = 1; i < n; i++)
-                T.Add(tmp *= units[i - 1].B * S[i]);
+            T.Add(tmp = RootB * S[0]);
+            for (var i = 1; i < N; i++)
+                T.Add(tmp *= Units[i - 1].B * S[i]);
 
-            T.Add(tmp *= units[n - 1].B);
+            T.Add(tmp *= Units[N - 1].B);
         }
 
         // TODO: refactor this method, use already calculated matrix 
@@ -178,11 +180,11 @@ namespace ManipulationSystemLibrary
         private BlockMatrix CalcdF(int index)
         {
             var dF = new BlockMatrix();
-            dF *= rootB;
-            for (var i = 1; i < n; i++)
+            dF *= RootB;
+            for (var i = 1; i < N; i++)
             {
                 dF *= i == index ? dS[i] : S[i];
-                dF *= units[i].B;
+                dF *= Units[i].B;
             }
 
             return dF;
@@ -191,7 +193,7 @@ namespace ManipulationSystemLibrary
         private void CalcdT()
         {
             dT = new ArrayList();
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
                 dT.Add(CalcdF(i));
         }
 
@@ -206,7 +208,7 @@ namespace ManipulationSystemLibrary
         /// </summary>
         private void CalcD()
         {
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
                 var b = GetdF(i);
                 D[0, i] = b.X;
@@ -216,11 +218,11 @@ namespace ManipulationSystemLibrary
         }
 
         // Вычисляем матрицу коэффициентов
-        private Matrix CalcC()
+        private Matrix.Matrix CalcC()
         {
-            var C = new Matrix(3);
+            var C = new Matrix.Matrix(3);
 
-            for (var i = 0; i < n; i++)
+            for (var i = 0; i < N; i++)
             {
                 C[0, 0] += D[0, i] * D[0, i];
                 C[0, 1] += D[0, i] * D[1, i];
@@ -236,17 +238,17 @@ namespace ManipulationSystemLibrary
             return C;
         }
 
-        private double Det3D(Matrix M) =>
+        private double Det3D(Matrix.Matrix M) =>
             M[0, 0] * (M[1, 1] * M[2, 2] - M[2, 1] * M[1, 2])
             - M[0, 1] * (M[1, 0] * M[2, 2] - M[1, 2] * M[2, 0])
             + M[0, 2] * (M[1, 0] * M[2, 2] - M[2, 0] * M[1, 1]);
 
-        private static Matrix ConcatAsColumn(Matrix A, Point3D v, int j)
+        private static Matrix.Matrix ConcatAsColumn(Matrix.Matrix A, Point3D v, int j)
         {
-            if (A.rows != 3)
+            if (A.Rows != 3)
                 throw new ArgumentOutOfRangeException();
 
-            var res = new Matrix(A)
+            var res = new Matrix.Matrix(A)
             {
                 [0, j] = v.X,
                 [1, j] = v.Y,
