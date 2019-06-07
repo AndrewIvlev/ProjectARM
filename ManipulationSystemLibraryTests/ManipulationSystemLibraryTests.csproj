@@ -62,6 +62,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ManipConfigFiles\ConfigFromGreenBook.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="ManipConfigFiles\13R-OctopusTentacle.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ManipConfigFiles\PR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -75,10 +81,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ManipConfigFiles\ConfigFromGreenBook.txt" />
-    <Content Include="ManipConfigFiles\OctopusTentacle.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ManipulationSystemLibrary\ManipulationSystemLibrary.csproj">

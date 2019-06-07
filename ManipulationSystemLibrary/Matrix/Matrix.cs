@@ -45,7 +45,13 @@ namespace ManipulationSystemLibrary.Matrix
 
         protected bool Equals(Matrix other)
         {
-            return Equals(M, other.M) && Rows == other.Rows && Columns == other.Columns;
+            if (Rows != other.Rows || Columns != other.Columns)
+                return false;
+            for (var i = 0; i < Rows; i++)
+            for (var j = 0; j < Columns; j++)
+                if (this.M[i, j] != other.M[i, j])
+                    return false;
+            return true;
         }
 
         public override bool Equals(object obj)

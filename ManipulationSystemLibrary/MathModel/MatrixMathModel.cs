@@ -45,7 +45,7 @@ namespace ManipulationSystemLibrary.MathModel
 
         public override void CalculationMetaData()
         {
-            CalcS();
+            CalcSByUnitsType();
             CalcT();
         }
         
@@ -96,7 +96,7 @@ namespace ManipulationSystemLibrary.MathModel
 
         public override double GetPointError(Point3D p) => NormaVector(new Point3D(p.X - F(N).X, p.Y - F(N).Y, p.Z - F(N).Z));
                 
-        private void CalcS()
+        private void CalcSByUnitsType()
         {
             for (var i = 0; i < N; i++)
             {
@@ -146,7 +146,7 @@ namespace ManipulationSystemLibrary.MathModel
             }
         }
 
-        // TODO: Сделать такой же массив умножая с правой стороны
+        // TODO: Сделать такой же массив, умножая с правой стороны
         private void CalcT()
         {
             T = new ArrayList();

@@ -22,11 +22,29 @@ namespace ManipulationSystemLibrary.MathModel
         /// Matrix orientation and position of unit
         /// </summary>
         public BlockMatrix B;
+
+        public bool Equals(Unit other)
+        {
+            if (this.Type != other.Type) return false;
+            if (this.Q != other.Q) return false;
+            if (this.B != other.B) return false;
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Unit other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class MathModel
     {
-        public readonly int N;
+        public int N;
         public BlockMatrix RootB;
         public Unit[] Units;
 
@@ -35,25 +53,48 @@ namespace ManipulationSystemLibrary.MathModel
 
         public MathModel() { }
 
-        public MathModel(int n)
+        public MathModel(int N)
         {
-            N = n;
+            this.N = N;
             RootB = new BlockMatrix();
-            Units = new Unit[n];
-            A = new Matrix.Matrix(n, n);
-            for (var i = 0; i < n; i++)
-                Units[i] = new Unit { Type = 'S'};
+            Units = new Unit[N];
+            A = new Matrix.Matrix(N, N);
+            for (var i = 0; i < N; i++)
+                Units[i] = new Unit { Type = 'E'};
         }
 
-        public MathModel(int n, BlockMatrix rootB, Unit[] units)
+        public MathModel(int N, BlockMatrix rootB, Unit[] units)
         {
-            N = n;
+            this.N = N;
             RootB = rootB;
-            Units = new Unit[n];
-            for (var i = 0; i < n; i++)
+            Units = new Unit[N];
+            for (var i = 0; i < N; i++)
                 Units[i] = units[i];
 
-            A = new Matrix.Matrix(n, n);
+            A = new Matrix.Matrix(N, N);
+        }
+
+        protected bool Equals(MathModel other)
+        {
+            if (this.N != other.N) return false;
+            if (this.RootB != other.RootB) return false;
+            for (var i = 0; i < N; i++)
+                if (!this.Units[i].Equals(other.Units[i]))
+                    return false;
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((MathModel) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
 
         public virtual void SetQ(double[] newQ)
@@ -70,7 +111,7 @@ namespace ManipulationSystemLibrary.MathModel
         //{
         //    double MaxL = 0;
 
-        //    for (int i = 0; i < n; i++) //Вычисление максимально возможной длины
+        //    for (int i = 0; i < N; i++) //Вычисление максимально возможной длины
         //        MaxL += units[i].len;               //манипулятора, которая равна сумме длин всех звеньев
         //    foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
         //        MaxL += d;
@@ -80,7 +121,7 @@ namespace ManipulationSystemLibrary.MathModel
 
         //public void AllAngleToRadianFromDegree()
         //{
-        //    for (int i = 0; i < n; i++)
+        //    for (int i = 0; i < N; i++)
         //        units[i].angle = - DegreeToRadian(units[i].angle);
         //}
 
