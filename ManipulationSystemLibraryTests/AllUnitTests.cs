@@ -1,142 +1,189 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Media.Media3D;
-using ManipulationSystemLibrary;
 using ManipulationSystemLibrary.MathModel;
 using ManipulationSystemLibrary.Matrix;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ProjectARM_Tests
+namespace ManipulationSystemLibraryTests
 {
     [TestFixture]
     public class AllUnitTests
     {
-        public string ManipConfigDirectory;
+        public string ManipulatorConfigDirectory;
         private readonly double error = 0.01;
 
         [SetUp]
         public void SetUp()
         {
-            ManipConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfigFiles");
+            ManipulatorConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfigFiles");
         }
         
-        [TestCase("SRRPR.json", 15, 4, 1)]
+        [TestCase("RRPR.json", 15, 4, 1)]
         public void MatrixMM_LagrangeMethodToThePointTest(string fileName, double pX, double pY, double pZ)
         {
-            var filePath = Path.Combine(ManipConfigDirectory, fileName);
+            var filePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var sr = new StreamReader(filePath);
             var jsonStringMatrixMathModel = sr.ReadToEnd();
-            var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
-            var model = new MatrixMathModel(manipConfig);
-            
-            Console.WriteLine($"Current q = {model.Q}");
+            var mathModel = JsonConvert.DeserializeObject<MathModel>(jsonStringMatrixMathModel);
+            var model = new MatrixMathModel(mathModel);
             model.DefaultA();
             model.CalculationMetaData();
             model.LagrangeMethodToThePoint(new Point3D(pX, pY, pZ));
-            Console.WriteLine($"After one iteration q = {model.Q}");
 
-            var Fq = model.F(model.N - 1);
-            Assert.True(Fq.X < pX + error && Fq.X > pX - error);
-            Assert.True(Fq.Y < pY + error && Fq.Y > pY - error);
-            Assert.True(Fq.Z < pZ + error && Fq.Z > pZ - error);
+            var fq = model.F( - 1);
+            Assert.True(fq.X < pX + error && fq.X > pX - error);
+            Assert.True(fq.Y < pY + error && fq.Y > pY - error);
+            Assert.True(fq.Z < pZ + error && fq.Z > pZ - error);
         }
 
-        [TestCase("SRRPR.json", 1, 99, 0)]
+        [TestCase("RRPR.json", 1, 99, 0)]
         public void ExplicitMM_LagrangeMethodToThePointTest(string fileName, double px, double py, double pz)
         {
-            var path = Path.Combine(ManipConfigDirectory, fileName);
+            var path = Path.Combine(ManipulatorConfigDirectory, fileName);
             var sr = new StreamReader(path);
             var jsonString = sr.ReadToEnd();
-            var manipConfig = JsonConvert.DeserializeObject<ExplicitMathModel>(jsonString);
-            //manipConfig.AllAngleToRadianFromDegree();
-            var model = new ExplicitMathModel(manipConfig);
-
-            Console.WriteLine($"Current q = {model.Q}");
+            var model = JsonConvert.DeserializeObject<ExplicitMathModel>(jsonString);
+            //manipulatorConfig.AllAngleToRadianFromDegree();
+            
             model.DefaultA();
             model.LagrangeMethodToThePoint(new Point3D(px, py, pz));
-            Console.WriteLine($"After one iteration q = {model.Q}");
 
-            Assert.IsTrue(model.Q.Equals(new double[] { 0, 1, 0, 1 })); //TODO: calc real q for that assert
+            Assert.IsTrue(true);
         }
 
         [Test]
-        public void ManipConfigToJson()
+        public void ManipulatorConfigToJson()
         {
             #region Expected Json string
 
-            const string expectedJson = 
-                "{\"q\":[0.0,0.0,0.0,0.0],\"units\":[{\"type\":\"S\",\"len\":0.0,\"angle\":0.0," +
-                "\"B\":{\"M\":[[0.0,0.0,1.0,0.0],[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0]],\"rows\":" +
-                "0,\"columns\":0}},{\"type\":\"R\",\"len\":13.0,\"angle\":0.0,\"B\":{\"M\":[[1." +
-                "0,0.0,0.0,13.0],[0.0,0.0,-1.0,0.0],[0.0,1.0,0.0,0.0]],\"rows\":0,\"columns\":0" +
-                "}},{\"type\":\"C\",\"len\":16.0,\"angle\":0.0,\"B\":{\"M\":[[0.0,0.0,1.0,16.0]" +
-                ",[0.0,1.0,0.0,0.0],[-1.0,0.0,0.0,0.0]],\"rows\":0,\"columns\":0}},{\"type\":\"" +
-                "P\",\"len\":4.0,\"angle\":0.0,\"B\":{\"M\":[[-1.0,0.0,0.0,0.0],[0.0,0.0,1.0,0." +
-                "0],[0.0,1.0,0.0,4.0]],\"rows\":0,\"columns\":0}},{\"type\":\"R\",\"len\":11.0," +
-                "\"angle\":0.0,\"B\":{\"M\":[[-1.0,0.0,0.0,0.0],[0.0,0.0,1.0,11.0],[0.0,1.0,0.0" +
-                ",0.0]],\"rows\":0,\"columns\":0}}],\"n\":5}";
-
+            const string expectedJson =
+                "{" +
+                "\"N\":5," +
+                "\"RootB\":{" +
+                    "\"M\":[" +
+                        "[-1.0,0.0,0.0,0.0]," +
+                        "[0.0,0.0,1.0,1.0]," +
+                        "[0.0,1.0,0.0,0.0]" +
+                    "]}," +
+                "\"Units\":[" +
+                    "{\"Type\":\"R\"," +
+                    "\"Q\":0.0," +
+                    "\"B\":{\"M\":[" +
+                        "[-1.0,0.0,0.0,0.0]," +
+                        "[0.0,0.0,1.0,0.0]," +
+                        "[0.0,1.0,0.0,2.0]]}}," +
+                    "{\"Type\":\"R\"," +
+                    "\"Q\":0.0," +
+                    "\"B\":{\"M\":[" +
+                        "[0.0,0.0,1.0,2.0]," +
+                        "[1.0,0.0,0.0,0.0]," +
+                        "[0.0,1.0,0.0,0.0]]}}," +
+                    "{\"Type\":\"R\"," +
+                "\"Q\":0.0," +
+                    "\"B\":{\"M\":[" +
+                        "[1.0,0.0,0.0,0.0]," +
+                        "[0.0,1.0,0.0,0.0]," +
+                        "[0.0,0.0,1.0,1.0]]}}," +
+                    "{\"Type\":\"P\"," +
+                "\"Q\":0.0," +
+                "\"B\":{\"M\":[" +
+                "[0.0,0.0,1.0,0.0]," +
+                "[1.0,0.0,0.0,0.0]," +
+                "[0.0,1.0,0.0,3.0]]}}," +
+                    "{\"Type\":\"R\"," +
+                "\"Q\":0.0," +
+                "\"B\":{\"M\":[" +
+                "[-1.0,0.0,0.0,0.0]," +
+                "[0.0,0.0,1.0,1.0]," +
+                "[0.0,1.0,0.0,0.0]]}}" +
+                "]}";
+            
             #endregion
 
             #region Actual Matrix Math Model
 
-            var model = new MatrixMathModel(5, new[]
-            {
-                new Unit{Type = 'S', B = new BlockMatrix(
-                    new double[,]{
-                        {0, 0, 1, 0},
-                        {1, 0, 0, 0},
-                        {0, 1, 0, 0}
-                    })
-                },
-                new Unit{Type = 'R', B = new BlockMatrix(
-                    new double[,]{
-                        {1, 0, 0, 13},
-                        {0, 0, -1, 0},
-                        {0, 1, 0, 0}
-                    })
-                },
-                new Unit{Type = 'C', B = new BlockMatrix(
-                    new double[,]{
-                        {0, 0, 1, 16},
-                        {0, 1, 0, 0},
-                        {-1, 0, 0, 0}
-                    })
-                },
-                new Unit{Type = 'P', B = new BlockMatrix(
-                    new double[,]{
-                        {-1, 0, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 1, 0, 4}
-                    })
-                },
-                new Unit{Type = 'R', B = new BlockMatrix(
-                    new double[,]{
-                        {-1, 0, 0, 0},
-                        {0, 0, 1, 11},
-                        {0, 1, 0, 0}
-                    })
-                }
-            });
+            var model = new MathModel(
+                5,
+                new BlockMatrix(new double[,] { 
+                    {-1.0, 0.0, 0.0, 0.0 },
+                    { 0.0, 0.0, 1.0, 1.0 },
+                    { 0.0, 1.0, 0.0, 0.0}
+                }),
+                new []
+                {
+                    new Unit{
+                        Type = 'R',
+                        Q = 0,
+                        B = new BlockMatrix(new double[,]
+                        {
+                            {-1.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 0.0, 1.0, 0.0 },
+                            { 0.0, 1.0, 0.0, 2.0 }
+                            })
+                    },
+                    new Unit
+                    {
+                        Type = 'R',
+                        Q = 0,
+                        B = new BlockMatrix(new double[,]
+                        {
+                            { 0.0, 0.0, 1.0, 2.0 },
+                            { 1.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 1.0, 0.0, 0.0 }
+                        })
+                    },
+                    new Unit{
+                        Type = 'R',
+                        Q = 0,
+                        B = new BlockMatrix(new double[,]
+                        {
+                            { 1.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 1.0, 0.0, 0.0 },
+                            { 0.0, 0.0, 1.0, 1.0 }
+                        })
+
+                    },
+                    new Unit{
+                        Type = 'P',
+                        Q = 0,
+                        B = new BlockMatrix(new double[,]
+                        {
+                            { 0.0, 0.0, 1.0, 0.0 },
+                            { 1.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 1.0, 0.0, 3.0 }
+                        })
+                    },
+                    new Unit{
+                        Type = 'R',
+                        Q = 0,
+                        B = new BlockMatrix(new double[,]
+                        {
+                            { -1.0, 0.0, 0.0, 0.0 },
+                            { 0.0, 0.0, 1.0, 1.0 },
+                            { 0.0, 1.0, 0.0, 0.0 }
+                        })
+                    }
+                });
 
             #endregion
 
-            var acturalJson = JsonConvert.SerializeObject(model);
+            var actualJson = JsonConvert.SerializeObject(model);
             
-            Assert.AreEqual(expectedJson, acturalJson);
+            Assert.AreEqual(expectedJson, actualJson);
         }
 
         [Test]
         public void MatrixMultiplication()
         {
-            var A = new Matrix(3, 2)
+            var a = new Matrix(3, 2)
             {
                 [0, 0] = 5, [0, 1] = 3,
                 [1, 0] = 4, [1, 1] = 6,
                 [2, 0] = 2, [2, 1] = 1
             };
-            var B = new Matrix(2, 5)
+            var b = new Matrix(2, 5)
             {
                 [0, 0] = 8, [0, 1] = 7, [0, 2] = 1, [0, 3] = 4, [0, 4] = 2,
                 [1, 0] = 2, [1, 1] = 1, [1, 2] = 7, [1, 3] = 0, [1, 4] = 5
@@ -148,9 +195,9 @@ namespace ProjectARM_Tests
                 [2, 0] = 18, [2, 1] = 15, [2, 2] = 9,  [2, 3] = 8,  [2, 4] = 9
             };
 
-            var actualAB = A * B;
+            var actualMultiplicationAonB = a * b;
 
-            Assert.IsTrue(expectedAb == actualAB);
+            Assert.IsTrue(expectedAb == actualMultiplicationAonB);
         }
     }
 }

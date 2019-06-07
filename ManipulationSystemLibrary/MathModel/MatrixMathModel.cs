@@ -1,33 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Windows.Media.Media3D;
-using ManipulationSystemLibrary.MathModel;
 using ManipulationSystemLibrary.Matrix;
 
-namespace ManipulationSystemLibrary
+namespace ManipulationSystemLibrary.MathModel
 {
-    //Матричное описание модели манипулятора
-    public class MatrixMathModel : MathModel.MathModel
+    public class MatrixMathModel : MathModel
     {
         private Matrix.Matrix D;
         public ArrayList T;
         private ArrayList dT;
         private BlockMatrix[] S;
         private BlockMatrix[] dS;
-
-        public MatrixMathModel() { }
-
-        public MatrixMathModel(MathModel.MathModel model) : base(model)
-        {
-            D = new Matrix.Matrix(3, N);
-            S = new BlockMatrix[N];
-            dS = new BlockMatrix[N];
-            for (var i = 0; i < N; i++)
-            {
-                S[i] = new BlockMatrix();
-                dS[i] = new BlockMatrix();
-            }
-        }
 
         public MatrixMathModel(int n) : base(n)
         {
@@ -41,12 +25,12 @@ namespace ManipulationSystemLibrary
             }
         }
 
-        public MatrixMathModel(int n, Unit[] units) : base(n, units)
+        public MatrixMathModel(MathModel model)
         {
-            D = new Matrix.Matrix(3, n);
-            S = new BlockMatrix[n];
-            dS = new BlockMatrix[n];
-            for (var i = 0; i < n; i++)
+            D = new Matrix.Matrix(3, model.N);
+            S = new BlockMatrix[model.N];
+            dS = new BlockMatrix[model.N];
+            for (var i = 0; i < model.N; i++)
             {
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
@@ -59,15 +43,15 @@ namespace ManipulationSystemLibrary
             CalculationMetaData();
         }
 
-        public void CalculationMetaData()
+        public override void CalculationMetaData()
         {
             CalcS();
             CalcT();
         }
         
-        public Vector3D F(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(3);
+        public Vector3D F(int i) => ((BlockMatrix) T[i]).ColumnAsVector3D(3);
 
-        public Vector3D GetZAxis(int i) => (T[i] as BlockMatrix).ColumnAsVector3D(2);
+        public Vector3D GetZAxis(int i) => ((BlockMatrix) T[i]).ColumnAsVector3D(2);
 
         public override void LagrangeMethodToThePoint(Point3D p)
         {
@@ -101,7 +85,7 @@ namespace ManipulationSystemLibrary
             for (var i = 0; i < N; i++)
             {
                 var dF = GetdF(i);
-                Q[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
+                Units[i].Q += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * A[i, i]);
             }
         }
 
@@ -110,7 +94,7 @@ namespace ManipulationSystemLibrary
             throw new NotImplementedException();
         }
 
-        public override double GetPointError(Point3D p) => NormaVectora(new Point3D(p.X - F(N).X, p.Y - F(N).Y, p.Z - F(N).Z));
+        public override double GetPointError(Point3D p) => NormaVector(new Point3D(p.X - F(N).X, p.Y - F(N).Y, p.Z - F(N).Z));
                 
         private void CalcS()
         {
@@ -120,14 +104,14 @@ namespace ManipulationSystemLibrary
                 {
                     case 'R':
                         S[i] = new BlockMatrix();
-                        S[i][0, 0] = Math.Cos(Q[i]);
-                        S[i][0, 1] = - Math.Sin(Q[i]);
-                        S[i][1, 0] = Math.Sin(Q[i]);
-                        S[i][1, 1] = Math.Cos(Q[i]);
+                        S[i][0, 0] =  Math.Cos(Units[i].Q);
+                        S[i][0, 1] = -Math.Sin(Units[i].Q);
+                        S[i][1, 0] =  Math.Sin(Units[i].Q);
+                        S[i][1, 1] =  Math.Cos(Units[i].Q);
                         break;
                     case 'P':
                         S[i] = new BlockMatrix();
-                        S[i][2, 3] = Q[i];
+                        S[i][2, 3] = Units[i].Q;
                         break;
                     default:
                         throw new Exception("Unexpected unit type");
@@ -143,10 +127,10 @@ namespace ManipulationSystemLibrary
                 {
                     case 'R':
                         dS[i] = new BlockMatrix();
-                        dS[i][0, 0] = -Math.Sin(Q[i]);
-                        dS[i][0, 1] = -Math.Cos(Q[i]);
-                        dS[i][1, 0] = Math.Cos(Q[i]);
-                        dS[i][1, 1] = -Math.Sin(Q[i]);
+                        dS[i][0, 0] = -Math.Sin(Units[i].Q);
+                        dS[i][0, 1] = -Math.Cos(Units[i].Q);
+                        dS[i][1, 0] =  Math.Cos(Units[i].Q);
+                        dS[i][1, 1] = -Math.Sin(Units[i].Q);
                         dS[i][2, 2] = 0;
                         break;
                     case 'P':
@@ -198,7 +182,7 @@ namespace ManipulationSystemLibrary
         }
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        private Vector3D GetdF(int i) => (dT[i] as BlockMatrix).ColumnAsVector3D(3);
+        private Vector3D GetdF(int i) => ((BlockMatrix) dT[i]).ColumnAsVector3D(3);
 
         /// <summary>
         /// D is Matrix of gradients Fx, Fy and Fz
@@ -238,21 +222,28 @@ namespace ManipulationSystemLibrary
             return C;
         }
 
-        private double Det3D(Matrix.Matrix M) =>
-            M[0, 0] * (M[1, 1] * M[2, 2] - M[2, 1] * M[1, 2])
-            - M[0, 1] * (M[1, 0] * M[2, 2] - M[1, 2] * M[2, 0])
-            + M[0, 2] * (M[1, 0] * M[2, 2] - M[2, 0] * M[1, 1]);
+        private static double Det3D(Matrix.Matrix m) =>
+            m[0, 0] * (m[1, 1] * m[2, 2] - m[2, 1] * m[1, 2])
+            - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0])
+            + m[0, 2] * (m[1, 0] * m[2, 2] - m[2, 0] * m[1, 1]);
 
-        private static Matrix.Matrix ConcatAsColumn(Matrix.Matrix A, Point3D v, int j)
+        /// <summary>
+        /// Replacing column in matrix with vector
+        /// </summary>
+        /// <param name="a">Matrix</param>
+        /// <param name="v">Column</param>
+        /// <param name="i">Index</param>
+        /// <returns></returns>
+        private static Matrix.Matrix ConcatAsColumn(Matrix.Matrix a, Point3D v, int i)
         {
-            if (A.Rows != 3)
+            if (a.Rows != 3)
                 throw new ArgumentOutOfRangeException();
 
-            var res = new Matrix.Matrix(A)
+            var res = new Matrix.Matrix(a)
             {
-                [0, j] = v.X,
-                [1, j] = v.Y,
-                [2, j] = v.Z
+                [0, i] = v.X,
+                [1, i] = v.Y,
+                [2, i] = v.Z
             };
             
             return res;

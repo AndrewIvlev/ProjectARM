@@ -1,19 +1,24 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace ManipulationSystemLibrary.Matrix
 {
+    //TODO: make this class as template class, not only for double matrix
     public class Matrix
     {
         public double[,] M;
 
+        [JsonIgnore]
         public int Rows;
 
+        [JsonIgnore]
         public int Columns;
 
         public Matrix()
         {
             M = new double[Rows = 0, Columns = 0];
         }
+
         public Matrix(int n)
         {
             M = new double[Rows = n, Columns = n];
@@ -68,28 +73,28 @@ namespace ManipulationSystemLibrary.Matrix
             set => M[i, j] = value;
         }
 
-        public static bool operator ==(Matrix A, Matrix B)
+        public static bool operator ==(Matrix a, Matrix b)
         {
-            if (A.Rows != B.Rows || A.Columns != B.Columns)
+            if (a.Rows != b.Rows || a.Columns != b.Columns)
                 return false;
 
-            for(var i = 0; i < A.Rows; i++)
-                for (var j = 0; j < A.Columns; j++)
-                    if (A[i, j] != B[i, j])
+            for(var i = 0; i < a.Rows; i++)
+                for (var j = 0; j < a.Columns; j++)
+                    if (Math.Abs(a[i, j] - b[i, j]) > 0)
                         return false;
 
             return true;
         }
 
-        public static bool operator !=(Matrix A, Matrix B)
+        public static bool operator !=(Matrix a, Matrix b)
         {
-            if (A.Rows != B.Rows || A.Columns != B.Columns)
+            if (a.Rows != b.Rows || a.Columns != b.Columns)
                 return true;
 
             var isEqual = true;
-            for (var i = 0; i < A.Rows; i++)
-            for (var j = 0; j < A.Columns; j++)
-                if (A[i, j] != B[i, j])
+            for (var i = 0; i < a.Rows; i++)
+            for (var j = 0; j < a.Columns; j++)
+                if (Math.Abs(a[i, j] - b[i, j]) > 0)
                     isEqual = false;
 
             return !isEqual;
@@ -117,13 +122,13 @@ namespace ManipulationSystemLibrary.Matrix
         /// </summary>
         public static Matrix Transpose(Matrix M)
         {
-            var transpM = new Matrix(M.Columns, M.Rows);
+            var transM = new Matrix(M.Columns, M.Rows);
 
             for (var i = 0; i < M.Rows; i++)
             for (var j = 0; j < M.Columns; j++)
-                transpM[j, i] = M[i, j];
+                transM[j, i] = M[i, j];
 
-            return transpM;
+            return transM;
         }
     }
 }

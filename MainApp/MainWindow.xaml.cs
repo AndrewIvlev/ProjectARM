@@ -7,7 +7,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Media3D;
+using MainApp.ViewModel;
 using ManipulationSystemLibrary;
+using ManipulationSystemLibrary.MathModel;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using OxyPlot;
@@ -90,8 +92,8 @@ namespace MainApp
             var openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() != true) return;
             var jsonStringMatrixMathModel = File.ReadAllText(openFileDialog.FileName);
-            var manipConfig = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
-            model = new MatrixMathModel(manipConfig);
+            var mathModel = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
+            model = new MatrixMathModel(mathModel);
             model.DefaultA();
             model.CalculationMetaData();
             CreateManipulator3DVisualModel(model);
@@ -219,8 +221,9 @@ namespace MainApp
                 //model.q.CopyTo(tmpQ, 0);
                 //arrayQ[i] = tmpQ;
                 //Thread.Sleep(1500);
-                ManipulatorTransformUpdate(model.q);
-                var p = model.F(model.n);
+
+                //ManipulatorTransformUpdate(model.q);//TODO:think what do with q
+                var p = model.F(model.N);
 
                 delta.DesiredPoints.Add(listSplitPathPoints[i]);
                 delta.RealPoints.Add((Point3D)p);
@@ -238,8 +241,8 @@ namespace MainApp
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
             File.WriteAllText(filePath, json);
 
-            for (var i = 0; i < delta.deltas.Count; i++)
-                deltaViewModel.Points.Add(new DataPoint(delta.deltas[i], i));
+            for (var i = 0; i < delta.Deltas.Count; i++)
+                deltaViewModel.Points.Add(new DataPoint(delta.Deltas[i], i));
             var plotWindow = new PlotWindow
             {
                 Owner = this,
@@ -394,7 +397,7 @@ namespace MainApp
                         pathLinesVisual3D = new List<PathLine>();
                         var firstPathPoint3D = new ModelVisual3D();
                         var firstPpathPoint = new MeshGeometry3D();
-                        var p = model.F(model.n);
+                        var p = model.F(model.N);
                         var firstPoint = new PathPoint();
                         firstPoint.center = new Point3D(p.X, p.Y + OffsetY, p.Z);
 
@@ -576,7 +579,7 @@ namespace MainApp
         private void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
-            for (var i = 1; i < model.n; i++)
+            for (var i = 1; i < model.N; i++)
             {
                 var animation1 = new ThicknessAnimation();
                 animation1.From = new Thickness(5);
@@ -597,13 +600,13 @@ namespace MainApp
         /// </summary>
         private void AddTransformationsForManipulator()
         {
-            var transformGroup = new Transform3DGroup[model.n];
-            for (var i = 0; i < model.n; i++)
+            var transformGroup = new Transform3DGroup[model.N];
+            for (var i = 0; i < model.N; i++)
             {
                 Transform3D transformation = null;
 
                 var center = model.F(i);
-                switch (model.units[i].type)
+                switch (model.Units[i].Type)
                 {
                     #region case R
                     case 'R':
@@ -615,13 +618,13 @@ namespace MainApp
                         var angleRotation = new AxisAngleRotation3D
                         {
                             Axis = model.GetZAxis(i),
-                            Angle = RadianToDegree(model.q[i])
+                            Angle = RadianToDegree(model.Units[i].Q)
                         };
 
                         (transformation as RotateTransform3D).Rotation = angleRotation;
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (var j = i; j < model.n; j++)
+                        for (var j = i; j < model.N; j++)
                             transformGroup[j].Children.Add(transformation);
 
                         break;
@@ -630,7 +633,7 @@ namespace MainApp
                         transformation = new TranslateTransform3D();
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (var j = i + 1; j < model.n; j++)
+                        for (var j = i + 1; j < model.N; j++)
                             transformGroup[j].Children.Add(transformation);
 
                         break;
@@ -638,20 +641,20 @@ namespace MainApp
             }
             // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
             // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
-            for (var i = 1; i < model.n + 1; i++)
+            for (var i = 1; i < model.N + 1; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
 
         private void ManipulatorTransformUpdate(double[] q)
         {
             
-            for (var i = 1; i < model.n + 1; i++)
+            for (var i = 1; i < model.N + 1; i++)
             {
 
-                switch (model.units[i - 1].type)
+                switch (model.Units[i - 1].Type)
                 {
                     case 'R':
-                        for (var j = i + 1; j < model.n; j++)
+                        for (var j = i + 1; j < model.N; j++)
                         {
                             (((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -693,7 +696,7 @@ namespace MainApp
                         #endregion
 
                         prismaticAxis = model.GetZAxis(i);
-                        for (var j = i + 2; j < model.n; j++)
+                        for (var j = i + 2; j < model.N; j++)
                         {
                             ((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -725,7 +728,7 @@ namespace MainApp
                     Viewport3D.Children.Remove(arm);
             }
             var sup = new Vector3D(0, 0, 0); // startUnitPoint
-            for (var i = 0; i < model.n + 1; i++)
+            for (var i = 0; i < model.N + 1; i++)
             {
                 var arm = new ModelVisual3D();
                 var jointsAndUnitsModelGroup = new Model3DGroup();
