@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 
-namespace ManipulationSystemLibrary.Matrix
+namespace ManipulationSystemLibrary
 {
-    //TODO: make this class as template class, not only for double matrix
     public class Matrix
     {
         public double[,] M;
@@ -41,36 +41,6 @@ namespace ManipulationSystemLibrary.Matrix
             for (var i = 0; i < Rows; i++)
             for (var j = 0; j < Columns; j++)
                 M[i, j] = A.M[i, j];
-        }
-
-        protected bool Equals(Matrix other)
-        {
-            if (Rows != other.Rows || Columns != other.Columns)
-                return false;
-            for (var i = 0; i < Rows; i++)
-            for (var j = 0; j < Columns; j++)
-                if (this.M[i, j] != other.M[i, j])
-                    return false;
-            return true;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Matrix) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = (M != null ? M.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Rows;
-                hashCode = (hashCode * 397) ^ Columns;
-                return hashCode;
-            }
         }
 
         public double this[int i, int j]
@@ -123,6 +93,12 @@ namespace ManipulationSystemLibrary.Matrix
             return AB;
         }
 
+
+        public static double Det3D(Matrix m) =>
+            m[0, 0] * (m[1, 1] * m[2, 2] - m[2, 1] * m[1, 2])
+            - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0])
+            + m[0, 2] * (m[1, 0] * m[2, 2] - m[2, 0] * m[1, 1]);
+
         /// <summary>
         /// Returns the transpose matrix
         /// </summary>
@@ -135,6 +111,27 @@ namespace ManipulationSystemLibrary.Matrix
                 transM[j, i] = M[i, j];
 
             return transM;
+        }
+
+        /// <summary>
+        /// Replacing column in matrix with vector
+        /// </summary>
+        /// <param name="a">Matrix</param>
+        /// <param name="v">Column</param>
+        /// <param name="i">Index</param>
+        public static Matrix ConcatAsColumn(Matrix a, Point3D v, int i)
+        {
+            if (a.Rows != 3)
+                throw new ArgumentOutOfRangeException();
+
+            var res = new Matrix(a)
+            {
+                [0, i] = v.X,
+                [1, i] = v.Y,
+                [2, i] = v.Z
+            };
+            
+            return res;
         }
     }
 }

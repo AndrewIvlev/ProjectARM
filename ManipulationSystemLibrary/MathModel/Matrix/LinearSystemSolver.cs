@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary.Matrix
+namespace ManipulationSystemLibrary
 {
     public static class LinearSystemSolver
     {

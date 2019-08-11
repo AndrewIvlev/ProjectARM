@@ -66,7 +66,7 @@ namespace MainApp
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
         private Storyboard storyboard;
 
-        private MatrixMathModel model;
+        private Arm model;
         private double[][] arrayQ; // Array of the generalized coordinates vectors for moving animation player
         private List<Point3D> listPathPoints; // list for spliting path
 
@@ -92,10 +92,9 @@ namespace MainApp
             var openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() != true) return;
             var jsonStringMatrixMathModel = File.ReadAllText(openFileDialog.FileName);
-            var mathModel = JsonConvert.DeserializeObject<MatrixMathModel>(jsonStringMatrixMathModel);
-            model = new MatrixMathModel(mathModel);
+            var model = JsonConvert.DeserializeObject<Arm>(jsonStringMatrixMathModel);
             model.DefaultA();
-            model.CalculationMetaData();
+            model.CalcMetaDataForStanding();
             CreateManipulator3DVisualModel(model);
             
             //model.SetQ(new double[] {
@@ -211,12 +210,11 @@ namespace MainApp
 
             //Array.Clear(arrayQ, 0, arrayQ.Length);
             var delta = new Delta();
-            var deltaViewModel = new DeltaPlotViewModel();
+            var deltaViewModel = new DeltaPlotModel();
             for (var i = 1; i < listSplitPathPoints.Count; i++)
             {
-                model.CalculationMetaData();
                 var pathPoint = listSplitPathPoints[i];
-                model.LagrangeMethodToThePoint(pathPoint);
+                model.Move(pathPoint);
                 //var tmpQ = new double[model.n];
                 //model.q.CopyTo(tmpQ, 0);
                 //arrayQ[i] = tmpQ;
@@ -720,7 +718,7 @@ namespace MainApp
 
         private double RadianToDegree(double angle) => 180.0 * angle / Math.PI;
 
-        private void CreateManipulator3DVisualModel(MatrixMathModel model)
+        private void CreateManipulator3DVisualModel(Arm model)
         {
             if (manipModelVisual3D.Count > 0)
             {

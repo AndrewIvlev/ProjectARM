@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary.Matrix
+namespace ManipulationSystemLibrary
 {
     /// <summary>
     /// Block matrices with size 3x4

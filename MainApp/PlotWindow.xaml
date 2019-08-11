@@ -6,7 +6,7 @@
         xmlns:viewModel="clr-namespace:MainApp.ViewModel"
         Title="Plot Window" Height="350" Width="525">
     <Window.DataContext>
-        <viewModel:DeltaPlotViewModel x:Name="deltaPlotViewModel"/>
+        <viewModel:DeltaPlotModel x:Name="deltaPlotViewModel"/>
     </Window.DataContext>
     <Grid>
         <oxy:Plot x:Name="DeltaPlot" Title="{Binding Title}">

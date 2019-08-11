@@ -3,9 +3,9 @@ using OxyPlot;
 
 namespace MainApp.ViewModel
 {
-    public class DeltaPlotViewModel
+    public class DeltaPlotModel
     {
-        public DeltaPlotViewModel()
+        public DeltaPlotModel()
         {
             Title = "Delta";
             Points = new List<DataPoint>

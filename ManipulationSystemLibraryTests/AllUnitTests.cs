@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using ManipulationSystemLibrary;
 using ManipulationSystemLibrary.MathModel;
-using ManipulationSystemLibrary.Matrix;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -29,7 +29,7 @@ namespace ManipulationSystemLibraryTests
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             try
             {
-                var mathModel = JsonConvert.DeserializeObject<MathModel>(File.ReadAllText(jsonFilePath));
+                var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
             }
             catch (Exception ex)
             {
@@ -42,13 +42,12 @@ namespace ManipulationSystemLibraryTests
         {
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, "3RPR.json");
 
-            var mathModel = JsonConvert.DeserializeObject<MathModel>(File.ReadAllText(jsonFilePath));
+            var armFromJson = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
 
-            #region Actual Matrix Math Model
+            #region Actual Arm
 
-            var model = new MathModel(
-                5,
-                new BlockMatrix(new double[,] {
+            var arm = new Arm(
+                new BlockMatrix(new[,] {
                     {-1.0, 0.0, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 1.0 },
                     { 0.0, 1.0, 0.0, 0.0}
@@ -58,7 +57,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             {-1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 0.0 },
@@ -69,7 +68,7 @@ namespace ManipulationSystemLibraryTests
                     {
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 2.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
@@ -79,7 +78,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 },
@@ -90,7 +89,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'P',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
@@ -100,7 +99,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 1.0 },
@@ -111,7 +110,7 @@ namespace ManipulationSystemLibraryTests
 
             #endregion
 
-            Assert.AreEqual(model, mathModel);
+            Assert.IsTrue(arm == armFromJson);
         }
 
         [Test]
@@ -163,11 +162,10 @@ namespace ManipulationSystemLibraryTests
             
             #endregion
 
-            #region Actual Matrix Math Model
+            #region Actual Arm
 
-            var model = new MathModel(
-                5,
-                new BlockMatrix(new double[,] { 
+            var model = new Arm(
+                new BlockMatrix(new [,] { 
                     {-1.0, 0.0, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 1.0 },
                     { 0.0, 1.0, 0.0, 0.0}
@@ -177,7 +175,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             {-1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 0.0 },
@@ -188,7 +186,7 @@ namespace ManipulationSystemLibraryTests
                     {
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 2.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
@@ -198,7 +196,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 },
@@ -209,7 +207,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'P',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
@@ -219,7 +217,7 @@ namespace ManipulationSystemLibraryTests
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new double[,]
+                        B = new BlockMatrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 1.0 },
@@ -258,7 +256,7 @@ namespace ManipulationSystemLibraryTests
 
             var actualAB = A * B;
 
-            Assert.AreEqual(expectedAB, actualAB);
+            Assert.IsTrue(expectedAB == actualAB);
         }
     }
 }

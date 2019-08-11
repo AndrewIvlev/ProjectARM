@@ -68,9 +68,10 @@
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\DeltaPlotViewModel.cs" />
-    <Compile Include="ViewModel\MathEngine.cs" />
-    <Compile Include="ViewModel\MovingManipulatorViewModel.cs" />
+    <Compile Include="ViewModel\ApplicationViewModel.cs" />
+    <Compile Include="ViewModel\DeltaPlotModel.cs" />
+    <Compile Include="ViewModel\ManipulatorArm3DModel.cs" />
+    <Compile Include="ViewModel\Trajectory3DModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

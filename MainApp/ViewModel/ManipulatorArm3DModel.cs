@@ -1,15 +1,27 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Media.Media3D;
-using ManipulationSystemLibrary;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using ManipulationSystemLibrary.MathModel;
 
 namespace MainApp.ViewModel
 {
-    class MathEngine
+    public class ManipulatorArm3DModel : INotifyPropertyChanged
     {
+        private Arm manipulator;
+ 
+        public ManipulatorArm3DModel(Arm manip)
+        {
+            manipulator = manip;
+        }
+ 
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName]string prop = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+
         // Начало планирования со следующей точки пути
-        //public static List<double[]> MovingAlongTheTrajectory(Trajectory S, MathModel model, List<Point3D> DeltaPoints, BackgroundWorker worker)
+        //public static List<double[]> MovingAlongTheTrajectory(Trajectory S, Arm model, List<Point3D> DeltaPoints, BackgroundWorker worker)
         //{
         //    var q = new List<double[]>();
             
@@ -30,7 +42,7 @@ namespace MainApp.ViewModel
         //}
 
         // Начало планирования с текущей точки пути
-        /*public static double[][] MovingAlongTheTrajectory(Trajectory S, MathModel model, List<Point3D> DeltaPoints, BackgroundWorker worker)
+        /*public static double[][] MovingAlongTheTrajectory(Trajectory S, Arm model, List<Point3D> DeltaPoints, BackgroundWorker worker)
         {
             double[][] q = new double[S.NumOfExtraPoints][];
             for (int i = 0; i < S.NumOfExtraPoints; i++)
