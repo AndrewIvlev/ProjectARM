@@ -10,79 +10,67 @@
         Title="ProjARM" Height="768" Width="1024"
         KeyDown="OnKeyDownHandler">
     <Grid>
-        <DockPanel LastChildFill="True">
-            <Menu DockPanel.Dock="Top" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top">
-                <MenuItem Header="Manipulator">
-                    <MenuItem Header="New"></MenuItem>
-                    <MenuItem Header="Open" Click="OpenManipulatorFile_MenuItem_Click"></MenuItem>
-                    <MenuItem Header="Edit"></MenuItem>
-                    <Separator />
-                    <MenuItem Header="Exit"></MenuItem>
-                </MenuItem>
-                <MenuItem Header="Path">
-                    <MenuItem Header="New" Click="NewPath_MenuItem_Click"></MenuItem>
-                    <MenuItem Header="Open"></MenuItem>
+        <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="0.15*" ></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.25*"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.Row="0">
+            <Button Content="Choose a manipulator" Click="OpenManipulatorFile_MenuItem_Click" />
+            <Separator></Separator>
+            <Grid>
+                <Grid x:Name="Trajectory">
+                    <Label>Trajectory</Label>
+                    <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click"></Button>
+                    <Button Content="Open existing" Click="OpenExisting_MenuItem_Click"></Button>
                     <MenuItem Header="Split path">
                         <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
                         <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
                     </MenuItem>
-                    <MenuItem Header="Edit"></MenuItem>
-                    <MenuItem Header="Interpolate"></MenuItem>
-                    <Separator />
-                    <MenuItem Header="Clear"></MenuItem>
-                </MenuItem>
-                <MenuItem Header="Obstacle">
-                    <MenuItem Header="New"></MenuItem>
-                    <MenuItem Header="Open"></MenuItem>
-                    <MenuItem Header="Edit"></MenuItem>
-                    <Separator />
-                    <MenuItem Header="Delete all"></MenuItem>
-                </MenuItem>
-            </Menu>
-            <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                <Grid DockPanel.Dock="Left" Width="177">
-                    <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top" Visibility="Hidden"/>
+                    <Button Content="Edit"></Button>
+                    <Button Content="Interpolate"></Button>
+                    <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
                     <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="10,10,5,0"/>
 
                     <Grid x:Name="PathContainer">
-                        <Grid x:Name="PathBuilderGrid_Grid" Visibility="Hidden">
+                        <Grid x:Name="PathBuilderGrid_Grid" >
                             <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
                             <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
                         </Grid>
 
-                        <Grid x:Name="SplitingByNumberOfPoints_Grid" Visibility="Hidden">
+                        <Grid x:Name="SplitingByNumberOfPoints_Grid" >
                             <Label Content="Enter the number of points&#x0a;to split" Margin="10,36,10,15" />
                             <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="22" Margin="58,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
                             <Button Content="Split path" HorizontalAlignment="Left" Margin="106,56,0,0" VerticalAlignment="Top" Width="61" Height="22"/>
                         </Grid>
 
-                        <Grid x:Name="SplitingByStepOfPoints_Grid" Visibility="Hidden">
+                        <Grid x:Name="SplitingByStepOfPoints_Grid" >
                             <Label Content="Enter a step split in cm" Margin="10,36,10,30"/>
                             <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" Margin="16,63,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="56"/>
                             <Button Content="Split path" Click="SplitPathByStep_Button_Click" HorizontalAlignment="Left" Margin="94,63,0,0" VerticalAlignment="Top" Width="66" Height="20"/>
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid DockPanel.Dock="Right" Width="169">
-                    <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
-                    <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
-                    <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                        <Button x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
-                        <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
-                    </DockPanel>
+                <Grid x:Name="Obstacle" Visibility="Hidden">
+                    <Label>Obstacle</Label>
                 </Grid>
-                <Grid Height="90">
-                    <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
-                    <Grid VerticalAlignment="Bottom" Height="36">
-                        <Button x:Name="StartStopButton" Content="Start" Margin="246,5,370,11" />
-                        <Button x:Name="PauseButton" Content="Pause" Margin="305,5,311,11"/>
-                        <Slider x:Name="SliderSpeed" Margin="417,5,101,-5"/>
-                        <Label x:Name="SpeedLabel"  Content="Speed" Margin="364,2,242,9"/>
-                    </Grid>
-                </Grid>
-            </DockPanel>
+            </Grid>
+        </StackPanel>
 
-            <Grid>
+        <Grid Grid.Column="0" Grid.Row="1">
+            <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
+            <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
+            <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
+                <Button x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
+                <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="0">
                 <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
                     <Viewport3D.Camera>
                         <PerspectiveCamera x:Name="Camera"  Position="31,15,31" LookDirection="-31,-15,-31" FieldOfView="60">
@@ -203,6 +191,15 @@
                         MouseMove="Canvas_MouseMove"
                         MouseWheel="Canvas_MouseWheel" />
             </Grid>
-        </DockPanel>
+
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
+            <Grid VerticalAlignment="Bottom" Height="36">
+                <Button x:Name="StartStopButton" Content="Start" Margin="246,5,370,11" />
+                <Button x:Name="PauseButton" Content="Pause" Margin="305,5,311,11"/>
+                <Slider x:Name="SliderSpeed" Margin="417,5,101,-5"/>
+                <Label x:Name="SpeedLabel"  Content="Speed" Margin="364,2,242,9"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

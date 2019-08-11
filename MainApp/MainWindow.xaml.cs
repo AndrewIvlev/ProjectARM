@@ -124,7 +124,7 @@ namespace MainApp
             SplitingByStepOfPoints_Grid.Visibility = Visibility.Visible;
         }
 
-        private void NewPath_MenuItem_Click(object sender, RoutedEventArgs e)
+        private void CreateNewTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (model == null)
             {
@@ -966,5 +966,10 @@ namespace MainApp
         }
 
         #endregion
+
+        private void OpenExisting_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
