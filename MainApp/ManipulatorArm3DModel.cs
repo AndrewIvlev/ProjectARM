@@ -4,6 +4,10 @@ using ManipulationSystemLibrary.MathModel;
 
 namespace MainApp.ViewModel
 {
+    using System.IO;
+
+    using Newtonsoft.Json;
+
     public class ManipulatorArm3DModel : INotifyPropertyChanged
     {
         private Arm manipulator;
@@ -18,6 +22,11 @@ namespace MainApp.ViewModel
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+
+        public void ConvertFromJson(string jsonFilePath)
+        {
+            manipulator = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
         }
 
         // Начало планирования со следующей точки пути

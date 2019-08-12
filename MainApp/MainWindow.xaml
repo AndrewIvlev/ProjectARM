@@ -26,7 +26,7 @@
                 <Grid x:Name="Trajectory">
                     <Label>Trajectory</Label>
                     <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click"></Button>
-                    <Button Content="Open existing" Click="OpenExisting_MenuItem_Click"></Button>
+                    <Button Content="Open existing" Click="OpenExistingTrajectory_MenuItem_Click"></Button>
                     <MenuItem Header="Split path">
                         <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
                         <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
@@ -38,7 +38,7 @@
 
                     <Grid x:Name="PathContainer">
                         <Grid x:Name="PathBuilderGrid_Grid" >
-                            <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
+                            <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownTrajectoryPoints_Click" Margin="10,36,45,37"/>
                             <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
                         </Grid>
 

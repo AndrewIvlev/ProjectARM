@@ -37,5 +37,25 @@ namespace MainApp.ViewModel
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
+
+        public void CreateManipulatorFromJson(string jsonFilePath)
+        {
+            arm.ConvertFromJson(jsonFilePath);
+
+            model.DefaultA();
+            model.CalcMetaDataForStanding();
+            CreateManipulator3DVisualModel(model);
+
+            //model.SetQ(new double[] {
+            //    DegreeToRadian(-45),
+            //    DegreeToRadian(30),
+            //    DegreeToRadian(90),
+            //    0,
+            //    DegreeToRadian(60)
+            //});
+
+            //AddTransformationsForManipulator();
+            //ManipulatorTransformUpdate(model.q);
+        }
     }
 }
