@@ -112,18 +112,6 @@ namespace MainApp
         #endregion
 
         #region Path
-        private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            SplitingByStepOfPoints_Grid.Visibility = Visibility.Hidden;
-            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Visible;
-        }
-
-        private void SplitPathWithStep_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Hidden;
-            SplitingByStepOfPoints_Grid.Visibility = Visibility.Visible;
-        }
-
         private void CreateNewTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (model == null)
@@ -260,7 +248,7 @@ namespace MainApp
         private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
         {
             keyboardMod = 0;
-            PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
+            ButtonsForCreatingNewTrajectory.Visibility = Visibility.Hidden;
             foreach (var p in pathPointsVisual3D)
                 listPathPoints.Add(p.center);
         }
@@ -410,7 +398,7 @@ namespace MainApp
                         firstPoint.pointModelVisual3D = firstPathPoint3D;
                         pathPointsVisual3D.Add(firstPoint);
 
-                        PathBuilderGrid_Grid.Visibility = Visibility.Visible;
+                        ButtonsForCreatingNewTrajectory.Visibility = Visibility.Visible;
                     }
 
                     var hitParams = new PointHitTestParameters(e.GetPosition(this));
@@ -437,7 +425,7 @@ namespace MainApp
                     AddPathLine(pathPointsVisual3D[pathPointsVisual3D.Count - 2].center, pathPointsVisual3D.Last().center);
 
                     pathLenght += (pathPointsVisual3D[pathPointsVisual3D.Count - 2].center - pathPointsVisual3D.Last().center).Length;
-                    PathLenght.Content = $"Path lenght = {pathLenght.ToString("#.000")} cm";
+                    PathLength.Content = $"Path lenght = {pathLenght.ToString("#.000")} cm";
                     break;
                 case 2:
                     //TODO: Editing path mode

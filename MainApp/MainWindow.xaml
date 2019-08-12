@@ -20,44 +20,46 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Grid.Row="0">
-            <Button Content="Choose a manipulator" Click="OpenManipulatorFile_MenuItem_Click" />
-            <Separator></Separator>
+            <Label HorizontalAlignment="Center" FontSize="20" FontWeight="Bold">ProjectARM</Label>
+            <TextBox TextWrapping="WrapWithOverflow" >
+                is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
+            </TextBox>
+            <Separator Height="20"></Separator>
+            <Button Content="Choose a manipulator" Click="OpenManipulatorFile_MenuItem_Click" Height="30" FontSize="14"/>
+            <Separator Height="20"></Separator>
             <Grid>
-                <Grid x:Name="Trajectory">
-                    <Label>Trajectory</Label>
-                    <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click"></Button>
-                    <Button Content="Open existing" Click="OpenExisting_MenuItem_Click"></Button>
-                    <MenuItem Header="Split path">
-                        <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
-                        <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
-                    </MenuItem>
-                    <Button Content="Edit"></Button>
-                    <Button Content="Interpolate"></Button>
-                    <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
-                    <Label x:Name="PathLenght" Content="Path lenght = 0 cm" VerticalAlignment="Top" Margin="10,10,5,0"/>
+                <StackPanel x:Name="Trajectory">
+                    <Label HorizontalAlignment="Center" FontSize="14">Trajectory</Label>
+                    <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click" FontSize="14"></Button>
+                    <Button Content="Open existing" Click="OpenExisting_MenuItem_Click" FontSize="14"></Button>
+                    <Button Content="Interpolate" FontSize="14"></Button>
+                    <Button Content="Split" FontSize="14" ></Button>
+                    <Button Content="Edit" FontSize="14"></Button>
 
-                    <Grid x:Name="PathContainer">
-                        <Grid x:Name="PathBuilderGrid_Grid" >
-                            <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" Click="UpDownPathPoints_Click" Margin="10,36,45,37"/>
-                            <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" Margin="10,63,45,10"/>
-                        </Grid>
+                    <Separator Height="20"></Separator>
 
-                        <Grid x:Name="SplitingByNumberOfPoints_Grid" >
-                            <Label Content="Enter the number of points&#x0a;to split" Margin="10,36,10,15" />
-                            <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="22" Margin="58,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
-                            <Button Content="Split path" HorizontalAlignment="Left" Margin="106,56,0,0" VerticalAlignment="Top" Width="61" Height="22"/>
-                        </Grid>
-
-                        <Grid x:Name="SplitingByStepOfPoints_Grid" >
-                            <Label Content="Enter a step split in cm" Margin="10,36,10,30"/>
-                            <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" Margin="16,63,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="56"/>
-                            <Button Content="Split path" Click="SplitPathByStep_Button_Click" HorizontalAlignment="Left" Margin="94,63,0,0" VerticalAlignment="Top" Width="66" Height="20"/>
-                        </Grid>
+                    <Grid Visibility="Hidden">
+                        <StackPanel x:Name="ButtonsForCreatingNewTrajectory">
+                            <Button x:Name="UpDownPathPoints_Button" FontSize="14" Content="Up/Down path points" Click="UpDownPathPoints_Click" />
+                            <Button x:Name="FinishBuildingAPath_Button" FontSize="14" Content="Finish building a path" Click="FinishBuildingPath_Click" />
+                        </StackPanel>
+                        <StackPanel x:Name="ButtonsForSplittingTrajectory">
+                            <Label Content="Enter the number of points&#x0a;to split" />
+                            <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
+                            <Button Content="Split path" HorizontalAlignment="Left" VerticalAlignment="Top" Width="61" Height="22"/>
+                   
+                            <Label Content="Enter a step split in cm" />
+                            <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Top" Width="56"/>
+                            <Button Content="Split path" Click="SplitPathByStep_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Width="66" Height="20"/>
+                            <Label x:Name="QLabel" Content="Current Generalized Coordinates:&#x0a;Q=(*,*, ... ,*)" VerticalAlignment="Top"/>
+                            <Label x:Name="PathLength" Content="Path length = 0 cm" VerticalAlignment="Top" />
+                        </StackPanel>
                     </Grid>
-                </Grid>
-                <Grid x:Name="Obstacle" Visibility="Hidden">
+                    
+                </StackPanel>
+                <StackPanel x:Name="Obstacle" Visibility="Hidden">
                     <Label>Obstacle</Label>
-                </Grid>
+                </StackPanel>
             </Grid>
         </StackPanel>
 
@@ -65,7 +67,7 @@
             <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
             <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
             <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <Button x:Name="PathPlanningButton" Content="Path planning" Width="100" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
+                <Button x:Name="PathPlanningButton" Content="Path planning" Width="95" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
                 <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
             </DockPanel>
         </Grid>
