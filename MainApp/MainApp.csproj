@@ -66,6 +66,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DefaultDialogService.cs" />
+    <Compile Include="Graphics\IModel3D.cs" />
+    <Compile Include="Graphics\IModel3DSet .cs" />
+    <Compile Include="Graphics\IPoint3D.cs" />
+    <Compile Include="Graphics\ITriangle3D.cs" />
+    <Compile Include="Graphics\IVector3D.cs" />
     <Compile Include="IDialogService.cs" />
     <Compile Include="IFileService.cs" />
     <Compile Include="JsonFileService.cs" />
