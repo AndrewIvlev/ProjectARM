@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Media3D;
+using MainApp.Common;
 using MainApp.ViewModel;
 using ManipulationSystemLibrary;
 using ManipulationSystemLibrary.MathModel;
@@ -85,19 +86,9 @@ namespace MainApp
             this.trajectoryLenght = 0;
 
         }
-
-        #region Trajectory
-        
-        
-
-        /// <summary>
-        /// Open existing trajectory
-        /// </summary>
-
         #region Trajectory creation mod
 
         #region Path
-        private void CreateNewTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
         private void UpDownTrajectoryPoints_Click(object sender, RoutedEventArgs e)
         {
             mouseMod = 0;

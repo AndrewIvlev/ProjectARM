@@ -47,18 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Delta.cs" />
-    <Compile Include="MathModel\ArmMetaDataCalculator.cs" />
-    <Compile Include="MathModel\ArmMovementPlaning.cs" />
-    <Compile Include="MathModel\MathFunctions.cs" />
-    <Compile Include="MathModel\Arm.cs" />
-    <Compile Include="MathModel\Unit.cs" />
-    <Compile Include="MathModel\Matrix\BlockMatrix.cs" />
-    <Compile Include="MathModel\Matrix\LinearSystemSolver.cs" />
-    <Compile Include="MathModel\Matrix\Matrix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Trajectory\LagrangeInterpolation.cs" />
-    <Compile Include="Trajectory\Trajectory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

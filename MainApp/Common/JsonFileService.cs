@@ -1,36 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MainApp
+﻿namespace MainApp.Common
 {
     using System.IO;
 
+    using ManipulationSystemLibrary.MathModel;
+
+    using Newtonsoft.Json;
+
     class JsonFileService : IFileService
     {
-        public List<Phone> Open(string filename)
-        {
-            List<Phone> phones = new List<Phone>();
-            DataContractJsonSerializer jsonFormatter =
-                new DataContractJsonSerializer(typeof(List<Phone>));
-            using (FileStream fs = new FileStream(filename, FileMode.OpenOrCreate))
-            {
-                phones = jsonFormatter.ReadObject(fs) as List<Phone>;
-            }
+        public Arm Open(string filename) =>
+            JsonConvert.DeserializeObject<Arm>(File.ReadAllText(filename));
 
-            return phones;
-        }
-
-        public void Save(string filename, List<Phone> phonesList)
-        {
-            DataContractJsonSerializer jsonFormatter =
-                new DataContractJsonSerializer(typeof(List<Phone>));
-            using (FileStream fs = new FileStream(filename, FileMode.Create))
-            {
-                jsonFormatter.WriteObject(fs, phonesList);
-            }
-        }
+        public void Save(string filename, Arm arm) =>
+            File.WriteAllText(filename, JsonConvert.SerializeObject(arm));
     }
 }

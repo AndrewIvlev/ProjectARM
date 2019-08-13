@@ -1,4 +1,4 @@
-﻿namespace MainApp
+﻿namespace MainApp.Common
 {
     using System;
     using System.Windows.Input;

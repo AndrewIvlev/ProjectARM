@@ -25,7 +25,7 @@
                 is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
             </TextBox>
             <Separator Height="20"></Separator>
-            <Button Content="Choose a manipulator" Click="OpenManipulatorFile_MenuItem_Click" Height="30" FontSize="14"/>
+            <Button Content="Choose a manipulator"  Command="{Binding openArmCommand}" Height="30" FontSize="14"/>
             <Separator Height="20"></Separator>
             <Grid>
                 <StackPanel x:Name="Trajectory">

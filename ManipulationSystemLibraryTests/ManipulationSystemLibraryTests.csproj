@@ -83,12 +83,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ManipulationSystemLibrary\ManipulationSystemLibrary.csproj">
-      <Project>{B8C12AED-DC70-4EBD-AA78-5551DC3CCEBB}</Project>
-      <Name>ManipulationSystemLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Deltas\" />
     <Folder Include="Test Tracks\" />
   </ItemGroup>

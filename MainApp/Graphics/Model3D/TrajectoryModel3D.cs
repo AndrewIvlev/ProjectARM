@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MainApp.ViewModel
 {
-    class Trajectory3DModel
+    class TrajectoryModel3D
     {
     }
 }

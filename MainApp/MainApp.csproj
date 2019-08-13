@@ -72,18 +72,29 @@
     <Compile Include="Graphics\Interfaces\IPoint3D.cs" />
     <Compile Include="Graphics\Interfaces\ITriangle3D.cs" />
     <Compile Include="Graphics\Interfaces\IVector3D.cs" />
-    <Compile Include="Graphics\Model\Model3D.cs" />
+    <Compile Include="Graphics\Model3D\Model3D.cs" />
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
+    <Compile Include="MathEngine\Model\Delta.cs" />
+    <Compile Include="MathEngine\Model\MathModel\Arm.cs" />
+    <Compile Include="MathEngine\Model\MathModel\ArmMetaDataCalculator.cs" />
+    <Compile Include="MathEngine\Model\MathModel\ArmMovementPlaning.cs" />
+    <Compile Include="MathEngine\Model\MathModel\MathFunctions.cs" />
+    <Compile Include="MathEngine\Model\MathModel\Matrix\BlockMatrix.cs" />
+    <Compile Include="MathEngine\Model\MathModel\Matrix\LinearSystemSolver.cs" />
+    <Compile Include="MathEngine\Model\MathModel\Matrix\Matrix.cs" />
+    <Compile Include="MathEngine\Model\MathModel\Unit.cs" />
+    <Compile Include="MathEngine\Model\Trajectory\LagrangeInterpolation.cs" />
+    <Compile Include="MathEngine\Model\Trajectory\Trajectory.cs" />
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ApplicationViewModel.cs" />
-    <Compile Include="DeltaPlotModel.cs" />
-    <Compile Include="Graphics\Model\ManipulatorArm3DModel.cs" />
+    <Compile Include="ViewModel\ApplicationViewModel.cs" />
+    <Compile Include="MathEngine\Model\DeltaPlotModel.cs" />
+    <Compile Include="Graphics\Model3D\ManipulatorArmModel3D.cs" />
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Graphics\Model\Trajectory3DModel.cs" />
+    <Compile Include="Graphics\Model3D\TrajectoryModel3D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -130,12 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="window_icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ManipulationSystemLibrary\ManipulationSystemLibrary.csproj">
-      <Project>{b8c12aed-dc70-4ebd-aa78-5551dc3ccebb}</Project>
-      <Name>ManipulationSystemLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
