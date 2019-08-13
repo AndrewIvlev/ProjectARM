@@ -16,17 +16,15 @@ using OxyPlot;
 
 namespace MainApp
 {
-    //TODO: Critically needed refactoring, using MVVM Pattern
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    // TODO: Critically needed refactoring, using MVVM Pattern [bug#13]
+
     public partial class MainWindow : Window
     {
         /// <summary>
         /// 0 - camera rotation;
-        /// 1 - path creation;
-        /// 2 - path editing;
-        /// 3 - up/down path points mod;
+        /// 1 - trajectory creation;
+        /// 2 - trajectory editing;
+        /// 3 - up/down trajectory points mod;
         /// </summary>
         private byte mouseMod;
         private byte keyboardMod;
@@ -35,12 +33,13 @@ namespace MainApp
         private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
 
-        #region PATH
-        private ModelVisual3D pathPointCursor;
+        #region Trajectory
 
-        private class PathPoint
+        private ModelVisual3D trajectoryPointCursor;
+
+        private class TrajectoryPoint
         {
-            public ModelVisual3D pointModelVisual3D;
+            public ModelVisual3D trajectoryModelVisual3D;
             public Point3D center;
 
             public void SetY(double y)
@@ -48,209 +47,71 @@ namespace MainApp
                 center.Y = y;
             }
         }
-        private List<PathPoint> pathPointsVisual3D;
-        private int indexPathPoint; //TODO: remove it, do smarter
+        private List<TrajectoryPoint> trajectoryPointsVisual3D;
+        private int indexTrajectoryPoint; //TODO: remove it, do smarter
 
-        struct PathLine
+        struct TrajectoryLine
         {
             public ModelVisual3D lineModelVisual3D;
             public Point3D start;
             public Point3D end;
         }
-        private List<PathLine> pathLinesVisual3D;
-        private List<Point3D> listSplitPathPoints;
+        private List<TrajectoryLine> trajectoryLinesVisual3D;
+        private List<Point3D> listSplitTrajectoryPoints;
 
-        private double pathLenght;
+        private double trajectoryLenght;
+
         #endregion
 
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
         private Storyboard storyboard;
 
-        private Arm model;
-        private double[][] arrayQ; // Array of the generalized coordinates vectors for moving animation player
-        private List<Point3D> listPathPoints; // list for spliting path
+        private List<Point3D> listTrajectoryPoints; // list for spliting trajectory
 
         public MainWindow()
         {
             InitializeComponent();
-            manipModelVisual3D = new List<ModelVisual3D>();
-            listPathPoints = new List<Point3D>();
+            DataContext =
+                new ApplicationViewModel(new DefaultDialogService(), new JsonFileService());
+
+            // TODO: Remove all to ApplicationViewModel :
+            this.manipModelVisual3D = new List<ModelVisual3D>();
+            this.listTrajectoryPoints = new List<Point3D>();
             storyboard = new Storyboard();
-            arrayQ = new double[256][]; //TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
             keyboardMod = 0;
-            pathLenght = 0;
-        }
-        #region Menu Strip
+            this.trajectoryLenght = 0;
 
-        #region Manipulator
-
-        private void OpenManipulatorFile_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() != true) return;
-            var jsonStringMatrixMathModel = File.ReadAllText(openFileDialog.FileName);
-            var model = JsonConvert.DeserializeObject<Arm>(jsonStringMatrixMathModel);
-            model.DefaultA();
-            model.CalcMetaDataForStanding();
-            CreateManipulator3DVisualModel(model);
-            
-            //model.SetQ(new double[] {
-            //    DegreeToRadian(-45),
-            //    DegreeToRadian(30),
-            //    DegreeToRadian(90),
-            //    0,
-            //    DegreeToRadian(60)
-            //});
-
-            //AddTransformationsForManipulator();
-            //ManipulatorTransformUpdate(model.q);
         }
 
-        #endregion
+        #region Trajectory
+        
+        
+
+        /// <summary>
+        /// Open existing trajectory
+        /// </summary>
+
+        #region Trajectory creation mod
 
         #region Path
         private void CreateNewTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (model == null)
-            {
-                MessageBox.Show("Firstly create manipulator model!");
-                return;
-            }
-
-            RotX.Angle = -71;
-            RotY.Angle = -45;
-            mouseMod = 1;
-        }
-
-        #endregion
-
-        #endregion
-
-        private void SplitPathByStep_Button_Click(object sender, RoutedEventArgs e)
-        {
-            double step;
-            if(!double.TryParse(StepInCmToSplit_TextBox.Text, out step))
-            {
-                MessageBox.Show("Invalid input of split step!");
-                return;
-            }
-
-            SplitPath(listPathPoints, step);
-        }
-
-        private void SplitPath(List<Point3D> listPathPoints, double step)
-        {
-            var index = 0;
-            listSplitPathPoints = new List<Point3D>();
-            for (var i = 1; i < listPathPoints.Count; i++)
-            {
-                var j = 0;
-                double lambda = 0;
-                var x = listPathPoints[i - 1].X;
-                var y = listPathPoints[i - 1].Y;
-                var z = listPathPoints[i - 1].Z;
-                var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
-                do
-                {
-                    lambda = (step * j) / (dist - step * j);
-                    x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
-                    y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
-                    z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
-                    listSplitPathPoints.Add(new Point3D(x, y, z));
-                    index++;
-                    j++;
-                }
-                while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
-            }
-            index++;
-            listSplitPathPoints.Add(listPathPoints[listPathPoints.Count - 1]);
-
-            ShowSplitPath(listSplitPathPoints);
-        }
-
-        private void ShowSplitPath(List<Point3D> listSplitPathPoints)
-        {
-            foreach(var p in listSplitPathPoints)
-            {
-                //TODO: Extract to method next 8 line
-                var point = new MeshGeometry3D();
-                AddSphere(point, new Point3D(p.X, p.Y, p.Z), 0.2, 8, 8);
-                var pointBrush = Brushes.DarkRed;
-                var pointMaterial = new DiffuseMaterial(pointBrush);
-                var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
-                var pathPointModelVisual3D = new ModelVisual3D();
-                pathPointModelVisual3D.Content = pathPointGeometryModel;
-                pathPointModelVisual3D.Transform = new TranslateTransform3D();
-                Viewport3D.Children.Add(pathPointModelVisual3D);
-            }
-        }
-
-        private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (model == null)
-            {
-                MessageBox.Show("Firstly create manipulator model!");
-                return;
-            }
-
-            //Array.Clear(arrayQ, 0, arrayQ.Length);
-            var delta = new Delta();
-            var deltaViewModel = new DeltaPlotModel();
-            for (var i = 1; i < listSplitPathPoints.Count; i++)
-            {
-                var pathPoint = listSplitPathPoints[i];
-                model.Move(pathPoint);
-                //var tmpQ = new double[model.n];
-                //model.q.CopyTo(tmpQ, 0);
-                //arrayQ[i] = tmpQ;
-                //Thread.Sleep(1500);
-
-                //ManipulatorTransformUpdate(model.q);//TODO:think what do with q
-                var p = model.F(model.N);
-
-                delta.DesiredPoints.Add(listSplitPathPoints[i]);
-                delta.RealPoints.Add((Point3D)p);
-            }
-
-            delta.CalcDeltas();
-            var serializer = new JsonSerializer();
-            var stringWriter = new StringWriter();
-            using (var writer = new JsonTextWriter(stringWriter))
-            {
-                writer.QuoteName = false;
-                serializer.Serialize(writer, delta);
-            }
-            var json = stringWriter.ToString();
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
-            File.WriteAllText(filePath, json);
-
-            for (var i = 0; i < delta.Deltas.Count; i++)
-                deltaViewModel.Points.Add(new DataPoint(delta.Deltas[i], i));
-            var plotWindow = new PlotWindow
-            {
-                Owner = this,
-                deltaPlotViewModel = deltaViewModel
-            };
-            plotWindow.Show();
-        }
-
-        private void UpDownPathPoints_Click(object sender, RoutedEventArgs e)
+        private void UpDownTrajectoryPoints_Click(object sender, RoutedEventArgs e)
         {
             mouseMod = 0;
             keyboardMod = 1;
-            Viewport3D.Children.Remove(pathPointCursor);
-            indexPathPoint = 1;
+            Viewport3D.Children.Remove(this.trajectoryPointCursor);
+            this.indexTrajectoryPoint = 1;
         }
 
         private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
         {
             keyboardMod = 0;
-            ButtonsForCreatingNewTrajectory.Visibility = Visibility.Hidden;
-            foreach (var p in pathPointsVisual3D)
-                listPathPoints.Add(p.center);
+            PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
+            foreach (var p in this.trajectoryPointsVisual3D)
+                this.listTrajectoryPoints.Add(p.center);
         }
 
         private void OnKeyDownHandler(object sender, KeyEventArgs e)
@@ -270,12 +131,12 @@ namespace MainApp
                 //Каким-то образом нужно подсвечивать сферу точки, которая выбирается
                 //Можно например применить к сфере ScaleTransform3D увеличив временно её в размерах
                 case Key.N: //Next point
-                    if (indexPathPoint == pathPointsVisual3D.Count - 1) return;
-                    indexPathPoint++;
+                    if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
+                    this.indexTrajectoryPoint++;
                     break;
                 case Key.P: //Previous point
-                    if (indexPathPoint == 1) return;
-                    indexPathPoint--;
+                    if (this.indexTrajectoryPoint == 1) return;
+                    this.indexTrajectoryPoint--;
                     break;
             }
         }
@@ -283,9 +144,9 @@ namespace MainApp
         private void ChangePathPointY(bool isUp)
         {
             var delta = isUp ? 0.25 : -0.25;
-            pathPointsVisual3D[indexPathPoint].SetY(pathPointsVisual3D[indexPathPoint].center.Y + delta);
+            this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].SetY(this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center.Y + delta);
 
-            (pathPointsVisual3D[indexPathPoint].pointModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
+            (this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].trajectoryModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
 
             NeighborhoodLinesRotation();
         }
@@ -295,44 +156,44 @@ namespace MainApp
             //Temporary solution
             //Insert new ModelVisual3D model of path line except old
 
-            PathLine pathLine;
-            pathLine.start = pathPointsVisual3D[indexPathPoint - 1].center;
-            pathLine.end = pathPointsVisual3D[indexPathPoint].center;
+            TrajectoryLine trajectoryLine;
+            trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint - 1].center;
+            trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
 
             //TODO: Extract to method next 8 line
             var line = new MeshGeometry3D();
-            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
             var lineBrush = Brushes.MediumPurple;
             var lineMaterial = new DiffuseMaterial(lineBrush);
             var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
             var pathLineModelVisual3D = new ModelVisual3D();
             pathLineModelVisual3D.Content = lineGeometryModel;
-            Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint - 1].lineModelVisual3D);
-            Viewport3D.Children.Insert(indexPathPoint - 1, pathLineModelVisual3D);
+            Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint - 1].lineModelVisual3D);
+            Viewport3D.Children.Insert(this.indexTrajectoryPoint - 1, pathLineModelVisual3D);
 
-            pathLine.lineModelVisual3D = pathLineModelVisual3D;
-            pathLinesVisual3D.RemoveAt(indexPathPoint - 1);
-            pathLinesVisual3D.Insert(indexPathPoint - 1, pathLine);
+            trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+            this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint - 1);
+            this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint - 1, trajectoryLine);
 
-            if (indexPathPoint == pathPointsVisual3D.Count - 1) return;
-            
-            pathLine.start = pathPointsVisual3D[indexPathPoint].center;
-            pathLine.end = pathPointsVisual3D[indexPathPoint + 1].center;
+            if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
+
+            trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
+            trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint + 1].center;
 
             //TODO: Extract to method next 8 line
             line = new MeshGeometry3D();
-            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
             lineBrush = Brushes.MediumPurple;
             lineMaterial = new DiffuseMaterial(lineBrush);
             lineGeometryModel = new GeometryModel3D(line, lineMaterial);
             pathLineModelVisual3D = new ModelVisual3D();
             pathLineModelVisual3D.Content = lineGeometryModel;
-            Viewport3D.Children.Remove(pathLinesVisual3D[indexPathPoint].lineModelVisual3D);
-            Viewport3D.Children.Insert(indexPathPoint, pathLineModelVisual3D);
+            Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint].lineModelVisual3D);
+            Viewport3D.Children.Insert(this.indexTrajectoryPoint, pathLineModelVisual3D);
 
-            pathLine.lineModelVisual3D = pathLineModelVisual3D;
-            pathLinesVisual3D.RemoveAt(indexPathPoint);
-            pathLinesVisual3D.Insert(indexPathPoint, pathLine);
+            trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+            this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint);
+            this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint, trajectoryLine);
 
             //there is the bug :( bug#2
             //Because lenght changed when we up or down path point
@@ -358,6 +219,138 @@ namespace MainApp
             //    .Angle = leftLineAngle;
         }
 
+        #endregion
+
+        #region Splitting trajectory
+
+        private void SplitPathByPointsQty_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SplitingByStepOfPoints_Grid.Visibility = Visibility.Hidden;
+            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Visible;
+        }
+
+        private void SplitPathWithStep_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SplitingByNumberOfPoints_Grid.Visibility = Visibility.Hidden;
+            SplitingByStepOfPoints_Grid.Visibility = Visibility.Visible;
+        }
+
+        private void SplitPathByStep_Button_Click(object sender, RoutedEventArgs e)
+        {
+            double step;
+            if (!double.TryParse(StepInCmToSplit_TextBox.Text, out step))
+            {
+                MessageBox.Show("Invalid input of split step!");
+                return;
+            }
+
+            SplitPath(this.listTrajectoryPoints, step);
+        }
+
+        private void SplitPath(List<Point3D> listPathPoints, double step)
+        {
+            var index = 0;
+            this.listSplitTrajectoryPoints = new List<Point3D>();
+            for (var i = 1; i < listPathPoints.Count; i++)
+            {
+                var j = 0;
+                double lambda = 0;
+                var x = listPathPoints[i - 1].X;
+                var y = listPathPoints[i - 1].Y;
+                var z = listPathPoints[i - 1].Z;
+                var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
+                do
+                {
+                    lambda = (step * j) / (dist - step * j);
+                    x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
+                    y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
+                    z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
+                    this.listSplitTrajectoryPoints.Add(new Point3D(x, y, z));
+                    index++;
+                    j++;
+                }
+                while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
+            }
+            index++;
+            this.listSplitTrajectoryPoints.Add(listPathPoints[listPathPoints.Count - 1]);
+
+            ShowSplitPath(this.listSplitTrajectoryPoints);
+        }
+
+        private void ShowSplitPath(List<Point3D> listSplitPathPoints)
+        {
+            foreach (var p in listSplitPathPoints)
+            {
+                //TODO: Extract to method next 8 line
+                var point = new MeshGeometry3D();
+                AddSphere(point, new Point3D(p.X, p.Y, p.Z), 0.2, 8, 8);
+                var pointBrush = Brushes.DarkRed;
+                var pointMaterial = new DiffuseMaterial(pointBrush);
+                var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
+                var pathPointModelVisual3D = new ModelVisual3D();
+                pathPointModelVisual3D.Content = pathPointGeometryModel;
+                pathPointModelVisual3D.Transform = new TranslateTransform3D();
+                Viewport3D.Children.Add(pathPointModelVisual3D);
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Path Planning (when arm and trajectory exists
+
+        private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (model == null)
+            {
+                MessageBox.Show("Firstly create manipulator model!");
+                return;
+            }
+
+            //Array.Clear(arrayQ, 0, arrayQ.Length);
+            var delta = new Delta();
+            var deltaViewModel = new DeltaPlotModel();
+            for (var i = 1; i < this.listSplitTrajectoryPoints.Count; i++)
+            {
+                var pathPoint = this.listSplitTrajectoryPoints[i];
+                model.Move(pathPoint);
+                //var tmpQ = new double[model.n];
+                //model.q.CopyTo(tmpQ, 0);
+                //arrayQ[i] = tmpQ;
+                //Thread.Sleep(1500);
+
+                //ManipulatorTransformUpdate(model.q);//TODO:think what do with q
+                var p = model.F(model.N);
+
+                delta.DesiredPoints.Add(this.listSplitTrajectoryPoints[i]);
+                delta.RealPoints.Add((Point3D)p);
+            }
+
+            delta.CalcDeltas();
+            var serializer = new JsonSerializer();
+            var stringWriter = new StringWriter();
+            using (var writer = new JsonTextWriter(stringWriter))
+            {
+                writer.QuoteName = false;
+                serializer.Serialize(writer, delta);
+            }
+            var json = stringWriter.ToString();
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ManipulationSystemLibraryTests\\Deltas\\deltas.txt");
+            File.WriteAllText(filePath, json);
+
+            for (var i = 0; i < delta.Deltas.Count; i++)
+                deltaViewModel.Points.Add(new DataPoint(delta.Deltas[i], i));
+            var plotWindow = new PlotWindow
+            {
+                Owner = this,
+                deltaPlotViewModel = deltaViewModel
+            };
+            plotWindow.Show();
+        }
+        
+        #endregion
+
         #region Canvas Events
 
         /// <summary>
@@ -377,14 +370,14 @@ namespace MainApp
                         MessageBox.Show("Firstly create manipulator model!");
                         return;
                     }
-                    if (pathPointsVisual3D == null)
+                    if (this.trajectoryPointsVisual3D == null)
                     {
-                        pathPointsVisual3D = new List<PathPoint>();
-                        pathLinesVisual3D = new List<PathLine>();
+                        this.trajectoryPointsVisual3D = new List<TrajectoryPoint>();
+                        this.trajectoryLinesVisual3D = new List<TrajectoryLine>();
                         var firstPathPoint3D = new ModelVisual3D();
                         var firstPpathPoint = new MeshGeometry3D();
                         var p = model.F(model.N);
-                        var firstPoint = new PathPoint();
+                        var firstPoint = new TrajectoryPoint();
                         firstPoint.center = new Point3D(p.X, p.Y + OffsetY, p.Z);
 
                         AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
@@ -395,8 +388,8 @@ namespace MainApp
                         firstPathPoint3D.Transform = new TranslateTransform3D();
                         Viewport3D.Children.Add(firstPathPoint3D);
 
-                        firstPoint.pointModelVisual3D = firstPathPoint3D;
-                        pathPointsVisual3D.Add(firstPoint);
+                        firstPoint.trajectoryModelVisual3D = firstPathPoint3D;
+                        this.trajectoryPointsVisual3D.Add(firstPoint);
 
                         ButtonsForCreatingNewTrajectory.Visibility = Visibility.Visible;
                     }
@@ -405,8 +398,8 @@ namespace MainApp
                     var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
                     var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
 
-                    var pathPoint = new PathPoint();
-                    pathPoint.center = new Point3D(X, pathPointsVisual3D.First().center.Y, Z);
+                    var pathPoint = new TrajectoryPoint();
+                    pathPoint.center = new Point3D(X, this.trajectoryPointsVisual3D.First().center.Y, Z);
 
                     //TODO: Extract to method next 8 line
                     var point = new MeshGeometry3D();
@@ -419,13 +412,13 @@ namespace MainApp
                     pathPointModelVisual3D.Transform = new TranslateTransform3D();
                     Viewport3D.Children.Add(pathPointModelVisual3D);
 
-                    pathPoint.pointModelVisual3D = pathPointModelVisual3D;
-                    pathPointsVisual3D.Add(pathPoint);
+                    pathPoint.trajectoryModelVisual3D = pathPointModelVisual3D;
+                    this.trajectoryPointsVisual3D.Add(pathPoint);
 
-                    AddPathLine(pathPointsVisual3D[pathPointsVisual3D.Count - 2].center, pathPointsVisual3D.Last().center);
+                    AddPathLine(this.trajectoryPointsVisual3D[this.trajectoryPointsVisual3D.Count - 2].center, this.trajectoryPointsVisual3D.Last().center);
 
-                    pathLenght += (pathPointsVisual3D[pathPointsVisual3D.Count - 2].center - pathPointsVisual3D.Last().center).Length;
-                    PathLength.Content = $"Path lenght = {pathLenght.ToString("#.000")} cm";
+                    this.trajectoryLenght += (this.trajectoryPointsVisual3D[this.trajectoryPointsVisual3D.Count - 2].center - this.trajectoryPointsVisual3D.Last().center).Length;
+                    PathLenght.Content = $"Path lenght = {this.trajectoryLenght.ToString("#.000")} cm";
                     break;
                 case 2:
                     //TODO: Editing path mode
@@ -435,13 +428,13 @@ namespace MainApp
 
         private void AddPathLine(Point3D start, Point3D end)
         {
-            PathLine pathLine;
-            pathLine.start = start;
-            pathLine.end = end;
+            TrajectoryLine trajectoryLine;
+            trajectoryLine.start = start;
+            trajectoryLine.end = end;
 
             //TODO: Extract to method next 8 line
             var line = new MeshGeometry3D();
-            LineByTwoPoints(line, pathLine.start, pathLine.end, 0.13);
+            LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
             var lineBrush = Brushes.MediumPurple;
             var lineMaterial = new DiffuseMaterial(lineBrush);
             var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
@@ -449,31 +442,31 @@ namespace MainApp
             pathLineModelVisual3D.Content = lineGeometryModel;
             Viewport3D.Children.Add(pathLineModelVisual3D);
 
-            pathLine.lineModelVisual3D = pathLineModelVisual3D;
-            pathLinesVisual3D.Add(pathLine);
+            trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+            this.trajectoryLinesVisual3D.Add(trajectoryLine);
             //AddRotateTransform(pathLine); uncomment when bug#2 closed
         }
 
-        private void AddRotateTransform(PathLine pathLine)
+        private void AddRotateTransform(TrajectoryLine trajectoryLine)
         {
             var transformGroup = new Transform3DGroup();
 
             var rotateTransformByStart = new RotateTransform3D();
-            rotateTransformByStart.CenterX = pathLine.start.X;
-            rotateTransformByStart.CenterY = pathLine.start.Y;
-            rotateTransformByStart.CenterZ = pathLine.start.Z;
+            rotateTransformByStart.CenterX = trajectoryLine.start.X;
+            rotateTransformByStart.CenterY = trajectoryLine.start.Y;
+            rotateTransformByStart.CenterZ = trajectoryLine.start.Z;
 
             var rotateTransformByEnd = new RotateTransform3D();
-            rotateTransformByEnd.CenterX = pathLine.end.X;
-            rotateTransformByEnd.CenterY = pathLine.end.Y;
-            rotateTransformByEnd.CenterZ = pathLine.end.Z;
+            rotateTransformByEnd.CenterX = trajectoryLine.end.X;
+            rotateTransformByEnd.CenterY = trajectoryLine.end.Y;
+            rotateTransformByEnd.CenterZ = trajectoryLine.end.Z;
 
             var angleRotationByStart = new AxisAngleRotation3D
             {
                 Axis = Vector3D.CrossProduct(
-                    new Vector3D(pathLine.end.X - pathLine.start.X,
-                                 pathLine.end.Y - pathLine.start.Y,
-                                 pathLine.end.Z - pathLine.start.Z),
+                    new Vector3D(trajectoryLine.end.X - trajectoryLine.start.X,
+                                 trajectoryLine.end.Y - trajectoryLine.start.Y,
+                                 trajectoryLine.end.Z - trajectoryLine.start.Z),
                     new Vector3D(0, 1, 0)),
                 Angle = 0
             };
@@ -482,9 +475,9 @@ namespace MainApp
             {
                 Axis = Vector3D.CrossProduct(
                      new Vector3D(0, 1, 0),
-                     new Vector3D(pathLine.end.X - pathLine.start.X,
-                                  pathLine.end.Y - pathLine.start.Y,
-                                  pathLine.end.Z - pathLine.start.Z)),
+                     new Vector3D(trajectoryLine.end.X - trajectoryLine.start.X,
+                                  trajectoryLine.end.Y - trajectoryLine.start.Y,
+                                  trajectoryLine.end.Z - trajectoryLine.start.Z)),
                 Angle = 0
             };
 
@@ -494,7 +487,7 @@ namespace MainApp
             rotateTransformByEnd.Rotation = angleRotationByEnd;
             transformGroup.Children.Add(rotateTransformByEnd);
 
-            pathLine.lineModelVisual3D.Transform = transformGroup;
+            trajectoryLine.lineModelVisual3D.Transform = transformGroup;
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
@@ -519,18 +512,18 @@ namespace MainApp
                     }
                     break;
                 case 1:
-                    if (pathPointCursor != null)
-                        Viewport3D.Children.Remove(pathPointCursor);
+                    if (this.trajectoryPointCursor != null)
+                        Viewport3D.Children.Remove(this.trajectoryPointCursor);
                     var myModel3DGroup = new Model3DGroup();
-                    pathPointCursor = new ModelVisual3D();
+                    this.trajectoryPointCursor = new ModelVisual3D();
 
                     //TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
                     var hitParams = new PointHitTestParameters(e.GetPosition(this));
                     var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
                         new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
                     myModel3DGroup.Children.Add(myGeometryModel);
-                    pathPointCursor.Content = myModel3DGroup;
-                    Viewport3D.Children.Add(pathPointCursor);
+                    this.trajectoryPointCursor.Content = myModel3DGroup;
+                    Viewport3D.Children.Add(this.trajectoryPointCursor);
                     break;
             }
         }
@@ -954,10 +947,5 @@ namespace MainApp
         }
 
         #endregion
-
-        private void OpenExisting_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

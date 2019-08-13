@@ -16,7 +16,7 @@ namespace ManipulationSystemLibrary.MathModel
         public BlockMatrix RootB;
         public Unit[] Units;
         
-        [JsonIgnore] public Matrix A { get; set; }
+        [JsonIgnore] public Matrix A { get; }
         
         [JsonIgnore] public ArrayList T;
         [JsonIgnore] public Matrix D;

@@ -10,7 +10,7 @@ namespace ManipulationSystemLibraryTests
     [TestFixture]
     public class AllUnitTests
     {
-        public string ManipulatorConfigDirectory;
+        private string ManipulatorConfigDirectory;
 
         [SetUp]
         public void SetUp()
@@ -114,7 +114,7 @@ namespace ManipulationSystemLibraryTests
         }
 
         [Test]
-        public void ManipulatorConfigToJson()
+        public void ManipulatorConfigurationToJson()
         {
             #region Expected Json string
 

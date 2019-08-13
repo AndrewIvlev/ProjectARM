@@ -65,13 +65,25 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Common\Notifier.cs" />
+    <Compile Include="Common\DefaultDialogService.cs" />
+    <Compile Include="Graphics\Interfaces\IModel3D.cs" />
+    <Compile Include="Graphics\Interfaces\IModel3DSet .cs" />
+    <Compile Include="Graphics\Interfaces\IPoint3D.cs" />
+    <Compile Include="Graphics\Interfaces\ITriangle3D.cs" />
+    <Compile Include="Graphics\Interfaces\IVector3D.cs" />
+    <Compile Include="Graphics\Model\Model3D.cs" />
+    <Compile Include="Common\IDialogService.cs" />
+    <Compile Include="Common\IFileService.cs" />
+    <Compile Include="Common\JsonFileService.cs" />
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ApplicationViewModel.cs" />
     <Compile Include="DeltaPlotModel.cs" />
-    <Compile Include="ManipulatorArm3DModel.cs" />
-    <Compile Include="Trajectory3DModel.cs" />
+    <Compile Include="Graphics\Model\ManipulatorArm3DModel.cs" />
+    <Compile Include="Common\RelayCommand.cs" />
+    <Compile Include="Graphics\Model\Trajectory3DModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
