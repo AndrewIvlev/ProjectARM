@@ -25,11 +25,11 @@
             <Grid>
                 <Grid x:Name="Trajectory">
                     <Label>Trajectory</Label>
-                    <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click"></Button>
-                    <Button Content="Open existing" Click="OpenExistingTrajectory_MenuItem_Click"></Button>
+                    <Button Content="Create new" Command="{Binding createNewTrajectoryCommand}" ></Button>
+                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" ></Button>
                     <MenuItem Header="Split path">
-                        <MenuItem Header="by points quantity" Click="SplitPathByPointsQty_MenuItem_Click"></MenuItem>
-                        <MenuItem Header="with step" Click="SplitPathWithStep_MenuItem_Click"></MenuItem>
+                        <MenuItem Header="by points quantity" Command="{Binding splitByQtyTrajectoryCommand}" ></MenuItem>
+                        <MenuItem Header="with step" Command="{Binding splitByStepTrajectoryCommand}" ></MenuItem>
                     </MenuItem>
                     <Button Content="Edit"></Button>
                     <Button Content="Interpolate"></Button>

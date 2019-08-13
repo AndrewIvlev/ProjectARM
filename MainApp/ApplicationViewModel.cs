@@ -3,6 +3,7 @@
     using System;
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
+    using System.Windows;
 
     public class ApplicationViewModel : INotifyPropertyChanged
     {
@@ -145,6 +146,55 @@
             //ManipulatorTransformUpdate(model.q);
         }
 
+        private RelayCommand createNewTrajectoryCommand;
+        public RelayCommand CreateNewTrajectoryCommand
+        {
+            get
+            {
+                return saveTrajectoryCommand ??
+                       (saveTrajectoryCommand = new RelayCommand(obj => 
+                               {
+                                   try
+                                   {
+                                       if (dialogService.SaveFileDialog() == true)
+                                       {
+                                           fileService.Save(dialogService.FilePath, Phones.ToList());
+                                           dialogService.ShowMessage("Файл сохранен");
+                                       }
+                                   }
+                                   catch (Exception ex)
+                                   {
+                                       dialogService.ShowMessage(ex.Message);
+                                   }
+                               }));
+            }
+        }
+        
+        private RelayCommand openExistingTrajectoryCommand;
+        public RelayCommand OpenExistingTrajectoryCommand
+        {
+            get
+            {
+                return saveTrajectoryCommand ??
+                       (saveTrajectoryCommand = new RelayCommand(obj =>
+                               {
+                                   try
+                                   {
+                                       if (dialogService.SaveFileDialog() == true)
+                                       {
+                                           fileService.Save(dialogService.FilePath, Phones.ToList());
+                                           dialogService.ShowMessage("Файл сохранен");
+                                       }
+                                   }
+                                   catch (Exception ex)
+                                   {
+                                       dialogService.ShowMessage(ex.Message);
+                                   }
+                               }));
+            }
+        }
+        splitByQtyTrajectoryCommand
+            splitByStepTrajectoryCommand
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName]string prop = "")
         {

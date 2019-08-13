@@ -88,29 +88,11 @@ namespace MainApp
 
         #region Trajectory
         
-        /// <summary>
-        /// Create new trajectory
-        /// </summary>
-        private void CreateNewTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (model == null)
-            {
-                MessageBox.Show("Firstly create manipulator model!");
-                return;
-            }
-
-            RotX.Angle = -71;
-            RotY.Angle = -45;
-            mouseMod = 1;
-        }
+        
 
         /// <summary>
         /// Open existing trajectory
         /// </summary>
-        private void OpenExistingTrajectory_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
         #region Trajectory creation mod
 
