@@ -18,9 +18,6 @@ namespace MainApp
 {
     // TODO: Critically needed refactoring, using MVVM Pattern [bug#13]
 
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         /// <summary>
@@ -74,28 +71,20 @@ namespace MainApp
         public MainWindow()
         {
             InitializeComponent();
-            manipModelVisual3D = new List<ModelVisual3D>();
+            DataContext =
+                new ApplicationViewModel(new DefaultDialogService(), new JsonFileService());
+
+            // TODO: Remove all to ApplicationViewModel :
+            this.manipModelVisual3D = new List<ModelVisual3D>();
             this.listTrajectoryPoints = new List<Point3D>();
             storyboard = new Storyboard();
-            arrayQ = new double[256][]; // TODO: move to method where we already know how many points in the path and change 256 to it
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
             keyboardMod = 0;
             this.trajectoryLenght = 0;
+
         }
-
-        #region Manipulator Arm
-
-        private void OpenManipulatorFile_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() != true)
-                return;
-            CreateManipulatorFromJson();
-        }
-
-        #endregion
 
         #region Trajectory
         

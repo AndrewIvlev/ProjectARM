@@ -65,12 +65,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DefaultDialogService.cs" />
+    <Compile Include="IDialogService.cs" />
+    <Compile Include="IFileService.cs" />
+    <Compile Include="JsonFileService.cs" />
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ApplicationViewModel.cs" />
     <Compile Include="DeltaPlotModel.cs" />
     <Compile Include="ManipulatorArm3DModel.cs" />
+    <Compile Include="RelayCommand.cs" />
     <Compile Include="Trajectory3DModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
