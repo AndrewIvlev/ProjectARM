@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MainApp.Graphics
+namespace MainApp.Graphics.Interfaces
 {
     interface IModel3D
     {
