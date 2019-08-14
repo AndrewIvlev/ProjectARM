@@ -7,8 +7,16 @@
         xmlns:local="clr-namespace:MainApp"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024"
-        KeyDown="OnKeyDownHandler">
+        Title="ProjARM" Height="768" Width="1024">
+    <Window.Resources>
+        <Style x:Key="ButtonStyle">
+            <Setter Property="Control.FontSize" Value="14" />
+            <Setter Property="Control.FontFamily" Value="Verdana" />
+            <Setter Property="Control.Background" Value="Black" />
+            <Setter Property="Control.Foreground" Value="White" />
+            <Setter Property="Control.Margin" Value="10" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
@@ -25,23 +33,24 @@
                 is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
             </TextBox>
             <Separator Height="20"></Separator>
-            <Button Content="Choose a manipulator"  Command="{Binding openArmCommand}" Height="30" FontSize="14"/>
+            <Button Content="Choose a manipulator"  Command="{Binding openArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
             <Separator Height="20"></Separator>
             <Grid>
                 <StackPanel x:Name="Trajectory">
-                    <Label HorizontalAlignment="Center" FontSize="14">Trajectory</Label>
-                    <Button Content="Create new" Click="CreateNewTrajectory_MenuItem_Click" FontSize="14"></Button>
-                    <Button Content="Open existing" Click="OpenExisting_MenuItem_Click" FontSize="14"></Button>
-                    <Button Content="Interpolate" FontSize="14"></Button>
-                    <Button Content="Split" FontSize="14" ></Button>
-                    <Button Content="Edit" FontSize="14"></Button>
+                    <Label HorizontalAlignment="Center" FontSize="14" >Trajectory</Label>
+                    <Button Content="Create new" Command="{Binding createNewTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" ></Button>
+                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}"></Button>
+                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" ></Button>
+                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}"></Button>
+                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}"></Button>
 
                     <Separator Height="20"></Separator>
 
                     <Grid Visibility="Hidden">
                         <StackPanel x:Name="ButtonsForCreatingNewTrajectory">
-                            <Button x:Name="UpDownPathPoints_Button" FontSize="14" Content="Up/Down path points" Click="UpDownPathPoints_Click" />
-                            <Button x:Name="FinishBuildingAPath_Button" FontSize="14" Content="Finish building a path" Click="FinishBuildingPath_Click" />
+                            <Button x:Name="UpDownPathPoints_Button" Content="Up/Down path points" />
+                            <Button x:Name="FinishBuildingAPath_Button" Content="Finish building a path" Click="FinishBuildingPath_Click" />
                         </StackPanel>
                         <StackPanel x:Name="ButtonsForSplittingTrajectory">
                             <Label Content="Enter the number of points&#x0a;to split" />
@@ -67,9 +76,19 @@
             <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
             <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
             <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <Button x:Name="PathPlanningButton" Content="Path planning" Width="95" VerticalAlignment="Center" Click="PathPlanningButton_Click"/>
+                <Button x:Name="PathPlanningButton" Content="Path planning" Width="95" VerticalAlignment="Center" Command="{Binding trackPlanningCommand}" />
                 <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
             </DockPanel>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
+            <Grid VerticalAlignment="Bottom" Height="36">
+                <Button x:Name="StartStopButton" Content="Start" Command="{Binding startStopAnimation}" />
+                <Button x:Name="PauseButton" Content="Pause" Command="{Binding pauseAnimation}" />
+                <Slider x:Name="SliderSpeed" Margin="417,5,101,-5"/>
+                <Label x:Name="SpeedLabel"  Content="Speed" Margin="364,2,242,9"/>
+            </Grid>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="0">
@@ -194,14 +213,5 @@
                         MouseWheel="Canvas_MouseWheel" />
             </Grid>
 
-        <Grid Grid.Column="1" Grid.Row="1">
-            <Slider x:Name="SliderPlay" VerticalAlignment="Center"/>
-            <Grid VerticalAlignment="Bottom" Height="36">
-                <Button x:Name="StartStopButton" Content="Start" Margin="246,5,370,11" />
-                <Button x:Name="PauseButton" Content="Pause" Margin="305,5,311,11"/>
-                <Slider x:Name="SliderSpeed" Margin="417,5,101,-5"/>
-                <Label x:Name="SpeedLabel"  Content="Speed" Margin="364,2,242,9"/>
-            </Grid>
-        </Grid>
     </Grid>
 </Window>

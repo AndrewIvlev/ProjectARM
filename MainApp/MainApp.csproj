@@ -67,6 +67,7 @@
     </ApplicationDefinition>
     <Compile Include="Common\Notifier.cs" />
     <Compile Include="Common\DefaultDialogService.cs" />
+    <Compile Include="Graphics\CameraModel3D.cs" />
     <Compile Include="Graphics\Interfaces\IModel3D.cs" />
     <Compile Include="Graphics\Interfaces\IModel3DSet .cs" />
     <Compile Include="Graphics\Interfaces\IPoint3D.cs" />
