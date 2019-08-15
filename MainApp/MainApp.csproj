@@ -77,6 +77,10 @@
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
+    <Compile Include="Graphics\Model3D\Model3dSet.cs" />
+    <Compile Include="Graphics\Model3D\Point3D.cs" />
+    <Compile Include="Graphics\Model3D\Triangle3D.cs" />
+    <Compile Include="Graphics\Model3D\Vector3D.cs" />
     <Compile Include="MathEngine\Model\Delta.cs" />
     <Compile Include="MathEngine\Model\MathModel\Arm.cs" />
     <Compile Include="MathEngine\Model\MathModel\ArmMetaDataCalculator.cs" />

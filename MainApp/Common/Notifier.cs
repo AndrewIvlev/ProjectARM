@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Simple3DModelEditor.Common
+namespace MainApp.Common
 {
     public class Notifier : INotifyPropertyChanged
     {

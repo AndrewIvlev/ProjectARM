@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MainApp.Graphics.Interfaces
+﻿namespace MainApp.Graphics.Interfaces
 {
     interface IVector3D
     {

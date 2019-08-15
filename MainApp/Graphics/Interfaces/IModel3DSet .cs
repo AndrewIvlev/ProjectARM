@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MainApp.Graphics.Interfaces
+﻿namespace MainApp.Graphics.Interfaces
 {
+    using System.Collections.Generic;
+
     interface IModel3DSet
     {
         string Description { get; set; }

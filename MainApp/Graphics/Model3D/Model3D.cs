@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MainApp.Graphics.Model
+﻿namespace MainApp.Graphics.Model
 {
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
     using System.ComponentModel;
 
+    using MainApp.Common;
     using MainApp.Graphics.Interfaces;
-
-    using Simple3DModelEditor.Common;
 
     class Model3D : Notifier, IModel3D
     {
@@ -81,25 +75,26 @@ namespace MainApp.Graphics.Model
             if (collectionNotify != null)
             {
                 collectionNotify.CollectionChanged += (o, e) => {
-                    if (e.Action == NotifyCollectionChangedAction.Add)
-                    {
-                        foreach (var item in e.NewItems)
+                        if (e.Action == NotifyCollectionChangedAction.Add)
                         {
-                            var notify = item as Notifier;
-                            if (notify != null)
-                                notify.PropertyChanged += PassNotificationThrough;
+                            foreach (var item in e.NewItems)
+                            {
+                                var notify = item as Notifier;
+                                if (notify != null)
+                                    notify.PropertyChanged += PassNotificationThrough;
+                            }
                         }
-                    }
-                    if (e.Action == NotifyCollectionChangedAction.Remove)
-                    {
-                        foreach (var item in e.OldItems)
+
+                        if (e.Action == NotifyCollectionChangedAction.Remove)
                         {
-                            var notify = item as Notifier;
-                            if (notify != null)
-                                notify.PropertyChanged -= PassNotificationThrough;
+                            foreach (var item in e.OldItems)
+                            {
+                                var notify = item as Notifier;
+                                if (notify != null)
+                                    notify.PropertyChanged -= PassNotificationThrough;
+                            }
                         }
-                    }
-                };
+                    };
             }
         }
 
