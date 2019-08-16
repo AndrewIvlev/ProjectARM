@@ -1,4 +1,4 @@
-﻿namespace MainApp.ViewModel
+﻿namespace MainApp.Graphics.Model3D
 {
     using System;
     using System.Collections.Generic;
@@ -14,13 +14,13 @@
 
     public class ManipulatorArmModel3D : INotifyPropertyChanged
     {
-        private Arm manipulator;
+        public Arm arm;
 
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
  
-        public ManipulatorArmModel3D(Arm manip)
+        public ManipulatorArmModel3D(Arm arm)
         {
-            manipulator = manip;
+            this.arm = arm;
             this.manipModelVisual3D = new List<ModelVisual3D>();
         }
 

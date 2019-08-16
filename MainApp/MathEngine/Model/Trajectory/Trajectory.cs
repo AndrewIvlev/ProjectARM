@@ -5,6 +5,10 @@ using System.Windows.Media.Media3D;
 
 namespace ManipulationSystemLibrary
 {
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Shapes;
+
     public class Trajectory
     {
         /// <summary>

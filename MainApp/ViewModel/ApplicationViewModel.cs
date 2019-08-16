@@ -3,20 +3,16 @@
     using System;
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
-    using System.Windows;
 
     using MainApp.Common;
-
-    using ManipulationSystemLibrary;
-    using ManipulationSystemLibrary.MathModel;
+    using MainApp.Graphics.Model3D;
 
     public class ApplicationViewModel : INotifyPropertyChanged
     {
-        private Arm arm;
-        private Trajectory track;
-
         private ManipulatorArmModel3D armModel3D;
         private TrajectoryModel3D track3D;
+        private CameraModel3D camera;
+        private SceneModel3D scene;
 
         IFileService fileService;
         IDialogService dialogService;
@@ -41,11 +37,10 @@
                            {
                                if (dialogService.OpenFileDialog())
                                {
-                                   arm = fileService.OpenArm(dialogService.FilePath);
-                                   arm.DefaultA();
-                                   arm.CalcMetaDataForStanding();
+                                   armModel3D = new ManipulatorArmModel3D(fileService.OpenArm(dialogService.FilePath));
+                                   armModel3D.arm.DefaultA();
+                                   armModel3D.arm.CalcMetaDataForStanding();
 
-                                   armModel3D = new ManipulatorArmModel3D(arm);
                                    //CreateManipulator3DVisualModel(model);
                                    //AddTransformationsForManipulator();
                                    //ManipulatorTransformUpdate(model.q);
@@ -88,7 +83,7 @@
                                    {
                                        if (dialogService.OpenFileDialog())
                                        {
-                                           track = fileService.OpenTrack(dialogService.FilePath);
+                                           track3D = new TrajectoryModel3D(fileService.OpenTrack(dialogService.FilePath));
                                            dialogService.ShowMessage("File open!");
                                        }
                                    }
@@ -112,7 +107,7 @@
                            {
                                if (dialogService.SaveFileDialog() == true)
                                {
-                                   fileService.SaveTrack(dialogService.FilePath, track);
+                                   fileService.SaveTrack(dialogService.FilePath, track3D.track);
                                    dialogService.ShowMessage("Файл сохранен");
                                }
                            }

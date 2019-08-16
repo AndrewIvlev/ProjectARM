@@ -4,12 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MainApp.ViewModel
+namespace MainApp.Graphics.Model3D
 {
     using System.Windows.Media.Media3D;
 
+    using ManipulationSystemLibrary;
+
     public class TrajectoryModel3D
     {
+        public Trajectory track;
+
         private ModelVisual3D trajectoryPointCursor;
         private List<Point3D> listTrajectoryPoints; // list for spliting trajectory
         private class TrajectoryPoint
@@ -36,9 +40,9 @@ namespace MainApp.ViewModel
 
         private double trajectoryLenght;
 
-        public TrajectoryModel3D()
+        public TrajectoryModel3D(Trajectory track)
         {
-
+            this.track = track;
             this.trajectoryLenght = 0;
             this.listTrajectoryPoints = new List<Point3D>();
         }

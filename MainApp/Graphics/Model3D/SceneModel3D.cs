@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MainApp.Graphics.Model3D
 {
-    public class CameraModel3D
+    public class SceneModel3D
     {
     }
 }
