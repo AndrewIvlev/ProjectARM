@@ -56,7 +56,9 @@ namespace ManipulationSystemLibrary
         }
 
         public double DistanceBetweenPoints(Point A, Point B) => Math.Sqrt(Math.Pow(B.X - A.X, 2) + Math.Pow(B.Y - A.Y, 2));
+
         public double DistanceBetweenPoints(Point3D p1, Point3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+
         public double DistanceBerweenPoints(Point P, Point3D dp) => Math.Sqrt(Math.Pow(dp.X - P.X, 2) + Math.Pow(dp.Y - P.Y, 2));
 
         public int NearestPointIndex(Point O) //Возвращает индекс ближайшей опорной точки к точке О
@@ -162,6 +164,37 @@ namespace ManipulationSystemLibrary
             IsSplit = true;
         }
 
+        private void SplitPath(List<Point3D> listPathPoints, double step)
+        {
+            var index = 0;
+            this.listSplitTrajectoryPoints = new List<Point3D>();
+            for (var i = 1; i < listPathPoints.Count; i++)
+            {
+                var j = 0;
+                double lambda = 0;
+                var x = listPathPoints[i - 1].X;
+                var y = listPathPoints[i - 1].Y;
+                var z = listPathPoints[i - 1].Z;
+                var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
+                do
+                {
+                    lambda = (step * j) / (dist - step * j);
+                    x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
+                    y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
+                    z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
+                    this.listSplitTrajectoryPoints.Add(new Point3D(x, y, z));
+                    index++;
+                    j++;
+                }
+                while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
+            }
+
+            index++;
+            this.listSplitTrajectoryPoints.Add(listPathPoints[listPathPoints.Count - 1]);
+
+            ShowSplitPath(this.listSplitTrajectoryPoints);
+        }
+
         #endregion
 
         public void ExactExtraPointOffset(Point offset)
@@ -172,14 +205,16 @@ namespace ManipulationSystemLibrary
                 ExactExtra[i].Y = offset.Y - ExactExtra[i].Y;
             }
         }
+
         public void TransExactExtraPoints(int k, double CoeftoRealW)
         {
-            for ( var i = 0; i < k; i++)
+            for (var i = 0; i < k; i++)
             {
                 ExactExtra[i].X *= CoeftoRealW;
                 ExactExtra[i].Y *= CoeftoRealW;
             }
         }
+        
         public void TransferFunction(Point offset, double CoeftoRealW)
         {
             for (var i = 0; i < NumOfExtraPoints; i++)
