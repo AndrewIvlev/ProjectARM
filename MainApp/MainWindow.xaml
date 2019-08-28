@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:local="clr-namespace:MainApp"
         mc:Ignorable="d"
         Icon="window_icon.ico"
@@ -90,11 +91,31 @@
 
         <Grid Grid.Column="1" Grid.Row="0">
             <Canvas Grid.Row="0" Grid.Column="0" 
-                    Background="Transparent" 
-                    MouseLeftButtonUp="{Binding canvas_MouseLeftButtonUp}" 
-                    MouseLeftButtonDown="{Binding canvas_MouseLeftButtonDown}" 
-                    MouseMove="{Binding canvas_MouseMove}"
-                    MouseWheel="{Binding canvas_MouseWheel}" />
+                    Background="Transparent" >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                        <i:InvokeCommandAction 
+                            Command="{Binding DoubleCommand}"
+                            CommandParameter="{Binding SelectedPhone}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction 
+                            Command="{Binding DoubleCommand}"
+                            CommandParameter="{Binding SelectedPhone}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseMove">
+                        <i:InvokeCommandAction 
+                            Command="{Binding DoubleCommand}"
+                            CommandParameter="{Binding SelectedPhone}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseWheel">
+                        <i:InvokeCommandAction 
+                            Command="{Binding DoubleCommand}"
+                            CommandParameter="{Binding SelectedPhone}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Canvas>
+
             <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
                     <Viewport3D.Camera>
                         <PerspectiveCamera x:Name="Camera"  Position="31,15,31" LookDirection="-31,-15,-31" FieldOfView="60">
