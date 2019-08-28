@@ -1,9 +1,11 @@
-﻿using System.Windows;
-using MainApp.Common;
-using MainApp.ViewModel;
-
-namespace MainApp
+﻿namespace MainApp
 {
+    using System.Windows;
+    using System.Windows.Input;
+
+    using MainApp.Common;
+    using MainApp.ViewModel;
+
     public partial class MainWindow : Window
     {
         public MainWindow()

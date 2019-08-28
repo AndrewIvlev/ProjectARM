@@ -23,8 +23,6 @@
 
     using Point3D = MainApp.Graphics.Model3D.Point3D;
     using Vector3D = MainApp.Graphics.Model3D.Vector3D;
-
-    // TODO: Critically needed refactoring, using MVVM Pattern [bug#13]
     
     public class ApplicationViewModel : Notifier
     {
@@ -464,7 +462,9 @@
         /// По клику ЛКМ по сцене мы либо перемещаем камеру,
         /// либо создаём траекторию пути, либо редактируем траекторию пути.
         /// </summary>
-        private void Canvas_MouseLeftButtonDown(object sender, MouseEventArgs e)
+        /// private RelayCommand openArmCommand;
+        private EventDescriptor canvas_MouseLeftButtonDown;
+        public EventDescriptor Canvas_MouseLeftButtonDown(object sender, MouseEventArgs e)
         {
             switch (mouseMod)
             {
@@ -597,7 +597,8 @@
             trajectoryLine.lineModelVisual3D.Transform = transformGroup;
         }
 
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        private EventDescriptor canvas_MouseMove;
+        public EventDescriptor Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             switch (mouseMod)
             {
@@ -635,12 +636,13 @@
             }
         }
 
-        private void Canvas_MouseLeftButtonUp(object sender, MouseEventArgs e)
+        private void canvas_MouseLeftButtonUp(object sender, MouseEventArgs e)
         {
         }
 
         // TODO: fix this method
-        private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        private EventDescriptor canvas_MouseWheel;
+        public EventDescriptor Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
             if (ScaleTransform3D.ScaleX < 1)
@@ -655,7 +657,7 @@
                 ScaleTransform3D.ScaleY += (double)e.Delta / 333;
                 ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
             }
-        }
+        };
 
         #endregion
         #endregion
