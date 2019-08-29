@@ -1,7 +1,6 @@
 ﻿namespace ArmManipulatorApp
 {
     using System.Windows;
-    using System.Windows.Input;
 
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.ViewModel;

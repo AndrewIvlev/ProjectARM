@@ -41,10 +41,12 @@
         private byte keyboardMod;
         private Point MousePos;
         private Point offset;
-        private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
-        private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
 
-        private Storyboard storyboard;
+        /// <summary>
+        /// Задаёт отношение реальных физических величин манипулятора
+        /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        /// </summary>
+        private double coeff;
         #endregion
 
         public ApplicationViewModel(IDialogService dialogService, IFileService fileService)
@@ -55,8 +57,6 @@
             // Здесь можно задать значения (по умлолчанию) для arm и track
             // arm = new ManipulatorArmModel3D();
 
-
-            storyboard = new Storyboard();
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
@@ -496,7 +496,7 @@
                         var firstPpathPoint = new MeshGeometry3D();
                         var p = model.F(model.N);
                         var firstPoint = new TrajectoryPoint();
-                        firstPoint.center = new Point3D(p.X, p.Y + OffsetY, p.Z);
+                        firstPoint.center = new Point3D(p.X, p.Y, p.Z);
 
                         AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
                         var firstPointBrush = Brushes.GreenYellow;

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ArmManipulatorApp.Graphics.Model3D
 {
-    public class SceneModel3D
+    using ArmManipulatorApp.Common;
+
+    public class SceneModel3D : Notifier
     {
     }
 }

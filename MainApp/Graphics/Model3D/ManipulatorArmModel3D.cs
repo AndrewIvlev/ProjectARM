@@ -10,28 +10,40 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Media3D;
 
+    using ArmManipulatorApp.Common;
+
+    using ArmManipulatorArm.MathModel;
     using ArmManipulatorArm.MathModel.Arm;
 
-    public class ManipulatorArmModel3D : INotifyPropertyChanged
+    public class ManipulatorArmModel3D : Notifier
     {
         public Arm arm;
 
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
- 
+
+        private Storyboard storyboard;
+
+        /// <summary>
+        /// Задаёт отношение реальных физических величин манипулятора
+        /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        /// </summary>
+        private double coeff;
+
         public ManipulatorArmModel3D(Arm arm)
         {
             this.arm = arm;
             this.manipModelVisual3D = new List<ModelVisual3D>();
+            storyboard = new Storyboard();
         }
 
         private void CreateManipulator3DVisualModel(Arm model)
         {
             if (manipModelVisual3D.Count > 0)
             {
-                foreach (var arm in manipModelVisual3D)
-                    Viewport3D.Children.Remove(arm);
+                //foreach (var arm in manipModelVisual3D)
+                    //Viewport3D.Children.Remove(arm);
             }
-            var sup = new Vector3D(0, 0, 0); // startUnitPoint
+            var sup = new System.Windows.Media.Media3D.Vector3D(0, 0, 0); // startUnitPoint
             for (var i = 0; i < model.N + 1; i++)
             {
                 var arm = new ModelVisual3D();
@@ -40,9 +52,12 @@
                 var joint = new MeshGeometry3D();
 
                 var eup = model.F(i); // endUnitPoint
-                LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
-                    new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
-                AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
+                LineByTwoPoints(
+                    unit, 
+                    new System.Windows.Media.Media3D.Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                    new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 
+                    0.25);
+                AddSphere(joint, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
                 var unitBrush = Brushes.CornflowerBlue;
@@ -58,7 +73,7 @@
                 arm.Content = jointsAndUnitsModelGroup;
                 var storyBoard = new Storyboard();
 
-                Viewport3D.Children.Add(arm);
+                //Viewport3D.Children.Add(arm); TODO: binding Viewport3D
                 manipModelVisual3D.Add(arm);
             }
         }
@@ -66,14 +81,14 @@
         private void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
-            for (var i = 1; i < model.N; i++)
+            for (var i = 1; i < this.arm.N; i++)
             {
                 var animation1 = new ThicknessAnimation();
                 animation1.From = new Thickness(5);
                 animation1.To = new Thickness(25);
                 animation1.Duration = TimeSpan.FromSeconds(5);
                 //Storyboard.SetTarget(animation1, button1);
-                Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
+                //Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
             }
 
             var storyboard = new Storyboard();
@@ -88,7 +103,7 @@
         private void AddTransformationsForManipulator()
         {
             var transformGroup = new Transform3DGroup[this.arm.N];
-            for (var i = 0; i < arm.N; i++)
+            for (var i = 0; i < this.arm.N; i++)
             {
                 Transform3D transformation = null;
 
@@ -105,7 +120,7 @@
                         var angleRotation = new AxisAngleRotation3D
                         {
                             Axis = this.arm.GetZAxis(i),
-                            Angle = RadianToDegree(this.arm.Units[i].Q)
+                            Angle = MathFunctions.RadianToDegree(this.arm.Units[i].Q)
                         };
 
                         (transformation as RotateTransform3D).Rotation = angleRotation;
@@ -152,15 +167,15 @@
                         break;
                     case 'P':
                         #region Remove old and insert new P unit model visual 3d
-                        var prismaticAxis = new Vector3D();
+                        var prismaticAxis = new System.Windows.Media.Media3D.Vector3D();
                         var unit = new MeshGeometry3D();
                         var joint = new MeshGeometry3D();
 
                         var sup = this.arm.F(i - 1); // startUnitPoint
                         var eup = this.arm.F(i); // endUnitPoint
-                        LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
-                                              new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
-                        AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
+                        LineByTwoPoints(unit, new System.Windows.Media.Media3D.Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                                              new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.25);
+                        AddSphere(joint, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
 
                         var unitBrush = Brushes.CornflowerBlue;
                         var unitMaterial = new DiffuseMaterial(unitBrush);
@@ -175,8 +190,8 @@
                         var arm = new ModelVisual3D();
                         arm.Content = jointsAndUnitsModelGroup;
 
-                        Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
-                        Viewport3D.Children.Insert(i + 1, arm);
+                        //Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
+                        //Viewport3D.Children.Insert(i + 1, arm);
 
                         manipModelVisual3D.Remove(arm);
                         manipModelVisual3D.Insert(i + 1, arm);
@@ -198,6 +213,7 @@
                                 .Children[i] as TranslateTransform3D)
                                 .OffsetZ += prismaticAxis.Z * q[i];
                         }
+
                         break;
                 }
             }

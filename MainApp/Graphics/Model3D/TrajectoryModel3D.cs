@@ -11,9 +11,11 @@ namespace ArmManipulatorApp.Graphics.Model3D
     using System.Windows.Media.Media3D;
     using System.Windows.Shapes;
 
+    using ArmManipulatorApp.Common;
+
     using ManipulationSystemLibrary;
 
-    public class TrajectoryModel3D
+    public class TrajectoryModel3D : Notifier
     {
         public Trajectory track;
 
