@@ -1,8 +1,8 @@
-﻿namespace ArmManipulatorApp.Common
+﻿using ArmManipulatorApp.MathModel.Trajectory;
+using ArmManipulatorArm.MathModel.Arm;
+
+namespace ArmManipulatorApp.Common
 {
-    using ManipulationSystemLibrary;
-    using ManipulationSystemLibrary.MathModel;
- 
     public interface IFileService
     {
         Arm OpenArm(string filename);

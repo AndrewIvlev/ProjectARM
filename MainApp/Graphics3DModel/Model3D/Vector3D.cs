@@ -1,7 +1,7 @@
-﻿namespace ArmManipulatorApp.Graphics.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using ArmManipulatorApp.Common;
-    using ArmManipulatorApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Graphics3DModel.Interfaces;
 
     class Vector3D : Notifier, IVector3D
     {

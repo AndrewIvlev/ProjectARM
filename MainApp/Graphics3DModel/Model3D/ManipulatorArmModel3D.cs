@@ -1,4 +1,4 @@
-﻿namespace ArmManipulatorApp.Graphics.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System;
     using System.Collections.Generic;

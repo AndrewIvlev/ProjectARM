@@ -1,4 +1,4 @@
-﻿namespace ArmManipulatorApp.Graphics.Model
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -6,7 +6,7 @@
     using System.ComponentModel;
 
     using ArmManipulatorApp.Common;
-    using ArmManipulatorApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Graphics3DModel.Interfaces;
 
     class Model3D : Notifier, IModel3D
     {
@@ -71,16 +71,14 @@
 
         private void PassNotificationThrough(object arg)
         {
-            var collectionNotify = arg as INotifyCollectionChanged;
-            if (collectionNotify != null)
+            if (arg is INotifyCollectionChanged collectionNotify)
             {
                 collectionNotify.CollectionChanged += (o, e) => {
                         if (e.Action == NotifyCollectionChangedAction.Add)
                         {
                             foreach (var item in e.NewItems)
                             {
-                                var notify = item as Notifier;
-                                if (notify != null)
+                                if (item is Notifier notify)
                                     notify.PropertyChanged += PassNotificationThrough;
                             }
                         }
@@ -89,12 +87,11 @@
                         {
                             foreach (var item in e.OldItems)
                             {
-                                var notify = item as Notifier;
-                                if (notify != null)
+                                if (item is Notifier notify)
                                     notify.PropertyChanged -= PassNotificationThrough;
                             }
                         }
-                    };
+                };
             }
         }
 

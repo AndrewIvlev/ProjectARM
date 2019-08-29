@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using ArmManipulatorArm.MathModel.Arm;
+using ArmManipulatorArm.MathModel.Matrix;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace ManipulationSystemLibraryTests
+namespace ArmManipulatorApp_Tests
 {
     [TestFixture]
     public class AllUnitTests

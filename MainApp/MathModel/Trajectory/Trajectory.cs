@@ -1,4 +1,4 @@
-﻿namespace ManipulationSystemLibrary
+﻿namespace ArmManipulatorApp.MathModel.Trajectory
 {
     using System;
     using System.Collections.Generic;

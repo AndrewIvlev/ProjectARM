@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ArmManipulatorApp.Graphics.Model3D
+namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using ArmManipulatorApp.Common;
 
-    public class SceneModel3D : Notifier
+    public class CameraModel3D : Notifier
     {
     }
 }

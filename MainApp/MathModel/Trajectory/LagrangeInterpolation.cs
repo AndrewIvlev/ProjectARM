@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ManipulationSystemLibrary
+namespace ArmManipulatorApp.MathModel.Trajectory
 {
     public class LagrangeInterpolate
     {

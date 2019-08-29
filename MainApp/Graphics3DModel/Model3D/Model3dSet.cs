@@ -1,11 +1,11 @@
 ﻿
-namespace ArmManipulatorApp.Graphics.Model3D
+namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
     using ArmManipulatorApp.Common;
-    using ArmManipulatorApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Graphics3DModel.Interfaces;
 
     class Model3DSet : Notifier, IModel3DSet
     {
@@ -17,10 +17,7 @@ namespace ArmManipulatorApp.Graphics.Model3D
         private string _description;
         public string Description
         {
-            get
-            {
-                return _description;
-            }
+            get => _description;
 
             set
             {

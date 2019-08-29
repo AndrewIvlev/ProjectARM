@@ -1,6 +1,7 @@
 ﻿namespace ArmManipulatorArm.MathModel.Arm
 {
     using System.Windows.Media.Media3D;
+    using MathModel.Matrix;
 
     public static class ArmMovementPlaning
     {

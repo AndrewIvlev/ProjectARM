@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Xaml.Behaviors, Version=1.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.0.1\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -47,7 +50,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -68,21 +70,23 @@
     </ApplicationDefinition>
     <Compile Include="Common\Notifier.cs" />
     <Compile Include="Common\DefaultDialogService.cs" />
-    <Compile Include="Graphics\CameraModel3D.cs" />
-    <Compile Include="Graphics\Interfaces\IModel3D.cs" />
-    <Compile Include="Graphics\Interfaces\IModel3DSet .cs" />
-    <Compile Include="Graphics\Interfaces\IPoint3D.cs" />
-    <Compile Include="Graphics\Interfaces\ITriangle3D.cs" />
-    <Compile Include="Graphics\Interfaces\IVector3D.cs" />
-    <Compile Include="Graphics\Model3D\Model3D.cs" />
+    <Compile Include="Graphics3DModel\CameraModel3D.cs" />
+    <Compile Include="Graphics3DModel\Interfaces\IModel3D.cs" />
+    <Compile Include="Graphics3DModel\Interfaces\IModel3DSet .cs" />
+    <Compile Include="Graphics3DModel\Interfaces\IPoint3D.cs" />
+    <Compile Include="Graphics3DModel\Interfaces\ITriangle3D.cs" />
+    <Compile Include="Graphics3DModel\Interfaces\IVector3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Model3D.cs" />
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
-    <Compile Include="Graphics\Model3D\Model3dSet.cs" />
-    <Compile Include="Graphics\Model3D\Point3D.cs" />
-    <Compile Include="Graphics\Model3D\SceneModel3D.cs" />
-    <Compile Include="Graphics\Model3D\Triangle3D.cs" />
-    <Compile Include="Graphics\Model3D\Vector3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Model3dSet.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Parallelepiped3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Point3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\SceneModel3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Sphere3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Triangle3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Vector3D.cs" />
     <Compile Include="MathModel\Delta.cs" />
     <Compile Include="MathModel\Arm\Arm.cs" />
     <Compile Include="MathModel\Arm\ArmMetaDataCalculator.cs" />
@@ -94,13 +98,10 @@
     <Compile Include="MathModel\Arm\Unit.cs" />
     <Compile Include="MathModel\Trajectory\LagrangeInterpolation.cs" />
     <Compile Include="MathModel\Trajectory\Trajectory.cs" />
-    <Compile Include="PlotWindow.xaml.cs">
-      <DependentUpon>PlotWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ViewModel\ApplicationViewModel.cs" />
-    <Compile Include="Graphics\Model3D\ManipulatorArmModel3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\ManipulatorArmModel3D.cs" />
     <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Graphics\Model3D\TrajectoryModel3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\TrajectoryModel3D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -113,10 +114,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PlotWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

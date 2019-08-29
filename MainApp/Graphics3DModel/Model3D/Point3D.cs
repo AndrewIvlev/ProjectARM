@@ -1,9 +1,9 @@
-﻿namespace ArmManipulatorApp.Graphics.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System.Windows.Media.Media3D;
 
     using ArmManipulatorApp.Common;
-    using ArmManipulatorApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Graphics3DModel.Interfaces;
 
     class Point3D : Notifier, IPoint3D
     {
@@ -13,10 +13,7 @@
         private double _x;
         public double X
         {
-            get
-            {
-                return this._x;
-            }
+            get => this._x;
 
             set
             {
@@ -32,10 +29,7 @@
         private double _y;
         public double Y
         {
-            get
-            {
-                return this._y;
-            }
+            get => this._y;
 
             set
             {
@@ -51,10 +45,7 @@
         private double _z;
         public double Z
         {
-            get
-            {
-                return this._z;
-            }
+            get => this._z;
 
             set
             {

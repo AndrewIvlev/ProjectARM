@@ -1,4 +1,4 @@
-﻿namespace ArmManipulatorApp.Graphics.Interfaces
+﻿namespace ArmManipulatorApp.Graphics3DModel.Interfaces
 {
     interface IVector3D
     {

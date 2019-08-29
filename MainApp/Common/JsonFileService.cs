@@ -1,9 +1,9 @@
-﻿namespace ArmManipulatorApp.Common
+﻿using ArmManipulatorApp.MathModel.Trajectory;
+using ArmManipulatorArm.MathModel.Arm;
+
+namespace ArmManipulatorApp.Common
 {
     using System.IO;
-
-    using ManipulationSystemLibrary;
-    using ManipulationSystemLibrary.MathModel;
 
     using Newtonsoft.Json;
 
