@@ -1,9 +1,9 @@
-﻿namespace MainApp.Graphics.Model3D
+﻿namespace ArmManipulatorApp.Graphics.Model3D
 {
     using System.Windows.Media.Media3D;
 
-    using MainApp.Common;
-    using MainApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Common;
+    using ArmManipulatorApp.Graphics.Interfaces;
 
     class Point3D : Notifier, IPoint3D
     {

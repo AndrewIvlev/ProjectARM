@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MainApp.Common
+namespace ArmManipulatorApp.Common
 {
     public class Notifier : INotifyPropertyChanged
     {

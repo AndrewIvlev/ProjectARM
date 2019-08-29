@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 
-namespace ManipulationSystemLibrary.MathModel
+namespace ArmManipulatorArm.MathModel.Arm
 {
+    using ArmManipulatorArm.MathModel.Matrix;
+
     public static class ArmMetaDataCalculator
     {
         private static Arm arm;

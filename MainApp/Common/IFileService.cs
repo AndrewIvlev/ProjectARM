@@ -1,4 +1,4 @@
-﻿namespace MainApp.Common
+﻿namespace ArmManipulatorApp.Common
 {
     using ManipulationSystemLibrary;
     using ManipulationSystemLibrary.MathModel;

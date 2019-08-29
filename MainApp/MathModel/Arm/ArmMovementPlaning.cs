@@ -1,7 +1,7 @@
-﻿using System.Windows.Media.Media3D;
+﻿namespace ArmManipulatorArm.MathModel.Arm
+{
+    using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary.MathModel
-{ 
     public static class ArmMovementPlaning
     {
         private static Arm arm;
@@ -25,8 +25,7 @@ namespace ManipulationSystemLibrary.MathModel
             var d = new Point3D(
                 p.X - f.X,
                 p.Y - f.Y,
-                p.Z - f.Z
-            );
+                p.Z - f.Z);
 
             var C = arm.C;
             var detC = Matrix.Det3D(C);
@@ -40,8 +39,7 @@ namespace ManipulationSystemLibrary.MathModel
             var μ = new Point3D(
                 detCx / detC,
                 detCy / detC,
-                detCz / detC
-            );
+                detCz / detC);
 
             for (var i = 0; i < arm.N; i++)
             {

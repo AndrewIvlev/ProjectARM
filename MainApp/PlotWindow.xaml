@@ -1,9 +1,9 @@
-﻿<Window x:Class="MainApp.PlotWindow"
+﻿<Window x:Class="ArmManipulatorApp.PlotWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:oxy="http://oxyplot.org/wpf"
-        xmlns:local="clr-namespace:MainApp"
-        xmlns:viewModel="clr-namespace:MainApp.ViewModel"
+        xmlns:local="clr-namespace:ArmManipulatorApp"
+        xmlns:viewModel="clr-namespace:ArmManipulatorApp.ViewModel"
         Title="Plot Window" Height="350" Width="525">
     <Window.DataContext>
         <viewModel:DeltaPlotModel x:Name="deltaPlotViewModel"/>

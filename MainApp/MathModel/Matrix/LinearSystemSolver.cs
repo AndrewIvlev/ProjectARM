@@ -1,8 +1,8 @@
-﻿using System;
-using System.Windows.Media.Media3D;
-
-namespace ManipulationSystemLibrary
+﻿namespace ArmManipulatorArm.Matrix
 {
+    using System;
+    using System.Windows.Media.Media3D;
+
     public static class LinearSystemSolver
     {
         public static Point3D CramersRule(double[,] a, Point3D b)

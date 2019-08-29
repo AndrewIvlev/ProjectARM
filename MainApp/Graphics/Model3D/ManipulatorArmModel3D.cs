@@ -1,4 +1,4 @@
-﻿namespace MainApp.Graphics.Model3D
+﻿namespace ArmManipulatorApp.Graphics.Model3D
 {
     using System;
     using System.Collections.Generic;
@@ -10,28 +10,40 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Media3D;
 
-    using ManipulationSystemLibrary.MathModel;
+    using ArmManipulatorApp.Common;
 
-    public class ManipulatorArmModel3D : INotifyPropertyChanged
+    using ArmManipulatorArm.MathModel;
+    using ArmManipulatorArm.MathModel.Arm;
+
+    public class ManipulatorArmModel3D : Notifier
     {
         public Arm arm;
 
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
- 
+
+        private Storyboard storyboard;
+
+        /// <summary>
+        /// Задаёт отношение реальных физических величин манипулятора
+        /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        /// </summary>
+        private double coeff;
+
         public ManipulatorArmModel3D(Arm arm)
         {
             this.arm = arm;
             this.manipModelVisual3D = new List<ModelVisual3D>();
+            storyboard = new Storyboard();
         }
 
         private void CreateManipulator3DVisualModel(Arm model)
         {
             if (manipModelVisual3D.Count > 0)
             {
-                foreach (var arm in manipModelVisual3D)
-                    Viewport3D.Children.Remove(arm);
+                //foreach (var arm in manipModelVisual3D)
+                    //Viewport3D.Children.Remove(arm);
             }
-            var sup = new Vector3D(0, 0, 0); // startUnitPoint
+            var sup = new System.Windows.Media.Media3D.Vector3D(0, 0, 0); // startUnitPoint
             for (var i = 0; i < model.N + 1; i++)
             {
                 var arm = new ModelVisual3D();
@@ -40,9 +52,12 @@
                 var joint = new MeshGeometry3D();
 
                 var eup = model.F(i); // endUnitPoint
-                LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
-                    new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
-                AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
+                LineByTwoPoints(
+                    unit, 
+                    new System.Windows.Media.Media3D.Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                    new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 
+                    0.25);
+                AddSphere(joint, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
                 var unitBrush = Brushes.CornflowerBlue;
@@ -58,7 +73,7 @@
                 arm.Content = jointsAndUnitsModelGroup;
                 var storyBoard = new Storyboard();
 
-                Viewport3D.Children.Add(arm);
+                //Viewport3D.Children.Add(arm); TODO: binding Viewport3D
                 manipModelVisual3D.Add(arm);
             }
         }
@@ -66,14 +81,14 @@
         private void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
-            for (var i = 1; i < model.N; i++)
+            for (var i = 1; i < this.arm.N; i++)
             {
                 var animation1 = new ThicknessAnimation();
                 animation1.From = new Thickness(5);
                 animation1.To = new Thickness(25);
                 animation1.Duration = TimeSpan.FromSeconds(5);
                 //Storyboard.SetTarget(animation1, button1);
-                Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
+                //Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
             }
 
             var storyboard = new Storyboard();
@@ -87,13 +102,13 @@
         /// </summary>
         private void AddTransformationsForManipulator()
         {
-            var transformGroup = new Transform3DGroup[model.N];
-            for (var i = 0; i < model.N; i++)
+            var transformGroup = new Transform3DGroup[this.arm.N];
+            for (var i = 0; i < this.arm.N; i++)
             {
                 Transform3D transformation = null;
 
-                var center = model.F(i);
-                switch (model.Units[i].Type)
+                var center = this.arm.F(i);
+                switch (this.arm.Units[i].Type)
                 {
                     #region case R
                     case 'R':
@@ -104,14 +119,14 @@
 
                         var angleRotation = new AxisAngleRotation3D
                         {
-                            Axis = model.GetZAxis(i),
-                            Angle = RadianToDegree(model.Units[i].Q)
+                            Axis = this.arm.GetZAxis(i),
+                            Angle = MathFunctions.RadianToDegree(this.arm.Units[i].Q)
                         };
 
                         (transformation as RotateTransform3D).Rotation = angleRotation;
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (var j = i; j < model.N; j++)
+                        for (var j = i; j < this.arm.N; j++)
                             transformGroup[j].Children.Add(transformation);
 
                         break;
@@ -120,7 +135,7 @@
                         transformation = new TranslateTransform3D();
 
                         transformGroup[i] = new Transform3DGroup();
-                        for (var j = i + 1; j < model.N; j++)
+                        for (var j = i + 1; j < this.arm.N; j++)
                             transformGroup[j].Children.Add(transformation);
 
                         break;
@@ -128,20 +143,20 @@
             }
             // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
             // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
-            for (var i = 1; i < model.N + 1; i++)
+            for (var i = 1; i < this.arm.N + 1; i++)
                 manipModelVisual3D[i].Transform = transformGroup[i - 1];
         }
 
         private void ManipulatorTransformUpdate(double[] q)
         {
 
-            for (var i = 1; i < model.N + 1; i++)
+            for (var i = 1; i < this.arm.N + 1; i++)
             {
 
-                switch (model.Units[i - 1].Type)
+                switch (this.arm.Units[i - 1].Type)
                 {
                     case 'R':
-                        for (var j = i + 1; j < model.N; j++)
+                        for (var j = i + 1; j < this.arm.N; j++)
                         {
                             (((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -152,15 +167,15 @@
                         break;
                     case 'P':
                         #region Remove old and insert new P unit model visual 3d
-                        var prismaticAxis = new Vector3D();
+                        var prismaticAxis = new System.Windows.Media.Media3D.Vector3D();
                         var unit = new MeshGeometry3D();
                         var joint = new MeshGeometry3D();
 
-                        var sup = model.F(i - 1); // startUnitPoint
-                        var eup = model.F(i); // endUnitPoint
-                        LineByTwoPoints(unit, new Point3D(sup.X * coeff, sup.Y * coeff + OffsetY, sup.Z * coeff),
-                                              new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.25);
-                        AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff + OffsetY, eup.Z * coeff), 0.4, 8, 8);
+                        var sup = this.arm.F(i - 1); // startUnitPoint
+                        var eup = this.arm.F(i); // endUnitPoint
+                        LineByTwoPoints(unit, new System.Windows.Media.Media3D.Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                                              new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.25);
+                        AddSphere(joint, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
 
                         var unitBrush = Brushes.CornflowerBlue;
                         var unitMaterial = new DiffuseMaterial(unitBrush);
@@ -175,15 +190,15 @@
                         var arm = new ModelVisual3D();
                         arm.Content = jointsAndUnitsModelGroup;
 
-                        Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
-                        Viewport3D.Children.Insert(i + 1, arm);
+                        //Viewport3D.Children.Remove(manipModelVisual3D[i + 1]);
+                        //Viewport3D.Children.Insert(i + 1, arm);
 
                         manipModelVisual3D.Remove(arm);
                         manipModelVisual3D.Insert(i + 1, arm);
                         #endregion
 
-                        prismaticAxis = model.GetZAxis(i);
-                        for (var j = i + 2; j < model.N; j++)
+                        prismaticAxis = this.arm.GetZAxis(i);
+                        for (var j = i + 2; j < this.arm.N; j++)
                         {
                             ((manipModelVisual3D[j]
                                 .Transform as Transform3DGroup)
@@ -198,16 +213,17 @@
                                 .Children[i] as TranslateTransform3D)
                                 .OffsetZ += prismaticAxis.Z * q[i];
                         }
+
                         break;
                 }
             }
         }
 
         // Set the vector's length.
-        private Vector3D ScaleVector(Vector3D vector, double length)
+        private System.Windows.Media.Media3D.Vector3D ScaleVector(System.Windows.Media.Media3D.Vector3D vector, double length)
         {
             var scale = length / vector.Length;
-            return new Vector3D(
+            return new System.Windows.Media.Media3D.Vector3D(
                 vector.X * scale,
                 vector.Y * scale,
                 vector.Z * scale);
@@ -215,7 +231,11 @@
 
         // Add a triangle to the indicated mesh.
         // Do not reuse points so triangles don't share normals.
-        private void AddTriangle(MeshGeometry3D mesh, Point3D point1, Point3D point2, Point3D point3)
+        private void AddTriangle(
+            MeshGeometry3D mesh,
+            System.Windows.Media.Media3D.Point3D point1,
+            System.Windows.Media.Media3D.Point3D point2,
+            System.Windows.Media.Media3D.Point3D point3)
         {
             // Create the points.
             var index1 = mesh.Positions.Count;
@@ -231,14 +251,22 @@
 
         // If extend is true, extend the segment by half the
         // thickness so segments with the same end points meet nicely.
-        private void AddSegment(MeshGeometry3D mesh,
-            Point3D point1, Point3D point2, Vector3D up, double thickness)
+        private void AddSegment(
+            MeshGeometry3D mesh,
+            System.Windows.Media.Media3D.Point3D point1,
+            System.Windows.Media.Media3D.Point3D point2,
+            System.Windows.Media.Media3D.Vector3D up,
+            double thickness)
         {
             AddSegment(mesh, point1, point2, up, thickness, false);
         }
 
-        private void AddSegment(MeshGeometry3D mesh,
-            Point3D point1, Point3D point2, Vector3D up, double thickness,
+        private void AddSegment(
+            MeshGeometry3D mesh,
+            System.Windows.Media.Media3D.Point3D point1,
+            System.Windows.Media.Media3D.Point3D point2,
+            System.Windows.Media.Media3D.Vector3D up,
+            double thickness,
             bool extend)
         {
             // Get the segment's vector.
@@ -256,7 +284,7 @@
             var n1 = ScaleVector(up, thickness / 2.0);
 
             // Get another scaled perpendicular vector.
-            var n2 = Vector3D.CrossProduct(v, n1);
+            var n2 = System.Windows.Media.Media3D.Vector3D.CrossProduct(v, n1);
             n2 = ScaleVector(n2, thickness / 2.0);
 
             // Make a skinny box.
@@ -292,7 +320,7 @@
         }
 
         // Add a sphere.
-        private void AddSphere(MeshGeometry3D mesh, Point3D center,
+        private void AddSphere(MeshGeometry3D mesh, System.Windows.Media.Media3D.Point3D center,
             double radius, int num_phi, int num_theta)
         {
             double phi0, theta0;
@@ -312,11 +340,11 @@
                 // For example, pt01 has phi = phi0 and theta = theta1.
                 // Find the points with theta = theta0.
                 theta0 = 0;
-                var pt00 = new Point3D(
+                var pt00 = new System.Windows.Media.Media3D.Point3D(
                     center.X + r0 * Math.Cos(theta0),
                     center.Y + y0,
                     center.Z + r0 * Math.Sin(theta0));
-                var pt10 = new Point3D(
+                var pt10 = new System.Windows.Media.Media3D.Point3D(
                     center.X + r1 * Math.Cos(theta0),
                     center.Y + y1,
                     center.Z + r1 * Math.Sin(theta0));
@@ -324,11 +352,11 @@
                 {
                     // Find the points with theta = theta1.
                     var theta1 = theta0 + dtheta;
-                    var pt01 = new Point3D(
+                    var pt01 = new System.Windows.Media.Media3D.Point3D(
                         center.X + r0 * Math.Cos(theta1),
                         center.Y + y0,
                         center.Z + r0 * Math.Sin(theta1));
-                    var pt11 = new Point3D(
+                    var pt11 = new System.Windows.Media.Media3D.Point3D(
                         center.X + r1 * Math.Cos(theta1),
                         center.Y + y1,
                         center.Z + r1 * Math.Sin(theta1));
@@ -350,10 +378,10 @@
             }
         }
 
-        private void LineByTwoPoints(MeshGeometry3D mesh, Point3D start, Point3D end, double thickness)
+        private void LineByTwoPoints(MeshGeometry3D mesh, System.Windows.Media.Media3D.Point3D start, System.Windows.Media.Media3D.Point3D end, double thickness)
         {
-            var up = new Vector3D(0, 0, 1);
-            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness);
+            var up = new System.Windows.Media.Media3D.Vector3D(0, 0, 1);
+            AddSegment(mesh, new System.Windows.Media.Media3D.Point3D(start.X, start.Y, start.Z), new System.Windows.Media.Media3D.Point3D(end.X, end.Y, end.Z), up, thickness);
         }
 
         /// <summary>
@@ -364,19 +392,19 @@
         /// <param name="center">Center position of the circle</param>
         /// <param name="resolution">Number of slices to iterate the circumference of the circle</param>
         /// <returns>A GeometryModel3D representation of the circle</returns>
-        private GeometryModel3D GetCircleModel(double radius, Vector3D normal, Point3D center, int resolution)
+        private GeometryModel3D GetCircleModel(double radius, System.Windows.Media.Media3D.Vector3D normal, System.Windows.Media.Media3D.Point3D center, int resolution)
         {
             var geo = new MeshGeometry3D();
 
             // Generate the circle in the XZ-plane
             // Add the center first
-            geo.Positions.Add(new Point3D(0, 0, 0));
+            geo.Positions.Add(new System.Windows.Media.Media3D.Point3D(0, 0, 0));
 
             // Iterate from angle 0 to 2*PI
             var t = 2 * Math.PI / resolution;
             for (var i = 0; i < resolution; i++)
             {
-                geo.Positions.Add(new Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
+                geo.Positions.Add(new System.Windows.Media.Media3D.Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
             }
 
             // Add points to MeshGeoemtry3D
@@ -398,13 +426,13 @@
             // Create transforms
             var trn = new Transform3DGroup();
             // Up Vector (normal for XZ-plane)
-            var up = new Vector3D(0, 1, 0);
+            var up = new System.Windows.Media.Media3D.Vector3D(0, 1, 0);
             // Set normal length to 1
             normal.Normalize();
-            var axis = Vector3D.CrossProduct(up, normal); // Cross product is rotation axis
-            var angle = Vector3D.AngleBetween(up, normal); // Angle to rotate
+            var axis = System.Windows.Media.Media3D.Vector3D.CrossProduct(up, normal); // Cross product is rotation axis
+            var angle = System.Windows.Media.Media3D.Vector3D.AngleBetween(up, normal); // Angle to rotate
             trn.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(axis, angle)));
-            trn.Children.Add(new TranslateTransform3D(new Vector3D(center.X, center.Y, center.Z)));
+            trn.Children.Add(new TranslateTransform3D(new System.Windows.Media.Media3D.Vector3D(center.X, center.Y, center.Z)));
 
             mod.Transform = trn;
 

@@ -1,10 +1,9 @@
-﻿namespace MainApp.ViewModel
+﻿namespace ArmManipulatorApp.ViewModel
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
-    using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
@@ -12,17 +11,13 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Media3D;
 
-    using MainApp.Common;
-    using MainApp.Graphics.Model3D;
-
-    using ManipulationSystemLibrary;
+    using ArmManipulatorApp.Common;
+    using ArmManipulatorApp.Graphics.Model3D;
 
     using Newtonsoft.Json;
 
-    using OxyPlot;
-
-    using Point3D = MainApp.Graphics.Model3D.Point3D;
-    using Vector3D = MainApp.Graphics.Model3D.Vector3D;
+    using Point3D = Graphics.Model3D.Point3D;
+    using Vector3D = Graphics.Model3D.Vector3D;
     
     public class ApplicationViewModel : Notifier
     {
@@ -46,10 +41,12 @@
         private byte keyboardMod;
         private Point MousePos;
         private Point offset;
-        private double coeff; // Задаёт отношение реальных физических величин манипулятора от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
-        private double OffsetY = 0; //0.5; // Сдвиг вверх от сцены, для того чтобы модель в горизонтальном положении лежала на сцене, а не тонула в ней наполовину
 
-        private Storyboard storyboard;
+        /// <summary>
+        /// Задаёт отношение реальных физических величин манипулятора
+        /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        /// </summary>
+        private double coeff;
         #endregion
 
         public ApplicationViewModel(IDialogService dialogService, IFileService fileService)
@@ -60,8 +57,6 @@
             // Здесь можно задать значения (по умлолчанию) для arm и track
             // arm = new ManipulatorArmModel3D();
 
-
-            storyboard = new Storyboard();
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
@@ -71,47 +66,63 @@
         #region Manipulator
 
         private RelayCommand openArmCommand;
-        public RelayCommand OpenArmCommand =>
-            openArmCommand ??
-               (openArmCommand = new RelayCommand(obj =>
-                       {
-                           try
-                           {
-                               if (dialogService.OpenFileDialog())
-                               {
-                                   armModel3D = new ManipulatorArmModel3D(fileService.OpenArm(dialogService.FilePath));
-                                   armModel3D.arm.DefaultA();
-                                   armModel3D.arm.CalcMetaDataForStanding();
+        public RelayCommand OpenArmCommand
+        {
+            get
+            {
+                return this.openArmCommand ?? 
+                       (this.openArmCommand = new RelayCommand(
+                            obj =>
+                                   {
+                                       try
+                                       {
+                                           if (this.dialogService.OpenFileDialog())
+                                           {
+                                               this.armModel3D = new ManipulatorArmModel3D(
+                                                   this.fileService.OpenArm(
+                                                       this.dialogService.FilePath));
+                                               this.armModel3D.arm.DefaultA();
+                                               this.armModel3D.arm.CalcMetaDataForStanding();
 
-                                   //CreateManipulator3DVisualModel(model);
-                                   //AddTransformationsForManipulator();
-                                   //ManipulatorTransformUpdate(model.q);
+                                               //CreateManipulator3DVisualModel(model);
+                                               //AddTransformationsForManipulator();
+                                               //ManipulatorTransformUpdate(model.q);
 
-                                   dialogService.ShowMessage("File open!");
-                               }
-                           }
-                           catch (Exception ex)
-                           {
-                               dialogService.ShowMessage(ex.Message);
-                           }
-                       }));
+                                               this.dialogService.ShowMessage("File open!");
+                                           }
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           this.dialogService.ShowMessage(ex.Message);
+                                       }
+                                   }
+                               ));
+            }
+        }
 
         #endregion
 
         #region Trajectory
 
         private RelayCommand createNewTrajectoryCommand;
-        public RelayCommand CreateNewTrajectoryCommand =>
-            createNewTrajectoryCommand ??
-            (createNewTrajectoryCommand = new RelayCommand(obj => 
-                    {
-                        try
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                        }
-                    }));
+        public RelayCommand CreateNewTrajectoryCommand
+        {
+            get
+            {
+                return this.createNewTrajectoryCommand ?? (this.createNewTrajectoryCommand = new RelayCommand(
+                                                               obj =>
+                                                                   {
+                                                                       try
+                                                                       {
+                                                                       }
+                                                                       catch (Exception ex)
+                                                                       {
+                                                                       }
+                                                                   }
+                                                               )
+                                                              );
+            }
+        }
 
         private RelayCommand openExistingTrajectoryCommand;
         public RelayCommand OpenExistingTrajectoryCommand
@@ -258,7 +269,7 @@
         #region Camera
         #endregion
 
-        #region Template region for refactoring
+        #region Temporary region for refactoring
         
         #region Trajectory creation mod
 
@@ -485,7 +496,7 @@
                         var firstPpathPoint = new MeshGeometry3D();
                         var p = model.F(model.N);
                         var firstPoint = new TrajectoryPoint();
-                        firstPoint.center = new Point3D(p.X, p.Y + OffsetY, p.Z);
+                        firstPoint.center = new Point3D(p.X, p.Y, p.Z);
 
                         AddSphere(firstPpathPoint, firstPoint.center, 0.2, 8, 8);
                         var firstPointBrush = Brushes.GreenYellow;
@@ -640,11 +651,11 @@
         {
         }
 
-        // TODO: fix this method
         private EventDescriptor canvas_MouseWheel;
         public EventDescriptor Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Camera zoom
+            // TODO: fix this to independent from canvas size
             if (ScaleTransform3D.ScaleX < 1)
             {
                 ScaleTransform3D.ScaleX += (double)e.Delta / 555;
@@ -657,7 +668,7 @@
                 ScaleTransform3D.ScaleY += (double)e.Delta / 333;
                 ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
             }
-        };
+        }
 
         #endregion
         #endregion

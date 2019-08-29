@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-namespace MainApp.Graphics.Interfaces
+namespace ArmManipulatorApp.Graphics.Interfaces
 {
     interface IPoint3D
     {

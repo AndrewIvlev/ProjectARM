@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary
+namespace ArmManipulatorArm.MathModel.Matrix
 {
     /// <summary>
     /// Block matrices with size 3x4
