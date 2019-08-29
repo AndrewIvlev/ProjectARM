@@ -10,11 +10,18 @@
         Title="ProjARM" Height="768" Width="1024">
     <Window.Resources>
         <Style x:Key="ButtonStyle">
-            <Setter Property="Control.FontSize" Value="14" />
+            <Setter Property="Control.FontSize" Value="15" />
             <Setter Property="Control.FontFamily" Value="Verdana" />
-            <Setter Property="Control.Background" Value="Black" />
-            <Setter Property="Control.Foreground" Value="White" />
-            <Setter Property="Control.Margin" Value="10" />
+            <Setter Property="Control.Background" Value="DarkGray" />
+            <Setter Property="Control.Foreground" Value="Black" />
+            <Setter Property="Control.Margin" Value="3" />
+        </Style>
+        <Style x:Key="LabelStyle">
+            <Setter Property="Control.FontSize" Value="18" />
+            <Setter Property="Control.FontWeight" Value="Bold"/>
+            <Setter Property="Control.FontFamily" Value="Verdana" />
+            <Setter Property="Control.Foreground" Value="Black" />
+            <Setter Property="Control.Margin" Value="1" />
         </Style>
     </Window.Resources>
     <Grid>
@@ -23,7 +30,7 @@
             <RowDefinition Height="0.15*" ></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.25*"></ColumnDefinition>
+            <ColumnDefinition Width="0.33*"></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
@@ -33,17 +40,17 @@
                 is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
             </TextBox>
             <Separator Height="20"></Separator>
-            <Button Content="Choose a manipulator"  Command="{Binding openArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
+            <Button Content="Choose a manipulator" Command="{Binding openArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
             <Separator Height="20"></Separator>
             <Grid>
                 <StackPanel x:Name="Trajectory">
-                    <Label HorizontalAlignment="Center" FontSize="14" >Trajectory</Label>
+                    <Label HorizontalAlignment="Center" Style="{StaticResource LabelStyle}" >Trajectory</Label>
                     <Button Content="Create new" Command="{Binding createNewTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
-                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" ></Button>
-                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}"></Button>
-                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" ></Button>
-                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}"></Button>
-                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}"></Button>
+                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
 
                     <Separator Height="20"></Separator>
 
@@ -71,12 +78,14 @@
         </StackPanel>
 
         <Grid Grid.Column="0" Grid.Row="1">
-            <Label HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,0,60">Path planning progress</Label>
-            <ProgressBar Height="18" HorizontalAlignment ="Center" VerticalAlignment="Bottom" Margin="0,0,9,37" Width="160"/>
-            <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <Button x:Name="PathPlanningButton" Content="Path planning" Width="95" VerticalAlignment="Center" Command="{Binding trackPlanningCommand}" />
-                <Button x:Name="PathPlanningCancelButton" Content="Cancel" Width="50" VerticalAlignment="Center"/>
-            </DockPanel>
+            <StackPanel>
+                <Label HorizontalAlignment="Center" Style="{StaticResource LabelStyle}" >Path planning progress</Label>
+                <ProgressBar Height="20"/>
+                <DockPanel>
+                    <Button x:Name="PathPlanningButton" Content="Path planning" Command="{Binding trackPlanningCommand}" Style="{StaticResource ButtonStyle}" DockPanel.Dock="Left"/>
+                    <Button x:Name="PathPlanningCancelButton" Content="Cancel" Style="{StaticResource ButtonStyle}" DockPanel.Dock="Right"/>
+                </DockPanel>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="1">
