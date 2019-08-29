@@ -14,14 +14,13 @@
 
     public class ManipulatorArmModel3D : INotifyPropertyChanged
     {
-        public Arm mathArmModel;
-
+        public Arm arm;
 
         private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
  
-        public ManipulatorArmModel3D(Arm mathArmModel)
+        public ManipulatorArmModel3D(Arm arm)
         {
-            this.mathArmModel = mathArmModel;
+            this.arm = arm;
             this.manipModelVisual3D = new List<ModelVisual3D>();
         }
 
