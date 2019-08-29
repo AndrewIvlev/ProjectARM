@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Media.Media3D;
-
-namespace ManipulationSystemLibrary
+﻿namespace ManipulationSystemLibrary
 {
+    using System;
+    using System.Collections.Generic;
     using System.Windows;
-    using System.Windows.Media;
-    using System.Windows.Shapes;
+    using System.Windows.Media.Media3D;
 
     public class Trajectory
     {
@@ -164,36 +160,37 @@ namespace ManipulationSystemLibrary
             IsSplit = true;
         }
 
-        private void SplitPath(List<Point3D> listPathPoints, double step)
-        {
-            var index = 0;
-            this.listSplitTrajectoryPoints = new List<Point3D>();
-            for (var i = 1; i < listPathPoints.Count; i++)
-            {
-                var j = 0;
-                double lambda = 0;
-                var x = listPathPoints[i - 1].X;
-                var y = listPathPoints[i - 1].Y;
-                var z = listPathPoints[i - 1].Z;
-                var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
-                do
-                {
-                    lambda = (step * j) / (dist - step * j);
-                    x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
-                    y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
-                    z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
-                    this.listSplitTrajectoryPoints.Add(new Point3D(x, y, z));
-                    index++;
-                    j++;
-                }
-                while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
-            }
+        // TODO: remove it
+        //private void SplitPath(List<Point3D> listPathPoints, double step)
+        //{
+        //    var index = 0;
+        //    this.listSplitTrajectoryPoints = new List<Point3D>();
+        //    for (var i = 1; i < listPathPoints.Count; i++)
+        //    {
+        //        var j = 0;
+        //        double lambda = 0;
+        //        var x = listPathPoints[i - 1].X;
+        //        var y = listPathPoints[i - 1].Y;
+        //        var z = listPathPoints[i - 1].Z;
+        //        var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
+        //        do
+        //        {
+        //            lambda = (step * j) / (dist - step * j);
+        //            x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
+        //            y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
+        //            z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
+        //            this.listSplitTrajectoryPoints.Add(new Point3D(x, y, z));
+        //            index++;
+        //            j++;
+        //        }
+        //        while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
+        //    }
 
-            index++;
-            this.listSplitTrajectoryPoints.Add(listPathPoints[listPathPoints.Count - 1]);
+        //    index++;
+        //    this.listSplitTrajectoryPoints.Add(listPathPoints[listPathPoints.Count - 1]);
 
-            ShowSplitPath(this.listSplitTrajectoryPoints);
-        }
+        //    ShowSplitPath(this.listSplitTrajectoryPoints);
+        //}
 
         #endregion
 
@@ -226,91 +223,8 @@ namespace ManipulationSystemLibrary
             }
         }
 
-
-        #region Shows and Hide
-        public void ShowNextPoints(Graphics gr, int j)
-        {
-            for (var i = j; i < NumOfExtraPoints; i++)
-                gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
-        }
-        public void ShowPastPoints(Graphics gr, int j)
-        {
-            for (var i = 0; i < j; i++)
-                gr.FillEllipse(new SolidBrush(Color.Green), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
-        }
-        public void ShowExtraPoints(Graphics gr)
-        {
-            for (var i = 0; i < NumOfExtraPoints; i++)
-                gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
-            foreach (var P in AnchorPoints)
-            {
-                gr.FillEllipse(new SolidBrush(Color.Purple), new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-                var index = AnchorPoints.IndexOf(P);
-                if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-                else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-            }
-        }
-
-        public void ShowExtraPoints(Graphics gr, Color color)
-        {
-            var pen = new Pen(Color.Purple, 4);
-            var brushMyColor = new SolidBrush(color);
-            var brush = new SolidBrush(Color.Purple);
-            for (var i = 0; i < NumOfExtraPoints - 1; i++)
-            {
-                //gr.DrawLine(pen, ExtraPoints[i], ExtraPoints[i + 1]);
-                gr.FillEllipse(brush, new Rectangle(ExtraPoints[i].X - 6, ExtraPoints[i].Y - 6, 12, 12));
-                gr.FillEllipse(brushMyColor, new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
-            }
-
-            gr.DrawLine(pen, ExtraPoints[NumOfExtraPoints - 2], ExtraPoints[NumOfExtraPoints - 1]);
-            gr.FillEllipse(brush, new Rectangle(ExtraPoints[NumOfExtraPoints - 1].X - 6, ExtraPoints[NumOfExtraPoints - 1].Y - 6, 12, 12));
-            gr.FillEllipse(brushMyColor, new Rectangle(ExtraPoints[NumOfExtraPoints - 1].X - 3, ExtraPoints[NumOfExtraPoints - 1].Y - 3, 6, 6));
-            foreach (var P in AnchorPoints)
-            {
-                gr.FillEllipse(brush, new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-                var index = AnchorPoints.IndexOf(P);
-                if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-                else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-            }
-        }
-        public void Show(Graphics gr)
-        {
-            foreach (var P in AnchorPoints)
-            {
-                var index = AnchorPoints.IndexOf(P);
-                if (index + 1 < AnchorPoints.Count)
-                {
-                    var NextP = AnchorPoints[index + 1];
-                    gr.DrawLine(new Pen(Color.Purple, 4), P, NextP);
-                }
-                gr.FillEllipse(new SolidBrush(Color.Purple),
-                        new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-                if (index > 9)
-                    gr.DrawString($"{index}", new Font("Arial", 8),
-                    new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-                else
-                    gr.DrawString($"{index}", new Font("Arial", 9),
-                    new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-            }
-        }
-        public void Hide(Graphics gr)
-        {
-            foreach (var P in AnchorPoints)
-            {
-                var index = AnchorPoints.IndexOf(P);
-                if (index + 1 < AnchorPoints.Count)
-                {
-                    var NextP = AnchorPoints[index + 1];
-                    gr.DrawLine(new Pen(Color.LightBlue, 8), P, NextP);
-                }
-                gr.FillEllipse(new SolidBrush(Color.LightBlue),
-                        new Rectangle(P.X - 8, P.Y - 8, 16, 16));
-            }
-        }
-        #endregion
-
         #region Interpolation
+
         public void Interpolate(ref LagrangeInterpolate[] interpolate)
         {
             var j = 0;
@@ -333,8 +247,10 @@ namespace ManipulationSystemLibrary
                 i--;
                 j++;
             }
+
             interpolate[j].Add(AnchorPoints[AnchorPoints.Count - 1].X, AnchorPoints[AnchorPoints.Count - 1].Y);
         }
+
         public void Interpolate(LagrangeInterpolate[] interpolate)
         {
             var j = 0;

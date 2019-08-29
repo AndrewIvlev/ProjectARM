@@ -1,4 +1,4 @@
-﻿namespace MainApp.Graphics.Interfaces
+﻿namespace ArmManipulatorApp.Graphics.Interfaces
 {
     using System.Collections.Generic;
 

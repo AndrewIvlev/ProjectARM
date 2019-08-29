@@ -1,10 +1,10 @@
-﻿namespace MainApp
+﻿namespace ArmManipulatorApp
 {
     using System.Windows;
     using System.Windows.Input;
 
-    using MainApp.Common;
-    using MainApp.ViewModel;
+    using ArmManipulatorApp.Common;
+    using ArmManipulatorApp.ViewModel;
 
     public partial class MainWindow : Window
     {

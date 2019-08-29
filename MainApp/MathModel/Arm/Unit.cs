@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ManipulationSystemLibrary
+﻿namespace ArmManipulatorArm.MathModel.Arm
 {
+    using System;
+
+    using ArmManipulatorArm.MathModel.Matrix;
+
     public class Unit
     {
         /// <summary>

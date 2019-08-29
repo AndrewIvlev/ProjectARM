@@ -2,7 +2,7 @@
 using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 
-namespace ManipulationSystemLibrary
+namespace ArmManipulatorArm.MathModel.Matrix
 {
     public class Matrix
     {

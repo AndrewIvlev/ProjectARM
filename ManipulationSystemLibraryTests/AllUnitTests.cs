@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using ManipulationSystemLibrary;
-using ManipulationSystemLibrary.MathModel;
 using Newtonsoft.Json;
 using NUnit.Framework;
 

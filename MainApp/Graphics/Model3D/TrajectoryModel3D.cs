@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MainApp.Graphics.Model3D
+namespace ArmManipulatorApp.Graphics.Model3D
 {
     using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Media3D;
+    using System.Windows.Shapes;
 
     using ManipulationSystemLibrary;
 
@@ -63,6 +64,90 @@ namespace MainApp.Graphics.Model3D
                 pathPointModelVisual3D.Content = pathPointGeometryModel;
                 pathPointModelVisual3D.Transform = new TranslateTransform3D();
                 Viewport3D.Children.Add(pathPointModelVisual3D);
+            }
+        }
+
+        public void ShowNextPoints(Graphics gr, int j)
+        {
+            for (var i = j; i < NumOfExtraPoints; i++)
+                gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
+        }
+
+        public void ShowPastPoints(Graphics gr, int j)
+        {
+            for (var i = 0; i < j; i++)
+                gr.FillEllipse(new SolidBrush(Color.Green), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
+        }
+
+        public void ShowExtraPoints(Graphics gr)
+        {
+            for (var i = 0; i < NumOfExtraPoints; i++)
+                gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
+            foreach (var P in AnchorPoints)
+            {
+                gr.FillEllipse(new SolidBrush(Color.Purple), new Rectangle(P.X - 6, P.Y - 6, 12, 12));
+                var index = AnchorPoints.IndexOf(P);
+                if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
+                else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
+            }
+        }
+
+        public void ShowExtraPoints(Graphics gr, Color color)
+        {
+            var pen = new Pen(Color.Purple, 4);
+            var brushMyColor = new SolidBrush(color);
+            var brush = new SolidBrush(Color.Purple);
+            for (var i = 0; i < NumOfExtraPoints - 1; i++)
+            {
+                //gr.DrawLine(pen, ExtraPoints[i], ExtraPoints[i + 1]);
+                gr.FillEllipse(brush, new Rectangle(ExtraPoints[i].X - 6, ExtraPoints[i].Y - 6, 12, 12));
+                gr.FillEllipse(brushMyColor, new Rectangle(ExtraPoints[i].X - 3, ExtraPoints[i].Y - 3, 6, 6));
+            }
+
+            gr.DrawLine(pen, ExtraPoints[NumOfExtraPoints - 2], ExtraPoints[NumOfExtraPoints - 1]);
+            gr.FillEllipse(brush, new Rectangle(ExtraPoints[NumOfExtraPoints - 1].X - 6, ExtraPoints[NumOfExtraPoints - 1].Y - 6, 12, 12));
+            gr.FillEllipse(brushMyColor, new Rectangle(ExtraPoints[NumOfExtraPoints - 1].X - 3, ExtraPoints[NumOfExtraPoints - 1].Y - 3, 6, 6));
+            foreach (var P in AnchorPoints)
+            {
+                gr.FillEllipse(brush, new Rectangle(P.X - 6, P.Y - 6, 12, 12));
+                var index = AnchorPoints.IndexOf(P);
+                if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
+                else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
+            }
+        }
+
+        public void Show(Graphics gr)
+        {
+            foreach (var P in AnchorPoints)
+            {
+                var index = AnchorPoints.IndexOf(P);
+                if (index + 1 < AnchorPoints.Count)
+                {
+                    var NextP = AnchorPoints[index + 1];
+                    gr.DrawLine(new Pen(Color.Purple, 4), P, NextP);
+                }
+                gr.FillEllipse(new SolidBrush(Color.Purple),
+                        new Rectangle(P.X - 6, P.Y - 6, 12, 12));
+                if (index > 9)
+                    gr.DrawString($"{index}", new Font("Arial", 8),
+                    new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
+                else
+                    gr.DrawString($"{index}", new Font("Arial", 9),
+                    new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
+            }
+        }
+        public void Hide(Graphics gr)
+        {
+            foreach (var P in AnchorPoints)
+            {
+                var index = AnchorPoints.IndexOf(P);
+                if (index + 1 < AnchorPoints.Count)
+                {
+                    var NextP = AnchorPoints[index + 1];
+                    gr.DrawLine(new Pen(Color.LightBlue, 8), P, NextP);
+                }
+                gr.FillEllipse(new SolidBrush(Color.LightBlue),
+                        new Rectangle(P.X - 8, P.Y - 8, 16, 16));
             }
         }
     }

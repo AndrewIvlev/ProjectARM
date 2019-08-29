@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MainApp
+namespace ArmManipulatorApp
 {
     /// <summary>
     /// Interaction logic for PlotWindow.xaml

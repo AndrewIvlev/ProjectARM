@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 
-namespace ManipulationSystemLibrary
+namespace ArmManipulatorArm.MathModel
 {
     public static class MathFunctions
     {

@@ -83,22 +83,21 @@
     <Compile Include="Graphics\Model3D\SceneModel3D.cs" />
     <Compile Include="Graphics\Model3D\Triangle3D.cs" />
     <Compile Include="Graphics\Model3D\Vector3D.cs" />
-    <Compile Include="MathEngine\Model\Delta.cs" />
-    <Compile Include="MathEngine\Model\MathModel\Arm.cs" />
-    <Compile Include="MathEngine\Model\MathModel\ArmMetaDataCalculator.cs" />
-    <Compile Include="MathEngine\Model\MathModel\ArmMovementPlaning.cs" />
-    <Compile Include="MathEngine\Model\MathModel\MathFunctions.cs" />
-    <Compile Include="MathEngine\Model\MathModel\Matrix\BlockMatrix.cs" />
-    <Compile Include="MathEngine\Model\MathModel\Matrix\LinearSystemSolver.cs" />
-    <Compile Include="MathEngine\Model\MathModel\Matrix\Matrix.cs" />
-    <Compile Include="MathEngine\Model\MathModel\Unit.cs" />
-    <Compile Include="MathEngine\Model\Trajectory\LagrangeInterpolation.cs" />
-    <Compile Include="MathEngine\Model\Trajectory\Trajectory.cs" />
+    <Compile Include="MathModel\Delta.cs" />
+    <Compile Include="MathModel\Arm\Arm.cs" />
+    <Compile Include="MathModel\Arm\ArmMetaDataCalculator.cs" />
+    <Compile Include="MathModel\Arm\ArmMovementPlaning.cs" />
+    <Compile Include="MathModel\MathFunctions.cs" />
+    <Compile Include="MathModel\Matrix\BlockMatrix.cs" />
+    <Compile Include="MathModel\Matrix\LinearSystemSolver.cs" />
+    <Compile Include="MathModel\Matrix\Matrix.cs" />
+    <Compile Include="MathModel\Arm\Unit.cs" />
+    <Compile Include="MathModel\Trajectory\LagrangeInterpolation.cs" />
+    <Compile Include="MathModel\Trajectory\Trajectory.cs" />
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\ApplicationViewModel.cs" />
-    <Compile Include="MathEngine\Model\DeltaPlotModel.cs" />
     <Compile Include="Graphics\Model3D\ManipulatorArmModel3D.cs" />
     <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Graphics\Model3D\TrajectoryModel3D.cs" />

@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Windows.Media.Media3D;
-using Newtonsoft.Json;
-
-namespace ManipulationSystemLibrary.MathModel
+﻿namespace ArmManipulatorArm.MathModel.Arm
 {
+    using System;
+    using System.Collections;
+    using System.Windows.Media.Media3D;
+
+    using ArmManipulatorArm.MathModel.Matrix;
+
+    using Newtonsoft.Json;
+
     public interface IMovable
     {
         void Move(Point3D p);

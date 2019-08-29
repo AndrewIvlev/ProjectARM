@@ -1,12 +1,12 @@
-﻿namespace MainApp.Graphics.Model
+﻿namespace ArmManipulatorApp.Graphics.Model
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
     using System.ComponentModel;
 
-    using MainApp.Common;
-    using MainApp.Graphics.Interfaces;
+    using ArmManipulatorApp.Common;
+    using ArmManipulatorApp.Graphics.Interfaces;
 
     class Model3D : Notifier, IModel3D
     {
