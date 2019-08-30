@@ -53,7 +53,6 @@
 
             // Здесь можно задать значения (по умлолчанию) для arm и track
             // arm = new ManipulatorArmModel3D();
-
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
@@ -80,10 +79,14 @@
                                                        this.dialogService.FilePath));
                                                this.armModel3D.arm.DefaultA();
                                                this.armModel3D.arm.CalcMetaDataForStanding();
-
+                                               // After parsing manipulator configuration file
+                                               // on the screen appears 3D scene with axis and manipulator
+                                               var maxArmLength = this.armModel3D.arm.MaxLength();
+                                               scene = new SceneModel3D(maxArmLength);
                                                //CreateManipulator3DVisualModel(model);
                                                //AddTransformationsForManipulator();
                                                //ManipulatorTransformUpdate(model.q);
+                                               camera = new CameraModel3D();
 
                                                this.dialogService.ShowMessage("File open!");
                                            }

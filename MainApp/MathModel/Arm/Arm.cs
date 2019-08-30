@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Linq;
     using System.Windows.Media.Media3D;
 
     using ArmManipulatorArm.MathModel.Matrix;
@@ -84,17 +85,12 @@
 
         public Vector3D GetZAxis(int i) => ((BlockMatrix) T[i]).ColumnAsVector3D(2);
 
-        //public  double MaxL(double[] UnitTypePmaxLen)
-        //{
-        //    double MaxL = 0;
-
-        //    for (int i = 0; i < N; i++) //Вычисление максимально возможной длины
-        //        MaxL += units[i].len;               //манипулятора, которая равна сумме длин всех звеньев
-        //    foreach (double d in UnitTypePmaxLen)   //плюс макисмальные длины звеньев типа Р
-        //        MaxL += d;
-
-        //    return MaxL;
-        //}
+        /// <summary>
+        /// Вычисление максимально возможной длины манипулятора,
+        /// которая равна сумме длин всех звеньев плюс макисмальные длины звеньев поступательного типа
+        /// </summary>
+        /// <returns></returns>
+        public double MaxLength() => this.Units.Sum(unit => unit.GetLength());
 
         //public void AllAngleToRadianFromDegree()
         //{

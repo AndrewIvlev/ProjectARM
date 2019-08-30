@@ -56,5 +56,7 @@
         {
             return !(a == b);
         }
+
+        public double GetLength() => B.ColumnAsVector3D(3).Length;
     }
 }
