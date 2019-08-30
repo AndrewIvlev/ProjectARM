@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
-    using ArmManipulatorApp.Common;
+    using System.Windows.Media.Media3D;
     
     /// <summary>
     /// Surface plane and coordinate system
     /// </summary>
-    public class SceneModel3D : Notifier
+    public class SceneModel3D
     {
-        private Model3DSet scene;
+        public ModelVisual3D modelVisual3D;
 
         public SceneModel3D(double sideLength)
         {

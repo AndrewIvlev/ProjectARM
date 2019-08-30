@@ -15,7 +15,9 @@
     using ArmManipulatorApp.Graphics3DModel.Model3D;
 
     using Newtonsoft.Json;
-    
+
+    using SystemPoint3D = System.Windows.Media.Media3D.Point3D;
+
     public class ApplicationViewModel : Notifier
     {
         private ManipulatorArmModel3D armModel3D;
@@ -26,6 +28,7 @@
         IFileService fileService;
         IDialogService dialogService;
 
+        private Viewport3D viewport;
 
         #region Template region for refactoring
         /// <summary>
@@ -46,10 +49,11 @@
         private double coeff;
         #endregion
 
-        public ApplicationViewModel(IDialogService dialogService, IFileService fileService)
+        public ApplicationViewModel(IDialogService dialogService, IFileService fileService, Viewport3D viewport)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
+            this.viewport = viewport;
 
             // Здесь можно задать значения (по умлолчанию) для arm и track
             // arm = new ManipulatorArmModel3D();
@@ -83,10 +87,17 @@
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
                                                scene = new SceneModel3D(maxArmLength);
-                                               //CreateManipulator3DVisualModel(model);
-                                               //AddTransformationsForManipulator();
-                                               //ManipulatorTransformUpdate(model.q);
-                                               camera = new CameraModel3D();
+                                               // this.armModel3D.Show();
+                                                   // CreateManipulator3DVisualModel(model);
+                                                   // AddTransformationsForManipulator();
+                                                   // ManipulatorTransformUpdate(model.q);
+                                               camera = new CameraModel3D(new SystemPoint3D(), 2 * maxArmLength);
+
+                                               this.viewport.Camera = camera.perspectiveCamera;
+
+                                               foreach (var mv in armModel3D.manipModelVisual3D)
+                                                   this.viewport.Children.Add(mv);
+                                               this.viewport.Children.Add(track3D.trajectoryPointCursor);
 
                                                this.dialogService.ShowMessage("File open!");
                                            }

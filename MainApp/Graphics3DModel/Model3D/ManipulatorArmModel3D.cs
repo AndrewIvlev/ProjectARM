@@ -19,7 +19,7 @@
     {
         public Arm arm;
 
-        private List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
+        public List<ModelVisual3D> manipModelVisual3D; // Count of this list should be (model.n + 1)
 
         private Storyboard storyboard;
 

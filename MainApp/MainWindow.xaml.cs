@@ -10,7 +10,7 @@
         public MainWindow()
         {
             this.InitializeComponent();
-            this.DataContext = new ApplicationViewModel(new DefaultDialogService(), new JsonFileService());
+            this.DataContext = new ApplicationViewModel(new DefaultDialogService(), new JsonFileService(), this.Viewport3D);
         }
     }
 }

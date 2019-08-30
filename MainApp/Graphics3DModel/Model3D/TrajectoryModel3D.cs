@@ -16,7 +16,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
     {
         public Trajectory track;
 
-        private ModelVisual3D trajectoryPointCursor;
+        public ModelVisual3D trajectoryPointCursor;
         private List<Point3D> listTrajectoryPoints; // list for spliting trajectory
         private class TrajectoryPoint
         {
@@ -31,13 +31,14 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
         private List<TrajectoryPoint> trajectoryPointsVisual3D;
         private int indexTrajectoryPoint; //TODO: remove it, do smarter
 
+        private List<TrajectoryLine> trajectoryLinesVisual3D;
         struct TrajectoryLine
         {
             public ModelVisual3D lineModelVisual3D;
             public Point3D start;
             public Point3D end;
         }
-        private List<TrajectoryLine> trajectoryLinesVisual3D;
+
         private List<Point3D> listSplitTrajectoryPoints;
 
         private double trajectoryLenght;
