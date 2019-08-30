@@ -10,12 +10,10 @@
     using System.Windows.Media.Animation;
     using System.Windows.Media.Media3D;
 
-    using ArmManipulatorApp.Common;
-
     using ArmManipulatorArm.MathModel;
     using ArmManipulatorArm.MathModel.Arm;
 
-    public class ManipulatorArmModel3D : Notifier
+    public class ManipulatorArmModel3D
     {
         public Arm arm;
 
@@ -33,48 +31,51 @@
         {
             this.arm = arm;
             this.manipModelVisual3D = new List<ModelVisual3D>();
-            storyboard = new Storyboard();
+            this.storyboard = new Storyboard();
+            //CreateManipulator3DVisualModel();
         }
 
-        private void CreateManipulator3DVisualModel(Arm model)
+        // TODO: rename to BuildArmModelVisual3D
+        private void CreateManipulator3DVisualModel()
         {
             if (manipModelVisual3D.Count > 0)
             {
                 //foreach (var arm in manipModelVisual3D)
                     //Viewport3D.Children.Remove(arm);
             }
-            var sup = new System.Windows.Media.Media3D.Vector3D(0, 0, 0); // startUnitPoint
-            for (var i = 0; i < model.N + 1; i++)
-            {
-                var arm = new ModelVisual3D();
-                var jointsAndUnitsModelGroup = new Model3DGroup();
-                var unit = new MeshGeometry3D();
-                var joint = new MeshGeometry3D();
 
-                var eup = model.F(i); // endUnitPoint
+            var sup = new System.Windows.Media.Media3D.Vector3D(0, 0, 0); // startUnitPoint
+            for (var i = 0; i < this.arm.N + 1; i++)
+            {
+                var unit = new ModelVisual3D();
+                var jointsAndUnitsModelGroup = new Model3DGroup();
+                var unitMesh = new MeshGeometry3D();
+                var jointMesh = new MeshGeometry3D();
+
+                var eup = this.arm.F(i); // endUnitPoint
                 LineByTwoPoints(
-                    unit, 
+                    unitMesh, 
                     new System.Windows.Media.Media3D.Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
                     new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 
                     0.25);
-                AddSphere(joint, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
+                AddSphere(jointMesh, new System.Windows.Media.Media3D.Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
                 var unitBrush = Brushes.CornflowerBlue;
                 var unitMaterial = new DiffuseMaterial(unitBrush);
-                var myGeometryModel = new GeometryModel3D(unit, unitMaterial);
+                var myGeometryModel = new GeometryModel3D(unitMesh, unitMaterial);
                 jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
 
                 var jointBrush = Brushes.OrangeRed;
                 var jointMaterial = new DiffuseMaterial(jointBrush);
-                myGeometryModel = new GeometryModel3D(joint, jointMaterial);
+                myGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
                 jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
 
-                arm.Content = jointsAndUnitsModelGroup;
+                unit.Content = jointsAndUnitsModelGroup;
                 var storyBoard = new Storyboard();
 
                 //Viewport3D.Children.Add(arm); TODO: binding Viewport3D
-                manipModelVisual3D.Add(arm);
+                manipModelVisual3D.Add(unit);
             }
         }
 
@@ -91,10 +92,9 @@
                 //Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
             }
 
-            var storyboard = new Storyboard();
-            storyboard.Children = timelineCollection;
+            this.storyboard.Children = timelineCollection;
 
-            storyboard.Begin();
+            this.storyboard.Begin();
         }
 
         /// <summary>
@@ -164,6 +164,7 @@
                                 .Rotation as AxisAngleRotation3D)
                                 .Angle = q[i];
                         }
+
                         break;
                     case 'P':
                         #region Remove old and insert new P unit model visual 3d

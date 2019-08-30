@@ -83,21 +83,17 @@
                                                        this.dialogService.FilePath));
                                                this.armModel3D.arm.DefaultA();
                                                this.armModel3D.arm.CalcMetaDataForStanding();
+
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               scene = new SceneModel3D(maxArmLength);
-                                               // this.armModel3D.Show();
-                                                   // CreateManipulator3DVisualModel(model);
-                                                   // AddTransformationsForManipulator();
-                                                   // ManipulatorTransformUpdate(model.q);
-                                               camera = new CameraModel3D(new SystemPoint3D(), 2 * maxArmLength);
-
-                                               this.viewport.Camera = camera.perspectiveCamera;
-
+                                               this.scene = new SceneModel3D(maxArmLength);
+                                               this.camera = new CameraModel3D(new SystemPoint3D(), 2 * maxArmLength);
+                                               
                                                foreach (var mv in armModel3D.manipModelVisual3D)
                                                    this.viewport.Children.Add(mv);
                                                this.viewport.Children.Add(track3D.trajectoryPointCursor);
+                                               this.viewport.Camera = camera.perspectiveCamera;
 
                                                this.dialogService.ShowMessage("File open!");
                                            }
