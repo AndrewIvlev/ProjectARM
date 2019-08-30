@@ -11,10 +11,8 @@
     <Window.Resources>
         <Style x:Key="ButtonStyle">
             <Setter Property="Control.FontSize" Value="14" />
+            <Setter Property="Control.Margin" Value="5" />
             <Setter Property="Control.FontFamily" Value="Verdana" />
-            <Setter Property="Control.Background" Value="Black" />
-            <Setter Property="Control.Foreground" Value="White" />
-            <Setter Property="Control.Margin" Value="10" />
         </Style>
     </Window.Resources>
     <Grid>
@@ -33,17 +31,17 @@
                 is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
             </TextBox>
             <Separator Height="20"></Separator>
-            <Button Content="Choose a manipulator"  Command="{Binding openArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
+            <Button Content="Choose a manipulator"  Command="{Binding OpenArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
             <Separator Height="20"></Separator>
             <Grid>
                 <StackPanel x:Name="Trajectory">
                     <Label HorizontalAlignment="Center" FontSize="14" >Trajectory</Label>
                     <Button Content="Create new" Command="{Binding createNewTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
-                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" ></Button>
-                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}"></Button>
-                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" ></Button>
-                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}"></Button>
-                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}"></Button>
+                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
 
                     <Separator Height="20"></Separator>
 
@@ -148,26 +146,6 @@
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <AmbientLight Color="#FFFFFF" />
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-
-                        <!--> Scene plane </-->
-                        <ModelVisual3D x:Name="ScenePlane">
-                            <ModelVisual3D.Content>
-                                <GeometryModel3D>
-                                    <GeometryModel3D.Geometry>
-                                        <MeshGeometry3D TriangleIndices="0,1,2 3,4,5"
-                                                         Normals="0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 0,0,1 "
-                                                         TextureCoordinates="0,0 1,0 1,1 1,1 0,1 0,0 "
-                                                         Positions="-23,0,23 23,0,23 23,0,-23 23,0,-23 -23,0,-23 -23,0,23 " />
-                                    </GeometryModel3D.Geometry>
-                                    <GeometryModel3D.Material>
-                                        <MaterialGroup>
-                                            <DiffuseMaterial Brush="DimGray" />
-                                            <SpecularMaterial Brush="LightSlateGray" SpecularPower="19" />
-                                        </MaterialGroup>
-                                    </GeometryModel3D.Material>
-                                </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
 

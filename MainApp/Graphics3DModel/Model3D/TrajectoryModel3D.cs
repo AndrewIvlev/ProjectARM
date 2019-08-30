@@ -16,7 +16,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
     {
         public Trajectory track;
 
-        public ModelVisual3D trajectoryPointCursor;
+        public ModelVisual3D trackModelVisual3D;
         private List<Point3D> listTrajectoryPoints; // list for spliting trajectory
         private class TrajectoryPoint
         {

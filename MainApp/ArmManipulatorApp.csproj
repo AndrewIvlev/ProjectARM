@@ -70,23 +70,14 @@
     </ApplicationDefinition>
     <Compile Include="Common\Notifier.cs" />
     <Compile Include="Common\DefaultDialogService.cs" />
+    <Compile Include="Common\UserControlMod.cs" />
     <Compile Include="Graphics3DModel\CameraModel3D.cs" />
-    <Compile Include="Graphics3DModel\Interfaces\IModel3D.cs" />
-    <Compile Include="Graphics3DModel\Interfaces\IModel3DSet .cs" />
-    <Compile Include="Graphics3DModel\Interfaces\IPoint3D.cs" />
-    <Compile Include="Graphics3DModel\Interfaces\ITriangle3D.cs" />
-    <Compile Include="Graphics3DModel\Interfaces\IVector3D.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Model3D.cs" />
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Model3dSet.cs" />
     <Compile Include="Graphics3DModel\Model3D\Parallelepiped3DModel.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Point3D.cs" />
     <Compile Include="Graphics3DModel\Model3D\SceneModel3D.cs" />
     <Compile Include="Graphics3DModel\Model3D\Sphere3DModel.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Triangle3D.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Vector3D.cs" />
     <Compile Include="MathModel\Delta.cs" />
     <Compile Include="MathModel\Arm\Arm.cs" />
     <Compile Include="MathModel\Arm\ArmMetaDataCalculator.cs" />

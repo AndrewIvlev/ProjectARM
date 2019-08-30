@@ -14,10 +14,6 @@
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.Graphics3DModel.Model3D;
 
-    using Newtonsoft.Json;
-
-    using SystemPoint3D = System.Windows.Media.Media3D.Point3D;
-
     public class ApplicationViewModel : Notifier
     {
         private ManipulatorArmModel3D armModel3D;
@@ -30,7 +26,7 @@
 
         private Viewport3D viewport;
 
-        #region Template region for refactoring
+        #region Temporary region for refactoring
         /// <summary>
         /// 0 - camera rotation;
         /// 1 - trajectory creation;
@@ -87,12 +83,13 @@
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               this.scene = new SceneModel3D(maxArmLength);
-                                               this.camera = new CameraModel3D(new SystemPoint3D(), 2 * maxArmLength);
-                                               
-                                               foreach (var mv in armModel3D.manipModelVisual3D)
+                                               this.scene = new SceneModel3D(2 * maxArmLength);
+                                               this.camera = new CameraModel3D(new Point3D(), 2 * maxArmLength);
+
+                                               foreach (var mv in armModel3D.armModelVisual3D)
                                                    this.viewport.Children.Add(mv);
-                                               this.viewport.Children.Add(track3D.trajectoryPointCursor);
+                                               this.viewport.Children.Add(track3D.trackModelVisual3D);
+                                               this.viewport.Children.Add(scene.ModelVisual3D);
                                                this.viewport.Camera = camera.perspectiveCamera;
 
                                                this.dialogService.ShowMessage("File open!");
@@ -285,7 +282,7 @@
         {
             mouseMod = 0;
             keyboardMod = 1;
-            //Viewport3D.Children.Remove(this.trajectoryPointCursor);
+            //Viewport3D.Children.Remove(this.trackModelVisual3D);
             //this.indexTrajectoryPoint = 1;
         }
 
@@ -480,8 +477,7 @@
         /// По клику ЛКМ по сцене мы либо перемещаем камеру,
         /// либо создаём траекторию пути, либо редактируем траекторию пути.
         /// </summary>
-        /// private RelayCommand openArmCommand;
-        private RelayCommand canvas_MouseLeftButtonDown;
+        //private RelayCommand canvas_MouseLeftButtonDown;
         //public RelayCommand Canvas_MouseLeftButtonDown
         //{
             //switch (mouseMod)
@@ -638,18 +634,18 @@
         //            }
         //            break;
         //        case 1:
-        //            if (this.trajectoryPointCursor != null)
-        //                Viewport3D.Children.Remove(this.trajectoryPointCursor);
+        //            if (this.trackModelVisual3D != null)
+        //                Viewport3D.Children.Remove(this.trackModelVisual3D);
         //            var myModel3DGroup = new Model3DGroup();
-        //            this.trajectoryPointCursor = new ModelVisual3D();
+        //            this.trackModelVisual3D = new ModelVisual3D();
 
         //            //TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
         //            var hitParams = new PointHitTestParameters(e.GetPosition(this));
         //            var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
         //                new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
         //            myModel3DGroup.Children.Add(myGeometryModel);
-        //            this.trajectoryPointCursor.Content = myModel3DGroup;
-        //            Viewport3D.Children.Add(this.trajectoryPointCursor);
+        //            this.trackModelVisual3D.Content = myModel3DGroup;
+        //            Viewport3D.Children.Add(this.trackModelVisual3D);
         //            break;
         //    }
         //}

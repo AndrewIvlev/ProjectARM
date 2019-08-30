@@ -14,12 +14,12 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
     public class CameraModel3D : Notifier
     {
-        public PerspectiveCamera perspectiveCamera;
+        public PerspectiveCamera PerspectiveCamera;
 
         public CameraModel3D(SystemPoint3D center, double distanceFromCenter)
         {
-            this.perspectiveCamera = new PerspectiveCamera();
-            perspectiveCamera.Position = center;
+            this.PerspectiveCamera = new PerspectiveCamera();
+            PerspectiveCamera.Position = center;
         }
 
         public void Move()
