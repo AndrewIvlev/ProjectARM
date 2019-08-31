@@ -14,7 +14,7 @@
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.Graphics3DModel.Model3D;
 
-    public class ApplicationViewModel : Notifier
+    public class ApplicationViewModel
     {
         private ManipulatorArmModel3D armModel3D;
         private TrajectoryModel3D track3D;
@@ -51,7 +51,7 @@
             this.fileService = fileService;
             this.viewport = viewport;
 
-            // Здесь можно задать значения (по умлолчанию) для arm и track
+            // Здесь можно задать значения (по умолчанию) для arm и track
             // arm = new ManipulatorArmModel3D();
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
@@ -83,14 +83,14 @@
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               this.scene = new SceneModel3D(2 * maxArmLength);
+                                               this.scene = new SceneModel3D(2 * maxArmLength, 0.1);
                                                this.camera = new CameraModel3D(new Point3D(), 2 * maxArmLength);
-
+                                               var c = new PerspectiveCamera();
                                                foreach (var mv in armModel3D.armModelVisual3D)
                                                    this.viewport.Children.Add(mv);
                                                this.viewport.Children.Add(track3D.trackModelVisual3D);
                                                this.viewport.Children.Add(scene.ModelVisual3D);
-                                               this.viewport.Camera = camera.perspectiveCamera;
+                                               this.viewport.Camera = camera.PerspectiveCamera;
 
                                                this.dialogService.ShowMessage("File open!");
                                            }
@@ -619,6 +619,7 @@
         //        case 0:
         //            if (e.LeftButton == MouseButtonState.Pressed)
         //            {
+        //                // Camera moving
         //                //Moving mouse with holding mouse button
         //                var nextMousePos = e.GetPosition(this);
         //                var dxdy = new Point(nextMousePos.X - MousePos.X, nextMousePos.Y - MousePos.Y);
@@ -654,24 +655,24 @@
         //{
         //}
 
-        //private EventDescriptor canvas_MouseWheel;
-        //public EventDescriptor Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
-        //{
-        //    // Camera zoom
-        //    // TODO: fix this to independent from canvas size
-        //    if (ScaleTransform3D.ScaleX < 1)
-        //    {
-        //        ScaleTransform3D.ScaleX += (double)e.Delta / 555;
-        //        ScaleTransform3D.ScaleY += (double)e.Delta / 555;
-        //        ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
-        //    }
-        //    else
-        //    {
-        //        ScaleTransform3D.ScaleX += (double)e.Delta / 333;
-        //        ScaleTransform3D.ScaleY += (double)e.Delta / 333;
-        //        ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
-        //    }
-        //}
+        private EventDescriptor canvas_MouseWheel;
+        public EventDescriptor Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // Camera zoom
+            // TODO: fix this to independent from canvas size
+            if (ScaleTransform3D.ScaleX < 1)
+            {
+                ScaleTransform3D.ScaleX += (double)e.Delta / 555;
+                ScaleTransform3D.ScaleY += (double)e.Delta / 555;
+                ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
+            }
+            else
+            {
+                ScaleTransform3D.ScaleX += (double)e.Delta / 333;
+                ScaleTransform3D.ScaleY += (double)e.Delta / 333;
+                ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
+            }
+        }
 
         #endregion
         #endregion

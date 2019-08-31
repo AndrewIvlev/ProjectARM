@@ -68,16 +68,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Common\Notifier.cs" />
     <Compile Include="Common\DefaultDialogService.cs" />
     <Compile Include="Common\UserControlMod.cs" />
     <Compile Include="Graphics3DModel\CameraModel3D.cs" />
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Parallelepiped3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Circle3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Rectangle3DModel.cs" />
     <Compile Include="Graphics3DModel\Model3D\SceneModel3D.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Sphere3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\Triangle3DModel.cs" />
     <Compile Include="MathModel\Delta.cs" />
     <Compile Include="MathModel\Arm\Arm.cs" />
     <Compile Include="MathModel\Arm\ArmMetaDataCalculator.cs" />

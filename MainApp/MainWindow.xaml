@@ -115,91 +115,12 @@
             </Canvas>
 
             <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
-                    <Viewport3D.Camera>
-                        <PerspectiveCamera x:Name="Camera"  Position="31,15,31" LookDirection="-31,-15,-31" FieldOfView="60">
-                            <PerspectiveCamera.Transform>
-                                <Transform3DGroup>
-                                    <TranslateTransform3D OffsetX="0" OffsetY="0" OffsetZ="0"></TranslateTransform3D>
-                                    <RotateTransform3D>
-                                        <RotateTransform3D.Rotation>
-                                            <AxisAngleRotation3D x:Name="RotY"
-                                                                 Axis="0 1 0" />
-                                        </RotateTransform3D.Rotation>
-                                    </RotateTransform3D>
-                                    <RotateTransform3D>
-                                        <RotateTransform3D.Rotation>
-                                            <AxisAngleRotation3D x:Name="RotX"
-                                                                 Axis="1 0 0" />
-                                        </RotateTransform3D.Rotation>
-                                    </RotateTransform3D>
-                                    <ScaleTransform3D x:Name="ScaleTransform3D" 
-                                                      CenterX="0"
-                                                      CenterY="0"
-                                                      CenterZ="0"/>
-                                </Transform3DGroup>
-                            </PerspectiveCamera.Transform>
-                        </PerspectiveCamera>
-                    </Viewport3D.Camera>
 
                     <Viewport3D.Children>
 
                         <ModelVisual3D>
                             <ModelVisual3D.Content>
                                 <AmbientLight Color="#FFFFFF" />
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-
-                        <!--> Oz axis </-->
-                        <ModelVisual3D>
-                            <ModelVisual3D.Content>
-                                <GeometryModel3D>
-                                    <GeometryModel3D.Geometry>
-                                        <MeshGeometry3D Positions="-0.05,0,0 0.05,0,0 -0.05,0.1,0 0.05,0.1,0 
-                                                           -0.05,0,23 0.05,0,23 -0.05,0.1,23 0.05,0.1,23"
-                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
-                                                       0,1,4 1,5,4 1,7,5 1,3,7
-                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
-                                    </GeometryModel3D.Geometry>
-                                    <GeometryModel3D.Material>
-                                        <DiffuseMaterial Brush="Blue" />
-                                    </GeometryModel3D.Material>
-                                </GeometryModel3D>
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-
-                        <!--> Ox axis </-->
-                        <ModelVisual3D>
-                            <ModelVisual3D.Content>
-                                <GeometryModel3D>
-                                    <GeometryModel3D.Geometry>
-                                        <MeshGeometry3D Positions="0,0,-0.05 23,0,-0.05 0,0.1,-0.05 23,0.1,-0.05 
-                                                           0,0,0.05 23,0,0.05 0,0.1,0.05 23,0.1,0.05"
-                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
-                                                       0,1,4 1,5,4 1,7,5 1,3,7
-                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
-                                    </GeometryModel3D.Geometry>
-                                    <GeometryModel3D.Material>
-                                        <DiffuseMaterial Brush="Green" />
-                                    </GeometryModel3D.Material>
-                                </GeometryModel3D>
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-
-                        <!-->Oy axis</-->
-                        <ModelVisual3D>
-                            <ModelVisual3D.Content>
-                                <GeometryModel3D>
-                                    <GeometryModel3D.Geometry>
-                                        <MeshGeometry3D Positions="-0.05,0,-0.05 0.05,0,-0.05 -0.05,23,-0.05 0.05,23,-0.05 
-                                                           -0.05,0,0.05 0.05,0,0.05 -0.05,23,0.05 0.05,23,0.05"
-                                                        TriangleIndices="0,2,1 1,2,3 0,4,2 2,4,6 
-                                                       0,1,4 1,5,4 1,7,5 1,3,7
-                                                       4,5,6 7,6,5 2,6,3 3,6,7"/>
-                                    </GeometryModel3D.Geometry>
-                                    <GeometryModel3D.Material>
-                                        <DiffuseMaterial Brush="Red" />
-                                    </GeometryModel3D.Material>
-                                </GeometryModel3D>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using MainApp.Graphics3DModel.Model3D;
 
 namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
@@ -16,24 +17,55 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
     {
         public ModelVisual3D ModelVisual3D;
 
-        public SceneModel3D(double sideLength)
+        public SceneModel3D(double sideLength, double axisThickness)
         {
             this.ModelVisual3D = new ModelVisual3D();
-            var sceneGeometryModel3D = new GeometryModel3D();
-            var sceneMeshGeometry3D = new MeshGeometry3D
-            {
-                TriangleIndices = Int32Collection.Parse("0, 1, 2, 2, 3, 0"),
-                Positions = Point3DCollection.Parse(
-                    $"-{sideLength},0,{sideLength} " +
-                    $"{sideLength},0,{sideLength} " +
-                    $"{sideLength},0,-{sideLength} " +
-                    $"-{sideLength},0,-{sideLength}")
-            };
-            var sceneMaterialGroup = new MaterialGroup();
-            sceneMaterialGroup.Children.Add(new DiffuseMaterial(Brushes.DimGray));
-            sceneGeometryModel3D.Geometry = sceneMeshGeometry3D;
-            sceneGeometryModel3D.Material = sceneMaterialGroup;
-            ModelVisual3D.Content = sceneGeometryModel3D;
+            var sceneModel3DGroup = new Model3DGroup();
+
+            // Scene plane building
+            var planeGeometryModel3D = new GeometryModel3D();
+            var planeMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddTriangle(planeMeshGeometry3D,
+                new Point3D(-sideLength, 0, sideLength),
+                new Point3D(sideLength, 0, sideLength),
+                new Point3D(sideLength, 0, -sideLength));
+            MeshGeometry3DHelper.AddTriangle(planeMeshGeometry3D,
+                new Point3D(-sideLength, 0, sideLength),
+                new Point3D(-sideLength, 0, -sideLength),
+                new Point3D(sideLength, 0, -sideLength));
+            planeGeometryModel3D.Geometry = planeMeshGeometry3D;
+            planeGeometryModel3D.Material = new DiffuseMaterial(Brushes.DimGray);
+            
+            // Coordinate system building
+            // Ox axis
+            var xAxisGeometryModel3D = new GeometryModel3D();
+            var xAxisMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddParallelepiped(xAxisMeshGeometry3D,
+                new Point3D(), new Point3D(sideLength, 0, 0), axisThickness);
+            xAxisGeometryModel3D.Geometry = xAxisMeshGeometry3D;
+            xAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Green);
+
+            // Oy axis
+            var yAxisGeometryModel3D = new GeometryModel3D();
+            var yAxisMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddParallelepiped(yAxisMeshGeometry3D,
+                new Point3D(), new Point3D(0, sideLength, 0), axisThickness);
+            yAxisGeometryModel3D.Geometry = yAxisMeshGeometry3D;
+            yAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Red);
+
+            // Oz axis
+            var zAxisGeometryModel3D = new GeometryModel3D();
+            var zAxisMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddParallelepiped(zAxisMeshGeometry3D,
+                new Point3D(), new Point3D(0, 0, sideLength), axisThickness);
+            zAxisGeometryModel3D.Geometry = zAxisMeshGeometry3D;
+            zAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Blue);
+
+            sceneModel3DGroup.Children.Add(planeGeometryModel3D);
+            sceneModel3DGroup.Children.Add(xAxisGeometryModel3D);
+            sceneModel3DGroup.Children.Add(yAxisGeometryModel3D);
+            sceneModel3DGroup.Children.Add(zAxisGeometryModel3D);
+            ModelVisual3D.Content = sceneModel3DGroup;
         }
     }
 }

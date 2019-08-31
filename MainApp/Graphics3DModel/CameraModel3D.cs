@@ -1,25 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ArmManipulatorApp.Graphics3DModel.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System.Windows.Media.Media3D;
 
-    using ArmManipulatorApp.Common;
-
-    using SystemPoint3D = System.Windows.Media.Media3D.Point3D;
-
-    public class CameraModel3D : Notifier
+    public class CameraModel3D
     {
         public PerspectiveCamera PerspectiveCamera;
 
-        public CameraModel3D(SystemPoint3D center, double distanceFromCenter)
+        public Point3D Position;
+        public Vector3D LookDirection;
+        public double FieldOfView;
+
+        public CameraModel3D(double distanceFromCenter)
         {
             this.PerspectiveCamera = new PerspectiveCamera();
-            PerspectiveCamera.Position = center;
+            var position = new Point3D(distanceFromCenter, distanceFromCenter / 2, distanceFromCenter);
+            PerspectiveCamera.Position = position;
+            var lookDirection = new Vector3D(- position.X, - position.Y, - position.Z);
+            PerspectiveCamera.LookDirection = lookDirection;
+            PerspectiveCamera.FieldOfView = 60;
+
+            var rotY = new RotateTransform3D();
+            var axisAngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
+            rotY.Rotation = axisAngleRotY;
+            var rotX = new RotateTransform3D();
+            var axisAngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
+            rotX.Rotation = axisAngleRotX;
+            var zoom = new ScaleTransform3D {CenterX = 0, CenterY = 0, CenterZ = 0};
+            
+            var transformGroup = new Transform3DGroup();
+            transformGroup.Children.Add(rotY);
+            transformGroup.Children.Add(rotX);
+            transformGroup.Children.Add(zoom);
+            PerspectiveCamera.Transform = transformGroup;
         }
 
         public void Move()

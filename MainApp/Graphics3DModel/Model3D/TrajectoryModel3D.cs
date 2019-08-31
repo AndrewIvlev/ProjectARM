@@ -12,11 +12,11 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
     using ArmManipulatorApp.Common;
 
-    public class TrajectoryModel3D : Notifier
+    public class TrajectoryModel3D
     {
         public Trajectory track;
 
-        public ModelVisual3D trackModelVisual3D;
+        public ModelVisual3D trackModelVisual3D;// TODO: change to List<ModelVisual3D>
         private List<Point3D> listTrajectoryPoints; // list for spliting trajectory
         private class TrajectoryPoint
         {
