@@ -79,17 +79,18 @@ namespace ArmManipulatorApp.ViewModel
                                                        this.dialogService.FilePath));
                                                this.armModel3D.arm.DefaultA();
                                                this.armModel3D.arm.CalcMetaDataForStanding();
+                                               this.armModel3D.BuildModelVisual3DCollection();
 
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               this.scene = new SceneModel3D(2 * maxArmLength, 0.1);
                                                this.camera = new CameraModel3D(2 * maxArmLength);
-                                               //foreach (var mv in armModel3D.armModelVisual3D)
-                                               //    this.viewport.Children.Add(mv);
-                                               //this.viewport.Children.Add(track3D.trackModelVisual3D);
-                                               this.viewport.Children.Add(scene.ModelVisual3D);
+                                               this.scene = new SceneModel3D(10 * maxArmLength, 0.1);
+                                               
                                                this.viewport.Camera = camera.PerspectiveCamera;
+                                               this.viewport.Children.Add(scene.ModelVisual3D);
+                                               foreach (var mv in armModel3D.armModelVisual3D)
+                                                   this.viewport.Children.Add(mv);
 
                                                this.dialogService.ShowMessage("File open!");
                                            }
@@ -117,6 +118,7 @@ namespace ArmManipulatorApp.ViewModel
                                                                    {
                                                                        try
                                                                        {
+                                                                           this.viewport.Children.Add(track3D.trackModelVisual3D);
                                                                        }
                                                                        catch (Exception ex)
                                                                        {

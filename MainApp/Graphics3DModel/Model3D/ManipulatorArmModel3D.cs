@@ -31,22 +31,22 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
         public ManipulatorArmModel3D(Arm arm)
         {
+            coeff = 1;
             this.arm = arm;
             armModelVisual3D = new List<ModelVisual3D>();
             storyboard = new Storyboard();
-            //CreateManipulator3DVisualModel();
         }
 
-        // TODO: rename to BuildArmModelVisual3D
-        private void CreateManipulator3DVisualModel()
+        public void ClearModelVisual3DCollection(Viewport3D viewport)
         {
-            if (armModelVisual3D.Count > 0)
-            {
-                //foreach (var arm in armModelVisual3D)
-                    //Viewport3D.Children.Remove(arm);
-            }
+            foreach (var mv in armModelVisual3D)
+                viewport.Children.Remove(mv);
+        }
 
-            var sup = new Vector3D(0, 0, 0); // startUnitPoint
+        public void BuildModelVisual3DCollection()
+        {
+
+            var sup = new Vector3D(0, 0, 0); // Start Unit Point
             for (var i = 0; i < arm.N + 1; i++)
             {
                 var unit = new ModelVisual3D();
@@ -54,30 +54,29 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 var unitMesh = new MeshGeometry3D();
                 var jointMesh = new MeshGeometry3D();
 
-                var eup = arm.F(i); // endUnitPoint
-                MeshGeometry3DHelper.AddParallelepiped(
-                    unitMesh, 
+                var eup = arm.F(i); // End Unit Point
+                MeshGeometry3DHelper.AddParallelepiped(unitMesh, 
                     new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
                     new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
-                    new Vector3D(0, 0, 1), 
-                    0.25);
+                    new Vector3D(1, 1, 1), 0.4);
                 MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 
-                var unitBrush = Brushes.CornflowerBlue;
-                var unitMaterial = new DiffuseMaterial(unitBrush);
+                var unitMaterial = new DiffuseMaterial(Brushes.CornflowerBlue);
                 var myGeometryModel = new GeometryModel3D(unitMesh, unitMaterial);
                 jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
 
-                var jointBrush = Brushes.OrangeRed;
+                SolidColorBrush jointBrush;
+                if (i == 0)
+                    jointBrush = Brushes.CadetBlue;
+                else
+                    jointBrush = arm.Units[i - 1].Type == 'R' ? Brushes.OrangeRed : Brushes.Green;
                 var jointMaterial = new DiffuseMaterial(jointBrush);
                 myGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
                 jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
 
                 unit.Content = jointsAndUnitsModelGroup;
-                var storyBoard = new Storyboard();
 
-                //Viewport3D.Children.Add(arm); TODO: binding Viewport3D
                 armModelVisual3D.Add(unit);
             }
         }

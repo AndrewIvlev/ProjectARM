@@ -36,8 +36,9 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 new Point3D(-halfSideLength, -halfSideLength, 0));
             planeGeometryModel3D.Geometry = planeMeshGeometry3D;
             planeGeometryModel3D.Material = new DiffuseMaterial(Brushes.DimGray);
+
+            #region Coordinate system
             
-            // Coordinate system building
             // Ox axis
             var xAxisGeometryModel3D = new GeometryModel3D();
             var xAxisMeshGeometry3D = new MeshGeometry3D();
@@ -64,6 +65,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 new Vector3D(1, 1, 0), axisThickness);
             zAxisGeometryModel3D.Geometry = zAxisMeshGeometry3D;
             zAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Blue);
+
+            #endregion Coordinate system building
 
             sceneModel3DGroup.Children.Add(planeGeometryModel3D);
             sceneModel3DGroup.Children.Add(xAxisGeometryModel3D);
