@@ -53,8 +53,6 @@ namespace ArmManipulatorApp.ViewModel
             this.fileService = fileService;
             this.viewport = viewport;
 
-            // Здесь можно задать значения (по умолчанию) для arm и track
-            // arm = new ManipulatorArmModel3D();
             offset = new Point(504, 403);
             coeff = 1; // 0.5;
             mouseMod = 0;
@@ -271,41 +269,93 @@ namespace ArmManipulatorApp.ViewModel
 
         #endregion
 
-        #region Camera
-        
-        private RelayCommand mouseWheelOnCanvas;
-        public RelayCommand MouseWheelOnCanvas
+        #region Canvas Events
+
+        public ICommand MouseWheel
         {
             get
             {
-                return this.mouseWheelOnCanvas ??
-                       (this.mouseWheelOnCanvas = new RelayCommand(
-                           obj =>
-                           {
-                               try
-                               {
-                                   // TODO: fix this to independent from canvas size
-                                   if (camera.Zoom.ScaleX < 1)
-                                   {
-                                       camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 555;
-                                       camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 555;
-                                       camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 555;
-                                   }
-                                   else
-                                   {
-                                       camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 333;
-                                       camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 333;
-                                       camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 333;
-                                   }
-                               }
-                               catch (Exception ex)
-                               {
+                return new RelayCommand(
+                    obj =>
+                    {
+                        try
+                        {
+                            // TODO: fix this to independent from canvas size
+                            if (camera.Zoom.ScaleX < 1)
+                            {
+                                camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                                camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                                camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                            }
+                            else
+                            {
+                                camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                                camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                                camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
 
-                               }
-                           }
-                       ));
+                        }
+                    },
+                    (obj) => this.camera != null);
             }
-        }
+        }        
+        
+        public ICommand MouseMove
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                    {
+                        try
+                        {
+                            switch (mouseMod)
+                            {
+                                case 0:
+                                    if (Mouse.LeftButton == MouseButtonState.Pressed)
+                                    {
+                                        var nextMousePos = Mouse.GetPosition(obj as IInputElement);
+                                        var dxdy = new Point(nextMousePos.X - MousePos.X, nextMousePos.Y - MousePos.Y);
+                                        camera.AngleRotX.Angle += dxdy.Y;
+                                        camera.AngleRotY.Angle -= dxdy.X;
+                                        // TODO: нужно добавить ограничение на движение камеры, чтобы нельзя было опуститься под сцену(упасть в текстуры)
+                                        //if (RotX.Angle > 90 || -90 > RotX.Angle) RotX.Angle = 0;
+                                        //if (RotY.Angle > 180 || -180 > RotY.Angle) RotY.Angle = 0;
+                                        MousePos = nextMousePos;
+                                    }
+                                    else if (Mouse.LeftButton == MouseButtonState.Released)
+                                    {
+                                        MousePos = Mouse.GetPosition(obj as IInputElement);
+                                    }
+
+                                    break;
+                                case 1:
+                                    //if (this.trackModelVisual3D != null)
+                                    //    Viewport3D.Children.Remove(this.trackModelVisual3D);
+                                    //var myModel3DGroup = new Model3DGroup();
+                                    //this.trackModelVisual3D = new ModelVisual3D();
+
+                                    ////TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
+                                    //var hitParams = new PointHitTestParameters(e.GetPosition(this));
+                                    //var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
+                                    //    new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
+                                    //myModel3DGroup.Children.Add(myGeometryModel);
+                                    //this.trackModelVisual3D.Content = myModel3DGroup;
+                                    //Viewport3D.Children.Add(this.trackModelVisual3D);
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    },
+                    (obj) => this.camera != null);
+            }
+        }   
 
         #endregion
 
@@ -645,50 +695,6 @@ namespace ArmManipulatorApp.ViewModel
         //    transformGroup.Children.Add(rotateTransformByEnd);
 
         //    trajectoryLine.lineModelVisual3D.Transform = transformGroup;
-        //}
-
-        //private RelayCommand canvas_MouseMove;
-        //public RelayCommand Canvas_MouseMove(object sender, MouseEventArgs e)
-        //{
-        //    switch (mouseMod)
-        //    {
-        //        case 0:
-        //            if (e.LeftButton == MouseButtonState.Pressed)
-        //            {
-        //                // Camera moving
-        //                //Moving mouse with holding mouse button
-        //                var nextMousePos = e.GetPosition(this);
-        //                var dxdy = new Point(nextMousePos.X - MousePos.X, nextMousePos.Y - MousePos.Y);
-        //                RotX.Angle += dxdy.Y;
-        //                RotY.Angle += dxdy.X;
-        //                //if (RotX.Angle > 90 || -90 > RotX.Angle) RotX.Angle = 0;
-        //                //if (RotY.Angle > 180 || -180 > RotY.Angle) RotY.Angle = 0;
-        //                MousePos = nextMousePos;
-        //            }
-        //            else if (e.LeftButton == MouseButtonState.Released)
-        //            {
-        //                //Moving mouse when mouse button up
-        //            }
-        //            break;
-        //        case 1:
-        //            if (this.trackModelVisual3D != null)
-        //                Viewport3D.Children.Remove(this.trackModelVisual3D);
-        //            var myModel3DGroup = new Model3DGroup();
-        //            this.trackModelVisual3D = new ModelVisual3D();
-
-        //            //TODO: fix moving path cursor (when resize window this shit doesn't work), remove this fucking coeffs (0.0531177)
-        //            var hitParams = new PointHitTestParameters(e.GetPosition(this));
-        //            var myGeometryModel = GetCircleModel(0.5, new Vector3D(0, 1, 0),
-        //                new Point3D((hitParams.HitPoint.X - offset.X) * 0.0531177, 0, (hitParams.HitPoint.Y - offset.Y) * 0.0531177), 14);
-        //            myModel3DGroup.Children.Add(myGeometryModel);
-        //            this.trackModelVisual3D.Content = myModel3DGroup;
-        //            Viewport3D.Children.Add(this.trackModelVisual3D);
-        //            break;
-        //    }
-        //}
-
-        //private void canvas_MouseLeftButtonUp(object sender, MouseEventArgs e)
-        //{
         //}
 
         #endregion

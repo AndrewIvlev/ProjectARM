@@ -89,7 +89,7 @@
         </Grid>
 
         <Grid Grid.Column="1" Grid.Row="0">
-            <Canvas Grid.Row="0" Grid.Column="0" 
+            <Canvas x:Name="CanvasForEvents" Grid.Row="0" Grid.Column="0" 
                     Background="Transparent" >
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseLeftButtonUp">
@@ -100,20 +100,19 @@
                         <i:InvokeCommandAction 
                             Command="{Binding MouseLeftButtonDownOnCanvas}" />
                     </i:EventTrigger>
-                    <i:EventTrigger EventName="MouseMove">
-                        <i:InvokeCommandAction 
-                            Command="{Binding MouseMoveOnCanvas}" />
-                    </i:EventTrigger>
-                    <i:EventTrigger EventName="MouseWheel">
-                        <command:EventToCommand Command="{Binding MouseWheelOnCanvas}" />
-                    </i:EventTrigger>
-                    <i:EventTrigger EventName="Closing">
-                    </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Canvas>
 
             <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="0" >
 
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseMove">
+                        <command:EventToCommand Command="{Binding MouseMove}" PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseWheel">
+                        <command:EventToCommand Command="{Binding MouseWheel}" PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                     <Viewport3D.Children>
 
                         <ModelVisual3D>

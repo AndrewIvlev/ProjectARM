@@ -27,13 +27,13 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             var planeGeometryModel3D = new GeometryModel3D();
             var planeMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddTriangle(planeMeshGeometry3D,
-                new Point3D(-halfSideLength, halfSideLength, 0),
+                new Point3D(halfSideLength, -halfSideLength, 0),
                 new Point3D(halfSideLength, halfSideLength, 0),
-                new Point3D(halfSideLength, -halfSideLength, 0));
+                new Point3D(-halfSideLength, halfSideLength, 0));
             MeshGeometry3DHelper.AddTriangle(planeMeshGeometry3D,
+                new Point3D(halfSideLength, -halfSideLength, 0),
                 new Point3D(-halfSideLength, halfSideLength, 0),
-                new Point3D(-halfSideLength, -halfSideLength, 0),
-                new Point3D(halfSideLength, -halfSideLength, 0));
+                new Point3D(-halfSideLength, -halfSideLength, 0));
             planeGeometryModel3D.Geometry = planeMeshGeometry3D;
             planeGeometryModel3D.Material = new DiffuseMaterial(Brushes.DimGray);
             
@@ -42,7 +42,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             var xAxisGeometryModel3D = new GeometryModel3D();
             var xAxisMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddParallelepiped(xAxisMeshGeometry3D,
-                new Point3D(), new Point3D(halfSideLength, 0, 0), axisThickness);
+                new Point3D(), new Point3D(halfSideLength, 0, 0), 
+                new Vector3D(0, 0, 1), axisThickness);
             xAxisGeometryModel3D.Geometry = xAxisMeshGeometry3D;
             xAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Green);
 
@@ -50,7 +51,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             var yAxisGeometryModel3D = new GeometryModel3D();
             var yAxisMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddParallelepiped(yAxisMeshGeometry3D,
-                new Point3D(), new Point3D(0, halfSideLength, 0), axisThickness);
+                new Point3D(), new Point3D(0, halfSideLength, 0),
+                new Vector3D(0, 0, 1), axisThickness);
             yAxisGeometryModel3D.Geometry = yAxisMeshGeometry3D;
             yAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Red);
 
@@ -58,7 +60,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             var zAxisGeometryModel3D = new GeometryModel3D();
             var zAxisMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddParallelepiped(zAxisMeshGeometry3D,
-                new Point3D(), new Point3D(0, 0, halfSideLength), axisThickness);
+                new Point3D(), new Point3D(0, 0, halfSideLength), 
+                new Vector3D(1, 1, 0), axisThickness);
             zAxisGeometryModel3D.Geometry = zAxisMeshGeometry3D;
             zAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Blue);
 

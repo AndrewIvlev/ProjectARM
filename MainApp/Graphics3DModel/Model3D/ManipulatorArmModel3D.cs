@@ -58,7 +58,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 MeshGeometry3DHelper.AddParallelepiped(
                     unitMesh, 
                     new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
-                    new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 
+                    new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
+                    new Vector3D(0, 0, 1), 
                     0.25);
                 MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
@@ -177,7 +178,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                         var sup = this.arm.F(i - 1); // startUnitPoint
                         var eup = this.arm.F(i); // endUnitPoint
                         MeshGeometry3DHelper.AddParallelepiped(unit, new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
-                                              new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.25);
+                                              new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
+                                              new Vector3D(0, 0, 1),  0.25);
                         MeshGeometry3DHelper.AddSphere(joint, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
 
                         var unitBrush = Brushes.CornflowerBlue;

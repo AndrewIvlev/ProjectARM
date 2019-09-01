@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using OxyPlot.Axes;
 
 namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
@@ -15,14 +16,16 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
         public ScaleTransform3D Zoom;
         public RotateTransform3D RotX;
+        public AxisAngleRotation3D AngleRotX;
         public RotateTransform3D RotY;
+        public AxisAngleRotation3D AngleRotY;
 
         public CameraModel3D(double distanceFromCenter)
         {
             this.PerspectiveCamera = new PerspectiveCamera();
-            var position = new Point3D(distanceFromCenter, distanceFromCenter / 2, distanceFromCenter);
+            var position = new Point3D(distanceFromCenter, distanceFromCenter, distanceFromCenter);
             PerspectiveCamera.Position = position;
-            var lookDirection = new Vector3D(- position.X, - position.Y / 2, - position.Z);
+            var lookDirection = new Vector3D(- position.X, - position.Y, - position.Z);
             PerspectiveCamera.LookDirection = lookDirection;
             PerspectiveCamera.FieldOfView = 60;
 
@@ -32,11 +35,15 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             RotY = new RotateTransform3D();
             var axisAngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
             RotY.Rotation = axisAngleRotY;
+            AngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
+            RotY.Rotation = AngleRotY;
 
             RotX = new RotateTransform3D();
             var axisAngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
             RotX.Rotation = axisAngleRotX;
-            
+            AngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
+            RotX.Rotation = AngleRotX;
+
             var transformGroup = new Transform3DGroup();
             transformGroup.Children.Add(Zoom);
             transformGroup.Children.Add(RotY);

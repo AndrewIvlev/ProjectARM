@@ -32,16 +32,10 @@ namespace MainApp.Graphics3DModel.Model3D
         #endregion
 
         #region Parallelepiped
-
-        public static void AddParallelepiped(MeshGeometry3D mesh, Point3D start, Point3D end, double thickness)
-        {
-            var up = new Vector3D(0, 0, 1); //TODO: this vector should be directed to camera position from center ?
-            AddSegment(mesh, new Point3D(start.X, start.Y, start.Z), new Point3D(end.X, end.Y, end.Z), up, thickness);
-        }
-
+        
         // If extend is true, extend the segment by half the
         // thickness so segments with the same end points meet nicely.
-        private static void AddSegment(
+        public static void AddParallelepiped(
             MeshGeometry3D mesh,
             Point3D point1,
             Point3D point2,
