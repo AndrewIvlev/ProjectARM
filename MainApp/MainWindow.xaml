@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ArmManipulatorApp"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:command="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
         Icon="window_icon.ico"
         Title="ProjARM" Height="768" Width="1024">
@@ -93,23 +94,20 @@
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseLeftButtonUp">
                         <i:InvokeCommandAction 
-                            Command="{Binding DoubleCommand}"
-                            CommandParameter="{Binding SelectedPhone}" />
+                            Command="{Binding MouseLeftButtonUpOnCanvas}"/>
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseLeftButtonDown">
                         <i:InvokeCommandAction 
-                            Command="{Binding DoubleCommand}"
-                            CommandParameter="{Binding SelectedPhone}" />
+                            Command="{Binding MouseLeftButtonDownOnCanvas}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseMove">
                         <i:InvokeCommandAction 
-                            Command="{Binding DoubleCommand}"
-                            CommandParameter="{Binding SelectedPhone}" />
+                            Command="{Binding MouseMoveOnCanvas}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="MouseWheel">
-                        <i:InvokeCommandAction 
-                            Command="{Binding DoubleCommand}"
-                            CommandParameter="{Binding SelectedPhone}" />
+                        <command:EventToCommand Command="{Binding MouseWheelOnCanvas}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="Closing">
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Canvas>

@@ -1,4 +1,6 @@
-﻿namespace ArmManipulatorApp.ViewModel
+﻿using System.Windows.Navigation;
+
+namespace ArmManipulatorApp.ViewModel
 {
     using System;
     using System.Collections.Generic;
@@ -84,11 +86,10 @@
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
                                                this.scene = new SceneModel3D(2 * maxArmLength, 0.1);
-                                               this.camera = new CameraModel3D(new Point3D(), 2 * maxArmLength);
-                                               var c = new PerspectiveCamera();
-                                               foreach (var mv in armModel3D.armModelVisual3D)
-                                                   this.viewport.Children.Add(mv);
-                                               this.viewport.Children.Add(track3D.trackModelVisual3D);
+                                               this.camera = new CameraModel3D(2 * maxArmLength);
+                                               //foreach (var mv in armModel3D.armModelVisual3D)
+                                               //    this.viewport.Children.Add(mv);
+                                               //this.viewport.Children.Add(track3D.trackModelVisual3D);
                                                this.viewport.Children.Add(scene.ModelVisual3D);
                                                this.viewport.Camera = camera.PerspectiveCamera;
 
@@ -271,6 +272,41 @@
         #endregion
 
         #region Camera
+        
+        private RelayCommand mouseWheelOnCanvas;
+        public RelayCommand MouseWheelOnCanvas
+        {
+            get
+            {
+                return this.mouseWheelOnCanvas ??
+                       (this.mouseWheelOnCanvas = new RelayCommand(
+                           obj =>
+                           {
+                               try
+                               {
+                                   // TODO: fix this to independent from canvas size
+                                   if (camera.Zoom.ScaleX < 1)
+                                   {
+                                       camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                                       camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                                       camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 555;
+                                   }
+                                   else
+                                   {
+                                       camera.Zoom.ScaleX += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                                       camera.Zoom.ScaleY += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                                       camera.Zoom.ScaleZ += (double) (obj as MouseWheelEventArgs).Delta / 333;
+                                   }
+                               }
+                               catch (Exception ex)
+                               {
+
+                               }
+                           }
+                       ));
+            }
+        }
+
         #endregion
 
         #region Temporary region for refactoring
@@ -611,8 +647,8 @@
         //    trajectoryLine.lineModelVisual3D.Transform = transformGroup;
         //}
 
-        //private EventDescriptor canvas_MouseMove;
-        //public EventDescriptor Canvas_MouseMove(object sender, MouseEventArgs e)
+        //private RelayCommand canvas_MouseMove;
+        //public RelayCommand Canvas_MouseMove(object sender, MouseEventArgs e)
         //{
         //    switch (mouseMod)
         //    {
@@ -654,25 +690,6 @@
         //private void canvas_MouseLeftButtonUp(object sender, MouseEventArgs e)
         //{
         //}
-
-        private EventDescriptor canvas_MouseWheel;
-        public EventDescriptor Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            // Camera zoom
-            // TODO: fix this to independent from canvas size
-            if (ScaleTransform3D.ScaleX < 1)
-            {
-                ScaleTransform3D.ScaleX += (double)e.Delta / 555;
-                ScaleTransform3D.ScaleY += (double)e.Delta / 555;
-                ScaleTransform3D.ScaleZ += (double)e.Delta / 555;
-            }
-            else
-            {
-                ScaleTransform3D.ScaleX += (double)e.Delta / 333;
-                ScaleTransform3D.ScaleY += (double)e.Delta / 333;
-                ScaleTransform3D.ScaleZ += (double)e.Delta / 333;
-            }
-        }
 
         #endregion
         #endregion

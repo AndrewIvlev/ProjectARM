@@ -1,4 +1,6 @@
-﻿namespace ArmManipulatorApp
+﻿using System.Windows.Input;
+
+namespace ArmManipulatorApp
 {
     using System.Windows;
 
