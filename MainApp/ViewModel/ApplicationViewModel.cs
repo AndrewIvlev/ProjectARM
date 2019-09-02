@@ -85,7 +85,7 @@ namespace ArmManipulatorApp.ViewModel
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
                                                this.camera = new CameraModel3D(2 * maxArmLength);
-                                               this.scene = new SceneModel3D(10 * maxArmLength, 0.1);
+                                               this.scene = new SceneModel3D(10 * maxArmLength, 1);
                                                
                                                this.viewport.Camera = camera.PerspectiveCamera;
                                                this.viewport.Children.Add(scene.ModelVisual3D);

@@ -55,10 +55,14 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 var jointMesh = new MeshGeometry3D();
 
                 var eup = arm.F(i); // End Unit Point
-                MeshGeometry3DHelper.AddParallelepiped(unitMesh, 
-                    new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                //MeshGeometry3DHelper.AddParallelepiped(unitMesh, 
+                //    new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
+                //    new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
+                //    new Vector3D(1, 1, 1), 0.4);
+                MeshGeometry3DHelper.AddSmoothCylinder(unitMesh,
                     new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
-                    new Vector3D(1, 1, 1), 0.4);
+                    new Vector3D((eup.X - sup.X) * coeff, (eup.Y - sup.Y) * coeff, (eup.Z - sup.Z) * coeff),
+                    3);
                 MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
                 sup = eup;
 

@@ -89,10 +89,8 @@
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Circle3DModel.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Rectangle3DModel.cs" />
     <Compile Include="Graphics3DModel\Model3D\SceneModel3D.cs" />
-    <Compile Include="Graphics3DModel\Model3D\Triangle3DModel.cs" />
+    <Compile Include="Graphics3DModel\Model3D\MeshGeometry3DHelper.cs" />
     <Compile Include="MathModel\Delta.cs" />
     <Compile Include="MathModel\Arm\Arm.cs" />
     <Compile Include="MathModel\Arm\ArmMetaDataCalculator.cs" />
