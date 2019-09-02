@@ -9,8 +9,8 @@
     <ProjectGuid>{BBA8ED97-5C6A-43E2-AD46-9CECD82407C0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ManipulationSystemLibraryTests</RootNamespace>
-    <AssemblyName>ManipulationSystemLibraryTests</AssemblyName>
+    <RootNamespace>ArmManipulatorApp_Tests</RootNamespace>
+    <AssemblyName>ArmManipulatorApp_Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -62,6 +62,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="ManipConfigFiles\ConfigFromGreenBook.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -87,7 +88,7 @@
     <Folder Include="Test Tracks\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MainApp\ArmManipulatorApp.csproj">
+    <ProjectReference Include="..\ArmManipulatorApp\ArmManipulatorApp.csproj">
       <Project>{A6671868-A744-446D-84DB-86675EEE7250}</Project>
       <Name>ArmManipulatorApp</Name>
     </ProjectReference>
