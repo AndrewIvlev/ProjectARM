@@ -1,14 +1,17 @@
 ﻿<Window x:Class="ArmManipulatorApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ArmManipulatorApp"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:command="http://www.galasoft.ch/mvvmlight"
+        xmlns:dvc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024">
+        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded">
     <Window.Resources>
         <Style x:Key="ButtonStyle">
             <Setter Property="Control.FontSize" Value="14" />
@@ -48,7 +51,7 @@
                     <Separator Height="10"></Separator>
 
                     <Grid>
-                        <!-- Chart /-->
+                        <WindowsFormsHost><dvc:Chart x:Name="DeltaChart" Height="60"/></WindowsFormsHost>
                         <StackPanel Visibility="Hidden">
                             <Button Content="Up/Down path points" Command="{Binding upDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
                             <Button Content="Finish building a path" Command="{Binding finishBuildingTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
@@ -81,7 +84,7 @@
                 <ProgressBar Height="18" Margin="10, 5"/>
                 <DockPanel VerticalAlignment="Bottom"  Margin="10, 5">
                     <Button DockPanel.Dock="Left" Content="Calculate" Width="97" Command="{Binding trackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
-                    <Button DockPanel.Dock="Right" Content="Cancel" Width="81" Command="{Binding cancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
+                    <Button DockPanel.Dock="Right" Content="Cancel" Width="88" Command="{Binding cancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
                 </DockPanel>
             </StackPanel>
         </Grid>
@@ -91,13 +94,13 @@
 
         <Grid Grid.Column="2" Grid.Row="1">
             <DockPanel LastChildFill="True" >
-                <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="15"/>
-                <DockPanel Margin="15, 0">
-                    <Button DockPanel.Dock="Left" Content="Start" Command="{Binding startStopAnimation}" Style="{StaticResource ButtonStyle}" Margin="5,11" Width="72" />
-                    <Button DockPanel.Dock="Left" Content="Pause" Command="{Binding pauseAnimation}" Style="{StaticResource ButtonStyle}" Margin="5,11" Width="67" />
-                    <Label DockPanel.Dock="Left" Content="Speed" FontSize="14" VerticalContentAlignment="Center" Width="51"/>
-                    <Slider x:Name="SliderSpeed" VerticalAlignment="Center" Width="120"/>
-                </DockPanel>
+                <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="25, 10"/>
+                <WrapPanel ItemHeight="50" ItemWidth="100" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Start" Command="{Binding startStopAnimation}" Style="{StaticResource ButtonStyle}"  />
+                    <Button Content="Pause" Command="{Binding pauseAnimation}" Style="{StaticResource ButtonStyle}"  />
+                    <Label Content="Speed" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10" Width="62"/>
+                    <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
+                </WrapPanel>
             </DockPanel>
         </Grid>
 
