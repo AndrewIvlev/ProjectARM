@@ -13,11 +13,17 @@ namespace ArmManipulatorApp
         public MainWindow()
         {
             this.InitializeComponent();
-            this.DataContext = new ApplicationViewModel(new DefaultDialogService(), new JsonFileService(), this.Viewport3D);
+            this.DataContext = new ApplicationViewModel(
+                new DefaultDialogService(),
+                new JsonFileService(),
+                this.Viewport3D,
+                this.ArmConfigTextBox,
+                this.DeltaChart);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // TODO: Move it to ApplicationViewModel.cs
             // Все графики находятся в пределах области построения ChartArea, создадим ее
             DeltaChart.ChartAreas.Add(new ChartArea("Default"));
 

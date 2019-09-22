@@ -18,6 +18,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
         public AxisAngleRotation3D AngleRotX;
         public RotateTransform3D RotY;
         public AxisAngleRotation3D AngleRotY;
+        public RotateTransform3D RotZ;
+        public AxisAngleRotation3D AngleRotZ;
 
         public CameraModel3D(double distanceFromCenter)
         {
@@ -26,27 +28,35 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             PerspectiveCamera.Position = position;
             var lookDirection = new Vector3D(- position.X, - position.Y, - position.Z);
             PerspectiveCamera.LookDirection = lookDirection;
+            PerspectiveCamera.UpDirection = new Vector3D(0, 0, 1);
             PerspectiveCamera.FieldOfView = 60;
 
             
             Zoom = new ScaleTransform3D {CenterX = 0, CenterY = 0, CenterZ = 0};
-
-            RotY = new RotateTransform3D();
-            var axisAngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
-            RotY.Rotation = axisAngleRotY;
-            AngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
-            RotY.Rotation = AngleRotY;
-
+            
             RotX = new RotateTransform3D();
             var axisAngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
             RotX.Rotation = axisAngleRotX;
             AngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
             RotX.Rotation = AngleRotX;
+            
+            RotY = new RotateTransform3D();
+            var axisAngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
+            RotY.Rotation = axisAngleRotY;
+            AngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
+            RotY.Rotation = AngleRotY;
+            
+            RotZ = new RotateTransform3D();
+            var axisAngleRotZ = new AxisAngleRotation3D {Axis = new Vector3D(0, 0, 1)};
+            RotZ.Rotation = axisAngleRotZ;
+            AngleRotZ = new AxisAngleRotation3D {Axis = new Vector3D(0, 0, 1)};
+            RotZ.Rotation = AngleRotZ;
 
             var transformGroup = new Transform3DGroup();
             transformGroup.Children.Add(Zoom);
             transformGroup.Children.Add(RotY);
             transformGroup.Children.Add(RotX);
+            transformGroup.Children.Add(RotZ);
             PerspectiveCamera.Transform = transformGroup;
         }
     }

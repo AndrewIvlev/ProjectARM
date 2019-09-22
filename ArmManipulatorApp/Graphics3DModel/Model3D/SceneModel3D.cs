@@ -42,33 +42,24 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             // Ox axis
             var xAxisGeometryModel3D = new GeometryModel3D();
             var xAxisMeshGeometry3D = new MeshGeometry3D();
-            //MeshGeometry3DHelper.AddParallelepiped(xAxisMeshGeometry3D,
-            //    new Point3D(), new Point3D(halfSideLength, 0, 0), 
-            //    new Vector3D(0, 0, 1), axisThickness);
             MeshGeometry3DHelper.AddSmoothCylinder(xAxisMeshGeometry3D,
-                new Point3D(halfSideLength, 0, 0), new Vector3D(1, 0, 0), axisThickness);
+                new Point3D(0, 0, 0), new Vector3D(halfSideLength, 0, 0), axisThickness);
             xAxisGeometryModel3D.Geometry = xAxisMeshGeometry3D;
             xAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Green);
 
             // Oy axis
             var yAxisGeometryModel3D = new GeometryModel3D();
             var yAxisMeshGeometry3D = new MeshGeometry3D();
-            //MeshGeometry3DHelper.AddParallelepiped(yAxisMeshGeometry3D,
-            //    new Point3D(), new Point3D(0, halfSideLength, 0),
-            //    new Vector3D(0, 0, 1), axisThickness);
             MeshGeometry3DHelper.AddSmoothCylinder(yAxisMeshGeometry3D,
-                new Point3D(0, halfSideLength, 0), new Vector3D(0, 1, 0), axisThickness);
+                new Point3D(0, 0, 0), new Vector3D(0, halfSideLength, 0), axisThickness);
             yAxisGeometryModel3D.Geometry = yAxisMeshGeometry3D;
             yAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Red);
 
             // Oz axis
             var zAxisGeometryModel3D = new GeometryModel3D();
             var zAxisMeshGeometry3D = new MeshGeometry3D();
-            //MeshGeometry3DHelper.AddParallelepiped(zAxisMeshGeometry3D,
-            //    new Point3D(), new Point3D(0, 0, halfSideLength), 
-            //    new Vector3D(1, 1, 0), axisThickness);
             MeshGeometry3DHelper.AddSmoothCylinder(zAxisMeshGeometry3D,
-                new Point3D(0, 0, halfSideLength), new Vector3D(0, 0, 1), axisThickness);
+                new Point3D(0, 0, 0), new Vector3D(0, 0, halfSideLength), axisThickness);
             zAxisGeometryModel3D.Geometry = zAxisMeshGeometry3D;
             zAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Blue);
 

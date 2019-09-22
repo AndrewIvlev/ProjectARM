@@ -78,7 +78,9 @@
             ? RootB.ColumnAsVector3D(3).Length
             : Units[unit].B.ColumnAsVector3D(3).Length;
 
-        public Vector3D F(int i) => ((BlockMatrix) T[i]).ColumnAsVector3D(3);
+        public Vector3D F(int i) => ((BlockMatrix)this.T[i]).ColumnAsVector3D(3);
+
+        public Vector3D Fn() => ((BlockMatrix)this.T[this.N]).ColumnAsVector3D(3);
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
         public Vector3D GetdF(int i) => ((BlockMatrix) dT[i]).ColumnAsVector3D(3);

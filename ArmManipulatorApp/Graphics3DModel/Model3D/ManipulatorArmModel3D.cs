@@ -1,6 +1,4 @@
-﻿using MainApp.Graphics3DModel.Model3D;
-
-namespace ArmManipulatorApp.Graphics3DModel.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System;
     using System.Collections.Generic;
@@ -14,6 +12,8 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
     using ArmManipulatorArm.MathModel;
     using ArmManipulatorArm.MathModel.Arm;
+
+    using MainApp.Graphics3DModel.Model3D;
 
     public class ManipulatorArmModel3D
     {
@@ -31,7 +31,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
         public ManipulatorArmModel3D(Arm arm)
         {
-            coeff = 1;
+            coeff = 3;
             this.arm = arm;
             armModelVisual3D = new List<ModelVisual3D>();
             storyboard = new Storyboard();
@@ -55,15 +55,11 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 var jointMesh = new MeshGeometry3D();
 
                 var eup = arm.F(i); // End Unit Point
-                //MeshGeometry3DHelper.AddParallelepiped(unitMesh, 
-                //    new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
-                //    new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
-                //    new Vector3D(1, 1, 1), 0.4);
                 MeshGeometry3DHelper.AddSmoothCylinder(unitMesh,
-                    new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff),
+                    new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
                     new Vector3D((eup.X - sup.X) * coeff, (eup.Y - sup.Y) * coeff, (eup.Z - sup.Z) * coeff),
-                    3);
-                MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 0.4, 8, 8);
+                    6);
+                MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 9, 8, 8);
                 sup = eup;
 
                 var unitMaterial = new DiffuseMaterial(Brushes.CornflowerBlue);
@@ -72,7 +68,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
 
                 SolidColorBrush jointBrush;
                 if (i == 0)
-                    jointBrush = Brushes.CadetBlue;
+                    jointBrush = Brushes.Black;
                 else
                     jointBrush = arm.Units[i - 1].Type == 'R' ? Brushes.OrangeRed : Brushes.Green;
                 var jointMaterial = new DiffuseMaterial(jointBrush);
@@ -99,7 +95,6 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
             }
 
             storyboard.Children = timelineCollection;
-
             storyboard.Begin();
         }
 
@@ -116,7 +111,6 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                 var center = arm.F(i);
                 switch (arm.Units[i].Type)
                 {
-                    #region case R
                     case 'R':
                         transformation = new RotateTransform3D();
                         (transformation as RotateTransform3D).CenterX = center.X;
@@ -134,9 +128,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                         transformGroup[i] = new Transform3DGroup();
                         for (var j = i; j < arm.N; j++)
                             transformGroup[j].Children.Add(transformation);
-
                         break;
-                    #endregion
                     case 'P':
                         transformation = new TranslateTransform3D();
 
@@ -225,61 +217,6 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// Generates a model of a Circle given specified parameters
-        /// </summary>
-        /// <param name="radius">Radius of circle</param>
-        /// <param name="normal">Vector normal to circle's plane</param>
-        /// <param name="center">Center position of the circle</param>
-        /// <param name="resolution">Number of slices to iterate the circumference of the circle</param>
-        /// <returns>A GeometryModel3D representation of the circle</returns>
-        private GeometryModel3D GetCircleModel(double radius, Vector3D normal, Point3D center, int resolution)
-        {
-            var geo = new MeshGeometry3D();
-
-            // Generate the circle in the XZ-plane
-            // Add the center first
-            geo.Positions.Add(new Point3D(0, 0, 0));
-
-            // Iterate from angle 0 to 2*PI
-            var t = 2 * Math.PI / resolution;
-            for (var i = 0; i < resolution; i++)
-            {
-                geo.Positions.Add(new Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
-            }
-
-            // Add points to MeshGeometry3D
-            for (var i = 0; i < resolution; i++)
-            {
-                var a = 0;
-                var b = i + 1;
-                var c = (i < (resolution - 1)) ? i + 2 : 1;
-
-                geo.TriangleIndices.Add(a);
-                geo.TriangleIndices.Add(b);
-                geo.TriangleIndices.Add(c);
-            }
-
-            var brush3 = Brushes.Purple;
-            var material3 = new DiffuseMaterial(brush3);
-            var mod = new GeometryModel3D(geo, material3);
-
-            // Create transforms
-            var trn = new Transform3DGroup();
-            // Up Vector (normal for XZ-plane)
-            var up = new Vector3D(0, 1, 0);
-            // Set normal length to 1
-            normal.Normalize();
-            var axis = Vector3D.CrossProduct(up, normal); // Cross product is rotation axis
-            var angle = Vector3D.AngleBetween(up, normal); // Angle to rotate
-            trn.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(axis, angle)));
-            trn.Children.Add(new TranslateTransform3D(new Vector3D(center.X, center.Y, center.Z)));
-
-            mod.Transform = trn;
-
-            return mod;
         }
     }
 }

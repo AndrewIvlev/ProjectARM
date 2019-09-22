@@ -258,5 +258,41 @@
         }
 
         #endregion
+
+        #region Circle
+        
+
+        /// <summary>
+        /// Generates a model of a Circle given specified parameters
+        /// </summary>
+        /// <param name="radius">Radius of circle</param>
+        /// <param name="resolution">Number of slices to iterate the circumference of the circle</param>
+        public static void AddCircle(MeshGeometry3D mesh, double radius, int resolution)
+        {
+            // Generate the circle in the XZ-plane
+            // Add the center first
+            mesh.Positions.Add(new Point3D(0, 0, 0));
+
+            // Iterate from angle 0 to 2*PI
+            var t = 2 * Math.PI / resolution;
+            for (var i = 0; i < resolution; i++)
+            {
+                mesh.Positions.Add(new Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
+            }
+
+            // Add points to MeshGeometry3D
+            for (var i = 0; i < resolution; i++)
+            {
+                var a = 0;
+                var b = i + 1;
+                var c = (i < (resolution - 1)) ? i + 2 : 1;
+
+                mesh.TriangleIndices.Add(a);
+                mesh.TriangleIndices.Add(b);
+                mesh.TriangleIndices.Add(c);
+            }
+        }
+
+        #endregion
     }
 }

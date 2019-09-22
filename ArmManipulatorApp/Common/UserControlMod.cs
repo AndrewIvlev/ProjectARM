@@ -8,10 +8,10 @@ namespace MainApp.Common
 {
     public enum UserMod
     {
-        CameraRotationMod,
-        TrajectoryAnchorPointCreationMod,
-        TrajectoryAnchorPointUpAndDownMod,
-        TrajectoryEditingMod
+        CameraRotation,
+        TrajectoryAnchorPointCreation,
+        TrajectoryAnchorPointUpAndDown,
+        TrajectoryEditing
     }
 
     public static class UserControlMod

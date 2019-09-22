@@ -22,8 +22,9 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.85*"></RowDefinition>
-            <RowDefinition Height="0.15*" ></RowDefinition>
+            <RowDefinition Height="0.025*"></RowDefinition>
+            <RowDefinition Height="0.46*"></RowDefinition>
+            <RowDefinition Height="0.46*" ></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.25*"></ColumnDefinition>
@@ -31,95 +32,110 @@
             <ColumnDefinition Width="0.75*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.Row="0">
-            <Label HorizontalAlignment="Center" FontSize="20" FontWeight="Bold">ProjectARM</Label>
-            <TextBox TextWrapping="WrapWithOverflow" >
-                is a 3D visualization of the algorithm for planning the movement of the manipulator along the trajectory.
-            </TextBox>
-            <Button Content="Choose a manipulator"  Command="{Binding OpenArmCommand}" Height="30" Style="{StaticResource ButtonStyle}" />
-            <Separator Height="10"></Separator>
-            <Grid>
-                <StackPanel x:Name="Trajectory">
-                    <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Trajectory</Label>
-                    <Button Content="Create new" Command="{Binding createNewTrajectoryCommand}" Style="{StaticResource ButtonStyle}" ></Button>
-                    <Button Content="Open existing" Command="{Binding openExistingTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-                    <Button Content="Save" Command="{Binding saveTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-                    <Button Content="Interpolate" Command="{Binding interpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-                    <Button Content="Split" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-                    <Button Content="Edit" Command="{Binding editTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-
-                    <Separator Height="10"></Separator>
-
-                    <Grid>
-                        <WindowsFormsHost><dvc:Chart x:Name="DeltaChart" Height="60"/></WindowsFormsHost>
-                        <StackPanel Visibility="Hidden">
-                            <Button Content="Up/Down path points" Command="{Binding upDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <Button Content="Finish building a path" Command="{Binding finishBuildingTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <WrapPanel>
-                                <Label Content="Enter the number of points to split" />
-                                <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" VerticalAlignment="Center" Width="43"/>
-                            </WrapPanel>
-                            <WrapPanel>
-                                <Label Content="Enter a step split in cm" />
-                                <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="56"/>
-                            </WrapPanel>
-                            <Button Content="Split Trajectory!" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
-                        </StackPanel>
-                    </Grid>
-                    <Label x:Name="QLabel" Content="Current Generalized Coordinates: Q=(*,*, ... ,*)" VerticalAlignment="Top" />
-                    <Label x:Name="PathLength" Content="Path length = 0 cm" />
-                    
-                </StackPanel>
-                <StackPanel x:Name="Obstacle" Visibility="Hidden">
-                    <Label>Obstacle</Label>
-                </StackPanel>
-            </Grid>
-            
-        </StackPanel>
+        <Menu Grid.Row="0" Grid.ColumnSpan="3" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top" >
+            <MenuItem Header="Манипулятор">
+                <MenuItem Header="Создать" Command="{Binding NewArmCommand}" ></MenuItem>
+                <MenuItem Header="Открыть" Command="{Binding OpenArmCommand}" ></MenuItem>
+                <MenuItem Header="Сохранить" Command="{Binding SaveArmCommand}" ></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Траектория">
+                <MenuItem Header="Создать" Command="{Binding CreateNewTrajectoryCommand}" ></MenuItem>
+                <MenuItem Header="Открыть" Command="{Binding OpenTrajectoryCommand}" ></MenuItem>
+                <MenuItem Header="Сохранить" Command="{Binding SaveTrajectoryCommand}" ></MenuItem>
+                <MenuItem Header="Редактировать" Command="{Binding EditTrajectoryCommand}" ></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Препятствия">
+                <MenuItem Header="Добавить"></MenuItem>
+                <MenuItem Header="Открыть"></MenuItem>
+                <MenuItem Header="Редактировать"></MenuItem>
+                <Separator />
+                <MenuItem Header="Удалить все"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Настройки">
+            </MenuItem>
+        </Menu>
 
         <Grid Grid.Column="0" Grid.Row="1">
+            <Grid x:Name="ManipulatorGrid"  Visibility="Hidden">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.1*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0.14*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Манипулятор</Label>
+                <TextBox Grid.Row="1" Height="Auto" Name="ArmConfigTextBox"  TextWrapping="WrapWithOverflow" ></TextBox>
+                <Grid Grid.Row="2">
+                    <Button Content="Восстановить" HorizontalAlignment="Left" Command="{Binding ResetLastCorrectArmCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Применить" HorizontalAlignment="Right" Command="{Binding BuildArmFromTextBoxCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                </Grid>
+            </Grid>
+            <Grid x:Name="TrajectoryGrid" >
+                <StackPanel>
+                    <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Траектория</Label>
+                    <Grid>
+                        <StackPanel>
+                            <Button Content="Интерполяция" Command="{Binding interpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                            <Button Content="Изменить z координату точки" Command="{Binding upDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Label HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" Content="Разделение траектории" />
+                            <WrapPanel>
+                                <Label Content="Количество точек разбиения" />
+                                <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                            </WrapPanel>
+                            <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
+                            <WrapPanel>
+                                <Label Content="введите шаг разбиения в см." />
+                                <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                            </WrapPanel>
+                            <Button Content="Разделить траекторию" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+            <Grid x:Name="Obstacle" Visibility="Hidden">
+                <StackPanel>
+                <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Препятствия</Label>
+               </StackPanel>
+            </Grid>
+            <Grid x:Name="SettingsGrid" Visibility="Hidden">
+                <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="2">
             <StackPanel>
                 <Separator Height="10"></Separator>
-                <Label HorizontalAlignment ="Center" FontSize="15" FontWeight="Bold" >Path planning progress</Label>
+                <Label HorizontalAlignment ="Center" FontSize="15" >Прогресс алгоритма планирования траектории движения манипулятора</Label>
                 <ProgressBar Height="18" Margin="10, 5"/>
-                <DockPanel VerticalAlignment="Bottom"  Margin="10, 5">
-                    <Button DockPanel.Dock="Left" Content="Calculate" Width="97" Command="{Binding trackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
-                    <Button DockPanel.Dock="Right" Content="Cancel" Width="88" Command="{Binding cancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
+                <WrapPanel VerticalAlignment="Bottom" ItemWidth="120" HorizontalAlignment="Center">
+                    <Button Content="Посчитать" Width="97" Command="{Binding trackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
+                    <Button Content="Отмена" Width="88" Command="{Binding cancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
+                </WrapPanel>
+                <DockPanel LastChildFill="True" >
+                    <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="15" >Анимация движения</Label>
+                    <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="10, 5"/>
+                    <WrapPanel ItemHeight="50" ItemWidth="120" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Старт" Command="{Binding startStopAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <Button Content="Пауза" Command="{Binding pauseAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <Label Content="Скорость" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,10" Width="70"/>
+                        <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
+                    </WrapPanel>
                 </DockPanel>
+                <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="13" >Текущие данные</Label>
+                <Label x:Name="QLabel" Content="Current Generalized Coordinates: Q=(*,*, ... ,*)" VerticalAlignment="Top" />
+                <Label x:Name="PathLength" Content="Path length = 0 cm" />
             </StackPanel>
         </Grid>
 
-        <GridSplitter Grid.Row="0" Grid.RowSpan="2"  Grid.Column="1" ShowsPreview="False" Width="3"
+        <GridSplitter Grid.Row="1" Grid.RowSpan="2"  Grid.Column="1" ShowsPreview="False" Width="3"
                       HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
-        <Grid Grid.Column="2" Grid.Row="1">
-            <DockPanel LastChildFill="True" >
-                <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="25, 10"/>
-                <WrapPanel ItemHeight="50" ItemWidth="100" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Start" Command="{Binding startStopAnimation}" Style="{StaticResource ButtonStyle}"  />
-                    <Button Content="Pause" Command="{Binding pauseAnimation}" Style="{StaticResource ButtonStyle}"  />
-                    <Label Content="Speed" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10" Width="62"/>
-                    <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
-                </WrapPanel>
-            </DockPanel>
+        <Grid Grid.Column="2" Grid.Row="2">
+            <WindowsFormsHost><dvc:Chart x:Name="DeltaChart" Height="60"/></WindowsFormsHost>
         </Grid>
 
-        <Grid Grid.Column="2" Grid.Row="0">
-            <Canvas x:Name="CanvasForEvents" Grid.Row="0" Grid.Column="0" 
-                    Background="Transparent" >
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseLeftButtonUp">
-                        <i:InvokeCommandAction 
-                            Command="{Binding MouseLeftButtonUpOnCanvas}"/>
-                    </i:EventTrigger>
-                    <i:EventTrigger EventName="MouseLeftButtonDown">
-                        <i:InvokeCommandAction 
-                            Command="{Binding MouseLeftButtonDownOnCanvas}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </Canvas>
-
-            <Viewport3D x:Name="Viewport3D" ClipToBounds="True" Grid.Row="0" Grid.Column="2" >
+        <Grid Grid.Column="2" Grid.Row="1">
+            <Viewport3D x:Name="Viewport3D" ClipToBounds="True" >
 
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseMove">
@@ -128,19 +144,21 @@
                     <i:EventTrigger EventName="MouseWheel">
                         <command:EventToCommand Command="{Binding MouseWheel}" PassEventArgsToCommand="True" />
                     </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <command:EventToCommand Command="{Binding MouseLeftButtonDown}" PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
                 </i:Interaction.Triggers>
-                    <Viewport3D.Children>
 
-                        <ModelVisual3D>
-                            <ModelVisual3D.Content>
-                                <AmbientLight Color="#FFFFFF" />
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
+                <Viewport3D.Children>
 
-                    </Viewport3D.Children>
+                    <ModelVisual3D>
+                        <ModelVisual3D.Content>
+                            <AmbientLight Color="#FFFFFF" />
+                        </ModelVisual3D.Content>
+                    </ModelVisual3D>
 
-                </Viewport3D>
-            </Grid>
-
+                </Viewport3D.Children>
+            </Viewport3D>
+        </Grid>
     </Grid>
 </Window>
