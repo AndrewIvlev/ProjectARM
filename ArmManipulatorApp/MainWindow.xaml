@@ -34,29 +34,31 @@
 
         <Menu Grid.Row="0" Grid.ColumnSpan="3" x:Name="MainMenu" HorizontalAlignment="Left" VerticalAlignment="Top" >
             <MenuItem Header="Манипулятор">
-                <MenuItem Header="Создать" Command="{Binding NewArmCommand}" ></MenuItem>
-                <MenuItem Header="Открыть" Command="{Binding OpenArmCommand}" ></MenuItem>
-                <MenuItem Header="Сохранить" Command="{Binding SaveArmCommand}" ></MenuItem>
+                <MenuItem Header="Создать" x:Name="NewArmMenuItem" Command="{Binding NewArmCommand}" />
+                <MenuItem Header="Открыть" Command="{Binding OpenArmCommand}" />
+                <MenuItem Header="Сохранить" Command="{Binding SaveArmCommand}" />
+                <MenuItem Header="Редактировать" x:Name="EditArmMenuItem" Command="{Binding EditArmCommand}" />
             </MenuItem>
             <MenuItem Header="Траектория">
-                <MenuItem Header="Создать" Command="{Binding CreateNewTrajectoryCommand}" ></MenuItem>
-                <MenuItem Header="Открыть" Command="{Binding OpenTrajectoryCommand}" ></MenuItem>
-                <MenuItem Header="Сохранить" Command="{Binding SaveTrajectoryCommand}" ></MenuItem>
-                <MenuItem Header="Редактировать" Command="{Binding EditTrajectoryCommand}" ></MenuItem>
+                <MenuItem Header="Создать" x:Name="NewTrackMenuItem" Command="{Binding CreateNewTrajectoryCommand}" />
+                <MenuItem Header="Открыть" Command="{Binding OpenTrajectoryCommand}" />
+                <MenuItem Header="Сохранить" Command="{Binding SaveTrajectoryCommand}" />
+                <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" Command="{Binding EditTrajectoryCommand}" />
             </MenuItem>
             <MenuItem Header="Препятствия">
-                <MenuItem Header="Добавить"></MenuItem>
-                <MenuItem Header="Открыть"></MenuItem>
-                <MenuItem Header="Редактировать"></MenuItem>
+                <MenuItem Header="Добавить"/>
+                <MenuItem Header="Открыть"/>
+                <MenuItem Header="Сохранить"/>
+                <MenuItem Header="Редактировать"/>
                 <Separator />
-                <MenuItem Header="Удалить все"></MenuItem>
+                <MenuItem Header="Удалить все"/>
             </MenuItem>
             <MenuItem Header="Настройки">
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Column="0" Grid.Row="1">
-            <Grid x:Name="ManipulatorGrid"  Visibility="Hidden">
+        <Grid Grid.Column="0" Grid.Row="1" >
+            <Grid x:Name="ManipulatorGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.1*"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
@@ -70,24 +72,28 @@
                     <Button Content="Применить" HorizontalAlignment="Right" Command="{Binding BuildArmFromTextBoxCommand}" Style="{StaticResource ButtonStyle}"></Button>
                 </Grid>
             </Grid>
-            <Grid x:Name="TrajectoryGrid" >
+            <Grid x:Name="TrajectoryGrid" Visibility="Hidden" >
                 <StackPanel>
                     <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Траектория</Label>
                     <Grid>
                         <StackPanel>
-                            <Button Content="Интерполяция" Command="{Binding interpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"></Button>
-                            <Button Content="Изменить z координату точки" Command="{Binding upDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Добавить опорную точку" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Изменить z координату точки" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Интерполяция" Command="{Binding InterpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <Label HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" Content="Разделение траектории" />
                             <WrapPanel>
                                 <Label Content="Количество точек разбиения" />
-                                <TextBox x:Name="NumberOfPointsToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
                             <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
                             <WrapPanel>
                                 <Label Content="введите шаг разбиения в см." />
                                 <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
-                            <Button Content="Разделить траекторию" Command="{Binding splitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Разделить траекторию" Command="{Binding SplitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <ListBox>
+                                <!-- точки пути, с возможностью редактирования координат/-->
+                            </ListBox>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -105,18 +111,18 @@
         <Grid Grid.Column="0" Grid.Row="2">
             <StackPanel>
                 <Separator Height="10"></Separator>
-                <Label HorizontalAlignment ="Center" FontSize="15" >Прогресс алгоритма планирования траектории движения манипулятора</Label>
+                <Label HorizontalAlignment ="Center" FontSize="15" >Прогресс алгоритма планирования</Label>
                 <ProgressBar Height="18" Margin="10, 5"/>
                 <WrapPanel VerticalAlignment="Bottom" ItemWidth="120" HorizontalAlignment="Center">
-                    <Button Content="Посчитать" Width="97" Command="{Binding trackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
-                    <Button Content="Отмена" Width="88" Command="{Binding cancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
+                    <Button Content="Посчитать" Width="97" Command="{Binding TrackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
+                    <Button Content="Отмена" Width="88" Command="{Binding CancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
                 </WrapPanel>
                 <DockPanel LastChildFill="True" >
                     <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="15" >Анимация движения</Label>
                     <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="10, 5"/>
                     <WrapPanel ItemHeight="50" ItemWidth="120" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="Старт" Command="{Binding startStopAnimation}" Style="{StaticResource ButtonStyle}"  />
-                        <Button Content="Пауза" Command="{Binding pauseAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <Button Content="Старт" Command="{Binding StartStopAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <Button Content="Пауза" Command="{Binding PauseAnimation}" Style="{StaticResource ButtonStyle}"  />
                         <Label Content="Скорость" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,10" Width="70"/>
                         <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
                     </WrapPanel>
@@ -160,5 +166,67 @@
                 </Viewport3D.Children>
             </Viewport3D>
         </Grid>
+
+        <Grid.Triggers>
+            <!--/ Trajectory MenuItems Events-->
+            <EventTrigger RoutedEvent="MenuItem.Click" SourceName="NewTrackMenuItem">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MenuItem.Click" SourceName="EditTrackMenuItem">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            
+            <!--/ Manipulator MenuItems Events-->
+            <EventTrigger RoutedEvent="MenuItem.Click" SourceName="NewArmMenuItem">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MenuItem.Click" SourceName="EditArmMenuItem">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
     </Grid>
 </Window>

@@ -1,6 +1,7 @@
 ﻿namespace MainApp.Graphics3DModel.Model3D
 {
     using System;
+    using System.Windows;
     using System.Windows.Media.Media3D;
     public static class MeshGeometry3DHelper
     {
@@ -267,17 +268,18 @@
         /// </summary>
         /// <param name="radius">Radius of circle</param>
         /// <param name="resolution">Number of slices to iterate the circumference of the circle</param>
-        public static void AddCircle(MeshGeometry3D mesh, double radius, int resolution)
+        public static void AddCircleXY(MeshGeometry3D mesh, Point position, double radius, int resolution)
         {
-            // Generate the circle in the XZ-plane
+            // Generate the circle in the XY-plane
             // Add the center first
-            mesh.Positions.Add(new Point3D(0, 0, 0));
+            var position3D = new Point3D(position.X, position.Y, 1);
+            mesh.Positions.Add(position3D);
 
             // Iterate from angle 0 to 2*PI
             var t = 2 * Math.PI / resolution;
             for (var i = 0; i < resolution; i++)
             {
-                mesh.Positions.Add(new Point3D(radius * Math.Cos(t * i), 0, -radius * Math.Sin(t * i)));
+                mesh.Positions.Add(new Point3D(radius * Math.Cos(t * i), -radius * Math.Sin(t * i), 1));
             }
 
             // Add points to MeshGeometry3D

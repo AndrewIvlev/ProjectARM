@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
-namespace ArmManipulatorApp.Graphics3DModel.Model3D
+﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
     using System.Windows.Media.Media3D;
 
@@ -12,6 +9,7 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
         public Point3D Position;
         public Vector3D LookDirection;
         public double FieldOfView;
+        public double DefaultDistanceFromCenter;
 
         public ScaleTransform3D Zoom;
         public RotateTransform3D RotX;
@@ -24,40 +22,58 @@ namespace ArmManipulatorApp.Graphics3DModel.Model3D
         public CameraModel3D(double distanceFromCenter)
         {
             this.PerspectiveCamera = new PerspectiveCamera();
+            this.DefaultDistanceFromCenter = distanceFromCenter;
             var position = new Point3D(distanceFromCenter, distanceFromCenter, distanceFromCenter);
-            PerspectiveCamera.Position = position;
-            var lookDirection = new Vector3D(- position.X, - position.Y, - position.Z);
-            PerspectiveCamera.LookDirection = lookDirection;
-            PerspectiveCamera.UpDirection = new Vector3D(0, 0, 1);
-            PerspectiveCamera.FieldOfView = 60;
+            this.PerspectiveCamera.Position = position;
+            var lookDirection = new Vector3D(-position.X, -position.Y, -position.Z);
+            this.PerspectiveCamera.LookDirection = lookDirection;
+            this.PerspectiveCamera.UpDirection = new Vector3D(0, 0, 1);
+            this.PerspectiveCamera.FieldOfView = 60;
 
-            
-            Zoom = new ScaleTransform3D {CenterX = 0, CenterY = 0, CenterZ = 0};
-            
-            RotX = new RotateTransform3D();
-            var axisAngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
-            RotX.Rotation = axisAngleRotX;
-            AngleRotX = new AxisAngleRotation3D {Axis = new Vector3D(1, 0, 0)};
-            RotX.Rotation = AngleRotX;
-            
-            RotY = new RotateTransform3D();
-            var axisAngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
-            RotY.Rotation = axisAngleRotY;
-            AngleRotY = new AxisAngleRotation3D {Axis = new Vector3D(0, 1, 0)};
-            RotY.Rotation = AngleRotY;
-            
-            RotZ = new RotateTransform3D();
-            var axisAngleRotZ = new AxisAngleRotation3D {Axis = new Vector3D(0, 0, 1)};
-            RotZ.Rotation = axisAngleRotZ;
-            AngleRotZ = new AxisAngleRotation3D {Axis = new Vector3D(0, 0, 1)};
-            RotZ.Rotation = AngleRotZ;
+            this.Zoom = new ScaleTransform3D { CenterX = 0, CenterY = 0, CenterZ = 0 };
+
+            this.RotX = new RotateTransform3D();
+            var axisAngleRotX = new AxisAngleRotation3D { Axis = new Vector3D(1, 0, 0) };
+            this.RotX.Rotation = axisAngleRotX;
+            this.AngleRotX = new AxisAngleRotation3D { Axis = new Vector3D(1, 0, 0) };
+            this.RotX.Rotation = this.AngleRotX;
+
+            this.RotY = new RotateTransform3D();
+            var axisAngleRotY = new AxisAngleRotation3D { Axis = new Vector3D(0, 1, 0) };
+            this.RotY.Rotation = axisAngleRotY;
+            this.AngleRotY = new AxisAngleRotation3D { Axis = new Vector3D(0, 1, 0) };
+            this.RotY.Rotation = this.AngleRotY;
+
+            this.RotZ = new RotateTransform3D();
+            var axisAngleRotZ = new AxisAngleRotation3D { Axis = new Vector3D(0, 0, 1) };
+            this.RotZ.Rotation = axisAngleRotZ;
+            this.AngleRotZ = new AxisAngleRotation3D { Axis = new Vector3D(0, 0, 1) };
+            this.RotZ.Rotation = this.AngleRotZ;
 
             var transformGroup = new Transform3DGroup();
-            transformGroup.Children.Add(Zoom);
-            transformGroup.Children.Add(RotY);
-            transformGroup.Children.Add(RotX);
-            transformGroup.Children.Add(RotZ);
-            PerspectiveCamera.Transform = transformGroup;
+            transformGroup.Children.Add(this.Zoom);
+            transformGroup.Children.Add(this.RotY);
+            transformGroup.Children.Add(this.RotX);
+            transformGroup.Children.Add(this.RotZ);
+            this.PerspectiveCamera.Transform = transformGroup;
+        }
+
+        public void ViewFromAbove()
+        {            
+            var position = new Point3D(0, 0, this.DefaultDistanceFromCenter);
+            this.PerspectiveCamera.Position = position;
+            var lookDirection = new Vector3D(0, 0, -this.DefaultDistanceFromCenter);
+            this.PerspectiveCamera.LookDirection = lookDirection;
+            this.PerspectiveCamera.UpDirection = new Vector3D(0, 1, 0);
+        }
+
+        public void DefaultView()
+        {
+            var position = new Point3D(this.DefaultDistanceFromCenter, this.DefaultDistanceFromCenter, this.DefaultDistanceFromCenter);
+            this.PerspectiveCamera.Position = position;
+            var lookDirection = new Vector3D(-position.X, -position.Y, -position.Z);
+            this.PerspectiveCamera.LookDirection = lookDirection;
+            this.PerspectiveCamera.UpDirection = new Vector3D(0, 0, 1);
         }
     }
 }

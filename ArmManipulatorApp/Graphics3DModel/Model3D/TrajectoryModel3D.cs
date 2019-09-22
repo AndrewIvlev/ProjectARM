@@ -19,8 +19,15 @@
 
         public List<ModelVisual3D> trackModelVisual3D;
 
-        public TrajectoryModel3D(Trajectory track)
+        /// <summary>
+        /// Задаёт отношение реальных физических величин манипулятора
+        /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
+        /// </summary>
+        private double coeff;
+
+        public TrajectoryModel3D(Trajectory track, double coeff = 1)
         {
+            this.coeff = coeff;
             this.track = track;
             this.trackModelVisual3D = new List<ModelVisual3D>();
 
@@ -28,7 +35,8 @@
             {
                 var anchorPointModelVisual3D = new ModelVisual3D();
                 var anchorPointMeshGeometry3D = new MeshGeometry3D();
-                MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, anchorPoint, 7, 8, 8);
+                var graphPoint = new Point3D(coeff * anchorPoint.X, coeff * anchorPoint.Y, coeff * anchorPoint.Z);
+                MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, graphPoint, 7, 8, 8);
                 var anchorPointBrush = Brushes.GreenYellow;
                 var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
                 var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
@@ -68,54 +76,27 @@
             }
         }
 
-        public void MoveCursorPathPoint(Point3D center)
+        public void AddAnchorPoint(Point3D newPoint)
         {
-            var normal = new Vector3D(0, 0, 1);
-            var meshCircle = new MeshGeometry3D();
 
-            MeshGeometry3DHelper.AddCircle(meshCircle, 1, 14);
-            var brush3 = Brushes.Purple;
-            var material3 = new DiffuseMaterial(brush3);
-            var mod = new GeometryModel3D(meshCircle, material3);
+            //var pathPoint = new TrajectoryPoint();
+            //pathPoint.center = new Point3D(X, Y, this.trajectoryPointsVisual3D.First().center.Z);
 
-            // Create transforms
-            var trn = new Transform3DGroup();
-            // Up Vector (normal for XZ-plane)
-            var up = new Vector3D(0, 1, 0);
-            // Set normal length to 1
-            normal.Normalize();
-            var axis = Vector3D.CrossProduct(up, normal); // Cross product is rotation axis
-            var angle = Vector3D.AngleBetween(up, normal); // Angle to rotate
-            trn.Children.Add(new RotateTransform3D(new AxisAngleRotation3D(axis, angle)));
-            trn.Children.Add(new TranslateTransform3D(new Vector3D(center.X, center.Y, center.Z)));
+            //TODO: Extract to method next 8 line
+            var point = new MeshGeometry3D();
+            //MeshGeometry3DHelper.AddSphere(point, pathPoint.center, 0.2, 8, 8);
+            var pointBrush = Brushes.Purple;
+            var pointMaterial = new DiffuseMaterial(pointBrush);
+            var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
+            var pathPointModelVisual3D = new ModelVisual3D();
+            pathPointModelVisual3D.Content = pathPointGeometryModel;
+            pathPointModelVisual3D.Transform = new TranslateTransform3D();
 
-            mod.Transform = trn;
+            //pathPoint.trajectoryModelVisual3D = pathPointModelVisual3D;
+            //this.trajectoryPointsVisual3D.Add(pathPoint);
+
+            //AddPathLine(this.trajectoryPointsVisual3D[this.trajectoryPointsVisual3D.Count - 2].center, this.trajectoryPointsVisual3D.Last().center);
         }
-
-        //public void AddAnchorPoint(Point3D newPoint)
-        //{
-        //    var hitParams = new PointHitTestParameters(e.GetPosition(this));
-        //    var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
-        //    var Z = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
-
-        //    var pathPoint = new TrajectoryPoint();
-        //    pathPoint.center = new Point3D(X, this.trajectoryPointsVisual3D.First().center.Y, Z);
-
-        //    //TODO: Extract to method next 8 line
-        //    var point = new MeshGeometry3D();
-        //    MeshGeometry3DHelper.AddSphere(point, pathPoint.center, 0.2, 8, 8);
-        //    var pointBrush = Brushes.Purple;
-        //    var pointMaterial = new DiffuseMaterial(pointBrush);
-        //    var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
-        //    var pathPointModelVisual3D = new ModelVisual3D();
-        //    pathPointModelVisual3D.Content = pathPointGeometryModel;
-        //    pathPointModelVisual3D.Transform = new TranslateTransform3D();
-
-        //    pathPoint.trajectoryModelVisual3D = pathPointModelVisual3D;
-        //    this.trajectoryPointsVisual3D.Add(pathPoint);
-
-        //    AddPathLine(this.trajectoryPointsVisual3D[this.trajectoryPointsVisual3D.Count - 2].center, this.trajectoryPointsVisual3D.Last().center);
-        //}
 
         //private void AddPathLine(Point3D start, Point3D end)
         //{

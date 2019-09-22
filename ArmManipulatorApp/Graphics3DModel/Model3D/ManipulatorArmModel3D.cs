@@ -29,12 +29,12 @@
         /// </summary>
         private double coeff;
 
-        public ManipulatorArmModel3D(Arm arm)
+        public ManipulatorArmModel3D(Arm arm, double coeff = 1)
         {
-            coeff = 3;
+            this.coeff = coeff;
             this.arm = arm;
-            armModelVisual3D = new List<ModelVisual3D>();
-            storyboard = new Storyboard();
+            this.armModelVisual3D = new List<ModelVisual3D>();
+            this.storyboard = new Storyboard();
         }
 
         public void ClearModelVisual3DCollection(Viewport3D viewport)
