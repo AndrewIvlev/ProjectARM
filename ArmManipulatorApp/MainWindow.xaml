@@ -20,7 +20,7 @@
             <Setter Property="Control.FontFamily" Value="Verdana" />
         </Style>
     </Window.Resources>
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="0.025*"></RowDefinition>
             <RowDefinition Height="0.46*"></RowDefinition>

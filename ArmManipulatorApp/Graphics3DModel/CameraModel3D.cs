@@ -28,7 +28,7 @@
             var lookDirection = new Vector3D(-position.X, -position.Y, -position.Z);
             this.PerspectiveCamera.LookDirection = lookDirection;
             this.PerspectiveCamera.UpDirection = new Vector3D(0, 0, 1);
-            this.PerspectiveCamera.FieldOfView = 60;
+            this.PerspectiveCamera.FieldOfView = 90;
 
             this.Zoom = new ScaleTransform3D { CenterX = 0, CenterY = 0, CenterZ = 0 };
 

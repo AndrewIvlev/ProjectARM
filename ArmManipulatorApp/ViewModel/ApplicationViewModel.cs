@@ -19,6 +19,7 @@
 
     using MainApp.Common;
 
+    using Grid = System.Windows.Controls.Grid;
     using Point3D = System.Windows.Media.Media3D.Point3D;
 
     public class ApplicationViewModel
@@ -31,18 +32,19 @@
 
         IFileService fileService;
         IDialogService dialogService;
-
+        
+        private Grid mainGrid;
         private Viewport3D viewport;
         private TextBox armTextBox;
         private Chart deltaChart;
 
-        private byte keyboardMod;
-        private Point MousePos;
 
         /// <summary>
         /// Offset for calculation mouse position from 2D coordinates to 3D then camera is looking on xy plate
         /// </summary>
-        private Point offset;
+        private Point mouseOffsetViewPort;
+        private Point MousePos;
+        private byte keyboardMod;
 
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
@@ -52,17 +54,19 @@
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
+            Grid mainGrid,
             Viewport3D viewport,
             TextBox armTextBox,
             Chart deltaChart)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
+            this.mainGrid = mainGrid;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.deltaChart = deltaChart;
 
-            this.offset = new Point(631, 196);
+            this.mouseOffsetViewPort = new Point(mainGrid.ColumnDefinitions[0].ActualWidth + viewport.ActualWidth / 2, 20 + viewport.ActualHeight / 2);
             this.coeff = 3;
             this.keyboardMod = 0;
         }
@@ -92,7 +96,7 @@
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               this.camera = new CameraModel3D(2 * maxArmLength);
+                                               this.camera = new CameraModel3D(10 * maxArmLength);
                                                this.scene = new SceneModel3D(10 * maxArmLength, 3);
                                                
                                                this.viewport.Camera = this.camera.PerspectiveCamera;
@@ -401,9 +405,9 @@
                                     if (Mouse.LeftButton == MouseButtonState.Pressed)
                                     {
                                         var nextMousePos = Mouse.GetPosition(obj as IInputElement);
-                                        var dxdy = new Point(nextMousePos.X - this.MousePos.X, nextMousePos.Y - this.MousePos.Y);
-                                        this.camera.AngleRotZ.Angle += dxdy.Y;
-                                        this.camera.AngleRotZ.Angle -= dxdy.X;
+                                        var dXdY = new Point(nextMousePos.X - this.MousePos.X, nextMousePos.Y - this.MousePos.Y);
+                                        this.camera.AngleRotZ.Angle += dXdY.Y;
+                                        this.camera.AngleRotZ.Angle -= dXdY.X;
                                         this.MousePos = nextMousePos;
                                     }
                                     else if (Mouse.LeftButton == MouseButtonState.Released)
@@ -413,30 +417,34 @@
 
                                     break;
                                 case UserMod.TrajectoryAnchorPointCreation:
-                                    var mousePosition = Mouse.GetPosition(obj as Viewport3D);
-                                    if (this.cursorForAnchorPointCreation != null)
+                                    if (Mouse.LeftButton == MouseButtonState.Pressed)
                                     {
-                                        this.cursorForAnchorPointCreation.Hide();
-                                        var X = (mousePosition.X - offset.X);
-                                        var Y = (offset.Y - mousePosition.Y);
-                                        this.cursorForAnchorPointCreation.Move(
-                                            new Point3D(
-                                                X,
-                                                Y,
-                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Z));
-                                        var vpHeight = this.viewport.ActualHeight;
-                                        var vpWidth = this.viewport.ActualWidth;
-                                        this.cursorForAnchorPointCreation.Show();
+                                        if (this.cursorForAnchorPointCreation == null)
+                                        {
+                                            this.cursorForAnchorPointCreation = new CursorPointModel3D(
+                                                this.viewport,
+                                                new Point3D(
+                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].X * this.coeff,
+                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Y * this.coeff,
+                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Z * this.coeff));
+                                            this.viewport.Children.Add(cursorForAnchorPointCreation.ModelVisual3D);
+                                        }
+                                        else
+                                        {                                
+                                            var nextMousePos = Mouse.GetPosition(obj as IInputElement);
+                                            this.viewport.Children.Remove(cursorForAnchorPointCreation.ModelVisual3D);
+                                            this.cursorForAnchorPointCreation.Move(
+                                                new Point3D(
+                                                    (nextMousePos.X - this.MousePos.X) * 13,
+                                                    (-nextMousePos.Y + this.MousePos.Y) * 13,
+                                                    0));
+                                            this.viewport.Children.Add(cursorForAnchorPointCreation.ModelVisual3D);
+                                            this.MousePos = nextMousePos;
+                                        }
                                     }
-                                    else
+                                    else if (Mouse.LeftButton == MouseButtonState.Released)
                                     {
-                                        this.cursorForAnchorPointCreation = new CursorPointModel3D(
-                                            this.viewport,
-                                            new Point3D(
-                                                mousePosition.X,
-                                                mousePosition.Y,
-                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Z));
-                                        this.cursorForAnchorPointCreation.Show();
+                                        this.MousePos = Mouse.GetPosition(obj as IInputElement);
                                     }
 
                                     break;
@@ -481,8 +489,8 @@
                                 case UserMod.TrajectoryAnchorPointCreation:
                                     var hitParams = new PointHitTestParameters(Mouse.GetPosition(obj as IInputElement));
                                     
-                                    var X = (hitParams.HitPoint.X - offset.X) * 0.0531177;
-                                    var Y = (hitParams.HitPoint.Y - offset.Y) * 0.0531177;
+                                    var X = (hitParams.HitPoint.X - this.mouseOffsetViewPort.X) * 0.0531177;
+                                    var Y = (hitParams.HitPoint.Y - this.mouseOffsetViewPort.Y) * 0.0531177;
                                     this.track3D.AddAnchorPoint(new Point3D(MousePos.X, MousePos.Y, 0));
                                     break;
                                 case UserMod.TrajectoryEditing:

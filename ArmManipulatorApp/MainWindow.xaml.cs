@@ -14,6 +14,7 @@
             this.DataContext = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),
+                this.MainGrid,
                 this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.DeltaChart);
