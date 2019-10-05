@@ -7,8 +7,8 @@
     {
         public int selectedPointIndex;
 
-        public PointSelectorModel3D(Viewport3D viewport, Point3D position)
-            : base(viewport, position)
+        public PointSelectorModel3D(Point3D position)
+            : base(position)
         {
             this.selectedPointIndex = 0;
         }

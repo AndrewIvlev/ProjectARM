@@ -56,7 +56,10 @@
         {
             this.track.AnchorPoints.Add(this.ConvertFromVirtualToReal(newVirtualPoint));
 
-            this.trackModelVisual3D.Add(this.CreateTrajectoryLineModelVisual3D(newVirtualPoint));
+            this.trackModelVisual3D.Add(
+                this.CreateTrajectoryLineModelVisual3D(
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 1]),
+                    newVirtualPoint));
             this.trackModelVisual3D.Add(this.CreateAnchorPointModelVisual3D(newVirtualPoint));
         }
 
@@ -74,16 +77,15 @@
             return anchorPointModelVisual3D;
         }
 
-        private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D endPoint)
+        private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D startPoint, Point3D endPoint)
         {
             var trajectoryLineModelVisual3D = new ModelVisual3D();
             var trajectoryLineMeshGeometry3D = new MeshGeometry3D();
-            var startPoint = this.track.AnchorPoints[this.track.AnchorPoints.Count - 1];
             MeshGeometry3DHelper.AddSmoothCylinder(
                 trajectoryLineMeshGeometry3D,
                 new Point3D(startPoint.X, startPoint.Y, startPoint.Z),
                 new Vector3D(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y, endPoint.Z - startPoint.Z),
-                6);
+                2);
             var anchorPointBrush = Brushes.MediumPurple;
             var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
             var anchorPointGeometryModel = new GeometryModel3D(trajectoryLineMeshGeometry3D, anchorPointMaterial);
@@ -140,85 +142,104 @@
                 var pathPointModelVisual3D = new ModelVisual3D();
                 pathPointModelVisual3D.Content = pathPointGeometryModel;
                 pathPointModelVisual3D.Transform = new TranslateTransform3D();
-                //// Viewport3D.Children.Add(pathPointModelVisual3D);
             }
         }
 
+        /// <summary>
+        /// Change z coordinate of anchor point
+        /// </summary>
+        /// <param name="indexOfAnchorPoint"> begin from second point of trajectory,
+        /// because first point pinned to manipulator end point</param>
+        /// <param name="delta">real delta in cm</param>
         public void ChangeAnchorPointZ(int indexOfAnchorPoint, double delta)
         {
-            this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].SetY(this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center.Y + delta);
+            if (indexOfAnchorPoint == 0)
+            {
+                throw new Exception("Can't change z coordinate of first trajectory point!");
+            }
 
-            (this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].trajectoryModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
-            this.NeighborhoodLinesRotation();
+            this.track.AnchorPoints[indexOfAnchorPoint].Offset(0, 0, delta);
+
+            ((TranslateTransform3D)this.trackModelVisual3D[indexOfAnchorPoint * 2].Transform).OffsetZ += delta * this.coeff;
+
+            if (indexOfAnchorPoint * 2 == this.track.AnchorPoints.Count - 1)
+            {
+                this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1]),
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]));
+            }
+            else
+            {
+                this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1]),
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]));
+                this.trackModelVisual3D[indexOfAnchorPoint * 2 + 1] = this.CreateTrajectoryLineModelVisual3D(
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]),
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1]));
+            }
         }
 
-        private void NeighborhoodLinesRotation()
-        {
-            // Temporary solution
-            // Insert new ModelVisual3D model of path line except old
+        // TODO: remove it 
+        //private void NeighborhoodLinesRotation()
+        //{
+        //    //TODO: Extract to method next 8 line
+        //    var line = new MeshGeometry3D();
+        //    LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
+        //    var lineBrush = Brushes.MediumPurple;
+        //    var lineMaterial = new DiffuseMaterial(lineBrush);
+        //    var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+        //    var pathLineModelVisual3D = new ModelVisual3D();
+        //    pathLineModelVisual3D.Content = lineGeometryModel;
+        //    Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint - 1].lineModelVisual3D);
+        //    Viewport3D.Children.Insert(this.indexTrajectoryPoint - 1, pathLineModelVisual3D);
 
-            // TrajectoryLine trajectoryLine;
-            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint - 1].center;
-            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
+        //    trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+        //    this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint - 1);
+        //    this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint - 1, trajectoryLine);
 
-            ////TODO: Extract to method next 8 line
-            // var line = new MeshGeometry3D();
-            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
-            // var lineBrush = Brushes.MediumPurple;
-            // var lineMaterial = new DiffuseMaterial(lineBrush);
-            // var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-            // var pathLineModelVisual3D = new ModelVisual3D();
-            // pathLineModelVisual3D.Content = lineGeometryModel;
-            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint - 1].lineModelVisual3D);
-            // Viewport3D.Children.Insert(this.indexTrajectoryPoint - 1, pathLineModelVisual3D);
+        //    if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
 
-            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
-            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint - 1);
-            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint - 1, trajectoryLine);
+        //    trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
+        //    trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint + 1].center;
 
-            // if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
+        //    //TODO: Extract to method next 8 line
+        //    line = new MeshGeometry3D();
+        //    LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
+        //    lineBrush = Brushes.MediumPurple;
+        //    lineMaterial = new DiffuseMaterial(lineBrush);
+        //    lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+        //    pathLineModelVisual3D = new ModelVisual3D();
+        //    pathLineModelVisual3D.Content = lineGeometryModel;
+        //    Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint].lineModelVisual3D);
+        //    Viewport3D.Children.Insert(this.indexTrajectoryPoint, pathLineModelVisual3D);
 
-            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
-            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint + 1].center;
+        //    trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+        //    this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint);
+        //    this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint, trajectoryLine);
 
-            ////TODO: Extract to method next 8 line
-            // line = new MeshGeometry3D();
-            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
-            // lineBrush = Brushes.MediumPurple;
-            // lineMaterial = new DiffuseMaterial(lineBrush);
-            // lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-            // pathLineModelVisual3D = new ModelVisual3D();
-            // pathLineModelVisual3D.Content = lineGeometryModel;
-            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint].lineModelVisual3D);
-            // Viewport3D.Children.Insert(this.indexTrajectoryPoint, pathLineModelVisual3D);
+        //    there is the bug :(bug#2
+        //     Because lenght changed when we up or down path point
+        //     And there is need to use ScaleTransform3D with RotateTransform3D
+        //     var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
+        //    var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+        //    var rightLineAngle = Math.Asin(h / rightLineLenght);
+        //    (((pathLinesVisual3D[indexPathPoint - 1]
+        //    .lineModelVisual3D
+        //    .Transform as Transform3DGroup)
+        //    .Children[0] as RotateTransform3D)
+        //    .Rotation as AxisAngleRotation3D)
+        //    .Angle = rightLineAngle;
 
-            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
-            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint);
-            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint, trajectoryLine);
-
-            // there is the bug :( bug#2
-            // Because lenght changed when we up or down path point
-            // And there is need to use ScaleTransform3D with RotateTransform3D
-            // var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
-            // var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            // var rightLineAngle = Math.Asin(h / rightLineLenght);
-            // (((pathLinesVisual3D[indexPathPoint - 1]
-            // .lineModelVisual3D
-            // .Transform as Transform3DGroup)
-            // .Children[0] as RotateTransform3D)
-            // .Rotation as AxisAngleRotation3D)
-            // .Angle = rightLineAngle;
-
-            // var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
-            // h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            // var leftLineAngle = Math.Asin(h / leftLineLenght);
-            // (((pathLinesVisual3D[indexPathPoint]
-            // .lineModelVisual3D
-            // .Transform as Transform3DGroup)
-            // .Children[1] as RotateTransform3D)
-            // .Rotation as AxisAngleRotation3D)
-            // .Angle = leftLineAngle;
-        }
+        //    var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
+        //    h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+        //    var leftLineAngle = Math.Asin(h / leftLineLenght);
+        //    (((pathLinesVisual3D[indexPathPoint]
+        //    .lineModelVisual3D
+        //    .Transform as Transform3DGroup)
+        //    .Children[1] as RotateTransform3D)
+        //    .Rotation as AxisAngleRotation3D)
+        //    .Angle = leftLineAngle;
+        //}
 
         // TODO: create class for next convert method:
         private Point3D ConvertFromRealToVirtual(Point3D point)

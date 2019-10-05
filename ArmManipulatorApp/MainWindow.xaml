@@ -11,8 +11,8 @@
         xmlns:dvc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded"
-        KeyDown="{Binding OnKeyDownHandler}">
+        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded">
+
     <Window.Resources>
         <Style x:Key="ButtonStyle">
             <Setter Property="Control.FontSize" Value="14" />
@@ -231,4 +231,10 @@
             </EventTrigger>
         </Grid.Triggers>
     </Grid>
+    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <command:EventToCommand Command="{Binding OnKeyDownHandler}" PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 </Window>

@@ -101,7 +101,9 @@
                                                this.viewport.Camera = this.camera.PerspectiveCamera;
                                                this.viewport.Children.Add(this.scene.ModelVisual3D);
                                                foreach (var mv in this.armModel3D.armModelVisual3D)
+                                               {
                                                    this.viewport.Children.Add(mv);
+                                               }
 
                                                this.armTextBox.Text = File.ReadAllText(this.dialogService.FilePath);
                                                ////this.dialogService.ShowMessage("File open!");
@@ -223,7 +225,17 @@
                                            }
                                            else
                                            {
+                                               foreach (var mv in this.track3D.trackModelVisual3D)
+                                               {
+                                                   this.viewport.Children.Remove(mv);
+                                               }
+
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
+                                               
+                                               foreach (var mv in this.track3D.trackModelVisual3D)
+                                               {
+                                                   this.viewport.Children.Add(mv);
+                                               }
                                            }
                                        }
                                        catch (Exception ex)
@@ -250,7 +262,6 @@
                                            var trajectoryFirstPoint =
                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
                                            this.pointSelector = new PointSelectorModel3D(
-                                               this.viewport,
                                                new Point3D(
                                                    trajectoryFirstPoint.X * this.coeff,
                                                    trajectoryFirstPoint.Y * this.coeff,
@@ -264,53 +275,52 @@
                                    }));
             }
         }
-        
-        private RelayCommand onKeyDownHandler;
-        public RelayCommand OnKeyDownHandler
+
+        public ICommand OnKeyDownHandler
         {
             get
             {
-                return this.upDownTrajectoryAnchorPointsCommand
-                       ?? (this.upDownTrajectoryAnchorPointsCommand = new RelayCommand(
-                               obj =>
-                                   {
-                                       try
-                                       {
-                                           if (this.pointSelector != null)
-                                           {
-                                               var delta = 0.25;
-                                               switch (((KeyEventArgs)obj).Key)
-                                               {
-                                                   /*** Raise/lower point along Z axis ***/
-                                                   case Key.W:
-                                                       this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, delta);
-                                                       break;
-                                                   case Key.S:
-                                                       this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, -delta);
-                                                       break;
-                                                   /*** Point selection ***/
-                                                   case Key.N: // Next point
-                                                       if (this.pointSelector.selectedPointIndex != this.track3D.track.AnchorPoints.Count - 1)
-                                                       {
-                                                           this.pointSelector.selectedPointIndex++;
-                                                       }
+                return new RelayCommand(
+                    obj =>
+                        {
+                            try
+                            {
+                                if (this.pointSelector != null)
+                                {
+                                    var delta = 0.25;
+                                    switch (((KeyEventArgs)obj).Key)
+                                    {
+                                        /*** Raise/lower point along Z axis ***/
+                                        case Key.W:
+                                            this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, delta);
+                                            break;
+                                        case Key.S:
+                                            this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, -delta);
+                                            break;
+                                        /*** Point selection ***/
+                                        case Key.N: // Next point
+                                            if (this.pointSelector.selectedPointIndex
+                                                != this.track3D.track.AnchorPoints.Count - 1)
+                                            {
+                                                this.pointSelector.selectedPointIndex++;
+                                            }
 
-                                                       break;
-                                                   case Key.P: // Previous point
-                                                       if (this.pointSelector.selectedPointIndex != 1)
-                                                       {
-                                                           this.pointSelector.selectedPointIndex--;
-                                                       }
-                                                       
-                                                       break;
-                                               }
-                                           }
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           this.dialogService.ShowMessage(ex.Message);
-                                       }
-                                   }));
+                                            break;
+                                        case Key.P: // Previous point
+                                            if (this.pointSelector.selectedPointIndex != 1)
+                                            {
+                                                this.pointSelector.selectedPointIndex--;
+                                            }
+
+                                            break;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                this.dialogService.ShowMessage(ex.Message);
+                            }
+                        });
             }
         }
 
@@ -497,7 +507,6 @@
                                             var trajectoryFirstPoint =
                                                 this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
                                             this.cursorForAnchorPointCreation = new CursorPointModel3D(
-                                                this.viewport,
                                                 new Point3D(
                                                     trajectoryFirstPoint.X * this.coeff,
                                                     trajectoryFirstPoint.Y * this.coeff,

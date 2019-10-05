@@ -11,11 +11,9 @@
     {
         public ModelVisual3D ModelVisual3D;
 
-        private Viewport3D viewport;
-
         public Point3D position;
 
-        public CursorPointModel3D(Viewport3D viewport, Point3D position)
+        public CursorPointModel3D(Point3D position)
         {
             var meshCircle = new MeshGeometry3D();
             MeshGeometry3DHelper.AddSphere(meshCircle, position, 8, 8, 8);
@@ -25,7 +23,6 @@
             var translateTransform = new TranslateTransform3D();
             this.ModelVisual3D = new ModelVisual3D { Content = circleCursor, Transform = translateTransform};
             this.position = position;
-            this.viewport = viewport;
         }
         
         public void Move(Point3D offset)
