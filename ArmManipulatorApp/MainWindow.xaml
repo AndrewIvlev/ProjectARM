@@ -11,7 +11,8 @@
         xmlns:dvc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded">
+        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded"
+        KeyDown="{Binding OnKeyDownHandler}">
     <Window.Resources>
         <Style x:Key="ButtonStyle">
             <Setter Property="Control.FontSize" Value="14" />
@@ -80,7 +81,7 @@
                             <Button Content="Добавить опорную точку" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
                             <Button Content="Изменить z координату точки" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
                             <Button Content="Интерполяция" Command="{Binding InterpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <Label HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" Content="Разделение траектории" />
+                            <Label Content="Разделение траектории" HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" />
                             <WrapPanel>
                                 <Label Content="Количество точек разбиения" />
                                 <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
@@ -92,7 +93,8 @@
                             </WrapPanel>
                             <Button Content="Разделить траекторию" Command="{Binding SplitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <ListBox>
-                                <!-- точки пути, с возможностью редактирования координат/-->
+                                <!-- Список точек пути, с возможностью редактирования их координат/-->
+                                <!-- Выводить реальные значения, при изменении с помощью coeff переводить в виртуальные координаты/-->
                             </ListBox>
                         </StackPanel>
                     </Grid>

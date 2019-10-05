@@ -29,6 +29,7 @@
         private CameraModel3D camera;
         private SceneModel3D scene;
         private CursorPointModel3D cursorForAnchorPointCreation;
+        private PointSelectorModel3D pointSelector;
 
         IFileService fileService;
         IDialogService dialogService;
@@ -44,7 +45,6 @@
         /// </summary>
         private Point mouseOffsetViewPort;
         private Point MousePos;
-        private byte keyboardMod;
 
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
@@ -68,7 +68,6 @@
 
             this.mouseOffsetViewPort = new Point(mainGrid.ColumnDefinitions[0].ActualWidth + viewport.ActualWidth / 2, 20 + viewport.ActualHeight / 2);
             this.coeff = 3;
-            this.keyboardMod = 0;
         }
 
         #region Manipulator
@@ -217,8 +216,15 @@
                                    {
                                        try
                                        {
-                                           this.camera.ViewFromAbove();
-                                           UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
+                                           if (UserControlMod.Mod != UserMod.TrajectoryAnchorPointCreation)
+                                           {
+                                               this.camera.ViewFromAbove();
+                                               UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
+                                           }
+                                           else
+                                           {
+                                               this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
+                                           }
                                        }
                                        catch (Exception ex)
                                        {
@@ -239,6 +245,17 @@
                                    {
                                        try
                                        {
+                                           UserControlMod.Mod = UserMod.CameraRotation;
+
+                                           var trajectoryFirstPoint =
+                                               this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
+                                           this.pointSelector = new PointSelectorModel3D(
+                                               this.viewport,
+                                               new Point3D(
+                                                   trajectoryFirstPoint.X * this.coeff,
+                                                   trajectoryFirstPoint.Y * this.coeff,
+                                                   trajectoryFirstPoint.Z * this.coeff));
+                                           this.viewport.Children.Add(this.pointSelector.ModelVisual3D);
                                        }
                                        catch (Exception ex)
                                        {
@@ -246,6 +263,62 @@
                                        }
                                    }));
             }
+        }
+        
+        private RelayCommand onKeyDownHandler;
+        public RelayCommand OnKeyDownHandler
+        {
+            get
+            {
+                return this.upDownTrajectoryAnchorPointsCommand
+                       ?? (this.upDownTrajectoryAnchorPointsCommand = new RelayCommand(
+                               obj =>
+                                   {
+                                       try
+                                       {
+                                           if (this.pointSelector != null)
+                                           {
+                                               var delta = 0.25;
+                                               switch (((KeyEventArgs)obj).Key)
+                                               {
+                                                   /*** Raise/lower point along Z axis ***/
+                                                   case Key.W:
+                                                       this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, delta);
+                                                       break;
+                                                   case Key.S:
+                                                       this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, -delta);
+                                                       break;
+                                                   /*** Point selection ***/
+                                                   case Key.N: // Next point
+                                                       if (this.pointSelector.selectedPointIndex != this.track3D.track.AnchorPoints.Count - 1)
+                                                       {
+                                                           this.pointSelector.selectedPointIndex++;
+                                                       }
+
+                                                       break;
+                                                   case Key.P: // Previous point
+                                                       if (this.pointSelector.selectedPointIndex != 1)
+                                                       {
+                                                           this.pointSelector.selectedPointIndex--;
+                                                       }
+                                                       
+                                                       break;
+                                               }
+                                           }
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           this.dialogService.ShowMessage(ex.Message);
+                                       }
+                                   }));
+            }
+        }
+
+        private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
+        {
+            this.viewport.Children.Remove(this.pointSelector.ModelVisual3D);
+            this.pointSelector = null;
+            // PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
         }
 
         private RelayCommand splitByQtyTrajectoryCommand;
@@ -421,24 +494,26 @@
                                     {
                                         if (this.cursorForAnchorPointCreation == null)
                                         {
+                                            var trajectoryFirstPoint =
+                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
                                             this.cursorForAnchorPointCreation = new CursorPointModel3D(
                                                 this.viewport,
                                                 new Point3D(
-                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].X * this.coeff,
-                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Y * this.coeff,
-                                                    this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1].Z * this.coeff));
-                                            this.viewport.Children.Add(cursorForAnchorPointCreation.ModelVisual3D);
+                                                    trajectoryFirstPoint.X * this.coeff,
+                                                    trajectoryFirstPoint.Y * this.coeff,
+                                                    trajectoryFirstPoint.Z * this.coeff));
+                                            this.viewport.Children.Add(this.cursorForAnchorPointCreation.ModelVisual3D);
                                         }
                                         else
                                         {                                
                                             var nextMousePos = Mouse.GetPosition(obj as IInputElement);
-                                            this.viewport.Children.Remove(cursorForAnchorPointCreation.ModelVisual3D);
+                                            this.viewport.Children.Remove(this.cursorForAnchorPointCreation.ModelVisual3D);
                                             this.cursorForAnchorPointCreation.Move(
                                                 new Point3D(
-                                                    (nextMousePos.X - this.MousePos.X) * 13,
-                                                    (-nextMousePos.Y + this.MousePos.Y) * 13,
+                                                    nextMousePos.X - this.MousePos.X,
+                                                    -nextMousePos.Y + this.MousePos.Y,
                                                     0));
-                                            this.viewport.Children.Add(cursorForAnchorPointCreation.ModelVisual3D);
+                                            this.viewport.Children.Add(this.cursorForAnchorPointCreation.ModelVisual3D);
                                             this.MousePos = nextMousePos;
                                         }
                                     }
@@ -487,11 +562,7 @@
                                     this.MousePos = Mouse.GetPosition(obj as IInputElement);
                                     break;
                                 case UserMod.TrajectoryAnchorPointCreation:
-                                    var hitParams = new PointHitTestParameters(Mouse.GetPosition(obj as IInputElement));
-                                    
-                                    var X = (hitParams.HitPoint.X - this.mouseOffsetViewPort.X) * 0.0531177;
-                                    var Y = (hitParams.HitPoint.Y - this.mouseOffsetViewPort.Y) * 0.0531177;
-                                    this.track3D.AddAnchorPoint(new Point3D(MousePos.X, MousePos.Y, 0));
+                                    // Creation trajectory point migrate to button
                                     break;
                                 case UserMod.TrajectoryEditing:
                                     // TODO:
@@ -517,133 +588,7 @@
         #region Temporary region for refactoring
         
         #region Trajectory creation mod
-
-        #region Path
-        private void UpDownTrajectoryPoints_Click(object sender, RoutedEventArgs e)
-        {
-            UserControlMod.Mod = UserMod.CameraRotation;
-            this.keyboardMod = 1;
-
-            // Viewport3D.Children.Remove(this.trackModelVisual3D);
-            // this.indexTrajectoryPoint = 1;
-        }
-
-        private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
-        {
-            this.keyboardMod = 0;
-
-            // PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
-            // foreach (var p in this.trajectoryPointsVisual3D)
-            // this.listTrajectoryPoints.Add(p.center);
-        }
-
-        private void OnKeyDownHandler(object sender, KeyEventArgs e)
-        {
-            if (this.keyboardMod != 1) return;
-            switch (e.Key)
-            {
-                /*** Raise/lower point along Y axis ***/
-                case Key.W:
-                    this.ChangePathPointY(true);
-                    break;
-                case Key.S:
-                    this.ChangePathPointY(false);
-                    break;
-
-                /*** Point selection ***/
-                // Каким-то образом нужно подсвечивать сферу точки, которая выбирается
-                // Можно например применить к сфере ScaleTransform3D увеличив временно её в размерах
-                case Key.N: // Next point
-                 // if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
-                // this.indexTrajectoryPoint++;
-                    break;
-                case Key.P: // Previous point
-                // if (this.indexTrajectoryPoint == 1) return;
-                // this.indexTrajectoryPoint--;
-                    break;
-            }
-        }
-
-        private void ChangePathPointY(bool isUp)
-        {
-            var delta = isUp ? 0.25 : -0.25;
-
-            // this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].SetY(this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center.Y + delta);
-
-            // (this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].trajectoryModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
-            this.NeighborhoodLinesRotation();
-        }
-
-        private void NeighborhoodLinesRotation()
-        {
-            // Temporary solution
-            // Insert new ModelVisual3D model of path line except old
-
-            // TrajectoryLine trajectoryLine;
-            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint - 1].center;
-            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
-
-            ////TODO: Extract to method next 8 line
-            // var line = new MeshGeometry3D();
-            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
-            // var lineBrush = Brushes.MediumPurple;
-            // var lineMaterial = new DiffuseMaterial(lineBrush);
-            // var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-            // var pathLineModelVisual3D = new ModelVisual3D();
-            // pathLineModelVisual3D.Content = lineGeometryModel;
-            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint - 1].lineModelVisual3D);
-            // Viewport3D.Children.Insert(this.indexTrajectoryPoint - 1, pathLineModelVisual3D);
-
-            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
-            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint - 1);
-            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint - 1, trajectoryLine);
-
-            // if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
-
-            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
-            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint + 1].center;
-
-            ////TODO: Extract to method next 8 line
-            // line = new MeshGeometry3D();
-            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
-            // lineBrush = Brushes.MediumPurple;
-            // lineMaterial = new DiffuseMaterial(lineBrush);
-            // lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-            // pathLineModelVisual3D = new ModelVisual3D();
-            // pathLineModelVisual3D.Content = lineGeometryModel;
-            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint].lineModelVisual3D);
-            // Viewport3D.Children.Insert(this.indexTrajectoryPoint, pathLineModelVisual3D);
-
-            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
-            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint);
-            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint, trajectoryLine);
-
-            // there is the bug :( bug#2
-            // Because lenght changed when we up or down path point
-            // And there is need to use ScaleTransform3D with RotateTransform3D
-            // var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
-            // var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            // var rightLineAngle = Math.Asin(h / rightLineLenght);
-            // (((pathLinesVisual3D[indexPathPoint - 1]
-            // .lineModelVisual3D
-            // .Transform as Transform3DGroup)
-            // .Children[0] as RotateTransform3D)
-            // .Rotation as AxisAngleRotation3D)
-            // .Angle = rightLineAngle;
-
-            // var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
-            // h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
-            // var leftLineAngle = Math.Asin(h / leftLineLenght);
-            // (((pathLinesVisual3D[indexPathPoint]
-            // .lineModelVisual3D
-            // .Transform as Transform3DGroup)
-            // .Children[1] as RotateTransform3D)
-            // .Rotation as AxisAngleRotation3D)
-            // .Angle = leftLineAngle;
-        }
-
-        #endregion
-
+        
         #region Splitting trajectory
 
         private void SplitPathByStep_Button_Click(object sender, RoutedEventArgs e)

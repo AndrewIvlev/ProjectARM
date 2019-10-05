@@ -88,6 +88,7 @@
     <Compile Include="Common\IFileService.cs" />
     <Compile Include="Common\JsonFileService.cs" />
     <Compile Include="Graphics3DModel\Model3D\CursorPointModel3D.cs" />
+    <Compile Include="Graphics3DModel\Model3D\PointSelectorModel3D.cs" />
     <Compile Include="Graphics3DModel\Model3D\SceneModel3D.cs" />
     <Compile Include="Graphics3DModel\Model3D\MeshGeometry3DHelper.cs" />
     <Compile Include="MathModel\Delta.cs" />

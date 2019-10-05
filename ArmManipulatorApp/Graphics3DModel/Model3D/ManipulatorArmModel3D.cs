@@ -190,8 +190,8 @@
                         var arm = new ModelVisual3D();
                         arm.Content = jointsAndUnitsModelGroup;
 
-                        //Viewport3D.Children.Remove(armModelVisual3D[i + 1]);
-                        //Viewport3D.Children.Insert(i + 1, arm);
+                        // Viewport3D.Children.Remove(armModelVisual3D[i + 1]);
+                        // Viewport3D.Children.Insert(i + 1, arm);
 
                         armModelVisual3D.Remove(arm);
                         armModelVisual3D.Insert(i + 1, arm);

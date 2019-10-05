@@ -33,17 +33,9 @@
 
             foreach (var anchorPoint in this.track.AnchorPoints)
             {
-                var anchorPointModelVisual3D = new ModelVisual3D();
-                var anchorPointMeshGeometry3D = new MeshGeometry3D();
-                var graphPoint = new Point3D(coeff * anchorPoint.X, coeff * anchorPoint.Y, coeff * anchorPoint.Z);
-                MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, graphPoint, 7, 8, 8);
-                var anchorPointBrush = Brushes.GreenYellow;
-                var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
-                var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
-                anchorPointModelVisual3D.Content = anchorPointGeometryModel;
-                //// Translate Transform for up/down anchor points in Edit Trajectory Mode.
-                anchorPointModelVisual3D.Transform = new TranslateTransform3D();
-                this.trackModelVisual3D.Add(anchorPointModelVisual3D);
+                this.trackModelVisual3D.Add(
+                    this.CreateAnchorPointModelVisual3D(
+                        new Point3D(coeff * anchorPoint.X, coeff * anchorPoint.Y, coeff * anchorPoint.Z)));
             }
 
             foreach (var splitPoint in this.track.SplitPoints)
@@ -60,6 +52,82 @@
             }
         }
 
+        public void AddAnchorPoint(Point3D newVirtualPoint)
+        {
+            this.track.AnchorPoints.Add(this.ConvertFromVirtualToReal(newVirtualPoint));
+
+            this.trackModelVisual3D.Add(this.CreateTrajectoryLineModelVisual3D(newVirtualPoint));
+            this.trackModelVisual3D.Add(this.CreateAnchorPointModelVisual3D(newVirtualPoint));
+        }
+
+        private ModelVisual3D CreateAnchorPointModelVisual3D(Point3D center)
+        {
+            var anchorPointModelVisual3D = new ModelVisual3D();
+            var anchorPointMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, center, 7, 8, 8);
+            var anchorPointBrush = Brushes.GreenYellow;
+            var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
+            var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
+            anchorPointModelVisual3D.Content = anchorPointGeometryModel;
+            //// Translate Transform for up/down anchor points in Edit Trajectory Mode.
+            anchorPointModelVisual3D.Transform = new TranslateTransform3D();
+            return anchorPointModelVisual3D;
+        }
+
+        private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D endPoint)
+        {
+            var trajectoryLineModelVisual3D = new ModelVisual3D();
+            var trajectoryLineMeshGeometry3D = new MeshGeometry3D();
+            var startPoint = this.track.AnchorPoints[this.track.AnchorPoints.Count - 1];
+            MeshGeometry3DHelper.AddSmoothCylinder(
+                trajectoryLineMeshGeometry3D,
+                new Point3D(startPoint.X, startPoint.Y, startPoint.Z),
+                new Vector3D(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y, endPoint.Z - startPoint.Z),
+                6);
+            var anchorPointBrush = Brushes.MediumPurple;
+            var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
+            var anchorPointGeometryModel = new GeometryModel3D(trajectoryLineMeshGeometry3D, anchorPointMaterial);
+            trajectoryLineModelVisual3D.Content = anchorPointGeometryModel;
+
+            //// Translate Transform for up/down anchor points in Edit Trajectory Mode.
+            var rotateTransformByStart = new RotateTransform3D();
+            rotateTransformByStart.CenterX = startPoint.X;
+            rotateTransformByStart.CenterY = startPoint.Y;
+            rotateTransformByStart.CenterZ = startPoint.Z;
+
+            var rotateTransformByEnd = new RotateTransform3D();
+            rotateTransformByEnd.CenterX = endPoint.X;
+            rotateTransformByEnd.CenterY = endPoint.Y;
+            rotateTransformByEnd.CenterZ = endPoint.Z;
+
+            var angleRotationByStart = new AxisAngleRotation3D();
+            angleRotationByStart.Axis = Vector3D.CrossProduct(
+                new Vector3D(
+                    endPoint.X - startPoint.X,
+                    endPoint.Y - startPoint.Y,
+                    endPoint.Z - startPoint.Z),
+                new Vector3D(0, 1, 0));
+            angleRotationByStart.Angle = 0;
+
+            var angleRotationByEnd = new AxisAngleRotation3D();
+            angleRotationByEnd.Axis = Vector3D.CrossProduct(
+                new Vector3D(0, 1, 0),
+                new Vector3D(
+                    endPoint.X - startPoint.X,
+                    endPoint.Y - startPoint.Y,
+                    endPoint.Z - startPoint.Z));
+            angleRotationByEnd.Angle = 0;
+
+            rotateTransformByStart.Rotation = angleRotationByStart;
+            rotateTransformByEnd.Rotation = angleRotationByEnd;
+            
+            var transformGroup = new Transform3DGroup();
+            transformGroup.Children.Add(rotateTransformByStart);
+            transformGroup.Children.Add(rotateTransformByEnd);
+            trajectoryLineModelVisual3D.Transform = transformGroup;
+            return trajectoryLineModelVisual3D;
+        }
+        
         private void ShowSplitPath(List<Point3D> listSplitPathPoints)
         {
             foreach (var p in listSplitPathPoints)
@@ -76,176 +144,87 @@
             }
         }
 
-        public void AddAnchorPoint(Point3D newPoint)
+        public void ChangeAnchorPointZ(int indexOfAnchorPoint, double delta)
         {
+            this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].SetY(this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center.Y + delta);
 
-            //var pathPoint = new TrajectoryPoint();
-            //pathPoint.center = new Point3D(X, Y, this.trajectoryPointsVisual3D.First().center.Z);
-
-            //TODO: Extract to method next 8 line
-            var point = new MeshGeometry3D();
-            //MeshGeometry3DHelper.AddSphere(point, pathPoint.center, 0.2, 8, 8);
-            var pointBrush = Brushes.Purple;
-            var pointMaterial = new DiffuseMaterial(pointBrush);
-            var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
-            var pathPointModelVisual3D = new ModelVisual3D();
-            pathPointModelVisual3D.Content = pathPointGeometryModel;
-            pathPointModelVisual3D.Transform = new TranslateTransform3D();
-
-            //pathPoint.trajectoryModelVisual3D = pathPointModelVisual3D;
-            //this.trajectoryPointsVisual3D.Add(pathPoint);
-
-            //AddPathLine(this.trajectoryPointsVisual3D[this.trajectoryPointsVisual3D.Count - 2].center, this.trajectoryPointsVisual3D.Last().center);
+            (this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].trajectoryModelVisual3D.Transform as TranslateTransform3D).OffsetY += delta;
+            this.NeighborhoodLinesRotation();
         }
 
-        //private void AddPathLine(Point3D start, Point3D end)
-        //{
-        //    TrajectoryLine trajectoryLine;
-        //    trajectoryLine.start = start;
-        //    trajectoryLine.end = end;
+        private void NeighborhoodLinesRotation()
+        {
+            // Temporary solution
+            // Insert new ModelVisual3D model of path line except old
 
-        //    //TODO: Extract to method next 8 line
-        //    var line = new MeshGeometry3D();
-        //    LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
-        //    var lineBrush = Brushes.MediumPurple;
-        //    var lineMaterial = new DiffuseMaterial(lineBrush);
-        //    var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
-        //    var pathLineModelVisual3D = new ModelVisual3D();
-        //    pathLineModelVisual3D.Content = lineGeometryModel;
-        //    Viewport3D.Children.Add(pathLineModelVisual3D);
+            // TrajectoryLine trajectoryLine;
+            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint - 1].center;
+            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
 
-        //    trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
-        //    this.trajectoryLinesVisual3D.Add(trajectoryLine);
-        //    AddRotateTransform(trajectoryLine);
-        //}
+            ////TODO: Extract to method next 8 line
+            // var line = new MeshGeometry3D();
+            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
+            // var lineBrush = Brushes.MediumPurple;
+            // var lineMaterial = new DiffuseMaterial(lineBrush);
+            // var lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+            // var pathLineModelVisual3D = new ModelVisual3D();
+            // pathLineModelVisual3D.Content = lineGeometryModel;
+            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint - 1].lineModelVisual3D);
+            // Viewport3D.Children.Insert(this.indexTrajectoryPoint - 1, pathLineModelVisual3D);
 
-        //private void AddRotateTransform(TrajectoryLine trajectoryLine)
-        //{
-        //    var transformGroup = new Transform3DGroup();
+            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint - 1);
+            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint - 1, trajectoryLine);
 
-        //    var rotateTransformByStart = new RotateTransform3D();
-        //    rotateTransformByStart.CenterX = trajectoryLine.start.X;
-        //    rotateTransformByStart.CenterY = trajectoryLine.start.Y;
-        //    rotateTransformByStart.CenterZ = trajectoryLine.start.Z;
+            // if (this.indexTrajectoryPoint == this.trajectoryPointsVisual3D.Count - 1) return;
 
-        //    var rotateTransformByEnd = new RotateTransform3D();
-        //    rotateTransformByEnd.CenterX = trajectoryLine.end.X;
-        //    rotateTransformByEnd.CenterY = trajectoryLine.end.Y;
-        //    rotateTransformByEnd.CenterZ = trajectoryLine.end.Z;
+            // trajectoryLine.start = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint].center;
+            // trajectoryLine.end = this.trajectoryPointsVisual3D[this.indexTrajectoryPoint + 1].center;
 
-        //    var angleRotationByStart = new AxisAngleRotation3D
-        //    {
-        //        Axis = Vector3D.CrossProduct(
-        //            new Vector3D(trajectoryLine.end.X - trajectoryLine.start.X,
-        //                         trajectoryLine.end.Y - trajectoryLine.start.Y,
-        //                         trajectoryLine.end.Z - trajectoryLine.start.Z),
-        //            new Vector3D(0, 1, 0)),
-        //        Angle = 0
-        //    };
+            ////TODO: Extract to method next 8 line
+            // line = new MeshGeometry3D();
+            // LineByTwoPoints(line, trajectoryLine.start, trajectoryLine.end, 0.13);
+            // lineBrush = Brushes.MediumPurple;
+            // lineMaterial = new DiffuseMaterial(lineBrush);
+            // lineGeometryModel = new GeometryModel3D(line, lineMaterial);
+            // pathLineModelVisual3D = new ModelVisual3D();
+            // pathLineModelVisual3D.Content = lineGeometryModel;
+            // Viewport3D.Children.Remove(this.trajectoryLinesVisual3D[this.indexTrajectoryPoint].lineModelVisual3D);
+            // Viewport3D.Children.Insert(this.indexTrajectoryPoint, pathLineModelVisual3D);
 
-        //    var angleRotationByEnd = new AxisAngleRotation3D
-        //    {
-        //        Axis = Vector3D.CrossProduct(
-        //             new Vector3D(0, 1, 0),
-        //             new Vector3D(trajectoryLine.end.X - trajectoryLine.start.X,
-        //                          trajectoryLine.end.Y - trajectoryLine.start.Y,
-        //                          trajectoryLine.end.Z - trajectoryLine.start.Z)),
-        //        Angle = 0
-        //    };
+            // trajectoryLine.lineModelVisual3D = pathLineModelVisual3D;
+            // this.trajectoryLinesVisual3D.RemoveAt(this.indexTrajectoryPoint);
+            // this.trajectoryLinesVisual3D.Insert(this.indexTrajectoryPoint, trajectoryLine);
 
-        //    rotateTransformByStart.Rotation = angleRotationByStart;
-        //    transformGroup.Children.Add(rotateTransformByStart);
+            // there is the bug :( bug#2
+            // Because lenght changed when we up or down path point
+            // And there is need to use ScaleTransform3D with RotateTransform3D
+            // var rightLineLenght = (pathLinesVisual3D[indexPathPoint - 1].end - pathLinesVisual3D[indexPathPoint - 1].start).Length;
+            // var h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            // var rightLineAngle = Math.Asin(h / rightLineLenght);
+            // (((pathLinesVisual3D[indexPathPoint - 1]
+            // .lineModelVisual3D
+            // .Transform as Transform3DGroup)
+            // .Children[0] as RotateTransform3D)
+            // .Rotation as AxisAngleRotation3D)
+            // .Angle = rightLineAngle;
 
-        //    rotateTransformByEnd.Rotation = angleRotationByEnd;
-        //    transformGroup.Children.Add(rotateTransformByEnd);
+            // var leftLineLenght = (pathLinesVisual3D[indexPathPoint].end - pathLinesVisual3D[indexPathPoint].start).Length;
+            // h = pathLinesVisual3D[indexPathPoint].end.Y - pathLinesVisual3D[indexPathPoint].start.Y;
+            // var leftLineAngle = Math.Asin(h / leftLineLenght);
+            // (((pathLinesVisual3D[indexPathPoint]
+            // .lineModelVisual3D
+            // .Transform as Transform3DGroup)
+            // .Children[1] as RotateTransform3D)
+            // .Rotation as AxisAngleRotation3D)
+            // .Angle = leftLineAngle;
+        }
 
-        //    trajectoryLine.lineModelVisual3D.Transform = transformGroup;
-        //}
+        // TODO: create class for next convert method:
+        private Point3D ConvertFromRealToVirtual(Point3D point)
+            => new Point3D(point.X * this.coeff, point.Y * this.coeff, point.Z * this.coeff);
 
-
-        // TODO: remove it (used for 2D Graphics)
-        //public void ShowNextPoints(Graphics gr, int j)
-        //{
-        //    for (var i = j; i < NumOfExtraPoints; i++)
-        //        gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(SplitPoints[i].X - 3, SplitPoints[i].Y - 3, 6, 6));
-        //}
-
-        //public void ShowPastPoints(Graphics gr, int j)
-        //{
-        //    for (var i = 0; i < j; i++)
-        //        gr.FillEllipse(new SolidBrush(Color.Green), new Rectangle(SplitPoints[i].X - 3, SplitPoints[i].Y - 3, 6, 6));
-        //}
-
-        //public void ShowExtraPoints(Graphics gr)
-        //{
-        //    for (var i = 0; i < NumOfExtraPoints; i++)
-        //        gr.FillEllipse(new SolidBrush(Color.Red), new Rectangle(SplitPoints[i].X - 3, SplitPoints[i].Y - 3, 6, 6));
-        //    foreach (var P in AnchorPoints)
-        //    {
-        //        gr.FillEllipse(new SolidBrush(Color.Purple), new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-        //        var index = AnchorPoints.IndexOf(P);
-        //        if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-        //        else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-        //    }
-        //}
-
-        //public void ShowExtraPoints(Graphics gr, Color color)
-        //{
-        //    var pen = new Pen(Color.Purple, 4);
-        //    var brushMyColor = new SolidBrush(color);
-        //    var brush = new SolidBrush(Color.Purple);
-        //    for (var i = 0; i < NumOfExtraPoints - 1; i++)
-        //    {
-        //        //gr.DrawLine(pen, SplitPoints[i], SplitPoints[i + 1]);
-        //        gr.FillEllipse(brush, new Rectangle(SplitPoints[i].X - 6, SplitPoints[i].Y - 6, 12, 12));
-        //        gr.FillEllipse(brushMyColor, new Rectangle(SplitPoints[i].X - 3, SplitPoints[i].Y - 3, 6, 6));
-        //    }
-
-        //    gr.DrawLine(pen, SplitPoints[NumOfExtraPoints - 2], SplitPoints[NumOfExtraPoints - 1]);
-        //    gr.FillEllipse(brush, new Rectangle(SplitPoints[NumOfExtraPoints - 1].X - 6, SplitPoints[NumOfExtraPoints - 1].Y - 6, 12, 12));
-        //    gr.FillEllipse(brushMyColor, new Rectangle(SplitPoints[NumOfExtraPoints - 1].X - 3, SplitPoints[NumOfExtraPoints - 1].Y - 3, 6, 6));
-        //    foreach (var P in AnchorPoints)
-        //    {
-        //        gr.FillEllipse(brush, new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-        //        var index = AnchorPoints.IndexOf(P);
-        //        if (index > 9) gr.DrawString($"{index}", new Font("Arial", 8), new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-        //        else gr.DrawString($"{index}", new Font("Arial", 9), new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-        //    }
-        //}
-
-        //public void Show(Graphics gr)
-        //{
-        //    foreach (var P in AnchorPoints)
-        //    {
-        //        var index = AnchorPoints.IndexOf(P);
-        //        if (index + 1 < AnchorPoints.Count)
-        //        {
-        //            var NextP = AnchorPoints[index + 1];
-        //            gr.DrawLine(new Pen(Color.Purple, 4), P, NextP);
-        //        }
-        //        gr.FillEllipse(new SolidBrush(Color.Purple),
-        //                new Rectangle(P.X - 6, P.Y - 6, 12, 12));
-        //        if (index > 9)
-        //            gr.DrawString($"{index}", new Font("Arial", 8),
-        //            new SolidBrush(Color.Yellow), P.X - 8, P.Y - 7);
-        //        else
-        //            gr.DrawString($"{index}", new Font("Arial", 9),
-        //            new SolidBrush(Color.Yellow), P.X - 5, P.Y - 6);
-        //    }
-        //}
-        //public void Hide(Graphics gr)
-        //{
-        //    foreach (var P in AnchorPoints)
-        //    {
-        //        var index = AnchorPoints.IndexOf(P);
-        //        if (index + 1 < AnchorPoints.Count)
-        //        {
-        //            var NextP = AnchorPoints[index + 1];
-        //            gr.DrawLine(new Pen(Color.LightBlue, 8), P, NextP);
-        //        }
-        //        gr.FillEllipse(new SolidBrush(Color.LightBlue),
-        //                new Rectangle(P.X - 8, P.Y - 8, 16, 16));
-        //    }
-        //}
+        private Point3D ConvertFromVirtualToReal(Point3D point)
+            => new Point3D(point.X / this.coeff, point.Y / this.coeff, point.Z / this.coeff);
     }
 }
