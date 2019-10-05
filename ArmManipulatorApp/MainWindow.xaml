@@ -79,6 +79,7 @@
                     <Grid>
                         <StackPanel>
                             <Button Content="Добавить опорную точку" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Завершить добавление точек" Command="{Binding FinishAddingTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
                             <Button Content="Изменить z координату точки" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
                             <Button Content="Интерполяция" Command="{Binding InterpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <Label Content="Разделение траектории" HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" />

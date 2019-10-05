@@ -138,7 +138,9 @@
                                         if (this.track3D != null)
                                         {
                                             foreach (var mv in this.track3D.trackModelVisual3D)
+                                            {
                                                 this.viewport.Children.Remove(mv);
+                                            }
                                         }
 
                                         var firstPoint = this.armModel3D.arm.Fn();
@@ -146,7 +148,9 @@
                                             new Trajectory((Point3D)firstPoint),
                                             this.coeff);
                                         foreach (var mv in this.track3D.trackModelVisual3D)
+                                        {
                                             this.viewport.Children.Add(mv);
+                                        }
                                         
                                         this.camera.ViewFromAbove();
                                         UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
@@ -237,6 +241,28 @@
                                                    this.viewport.Children.Add(mv);
                                                }
                                            }
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           this.dialogService.ShowMessage(ex.Message);
+                                       }
+                                   }));
+            }
+        }
+        
+        private RelayCommand finishAddingTrajectoryAnchorPointsCommand;
+        public RelayCommand FinishAddingTrajectoryAnchorPointsCommand
+        {
+            get
+            {
+                return this.finishAddingTrajectoryAnchorPointsCommand
+                       ?? (this.finishAddingTrajectoryAnchorPointsCommand = new RelayCommand(
+                               obj =>
+                                   {
+                                       try
+                                       {
+                                           UserControlMod.Mod = UserMod.CameraRotation;
+                                           this.camera.DefaultView();
                                        }
                                        catch (Exception ex)
                                        {
@@ -447,31 +473,22 @@
             {
                 return new RelayCommand(
                     obj =>
-                    {
-                        try
                         {
-                            // TODO: fix this to independent from canvas size
-                            if (this.camera.Zoom.ScaleX < 1)
+                            try
                             {
-                                this.camera.Zoom.ScaleX += (double)((MouseWheelEventArgs)obj).Delta / 555;
-                                this.camera.Zoom.ScaleY += (double)((MouseWheelEventArgs)obj).Delta / 555;
-                                this.camera.Zoom.ScaleZ += (double)((MouseWheelEventArgs)obj).Delta / 555;
+                                // TODO: rewrite this without magic number 1024
+                                this.camera.Zoom.ScaleX += (double)((MouseWheelEventArgs)obj).Delta / 1024;
+                                this.camera.Zoom.ScaleY += (double)((MouseWheelEventArgs)obj).Delta / 1024;
+                                this.camera.Zoom.ScaleZ += (double)((MouseWheelEventArgs)obj).Delta / 1024;
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                this.camera.Zoom.ScaleX += (double)((MouseWheelEventArgs)obj).Delta / 333;
-                                this.camera.Zoom.ScaleY += (double)((MouseWheelEventArgs)obj).Delta / 333;
-                                this.camera.Zoom.ScaleZ += (double)((MouseWheelEventArgs)obj).Delta / 333;
+                                this.dialogService.ShowMessage(ex.Message);
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            this.dialogService.ShowMessage(ex.Message);
-                        }
-                    },
+                        },
                     (obj) => this.camera != null);
             }
-        }        
+        }
         
         public ICommand MouseMove
         {

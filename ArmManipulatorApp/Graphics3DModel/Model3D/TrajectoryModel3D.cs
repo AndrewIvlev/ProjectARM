@@ -58,7 +58,7 @@
 
             this.trackModelVisual3D.Add(
                 this.CreateTrajectoryLineModelVisual3D(
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 1]),
+                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 2]),
                     newVirtualPoint));
             this.trackModelVisual3D.Add(this.CreateAnchorPointModelVisual3D(newVirtualPoint));
         }
@@ -67,7 +67,7 @@
         {
             var anchorPointModelVisual3D = new ModelVisual3D();
             var anchorPointMeshGeometry3D = new MeshGeometry3D();
-            MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, center, 7, 8, 8);
+            MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, center, 8, 8, 8);
             var anchorPointBrush = Brushes.GreenYellow;
             var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
             var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
