@@ -14,12 +14,12 @@
     using System.Windows.Navigation;
 
     using ArmManipulatorApp.Common;
+    using ArmManipulatorApp.Graphics3DModel;
     using ArmManipulatorApp.Graphics3DModel.Model3D;
     using ArmManipulatorApp.MathModel.Trajectory;
 
     using MainApp.Common;
 
-    using Grid = System.Windows.Controls.Grid;
     using Point3D = System.Windows.Media.Media3D.Point3D;
 
     public class ApplicationViewModel
@@ -34,16 +34,11 @@
         IFileService fileService;
         IDialogService dialogService;
         
-        private Grid mainGrid;
         private Viewport3D viewport;
         private TextBox armTextBox;
         private Chart deltaChart;
 
 
-        /// <summary>
-        /// Offset for calculation mouse position from 2D coordinates to 3D then camera is looking on xy plate
-        /// </summary>
-        private Point mouseOffsetViewPort;
         private Point MousePos;
 
         /// <summary>
@@ -54,19 +49,16 @@
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
-            Grid mainGrid,
             Viewport3D viewport,
             TextBox armTextBox,
             Chart deltaChart)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
-            this.mainGrid = mainGrid;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.deltaChart = deltaChart;
 
-            this.mouseOffsetViewPort = new Point(mainGrid.ColumnDefinitions[0].ActualWidth + viewport.ActualWidth / 2, 20 + viewport.ActualHeight / 2);
             this.coeff = 3;
         }
 
@@ -284,14 +276,8 @@
                                        try
                                        {
                                            UserControlMod.Mod = UserMod.CameraRotation;
-
-                                           var trajectoryFirstPoint =
-                                               this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
-                                           this.pointSelector = new PointSelectorModel3D(
-                                               new Point3D(
-                                                   trajectoryFirstPoint.X * this.coeff,
-                                                   trajectoryFirstPoint.Y * this.coeff,
-                                                   trajectoryFirstPoint.Z * this.coeff));
+                                           var trajectoryLastPoint = this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
+                                           this.pointSelector = new PointSelectorModel3D(VRConvert.ConvertFromRealToVirtual(trajectoryLastPoint, this.coeff));
                                            this.viewport.Children.Add(this.pointSelector.ModelVisual3D);
                                        }
                                        catch (Exception ex)

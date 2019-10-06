@@ -54,11 +54,11 @@
 
         public void AddAnchorPoint(Point3D newVirtualPoint)
         {
-            this.track.AnchorPoints.Add(this.ConvertFromVirtualToReal(newVirtualPoint));
+            this.track.AnchorPoints.Add(VRConvert.ConvertFromVirtualToReal(newVirtualPoint, this.coeff));
 
             this.trackModelVisual3D.Add(
                 this.CreateTrajectoryLineModelVisual3D(
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 2]),
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 2], this.coeff),
                     newVirtualPoint));
             this.trackModelVisual3D.Add(this.CreateAnchorPointModelVisual3D(newVirtualPoint));
         }
@@ -165,17 +165,17 @@
             if (indexOfAnchorPoint * 2 == this.track.AnchorPoints.Count - 1)
             {
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1]),
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1], this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff));
             }
             else
             {
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1]),
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1], this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff));
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 + 1] = this.CreateTrajectoryLineModelVisual3D(
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint]),
-                    this.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1]));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1], this.coeff));
             }
         }
 
@@ -240,12 +240,5 @@
         //    .Rotation as AxisAngleRotation3D)
         //    .Angle = leftLineAngle;
         //}
-
-        // TODO: create class for next convert method:
-        private Point3D ConvertFromRealToVirtual(Point3D point)
-            => new Point3D(point.X * this.coeff, point.Y * this.coeff, point.Z * this.coeff);
-
-        private Point3D ConvertFromVirtualToReal(Point3D point)
-            => new Point3D(point.X / this.coeff, point.Y / this.coeff, point.Z / this.coeff);
     }
 }
