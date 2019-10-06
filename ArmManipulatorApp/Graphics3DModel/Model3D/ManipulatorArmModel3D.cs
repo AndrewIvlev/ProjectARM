@@ -123,16 +123,21 @@
 
             return joint;
         }
-
+        
+        // TODO: complete this method
         public void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
             for (var i = 1; i < this.arm.N; i++)
             {
-                var animation1 = new ThicknessAnimation();
-                animation1.From = new Thickness(5);
-                animation1.To = new Thickness(25);
-                animation1.Duration = TimeSpan.FromSeconds(5);
+                var j = 0;
+                DoubleAnimation animation = new DoubleAnimation();
+                animation.To = 40;
+                animation.DecelerationRatio = 1;
+                animation.Duration = TimeSpan.FromSeconds(0.15);
+                animation.AutoReverse = true;
+                (((this.armModelVisual3D[j].Transform as Transform3DGroup).Children[1] as RotateTransform3D)
+                 .Rotation as AxisAngleRotation3D).BeginAnimation(AxisAngleRotation3D.AngleProperty, animation);
                 //Storyboard.SetTarget(animation1, button1);
                 //Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
             }
@@ -148,24 +153,50 @@
                 switch (this.arm.Units[i].Type)
                 {
                     case 'R':
-                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1); j++)
+                        var rotAxis = this.arm.GetZAxis(i);
+                        this.arm.CalcMetaDataForStanding();
+                        var centerRot = this.arm.F(i);
+                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1) + 1; j++)
                         {
-                            (((this.armModelVisual3D[j].Transform as Transform3DGroup).Children[1] as RotateTransform3D)
-                             .Rotation as AxisAngleRotation3D).Angle = q[i]; // TODO: радианы или градусы ?
+                            // TODO: omg it seems to me that the CenterX, CenterY and CenterZ no corresponds to my xyz axis ((
+                            // Кажется проблема здеськак минимум в том, что оси у меня располагаются иначе дефолтовых
+                            // Ещё возможна ошибка в rotAxis
+                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[1] as RotateTransform3D)
+                                .CenterX = centerRot.X;
+                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[1] as RotateTransform3D)
+                                .CenterY = centerRot.Y;
+                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[1] as RotateTransform3D)
+                                .CenterZ = centerRot.Z;
+
+                            (((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                              .Children[1] as RotateTransform3D)
+                             .Rotation as AxisAngleRotation3D)
+                                .Axis = rotAxis;
+
+                            (((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                              .Children[1] as RotateTransform3D)
+                             .Rotation as AxisAngleRotation3D)
+                                .Angle = MathFunctions.RadianToDegree(q[i]);
                         }
 
                         break;
                     case 'P':
                         var prismaticAxis = this.arm.GetZAxis(i);
-                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1); j++)
+                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1) + 1; j++)
                         {
                             if (j == 2 * (i + 1) + 1) continue;
 
-                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
+                            ((armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[0] as TranslateTransform3D)
                                 .OffsetX += prismaticAxis.X * q[i];
-                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
+                            ((armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[0] as TranslateTransform3D)
                                 .OffsetY += prismaticAxis.Y * q[i];
-                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
+                            ((armModelVisual3D[j].Transform as Transform3DGroup)
+                             .Children[0] as TranslateTransform3D)
                                 .OffsetZ += prismaticAxis.Z * q[i];
                         }
 

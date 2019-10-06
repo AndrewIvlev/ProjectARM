@@ -14,6 +14,8 @@
     using ArmManipulatorApp.Graphics3DModel.Model3D;
     using ArmManipulatorApp.MathModel.Trajectory;
 
+    using ArmManipulatorArm.MathModel;
+
     using MainApp.Common;
 
     using Point3D = System.Windows.Media.Media3D.Point3D;
@@ -503,11 +505,29 @@
                                                    {
                                                        try
                                                        {
-                                                           foreach (var dq in this.dQList)
-                                                           {
-                                                               this.armModel3D.TransformUpdate(dq);
-                                                               Thread.Sleep(1000); //// TODO: Add speed parameter here
-                                                           }
+                                                           var dq = new double[1]
+                                                                        {
+                                                                            MathFunctions.DegreeToRadian(45)
+                                                                        };
+                                                           this.armModel3D.TransformUpdate(dq);
+
+                                                           // For 3RPR.json
+                                                           //var dq = new double[5]
+                                                           //             {
+                                                           //                 MathFunctions.DegreeToRadian(45),
+                                                           //                 MathFunctions.DegreeToRadian(30),
+                                                           //                 MathFunctions.DegreeToRadian(45),
+                                                           //                 5,
+                                                           //                 MathFunctions.DegreeToRadian(90)
+                                                           //             };
+                                                           //this.armModel3D.TransformUpdate(dq);
+
+                                                           // TODO: uncomment after tests
+                                                           //foreach (var dq in this.dQList)
+                                                           //{
+                                                           //    this.armModel3D.TransformUpdate(dq);
+                                                           //    Thread.Sleep(1000); //// TODO: Add speed parameter here
+                                                           //}
                                                        }
                                                        catch (Exception ex)
                                                        {
