@@ -11,7 +11,7 @@
         xmlns:dvc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024" Loaded="Window_Loaded">
+        Title="ProjARM" Height="768" Width="1024">
 
     <Window.Resources>
         <Style x:Key="ButtonStyle">
@@ -115,7 +115,7 @@
             <StackPanel>
                 <Separator Height="10"></Separator>
                 <Label HorizontalAlignment ="Center" FontSize="15" >Прогресс алгоритма планирования</Label>
-                <ProgressBar Height="18" Margin="10, 5"/>
+                <ProgressBar x:Name="PathPlanningProgressBar" Height="18" Margin="10, 5"/>
                 <WrapPanel VerticalAlignment="Bottom" ItemWidth="120" HorizontalAlignment="Center">
                     <Button Content="Посчитать" Width="97" Command="{Binding TrackPlanningCommand}" Style="{StaticResource ButtonStyle}"/>
                     <Button Content="Отмена" Width="88" Command="{Binding CancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>

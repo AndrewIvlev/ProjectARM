@@ -64,14 +64,31 @@
         public void DefaultA()
         {
             for (var i = 0; i < N; i++)
-            for (var j = 0; j < N; j++)
-                A[i, j] = i == j ? 1 : 0;
+            {
+                for (var j = 0; j < N; j++)
+                {
+                    this.A[i, j] = i == j ? 1 : 0;
+                }
+            }
         }
         
         public void SetQ(double[] newQ)
         {
             for (var i = 0; i < N; i++)
-                Units[i].Q = newQ[i];
+            {
+                this.Units[i].Q = newQ[i];
+            }
+        }
+
+        public double[] GetQ()
+        {
+            var result = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+            {
+                result[i] = this.Units[i].Q;
+            }
+
+            return result;
         }
         
         public double GetUnitLen(int unit) => unit == 0
@@ -124,6 +141,13 @@
             ArmMovementPlaning.LagrangeMethodToThePoint(p);
         }
         
+
+        public double GetPointError(Point3D p) =>
+            MathFunctions.NormaVector(new Point3D(
+                p.X - this.F(this.N).X,
+                p.Y - this.F(this.N).Y,
+                p.Z - this.F(this.N).Z));
+
         public static bool operator ==(Arm a, Arm b)
         {
             if (a.N != b.N)

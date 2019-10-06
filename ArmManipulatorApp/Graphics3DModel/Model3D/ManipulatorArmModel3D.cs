@@ -20,7 +20,7 @@
         public Arm arm;
 
         public List<ModelVisual3D> armModelVisual3D; // Count of this list should be (model.n + 1)
-
+        
         private Storyboard storyboard;
 
         /// <summary>
@@ -55,7 +55,8 @@
                 var jointMesh = new MeshGeometry3D();
 
                 var eup = this.arm.F(i); // End Unit Point
-                MeshGeometry3DHelper.AddSmoothCylinder(unitMesh,
+                MeshGeometry3DHelper.AddSmoothCylinder(
+                    unitMesh,
                     new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
                     new Vector3D((eup.X - sup.X) * coeff, (eup.Y - sup.Y) * coeff, (eup.Z - sup.Z) * coeff),
                     6);

@@ -12,12 +12,6 @@
             ArmMovementPlaning.arm = arm;
         }
 
-        public static double GetPointError(Point3D p) =>
-            MathFunctions.NormaVector(new Point3D(
-                p.X - arm.F(arm.N).X,
-                p.Y - arm.F(arm.N).Y,
-                p.Z - arm.F(arm.N).Z));
-
         public static double[] LagrangeMethodToThePoint(Point3D p)
         {
             var resultQ = new double[arm.N];

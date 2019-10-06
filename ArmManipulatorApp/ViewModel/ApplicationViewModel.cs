@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Forms.DataVisualization.Charting;
@@ -17,6 +18,8 @@
     using ArmManipulatorApp.Graphics3DModel;
     using ArmManipulatorApp.Graphics3DModel.Model3D;
     using ArmManipulatorApp.MathModel.Trajectory;
+
+    using ArmManipulatorArm.MathModel.Arm;
 
     using MainApp.Common;
 
@@ -38,8 +41,10 @@
         private TextBox armTextBox;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
-        private Chart deltaChart;
-
+        private Chart DeltaChart;
+        
+        // Buffer of all calculated q's for animation
+        private List<double[]> Q;
 
         private Point MousePos;
 
@@ -63,9 +68,19 @@
             this.armTextBox = armTextBox;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
-            this.deltaChart = deltaChart;
+            this.DeltaChart = deltaChart;
+            this.DeltaChart.ChartAreas.Add(new ChartArea("Default"));
+            this.DeltaChart.Series.Add(new Series("Series1"));
+            this.DeltaChart.Series["Series1"].ChartArea = "Default";
+            this.DeltaChart.Series["Series1"].ChartType = SeriesChartType.Line;
+
+            // добавим данные линии
+            int[] axisXData = { 0, 50, 100 };
+            double[] axisYData = { 5.3, 1.3, 7.3 };
+            this.DeltaChart.Series["Series1"].Points.DataBindXY(axisXData, axisYData);
 
             this.coeff = 3;
+            this.Q = new List<double[]>();
         }
 
         #region Manipulator
@@ -417,25 +432,18 @@
                     {
                         try
                         {
-                            // public static List<double[]> PlanningTrajectory(Trajectory S, Arm model, List<Point3D> DeltaPoints, BackgroundWorker worker)
-                            // {
-                            // var q = new List<double[]>();
+                            var deltaList = new double[this.track3D.track.SplitPoints.Count];
 
-                            // for (var i = 1; i < S.NumOfExtraPoints; i++)
-                            // {
-                            // var tmpQ = new double[model.n - 1];
-                            // worker.ReportProgress((int)((float)i / S.NumOfExtraPoints * 100));
-                            // for (var j = 0; j < model.n - 1; j++)
-                            // {
-                            // model.LagrangeMethodToThePoint(S.ExactExtra[i - 1]);
-                            // tmpQ[j] = model.q[j];
-                            // }
-                            // q.Add(tmpQ);
-                            // DeltaPoints.Add(new Point3D(i - 1, model.GetPointError(S.ExactExtra[i - 1]), 0));
-                            // }
+                            for (var i = 1; i < this.track3D.track.SplitPoints.Count; i++)
+                            {
+                                var point = this.track3D.track.SplitPoints[i];
+                                this.armModel3D.arm.Move(point);
+                                this.Q.Add(this.armModel3D.arm.GetQ());
+                                deltaList[i] = this.armModel3D.arm.GetPointError(point);
+                            }
 
-                            // return q;
-                            // }
+                            this.DeltaChart.Series["Series1"].Points.Clear();
+                            this.DeltaChart.Series["Series1"].Points.DataBindXY(deltaList, Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray());
                         }
                         catch (Exception ex)
                         {
