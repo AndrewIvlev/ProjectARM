@@ -24,9 +24,9 @@
 
         public Unit()
         {
-            Type = 'T';
-            Q = 0;
-            B = new BlockMatrix();
+            this.Type = 'T';
+            this.Q = 0;
+            this.B = new BlockMatrix();
         }
 
         public static bool operator ==(Unit a, Unit b)

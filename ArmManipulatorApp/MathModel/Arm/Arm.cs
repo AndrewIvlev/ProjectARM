@@ -9,12 +9,7 @@
 
     using Newtonsoft.Json;
 
-    public interface IMovable
-    {
-        void Move(Point3D p);
-    }
-
-    public class Arm : IMovable
+    public class Arm
     {
         public int N;
         public BlockMatrix RootB;
@@ -79,6 +74,14 @@
                 this.Units[i].Q = newQ[i];
             }
         }
+        
+        public void OffsetQ(double[] dQ)
+        {
+            for (var i = 0; i < N; i++)
+            {
+                this.Units[i].Q += dQ[i];
+            }
+        }
 
         public double[] GetQ()
         {
@@ -126,7 +129,7 @@
             ArmMetaDataCalculator.CalcT();
         }
 
-        public void Move(Point3D p)
+        public double[] Move(Point3D p)
         {
             ArmMetaDataCalculator.Init(this);
             ArmMetaDataCalculator.CalcSByUnitsType();
@@ -138,7 +141,9 @@
             ArmMetaDataCalculator.CalcC();
 
             ArmMovementPlaning.Init(this);
-            ArmMovementPlaning.LagrangeMethodToThePoint(p);
+            var dQ = ArmMovementPlaning.LagrangeMethodToThePoint(p);
+            this.OffsetQ(dQ);
+            return dQ;
         }
         
 

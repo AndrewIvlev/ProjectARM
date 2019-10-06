@@ -80,6 +80,7 @@
   <ItemGroup>
     <Folder Include="Deltas\" />
     <Folder Include="Test Tracks\" />
+    <Folder Include="Tracks\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArmManipulatorApp\ArmManipulatorApp.csproj">

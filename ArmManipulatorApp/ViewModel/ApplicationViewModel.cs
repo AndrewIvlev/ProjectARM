@@ -2,24 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Forms.DataVisualization.Charting;
     using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Media.Animation;
-    using System.Windows.Media.Media3D;
-    using System.Windows.Navigation;
-
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.Graphics3DModel;
     using ArmManipulatorApp.Graphics3DModel.Model3D;
     using ArmManipulatorApp.MathModel.Trajectory;
-
-    using ArmManipulatorArm.MathModel.Arm;
 
     using MainApp.Common;
 
@@ -44,7 +37,7 @@
         private Chart DeltaChart;
         
         // Buffer of all calculated q's for animation
-        private List<double[]> Q;
+        private List<double[]> dQList;
 
         private Point MousePos;
 
@@ -52,7 +45,7 @@
         /// Задаёт отношение реальных физических величин манипулятора
         /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         /// </summary>
-        private double coeff = 3;
+        private double coeff;
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
@@ -74,16 +67,37 @@
             this.DeltaChart.Series["Series1"].ChartArea = "Default";
             this.DeltaChart.Series["Series1"].ChartType = SeriesChartType.Line;
 
-            // добавим данные линии
+            // Add random values for chart display
             int[] axisXData = { 0, 50, 100 };
             double[] axisYData = { 5.3, 1.3, 7.3 };
             this.DeltaChart.Series["Series1"].Points.DataBindXY(axisXData, axisYData);
 
+            this.dQList = new List<double[]>();
             this.coeff = 3;
-            this.Q = new List<double[]>();
         }
 
         #region Manipulator
+
+        private RelayCommand newArmCommand;
+        public RelayCommand NewArmCommand
+        {
+            get
+            {
+                return this.newArmCommand ?? 
+                       (this.newArmCommand = new RelayCommand(
+                            obj =>
+                                   {
+                                       try
+                                       {
+                                          
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           this.dialogService.ShowMessage(ex.Message);
+                                       }
+                                   }));
+            }
+        }
 
         private RelayCommand openArmCommand;
         public RelayCommand OpenArmCommand
@@ -119,7 +133,7 @@
                                                }
 
                                                this.armTextBox.Text = File.ReadAllText(this.dialogService.FilePath);
-                                               ////this.dialogService.ShowMessage("File open!");
+                                               this.dialogService.ShowMessage("Файл манипулятора открыт.");
                                            }
                                        }
                                        catch (Exception ex)
@@ -127,6 +141,31 @@
                                            this.dialogService.ShowMessage(ex.Message);
                                        }
                                    }));
+            }
+        }
+
+        private RelayCommand saveArmCommand;
+        public RelayCommand SaveArmCommand
+        {
+            get
+            {
+                return this.saveArmCommand ?? 
+                       (this.saveArmCommand = new RelayCommand(
+                            obj =>
+                                {
+                                    try
+                                    {
+                                        if (this.dialogService.SaveFileDialog() == true)
+                                        {
+                                            this.fileService.SaveArm(this.dialogService.FilePath, this.armModel3D.arm);
+                                            this.dialogService.ShowMessage("Файл манипулятора сохранен.");
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        this.dialogService.ShowMessage(ex.Message);
+                                    }
+                                }));
             }
         }
 
@@ -189,8 +228,10 @@
                                    {
                                        if (this.dialogService.OpenFileDialog())
                                        {
+                                           this.track3D?.RemoveAnchorTrackFromViewport();
                                            this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.coeff);
-                                           this.dialogService.ShowMessage("File open!");
+                                           this.track3D.AddAnchorTrackToViewport();
+                                           this.dialogService.ShowMessage("Файл траектории открыт.");
                                        }
                                    }
                                    catch (Exception ex)
@@ -214,7 +255,7 @@
                                if (this.dialogService.SaveFileDialog() == true)
                                {
                                    this.fileService.SaveTrack(this.dialogService.FilePath, this.track3D.track);
-                                   this.dialogService.ShowMessage("Файл сохранен");
+                                   this.dialogService.ShowMessage("Файл траектории сохранен.");
                                }
                            }
                            catch (Exception ex)
@@ -437,13 +478,13 @@
                             for (var i = 1; i < this.track3D.track.SplitPoints.Count; i++)
                             {
                                 var point = this.track3D.track.SplitPoints[i];
-                                this.armModel3D.arm.Move(point);
-                                this.Q.Add(this.armModel3D.arm.GetQ());
+                                var dQ = this.armModel3D.arm.Move(point);
+                                this.dQList.Add(dQ);
                                 deltaList[i] = this.armModel3D.arm.GetPointError(point);
                             }
 
                             this.DeltaChart.Series["Series1"].Points.Clear();
-                            this.DeltaChart.Series["Series1"].Points.DataBindXY(deltaList, Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray());
+                            this.DeltaChart.Series["Series1"].Points.DataBindXY(Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray(), deltaList);
                         }
                         catch (Exception ex)
                         {
@@ -454,32 +495,39 @@
         #endregion
 
         #region Moving animation
-        
+
         private RelayCommand startStopAnimation;
-        public RelayCommand StartStopAnimation => this.startStopAnimation ??
-            (this.startStopAnimation = new RelayCommand(obj =>
-                    {
-                        try
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                            this.dialogService.ShowMessage(ex.Message);
-                        }
-                    }));
+        public RelayCommand StartStopAnimation
+            => this.startStopAnimation ?? (this.startStopAnimation = new RelayCommand(
+                                               obj =>
+                                                   {
+                                                       try
+                                                       {
+                                                           foreach (var dq in this.dQList)
+                                                           {
+                                                               this.armModel3D.TransformUpdate(dq);
+                                                               Thread.Sleep(1000); //// TODO: Add speed parameter here
+                                                           }
+                                                       }
+                                                       catch (Exception ex)
+                                                       {
+                                                           this.dialogService.ShowMessage(ex.Message);
+                                                       }
+                                                   }));
 
         private RelayCommand pauseAnimation;
-        public RelayCommand PauseAnimation => this.pauseAnimation ??
-            (this.pauseAnimation = new RelayCommand(obj =>
-                    {
-                        try
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                            this.dialogService.ShowMessage(ex.Message);
-                        }
-                    }));
+        public RelayCommand PauseAnimation
+            => this.pauseAnimation ?? (this.pauseAnimation = new RelayCommand(
+                                           obj =>
+                                               {
+                                                   try
+                                                   {
+                                                   }
+                                                   catch (Exception ex)
+                                                   {
+                                                       this.dialogService.ShowMessage(ex.Message);
+                                                   }
+                                               }));
 
         #endregion
 
@@ -622,57 +670,6 @@
             }
         }
 
-        #endregion
-
-        #region Temporary region for refactoring
-        
-        #region Path Planning (when arm and trajectory exists
-
-        private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.armModel3D == null)
-            {
-                MessageBox.Show("Firstly create manipulator model!");
-                return;
-            }
-
-            // Array.Clear(arrayQ, 0, arrayQ.Length);
-            // var delta = new Delta();
-            // var deltaViewModel = new DeltaPlotModel();
-            // for (var i = 1; i < this.listSplitTrajectoryPoints.Count; i++)
-            // {
-            // var pathPoint = this.listSplitTrajectoryPoints[i];
-            // model.MoveByOffset(pathPoint);
-            // //var tmpQ = new double[model.n];
-            // //model.q.CopyTo(tmpQ, 0);
-            // //arrayQ[i] = tmpQ;
-            // //Thread.Sleep(1500);
-
-            // //ManipulatorTransformUpdate(model.q);//TODO:think what do with q
-            // var p = model.F(model.N);
-
-            // delta.DesiredPoints.Add(this.listSplitTrajectoryPoints[i]);
-            // delta.RealPoints.Add((Point3D)p);
-            // }
-
-            // delta.CalcDeltas();
-            // var serializer = new JsonSerializer();
-            // var stringWriter = new StringWriter();
-            // using (var writer = new JsonTextWriter(stringWriter))
-            // {
-            // writer.QuoteName = false;
-            // serializer.Serialize(writer, delta);
-            // }
-            // var json = stringWriter.ToString();
-            // var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\ArmManipulatorApp_Tests\\Deltas\\deltas.txt");
-            // File.WriteAllText(filePath, json);
-
-            // for (var i = 0; i < delta.Deltas.Count; i++)
-            // deltaViewModel.Points.Add(new DataPoint(delta.Deltas[i], i));
-        }
-
-        #endregion
-        
         #endregion
     }
 }

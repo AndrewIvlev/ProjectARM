@@ -34,17 +34,26 @@
             this.viewport = viewport;
             this.trackModelVisual3D = new List<ModelVisual3D>();
             this.splitTrackModelVisual3D = new List<ModelVisual3D>();
-
-            foreach (var anchorPoint in this.track.AnchorPoints)
+            
+            this.trackModelVisual3D.Add(
+                this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[0], this.coeff)));
+            for (var i = 1; i < this.track.AnchorPoints.Count; i++)
             {
+                var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
+                    VRConvert.ConvertFromRealToVirtual(
+                        this.track.AnchorPoints[i - 1],
+                        this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff));
+
+                this.trackModelVisual3D.Add(trackLineMV3D);
                 this.trackModelVisual3D.Add(
-                    this.CreateAnchorPointModelVisual3D(
-                        new Point3D(coeff * anchorPoint.X, coeff * anchorPoint.Y, coeff * anchorPoint.Z)));
+                    this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff)));
             }
 
             foreach (var splitPoint in this.track.SplitPoints)
             {
-                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(splitPoint));
+                this.splitTrackModelVisual3D.Add(
+                    this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
             }
         }
 

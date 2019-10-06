@@ -19,7 +19,7 @@
     {
         public Arm arm;
 
-        public List<ModelVisual3D> armModelVisual3D; // Count of this list should be (model.n + 1)
+        public List<ModelVisual3D> armModelVisual3D;
         
         private Storyboard storyboard;
 
@@ -39,50 +39,92 @@
 
         public void ClearModelVisual3DCollection(Viewport3D viewport)
         {
-            foreach (var mv in armModelVisual3D)
+            foreach (var mv in this.armModelVisual3D)
+            {
                 viewport.Children.Remove(mv);
+            }
         }
 
         public void BuildModelVisual3DCollection()
         {
+            var sup = new Point3D(0, 0, 0); // Start Unit Point
+            var eup = (Point3D)this.arm.F(0); // End Unit Point
 
-            var sup = new Vector3D(0, 0, 0); // Start Unit Point
-            for (var i = 0; i < this.arm.N + 1; i++)
+            // Zero unit of arm:
+            this.armModelVisual3D.Add(
+                this.CreateArmBoneModelVisual3D(
+                    VRConvert.ConvertFromRealToVirtual(sup, this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(eup, this.coeff)));
+            var jointBrush = Brushes.Black;
+            this.armModelVisual3D.Add(
+                this.CreateArmJointModelVisual3D(VRConvert.ConvertFromRealToVirtual(eup, this.coeff), jointBrush));
+
+            sup = eup;
+
+            // 'P' and 'R' units:
+            for (var i = 0; i < this.arm.N; i++)
             {
-                var unit = new ModelVisual3D();
-                var jointsAndUnitsModelGroup = new Model3DGroup();
-                var unitMesh = new MeshGeometry3D();
-                var jointMesh = new MeshGeometry3D();
+                eup = (Point3D)this.arm.F(i + 1);
+                
+                jointBrush = this.arm.Units[i].Type == 'R' ? Brushes.OrangeRed : Brushes.Green;
+                this.armModelVisual3D.Add(
+                    this.CreateArmJointModelVisual3D(VRConvert.ConvertFromRealToVirtual(sup, this.coeff), jointBrush));
 
-                var eup = this.arm.F(i); // End Unit Point
-                MeshGeometry3DHelper.AddSmoothCylinder(
-                    unitMesh,
-                    new Point3D(sup.X * coeff, sup.Y * coeff, sup.Z * coeff),
-                    new Vector3D((eup.X - sup.X) * coeff, (eup.Y - sup.Y) * coeff, (eup.Z - sup.Z) * coeff),
-                    6);
-                MeshGeometry3DHelper.AddSphere(jointMesh, new Point3D(eup.X * coeff, eup.Y * coeff, eup.Z * coeff), 9, 8, 8);
+                this.armModelVisual3D.Add(
+                    this.CreateArmBoneModelVisual3D(
+                        VRConvert.ConvertFromRealToVirtual(sup, this.coeff),
+                        VRConvert.ConvertFromRealToVirtual(eup, this.coeff)));
+
                 sup = eup;
-
-                var unitMaterial = new DiffuseMaterial(Brushes.CornflowerBlue);
-                var myGeometryModel = new GeometryModel3D(unitMesh, unitMaterial);
-                jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
-
-                SolidColorBrush jointBrush;
-                if (i == 0)
-                    jointBrush = Brushes.Black;
-                else
-                    jointBrush = this.arm.Units[i - 1].Type == 'R' ? Brushes.OrangeRed : Brushes.Green;
-                var jointMaterial = new DiffuseMaterial(jointBrush);
-                myGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
-                jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
-
-                unit.Content = jointsAndUnitsModelGroup;
-
-                this.armModelVisual3D.Add(unit);
             }
+            
+            // Grip unit:
+            jointBrush = Brushes.Blue;
+            this.armModelVisual3D.Add(
+                this.CreateArmJointModelVisual3D(VRConvert.ConvertFromRealToVirtual(sup, this.coeff), jointBrush));
         }
 
-        private void ManipulatorMoveAnimation()
+        private ModelVisual3D CreateArmBoneModelVisual3D(Point3D start, Point3D end)
+        {
+            var bone = new ModelVisual3D();
+            var boneMesh = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddSmoothCylinder(
+                boneMesh,
+                start,
+                new Vector3D(end.X - start.X, end.Y - start.Y, end.Z - start.Z),
+                6);
+            var boneMaterial = new DiffuseMaterial(Brushes.CornflowerBlue);
+            var boneGeometryModel = new GeometryModel3D(boneMesh, boneMaterial);
+            bone.Content = boneGeometryModel;
+
+            var transGroup = new Transform3DGroup();
+            transGroup.Children.Add(new TranslateTransform3D());
+            var rotTrans = new RotateTransform3D { Rotation = new AxisAngleRotation3D() };
+            transGroup.Children.Add(rotTrans);
+            bone.Transform = transGroup;
+
+            return bone;
+        }
+
+        private ModelVisual3D CreateArmJointModelVisual3D(Point3D center, SolidColorBrush brush)
+        {
+            var joint = new ModelVisual3D();
+            var jointMesh = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddSphere(jointMesh, center, 9, 8, 8);
+            var jointMaterial = new DiffuseMaterial(brush);
+            var jointGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
+            joint.Content = jointGeometryModel;
+
+            var transGroup = new Transform3DGroup();
+            transGroup.Children.Add(new TranslateTransform3D());
+            var rotTrans = new RotateTransform3D { Rotation = new AxisAngleRotation3D() };
+            transGroup.Children.Add(rotTrans);
+            joint.Transform = transGroup;
+
+            return joint;
+        }
+
+        public void ManipulatorMoveAnimation()
         {
             var timelineCollection = new TimelineCollection();
             for (var i = 1; i < this.arm.N; i++)
@@ -99,119 +141,31 @@
             this.storyboard.Begin();
         }
 
-        /// <summary>
-        /// Add transformations for each unit of manipulatorModelVisual3D
-        /// </summary>
-        private void AddTransformationsForManipulator()
+        public void TransformUpdate(double[] q)
         {
-            var transformGroup = new Transform3DGroup[this.arm.N];
             for (var i = 0; i < this.arm.N; i++)
             {
-                Transform3D transformation = null;
-
-                var center = this.arm.F(i);
                 switch (this.arm.Units[i].Type)
                 {
                     case 'R':
-                        transformation = new RotateTransform3D();
-                        (transformation as RotateTransform3D).CenterX = center.X;
-                        (transformation as RotateTransform3D).CenterY = center.Y;
-                        (transformation as RotateTransform3D).CenterZ = center.Z;
-
-                        var angleRotation = new AxisAngleRotation3D
+                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1); j++)
                         {
-                            Axis = this.arm.GetZAxis(i),
-                            Angle = MathFunctions.RadianToDegree(this.arm.Units[i].Q)
-                        };
-
-                        (transformation as RotateTransform3D).Rotation = angleRotation;
-
-                        transformGroup[i] = new Transform3DGroup();
-                        for (var j = i; j < this.arm.N; j++)
-                            transformGroup[j].Children.Add(transformation);
-                        break;
-                    case 'P':
-                        transformation = new TranslateTransform3D();
-
-                        transformGroup[i] = new Transform3DGroup();
-                        for (var j = i + 1; j < this.arm.N; j++)
-                            transformGroup[j].Children.Add(transformation);
-
-                        break;
-                }
-            }
-            // Трансформация звеньев RotateTransform3D для 'R' должна быть применена ко всем последующим звеньям,
-            // а для звена 'P' только ScaleTransform3D(только для линии) и для всех последующих TranslateTransform3D
-            for (var i = 1; i < this.arm.N + 1; i++)
-                this.armModelVisual3D[i].Transform = transformGroup[i - 1];
-        }
-
-        private void ManipulatorTransformUpdate(double[] q)
-        {
-
-            for (var i = 1; i < this.arm.N + 1; i++)
-            {
-
-                switch (this.arm.Units[i - 1].Type)
-                {
-                    case 'R':
-                        for (var j = i + 1; j < this.arm.N; j++)
-                        {
-                            (((armModelVisual3D[j]
-                                .Transform as Transform3DGroup)
-                                .Children[i] as RotateTransform3D)
-                                .Rotation as AxisAngleRotation3D)
-                                .Angle = q[i];
+                            (((this.armModelVisual3D[j].Transform as Transform3DGroup).Children[1] as RotateTransform3D)
+                             .Rotation as AxisAngleRotation3D).Angle = q[i]; // TODO: радианы или градусы ?
                         }
 
                         break;
                     case 'P':
-                        #region Remove old and insert new P unit model visual 3d
-                        var prismaticAxis = new Vector3D();
-                        var unit = new MeshGeometry3D();
-                        var joint = new MeshGeometry3D();
-
-                        var sup = this.arm.F(i - 1); // startUnitPoint
-                        var eup = this.arm.F(i); // endUnitPoint
-                        MeshGeometry3DHelper.AddParallelepiped(unit, new Point3D(sup.X * this.coeff, sup.Y * this.coeff, sup.Z * this.coeff),
-                                              new Point3D(eup.X * this.coeff, eup.Y * this.coeff, eup.Z * this.coeff),
-                                              new Vector3D(0, 0, 1),  0.25);
-                        MeshGeometry3DHelper.AddSphere(joint, new Point3D(eup.X * this.coeff, eup.Y * this.coeff, eup.Z * this.coeff), 0.4, 8, 8);
-
-                        var unitBrush = Brushes.CornflowerBlue;
-                        var unitMaterial = new DiffuseMaterial(unitBrush);
-                        var myGeometryModel = new GeometryModel3D(unit, unitMaterial);
-                        var jointsAndUnitsModelGroup = new Model3DGroup();
-                        jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
-
-                        var jointBrush = Brushes.OrangeRed;
-                        var jointMaterial = new DiffuseMaterial(jointBrush);
-                        myGeometryModel = new GeometryModel3D(joint, jointMaterial);
-                        jointsAndUnitsModelGroup.Children.Add(myGeometryModel);
-                        var arm = new ModelVisual3D();
-                        arm.Content = jointsAndUnitsModelGroup;
-
-                        // Viewport3D.Children.Remove(armModelVisual3D[i + 1]);
-                        // Viewport3D.Children.Insert(i + 1, arm);
-
-                        this.armModelVisual3D.Remove(arm);
-                        this.armModelVisual3D.Insert(i + 1, arm);
-                        #endregion
-
-                        prismaticAxis = this.arm.GetZAxis(i);
-                        for (var j = i + 2; j < this.arm.N; j++)
+                        var prismaticAxis = this.arm.GetZAxis(i);
+                        for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1); j++)
                         {
-                            ((armModelVisual3D[j]
-                                .Transform as Transform3DGroup)
-                                .Children[i] as TranslateTransform3D)
+                            if (j == 2 * (i + 1) + 1) continue;
+
+                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
                                 .OffsetX += prismaticAxis.X * q[i];
-                            ((armModelVisual3D[j]
-                                .Transform as Transform3DGroup)
-                                .Children[i] as TranslateTransform3D)
+                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
                                 .OffsetY += prismaticAxis.Y * q[i];
-                            ((armModelVisual3D[j]
-                                .Transform as Transform3DGroup)
-                                .Children[i] as TranslateTransform3D)
+                            ((armModelVisual3D[j].Transform as Transform3DGroup).Children[0] as TranslateTransform3D)
                                 .OffsetZ += prismaticAxis.Z * q[i];
                         }
 

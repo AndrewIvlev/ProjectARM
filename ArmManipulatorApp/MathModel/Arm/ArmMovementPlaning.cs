@@ -14,7 +14,7 @@
 
         public static double[] LagrangeMethodToThePoint(Point3D p)
         {
-            var resultQ = new double[arm.N];
+            var dQ = new double[arm.N];
 
             var f = arm.F(arm.N);
             var d = new Point3D(
@@ -39,10 +39,10 @@
             for (var i = 0; i < arm.N; i++)
             {
                 var dF = arm.GetdF(i);
-                resultQ[i] += (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * arm.A[i, i]);
+                dQ[i] = (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * arm.A[i, i]);
             }
 
-            return resultQ;
+            return dQ;
         }
     }
 }

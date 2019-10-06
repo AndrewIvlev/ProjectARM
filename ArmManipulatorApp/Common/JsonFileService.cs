@@ -19,6 +19,6 @@ namespace ArmManipulatorApp.Common
             JsonConvert.DeserializeObject<Trajectory>(File.ReadAllText(filename));
 
         public void SaveTrack(string filename, Trajectory track) =>
-            File.WriteAllText(filename, JsonConvert.SerializeObject(track));
+            File.WriteAllText(filename + ".json", JsonConvert.SerializeObject(track));
     }
 }

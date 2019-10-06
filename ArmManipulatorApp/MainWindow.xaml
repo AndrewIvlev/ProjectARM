@@ -21,7 +21,7 @@
             <Setter Property="Control.FontFamily" Value="Verdana" />
         </Style>
     </Window.Resources>
-    <Grid x:Name="MainGrid">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.025*"></RowDefinition>
             <RowDefinition Height="0.46*"></RowDefinition>
@@ -42,7 +42,7 @@
             </MenuItem>
             <MenuItem Header="Траектория">
                 <MenuItem Header="Создать" x:Name="NewTrackMenuItem" Command="{Binding CreateNewTrajectoryCommand}" />
-                <MenuItem Header="Открыть" Command="{Binding OpenTrajectoryCommand}" />
+                <MenuItem Header="Открыть" Command="{Binding OpenExistingTrajectoryCommand}" />
                 <MenuItem Header="Сохранить" Command="{Binding SaveTrajectoryCommand}" />
                 <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" Command="{Binding EditTrajectoryCommand}" />
             </MenuItem>
@@ -70,7 +70,7 @@
                 <TextBox Grid.Row="1" Height="Auto" Name="ArmConfigTextBox"  TextWrapping="WrapWithOverflow" ></TextBox>
                 <Grid Grid.Row="2">
                     <Button Content="Восстановить" HorizontalAlignment="Left" Command="{Binding ResetLastCorrectArmCommand}" Style="{StaticResource ButtonStyle}" ></Button>
-                    <Button Content="Применить" HorizontalAlignment="Right" Command="{Binding BuildArmFromTextBoxCommand}" Style="{StaticResource ButtonStyle}"></Button>
+                    <Button Content="Применить" HorizontalAlignment="Right" Command="{Binding BuildArmFromTextBoxCommand}" Style="{StaticResource ButtonStyle}" ></Button>
                 </Grid>
             </Grid>
             <Grid x:Name="TrajectoryGrid" Visibility="Hidden" >
@@ -87,7 +87,7 @@
                                 <Label Content="Количество точек разбиения" />
                                 <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
-                            <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
+                            <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                             <WrapPanel>
                                 <Label Content="введите шаг разбиения в см." />
                                 <TextBox x:Name="StepInCmToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
