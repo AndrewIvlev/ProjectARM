@@ -17,6 +17,7 @@
     {
         public Trajectory track;
 
+        private Viewport3D viewport;
         public List<ModelVisual3D> trackModelVisual3D;
 
         /// <summary>
@@ -25,10 +26,11 @@
         /// </summary>
         private double coeff;
 
-        public TrajectoryModel3D(Trajectory track, double coeff = 1)
+        public TrajectoryModel3D(Trajectory track, Viewport3D viewport, double coeff = 1)
         {
             this.coeff = coeff;
             this.track = track;
+            this.viewport = viewport;
             this.trackModelVisual3D = new List<ModelVisual3D>();
 
             foreach (var anchorPoint in this.track.AnchorPoints)
@@ -56,11 +58,15 @@
         {
             this.track.AnchorPoints.Add(VRConvert.ConvertFromVirtualToReal(newVirtualPoint, this.coeff));
 
-            this.trackModelVisual3D.Add(
-                this.CreateTrajectoryLineModelVisual3D(
-                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[this.track.AnchorPoints.Count - 2], this.coeff),
-                    newVirtualPoint));
-            this.trackModelVisual3D.Add(this.CreateAnchorPointModelVisual3D(newVirtualPoint));
+            var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
+                VRConvert.ConvertFromRealToVirtual(
+                    this.track.AnchorPoints[this.track.AnchorPoints.Count - 2],
+                    this.coeff),
+                newVirtualPoint);
+            var trackAnchorPointMV3D = this.CreateAnchorPointModelVisual3D(newVirtualPoint);
+
+            this.trackModelVisual3D.Add(trackLineMV3D);
+            this.trackModelVisual3D.Add(trackAnchorPointMV3D);
         }
 
         private ModelVisual3D CreateAnchorPointModelVisual3D(Point3D center)
@@ -150,19 +156,23 @@
         /// </summary>
         /// <param name="indexOfAnchorPoint"> begin from second point of trajectory,
         /// because first point pinned to manipulator end point</param>
-        /// <param name="delta">real delta in cm</param>
-        public void ChangeAnchorPointZ(int indexOfAnchorPoint, double delta)
+        /// <param name="deltaZ">real deltaZ in cm</param>
+        public void ChangeAnchorPointZ(int indexOfAnchorPoint, double deltaZ)
         {
             if (indexOfAnchorPoint == 0)
             {
                 throw new Exception("Can't change z coordinate of first trajectory point!");
             }
 
-            this.track.AnchorPoints[indexOfAnchorPoint].Offset(0, 0, delta);
+            // TODO: Offset doesn't change Point3D value ;(
+            // this.track.AnchorPoints[indexOfAnchorPoint].Offset(0, 0, deltaZ);
+            // Temporary solution:
+            var tmpPoint = this.track.AnchorPoints[indexOfAnchorPoint];
+            this.track.AnchorPoints[indexOfAnchorPoint] = new Point3D(tmpPoint.X, tmpPoint.Y, tmpPoint.Z + deltaZ);
 
-            ((TranslateTransform3D)this.trackModelVisual3D[indexOfAnchorPoint * 2].Transform).OffsetZ += delta * this.coeff;
+            ((TranslateTransform3D)this.trackModelVisual3D[indexOfAnchorPoint * 2].Transform).OffsetZ += deltaZ * this.coeff;
 
-            if (indexOfAnchorPoint * 2 == this.track.AnchorPoints.Count - 1)
+            if (indexOfAnchorPoint == this.track.AnchorPoints.Count - 1)
             {
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1], this.coeff),
@@ -176,6 +186,22 @@
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 + 1] = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff),
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1], this.coeff));
+            }
+        }
+
+        public void RemoveAllFromViewport()
+        {
+            foreach (var mv in this.trackModelVisual3D)
+            {
+                this.viewport.Children.Remove(mv);
+            }
+        }
+        
+        public void AddAllToViewport()
+        {
+            foreach (var mv in this.trackModelVisual3D)
+            {
+                this.viewport.Children.Add(mv);
             }
         }
 

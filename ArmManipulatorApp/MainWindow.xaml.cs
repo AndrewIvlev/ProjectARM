@@ -16,6 +16,8 @@
                 new JsonFileService(),
                 this.Viewport3D,
                 this.ArmConfigTextBox,
+                this.StepInCmToSplitTextBox,
+                this.NumberOfPointsToSplitTextBox,
                 this.DeltaChart);
         }
 

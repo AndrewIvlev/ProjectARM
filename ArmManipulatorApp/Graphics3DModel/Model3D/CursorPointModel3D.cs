@@ -1,7 +1,5 @@
 ﻿namespace ArmManipulatorApp.Graphics3DModel.Model3D
 {
-    using System.Windows;
-    using System.Windows.Controls;
     using System.Windows.Media;
     using System.Windows.Media.Media3D;
 
@@ -16,7 +14,7 @@
         public CursorPointModel3D(Point3D position)
         {
             var meshCircle = new MeshGeometry3D();
-            MeshGeometry3DHelper.AddSphere(meshCircle, position, 7, 8, 8);
+            MeshGeometry3DHelper.AddSphere(meshCircle, position, 9, 8, 8);
             var brush3 = Brushes.Purple;
             var material3 = new DiffuseMaterial(brush3);
             var circleCursor = new GeometryModel3D(meshCircle, material3);
@@ -25,8 +23,17 @@
             this.position = position;
         }
         
-        public void Move(Point3D offset)
+        public void MoveByOffset(Point3D offset)
         {
+            this.position.Offset(offset.X, offset.Y, offset.Z);
+            ((TranslateTransform3D)this.ModelVisual3D.Transform).OffsetX += offset.X;
+            ((TranslateTransform3D)this.ModelVisual3D.Transform).OffsetY += offset.Y;
+            ((TranslateTransform3D)this.ModelVisual3D.Transform).OffsetZ += offset.Z;
+        }
+
+        public void MoveTo(Point3D position)
+        {
+            var offset = position - this.position;
             this.position.Offset(offset.X, offset.Y, offset.Z);
             ((TranslateTransform3D)this.ModelVisual3D.Transform).OffsetX += offset.X;
             ((TranslateTransform3D)this.ModelVisual3D.Transform).OffsetY += offset.Y;

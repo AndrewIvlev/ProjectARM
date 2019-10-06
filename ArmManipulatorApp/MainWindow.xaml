@@ -90,7 +90,7 @@
                             <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
                             <WrapPanel>
                                 <Label Content="введите шаг разбиения в см." />
-                                <TextBox x:Name="StepInCmToSplit_TextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <TextBox x:Name="StepInCmToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
                             <Button Content="Разделить траекторию" Command="{Binding SplitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <ListBox>

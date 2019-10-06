@@ -7,10 +7,10 @@
     {
         public int selectedPointIndex;
 
-        public PointSelectorModel3D(Point3D position)
+        public PointSelectorModel3D(Point3D position, int selectedPointIndex = 0)
             : base(position)
         {
-            this.selectedPointIndex = 0;
+            this.selectedPointIndex = selectedPointIndex;
         }
     }
 }

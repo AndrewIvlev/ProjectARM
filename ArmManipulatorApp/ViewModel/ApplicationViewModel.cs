@@ -36,6 +36,8 @@
         
         private Viewport3D viewport;
         private TextBox armTextBox;
+        private TextBox stepInCmToSplitTextBox;
+        private TextBox numberOfPointsToSplitTextBox;
         private Chart deltaChart;
 
 
@@ -51,12 +53,16 @@
             IFileService fileService,
             Viewport3D viewport,
             TextBox armTextBox,
+            TextBox stepInCmToSplitTextBox,
+            TextBox numberOfPointsToSplitTextBox,
             Chart deltaChart)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
+            this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
+            this.numberOfPointsToSplitTextBox = stepInCmToSplitTextBox;
             this.deltaChart = deltaChart;
 
             this.coeff = 3;
@@ -138,6 +144,7 @@
                                         var firstPoint = this.armModel3D.arm.Fn();
                                         this.track3D = new TrajectoryModel3D(
                                             new Trajectory((Point3D)firstPoint),
+                                            this.viewport,
                                             this.coeff);
                                         foreach (var mv in this.track3D.trackModelVisual3D)
                                         {
@@ -167,7 +174,7 @@
                                    {
                                        if (this.dialogService.OpenFileDialog())
                                        {
-                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.coeff);
+                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.coeff);
                                            this.dialogService.ShowMessage("File open!");
                                        }
                                    }
@@ -221,17 +228,9 @@
                                            }
                                            else
                                            {
-                                               foreach (var mv in this.track3D.trackModelVisual3D)
-                                               {
-                                                   this.viewport.Children.Remove(mv);
-                                               }
-
+                                               this.track3D.RemoveAllFromViewport();
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
-                                               
-                                               foreach (var mv in this.track3D.trackModelVisual3D)
-                                               {
-                                                   this.viewport.Children.Add(mv);
-                                               }
+                                               this.track3D.AddAllToViewport();
                                            }
                                        }
                                        catch (Exception ex)
@@ -254,6 +253,7 @@
                                        try
                                        {
                                            UserControlMod.Mod = UserMod.CameraRotation;
+                                           this.viewport.Children.Remove(this.cursorForAnchorPointCreation.ModelVisual3D);
                                            this.camera.DefaultView();
                                        }
                                        catch (Exception ex)
@@ -276,8 +276,11 @@
                                        try
                                        {
                                            UserControlMod.Mod = UserMod.CameraRotation;
-                                           var trajectoryLastPoint = this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
-                                           this.pointSelector = new PointSelectorModel3D(VRConvert.ConvertFromRealToVirtual(trajectoryLastPoint, this.coeff));
+                                           var trajectoryLastPoint =
+                                               this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
+                                           this.pointSelector = new PointSelectorModel3D(
+                                               VRConvert.ConvertFromRealToVirtual(trajectoryLastPoint, this.coeff),
+                                               this.track3D.track.AnchorPoints.Count - 1);
                                            this.viewport.Children.Add(this.pointSelector.ModelVisual3D);
                                        }
                                        catch (Exception ex)
@@ -299,33 +302,54 @@
                             {
                                 if (this.pointSelector != null)
                                 {
-                                    var delta = 0.25;
+                                    var deltaZ = 0.5;
                                     switch (((KeyEventArgs)obj).Key)
                                     {
-                                        /*** Raise/lower point along Z axis ***/
-                                        case Key.W:
-                                            this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, delta);
+                                        case Key.W: // Increase z coordinate of point
+                                            this.track3D.RemoveAllFromViewport();
+                                            this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, deltaZ);
+                                            this.track3D.AddAllToViewport();
+                                            this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, deltaZ), this.coeff));
                                             break;
-                                        case Key.S:
-                                            this.track3D.ChangeAnchorPointZ(pointSelector.selectedPointIndex, -delta);
+                                        case Key.S: // Decrease z coordinate of point
+                                            this.track3D.RemoveAllFromViewport();
+                                            this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, -deltaZ);
+                                            this.track3D.AddAllToViewport();
+                                            this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, -deltaZ), this.coeff));
                                             break;
-                                        /*** Point selection ***/
-                                        case Key.N: // Next point
+                                        case Key.D: // Select next point
                                             if (this.pointSelector.selectedPointIndex
                                                 != this.track3D.track.AnchorPoints.Count - 1)
                                             {
                                                 this.pointSelector.selectedPointIndex++;
+                                                var newSelectorPosition = VRConvert.ConvertFromRealToVirtual(
+                                                    this.track3D.track.AnchorPoints[this.pointSelector
+                                                        .selectedPointIndex],
+                                                    this.coeff);
+                                                this.pointSelector.MoveTo(newSelectorPosition);
                                             }
 
                                             break;
-                                        case Key.P: // Previous point
+                                        case Key.A: // Select previous point
                                             if (this.pointSelector.selectedPointIndex != 1)
                                             {
                                                 this.pointSelector.selectedPointIndex--;
+                                                var newSelectorPosition = VRConvert.ConvertFromRealToVirtual(
+                                                    this.track3D.track.AnchorPoints[this.pointSelector
+                                                        .selectedPointIndex],
+                                                    this.coeff);
+                                                this.pointSelector.MoveTo(newSelectorPosition);
                                             }
 
                                             break;
                                     }
+                                }
+                                else if (UserControlMod.Mod == UserMod.TrajectoryAnchorPointCreation && ((KeyEventArgs)obj).Key == Key.Enter)
+                                {
+                                    // Like in AddTrajectoryAnchorPointsCommand
+                                    this.track3D.RemoveAllFromViewport();
+                                    this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
+                                    this.track3D.AddAllToViewport();
                                 }
                             }
                             catch (Exception ex)
@@ -336,50 +360,23 @@
             }
         }
 
-        private void FinishBuildingPath_Click(object sender, RoutedEventArgs e)
-        {
-            this.viewport.Children.Remove(this.pointSelector.ModelVisual3D);
-            this.pointSelector = null;
-            // PathBuilderGrid_Grid.Visibility = Visibility.Hidden;
-        }
-
-        private RelayCommand splitByQtyTrajectoryCommand;
-        public RelayCommand SplitByQtyTrajectoryCommand
+        public ICommand SplitTrajectoryCommand
         {
             get
             {
-                return this.splitByQtyTrajectoryCommand
-                       ?? (this.splitByQtyTrajectoryCommand = new RelayCommand(
-                               obj =>
-                                   {
-                                       try
-                                       {
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           this.dialogService.ShowMessage(ex.Message);
-                                       }
-                                   }));
-            }
-        }
-
-        private RelayCommand splitByStepTrajectoryCommand;
-        public RelayCommand SplitByStepTrajectoryCommand
-        {
-            get
-            {
-                return this.splitByStepTrajectoryCommand
-                       ?? (this.splitByStepTrajectoryCommand = new RelayCommand(
-                               obj =>
-                                   {
-                                       try
-                                       {
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           this.dialogService.ShowMessage(ex.Message);
-                                       }
-                                   }));
+                return new RelayCommand(
+                    obj =>
+                        {
+                            try
+                            {
+                                var stepInCmToSplitStr = this.stepInCmToSplitTextBox.Text;
+                                var numberOfPointsToSplitStr = this.numberOfPointsToSplitTextBox.Text;
+                            }
+                            catch (Exception ex)
+                            {
+                                this.dialogService.ShowMessage(ex.Message);
+                            }
+                        });
             }
         }
 
@@ -520,7 +517,7 @@
                                         {                                
                                             var nextMousePos = Mouse.GetPosition(obj as IInputElement);
                                             this.viewport.Children.Remove(this.cursorForAnchorPointCreation.ModelVisual3D);
-                                            this.cursorForAnchorPointCreation.Move(
+                                            this.cursorForAnchorPointCreation.MoveByOffset(
                                                 new Point3D(
                                                     nextMousePos.X - this.MousePos.X,
                                                     -nextMousePos.Y + this.MousePos.Y,
@@ -635,7 +632,7 @@
             // for (var i = 1; i < this.listSplitTrajectoryPoints.Count; i++)
             // {
             // var pathPoint = this.listSplitTrajectoryPoints[i];
-            // model.Move(pathPoint);
+            // model.MoveByOffset(pathPoint);
             // //var tmpQ = new double[model.n];
             // //model.q.CopyTo(tmpQ, 0);
             // //arrayQ[i] = tmpQ;
