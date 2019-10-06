@@ -19,6 +19,7 @@
 
         private Viewport3D viewport;
         public List<ModelVisual3D> trackModelVisual3D;
+        public List<ModelVisual3D> splitTrackModelVisual3D;
 
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
@@ -32,6 +33,7 @@
             this.track = track;
             this.viewport = viewport;
             this.trackModelVisual3D = new List<ModelVisual3D>();
+            this.splitTrackModelVisual3D = new List<ModelVisual3D>();
 
             foreach (var anchorPoint in this.track.AnchorPoints)
             {
@@ -42,15 +44,7 @@
 
             foreach (var splitPoint in this.track.SplitPoints)
             {
-                // TODO: change to lines except points
-                var anchorPointModelVisual3D = new ModelVisual3D();
-                var anchorPointMeshGeometry3D = new MeshGeometry3D();
-                MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, splitPoint, 4, 8, 8);
-                var anchorPointBrush = Brushes.Red;
-                var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
-                var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
-                anchorPointModelVisual3D.Content = anchorPointGeometryModel;
-                this.trackModelVisual3D.Add(anchorPointModelVisual3D);
+                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(splitPoint));
             }
         }
 
@@ -81,6 +75,19 @@
             //// Translate Transform for up/down anchor points in Edit Trajectory Mode.
             anchorPointModelVisual3D.Transform = new TranslateTransform3D();
             return anchorPointModelVisual3D;
+        }
+        
+        private ModelVisual3D CreateSplitPointModelVisual3D(Point3D center)
+        {
+            
+            var splitPointModelVisual3D = new ModelVisual3D();
+            var splitPointMeshGeometry3D = new MeshGeometry3D();
+            MeshGeometry3DHelper.AddSphere(splitPointMeshGeometry3D, center, 6, 8, 8);
+            var splitPointBrush = Brushes.Red;
+            var splitPointMaterial = new DiffuseMaterial(splitPointBrush);
+            var splitPointGeometryModel = new GeometryModel3D(splitPointMeshGeometry3D, splitPointMaterial);
+            splitPointModelVisual3D.Content = splitPointGeometryModel;
+            return splitPointModelVisual3D;
         }
 
         private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D startPoint, Point3D endPoint)
@@ -136,18 +143,23 @@
             return trajectoryLineModelVisual3D;
         }
         
-        private void ShowSplitPath(List<Point3D> listSplitPathPoints)
+        public void SplitPath(double step)
         {
-            foreach (var p in listSplitPathPoints)
+            this.track.SplitTrack(step);
+
+            foreach (var splitPoint in this.track.SplitPoints)
             {
-                var point = new MeshGeometry3D();
-                //// AddSphere(point, new Point3D(p.X, p.Y, p.Z), 0.2, 8, 8);
-                var pointBrush = Brushes.DarkRed;
-                var pointMaterial = new DiffuseMaterial(pointBrush);
-                var pathPointGeometryModel = new GeometryModel3D(point, pointMaterial);
-                var pathPointModelVisual3D = new ModelVisual3D();
-                pathPointModelVisual3D.Content = pathPointGeometryModel;
-                pathPointModelVisual3D.Transform = new TranslateTransform3D();
+                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
+            }
+        }
+        
+        public void SplitPath(int numOfSplitPoints)
+        {
+            this.track.SplitTrack(numOfSplitPoints);
+
+            foreach (var splitPoint in this.track.SplitPoints)
+            {
+                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
             }
         }
 
@@ -189,7 +201,7 @@
             }
         }
 
-        public void RemoveAllFromViewport()
+        public void RemoveAnchorTrackFromViewport()
         {
             foreach (var mv in this.trackModelVisual3D)
             {
@@ -197,9 +209,25 @@
             }
         }
         
-        public void AddAllToViewport()
+        public void AddAnchorTrackToViewport()
         {
             foreach (var mv in this.trackModelVisual3D)
+            {
+                this.viewport.Children.Add(mv);
+            }
+        }
+
+        public void RemoveSplitTrackFromViewport()
+        {
+            foreach (var mv in this.splitTrackModelVisual3D)
+            {
+                this.viewport.Children.Remove(mv);
+            }
+        }
+        
+        public void AddSplitTrackToViewport()
+        {
+            foreach (var mv in this.splitTrackModelVisual3D)
             {
                 this.viewport.Children.Add(mv);
             }

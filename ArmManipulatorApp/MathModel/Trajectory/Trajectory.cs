@@ -80,6 +80,37 @@
 
         #region Split Trajectory
 
+        public void SplitTrack(double step)
+        {
+            this.SplitPoints.Clear();
+            for (var i = 1; i < this.AnchorPoints.Count; i++)
+            {
+                var j = 0;
+                var x = this.AnchorPoints[i - 1].X;
+                var y = this.AnchorPoints[i - 1].Y;
+                var z = this.AnchorPoints[i - 1].Z;
+                var dist = (this.AnchorPoints[i - 1] - this.AnchorPoints[i]).Length;
+                do
+                {
+                    var lambda = (step * j) / (dist - step * j);
+                    x = (this.AnchorPoints[i - 1].X + lambda * this.AnchorPoints[i].X) / (1 + lambda);
+                    y = (this.AnchorPoints[i - 1].Y + lambda * this.AnchorPoints[i].Y) / (1 + lambda);
+                    z = (this.AnchorPoints[i - 1].Z + lambda * this.AnchorPoints[i].Z) / (1 + lambda);
+                    this.SplitPoints.Add(new Point3D(x, y, z));
+                    j++;
+                }
+                while ((this.AnchorPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
+            }
+
+            this.SplitPoints.Add(this.AnchorPoints[this.AnchorPoints.Count - 1]);
+        }
+
+        public void SplitTrack(int numSplitPoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        // TODO: remove it 2D realization
         //public void SplitTrajectory(double step)
         //{
         //    var index = 0;
@@ -106,7 +137,8 @@
         //    NumOfExtraPoints = index;
         //    IsSplit = true;
         //}
-
+        
+        // TODO: remove it 2D realization
         //public void SplitTrajectory(int k)
         //{
         //    var index = 0;
@@ -136,68 +168,7 @@
         //    IsSplit = true;
         //}
 
-        // TODO: remove it
-        //private void SplitPath(List<Point3D> listPathPoints, double step)
-        //{
-        //    var index = 0;
-        //    this.listSplitTrajectoryPoints = new List<Point3D>();
-        //    for (var i = 1; i < listPathPoints.Count; i++)
-        //    {
-        //        var j = 0;
-        //        double lambda = 0;
-        //        var x = listPathPoints[i - 1].X;
-        //        var y = listPathPoints[i - 1].Y;
-        //        var z = listPathPoints[i - 1].Z;
-        //        var dist = (listPathPoints[i - 1] - listPathPoints[i]).Length;
-        //        do
-        //        {
-        //            lambda = (step * j) / (dist - step * j);
-        //            x = (listPathPoints[i - 1].X + lambda * listPathPoints[i].X) / (1 + lambda);
-        //            y = (listPathPoints[i - 1].Y + lambda * listPathPoints[i].Y) / (1 + lambda);
-        //            z = (listPathPoints[i - 1].Z + lambda * listPathPoints[i].Z) / (1 + lambda);
-        //            this.listSplitTrajectoryPoints.Add(new Point3D(x, y, z));
-        //            index++;
-        //            j++;
-        //        }
-        //        while ((listPathPoints[i - 1] - new Point3D(x, y, z)).Length + step < dist);
-        //    }
-
-        //    index++;
-        //    this.listSplitTrajectoryPoints.Add(listPathPoints[listPathPoints.Count - 1]);
-
-        //    ShowSplitPath(this.listSplitTrajectoryPoints);
-        //}
-
         #endregion
-
-        //public void ExactExtraPointOffset(Point3D offset)
-        //{
-        //    for (var i = 0; i < NumOfExtraPoints; i++)
-        //    {
-        //        ExactExtra[i].X -= offset.X;
-        //        ExactExtra[i].Y = offset.Y - ExactExtra[i].Y;
-        //    }
-        //}
-
-        //public void TransExactExtraPoints(int k, double CoeftoRealW)
-        //{
-        //    for (var i = 0; i < k; i++)
-        //    {
-        //        ExactExtra[i].X *= CoeftoRealW;
-        //        ExactExtra[i].Y *= CoeftoRealW;
-        //    }
-        //}
-        
-        //public void TransferFunction(Point offset, double CoeftoRealW)
-        //{
-        //    for (var i = 0; i < NumOfExtraPoints; i++)
-        //    {
-        //        ExactExtra[i].X = ExactExtra[i].X - offset.X;
-        //        ExactExtra[i].Y = offset.Y - ExactExtra[i].Y;
-        //        ExactExtra[i].X *= CoeftoRealW;
-        //        ExactExtra[i].Y *= CoeftoRealW;
-        //    }
-        //}
 
         #region Interpolation
 

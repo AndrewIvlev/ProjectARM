@@ -62,7 +62,7 @@
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
-            this.numberOfPointsToSplitTextBox = stepInCmToSplitTextBox;
+            this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
             this.deltaChart = deltaChart;
 
             this.coeff = 3;
@@ -228,9 +228,9 @@
                                            }
                                            else
                                            {
-                                               this.track3D.RemoveAllFromViewport();
+                                               this.track3D.RemoveAnchorTrackFromViewport();
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
-                                               this.track3D.AddAllToViewport();
+                                               this.track3D.AddAnchorTrackToViewport();
                                            }
                                        }
                                        catch (Exception ex)
@@ -306,15 +306,15 @@
                                     switch (((KeyEventArgs)obj).Key)
                                     {
                                         case Key.W: // Increase z coordinate of point
-                                            this.track3D.RemoveAllFromViewport();
+                                            this.track3D.RemoveAnchorTrackFromViewport();
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, deltaZ);
-                                            this.track3D.AddAllToViewport();
+                                            this.track3D.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, deltaZ), this.coeff));
                                             break;
                                         case Key.S: // Decrease z coordinate of point
-                                            this.track3D.RemoveAllFromViewport();
+                                            this.track3D.RemoveAnchorTrackFromViewport();
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, -deltaZ);
-                                            this.track3D.AddAllToViewport();
+                                            this.track3D.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, -deltaZ), this.coeff));
                                             break;
                                         case Key.D: // Select next point
@@ -347,9 +347,9 @@
                                 else if (UserControlMod.Mod == UserMod.TrajectoryAnchorPointCreation && ((KeyEventArgs)obj).Key == Key.Enter)
                                 {
                                     // Like in AddTrajectoryAnchorPointsCommand
-                                    this.track3D.RemoveAllFromViewport();
+                                    this.track3D.RemoveAnchorTrackFromViewport();
                                     this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
-                                    this.track3D.AddAllToViewport();
+                                    this.track3D.AddAnchorTrackToViewport();
                                 }
                             }
                             catch (Exception ex)
@@ -371,6 +371,33 @@
                             {
                                 var stepInCmToSplitStr = this.stepInCmToSplitTextBox.Text;
                                 var numberOfPointsToSplitStr = this.numberOfPointsToSplitTextBox.Text;
+                                if (stepInCmToSplitStr != string.Empty && numberOfPointsToSplitStr != string.Empty)
+                                {
+                                    MessageBox.Show("Please choose only one option.");
+                                }
+                                else if (stepInCmToSplitStr != string.Empty)
+                                {
+                                    if (double.TryParse(stepInCmToSplitStr, out var step))
+                                    {
+                                        this.track3D.RemoveSplitTrackFromViewport();
+                                        this.track3D.SplitPath(step);
+                                        this.track3D.AddSplitTrackToViewport();
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Invalid input of split step!");
+                                    }
+                                }
+                                else if (int.TryParse(numberOfPointsToSplitStr, out var numberOfSplitPoints))
+                                {
+                                    this.track3D.RemoveSplitTrackFromViewport();
+                                    this.track3D.SplitPath(numberOfSplitPoints);
+                                    this.track3D.AddSplitTrackToViewport();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Invalid input of split step!");
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -551,11 +578,6 @@
             }
         }
         
-
-        /// <summary>
-        /// По клику ЛКМ по сцене мы либо перемещаем камеру,
-        /// либо создаём траекторию пути, либо редактируем траекторию пути.
-        /// </summary>
         public ICommand MouseLeftButtonDown
         {
             get
@@ -596,26 +618,6 @@
 
         #region Temporary region for refactoring
         
-        #region Trajectory creation mod
-        
-        #region Splitting trajectory
-
-        private void SplitPathByStep_Button_Click(object sender, RoutedEventArgs e)
-        {
-            double step;
-
-            // if (!double.TryParse(StepInCmToSplit_TextBox.Text, out step))
-            // {
-            // MessageBox.Show("Invalid input of split step!");
-            // return;
-            // }
-            // SplitPath(this.listTrajectoryPoints, step);
-        }
-
-        #endregion
-
-        #endregion
-
         #region Path Planning (when arm and trajectory exists
 
         private void PathPlanningButton_Click(object sender, RoutedEventArgs e)
@@ -662,6 +664,7 @@
         }
 
         #endregion
+        
         #endregion
     }
 }
