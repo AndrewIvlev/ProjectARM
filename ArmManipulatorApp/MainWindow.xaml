@@ -9,6 +9,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:dvc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
+        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=System"
         mc:Ignorable="d"
         Icon="window_icon.ico"
         Title="ProjARM" Height="768" Width="1024">
@@ -20,17 +21,7 @@
             <Setter Property="Control.Height" Value="26" />
             <Setter Property="Control.FontFamily" Value="Verdana" />
         </Style>
-        <Storyboard x:Key="StoryboardArmMoveAnimation">
-            <TimelineCollection x:Name="TimelineCollection">
-            </TimelineCollection>
-        </Storyboard>
     </Window.Resources>
-
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="StartAnimation" >
-            <BeginStoryboard Storyboard="{StaticResource StoryboardArmMoveAnimation}" x:Name="ArmMoveAnimationBeginStoryboard"/>
-        </EventTrigger>
-    </Window.Triggers>
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="KeyDown">

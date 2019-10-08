@@ -63,12 +63,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ManipConfigFiles\RP.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ManipConfigFiles\PR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="ManipConfigFiles\3RPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="ManipConfigFiles\PRR.json" />
     <None Include="ManipConfigFiles\R.json" />
     <None Include="packages.config" />
   </ItemGroup>

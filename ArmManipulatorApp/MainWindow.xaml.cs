@@ -14,8 +14,7 @@
             this.DataContext = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),
-                this.Viewport3D, 
-                (this.Resources["StoryboardArmMoveAnimation"] as Storyboard),
+                this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.StepInCmToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox,

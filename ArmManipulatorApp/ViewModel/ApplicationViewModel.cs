@@ -35,7 +35,6 @@
         IDialogService dialogService;
         
         private Viewport3D viewport;
-        private Storyboard storyboard;
         private TextBox armTextBox;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
@@ -55,7 +54,6 @@
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
             Viewport3D viewport,
-            Storyboard storyboard,
             TextBox armTextBox,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox,
@@ -64,7 +62,6 @@
             this.dialogService = dialogService;
             this.fileService = fileService;
             this.viewport = viewport;
-            this.storyboard = storyboard;
             this.armTextBox = armTextBox;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
@@ -518,33 +515,21 @@
                                                    {
                                                        try
                                                        {
-                                                           var dq = new double[5]
-                                                                        {
-                                                                            MathFunctions.DegreeToRadian(45),
-                                                                            MathFunctions.DegreeToRadian(90),
-                                                                            MathFunctions.DegreeToRadian(60),
-                                                                            20,
-                                                                            MathFunctions.DegreeToRadian(30)
-                                                                        };
-                                                           this.armModel3D.BeginAnimation(dq, ref this.storyboard);
+                                                           // RunWorkerAsync
+                                                           foreach (var dQ in this.dQList)
+                                                           {
+                                                               this.armModel3D.ClearModelVisual3DCollection(this.viewport);
 
-                                                           // костыль
-                                                           //for (int i = 0; i < this.dQList.Count; i++)
-                                                           //{
-                                                           //    this.armModel3D.arm.OffsetQ(this.dQList[i]);
-                                                           //    this.armModel3D.arm.CalcMetaDataForStanding();
-                                                           //    this.armModel3D.BuildModelVisual3DCollection();
-                                                           //    Thread.Sleep(600);
-
-                                                           //    this.viewport.UpdateLayout();
-                                                           //}
-
-                                                           // не костыль
-                                                           //foreach (var dq in this.dQList)
-                                                           //{
-                                                           //    this.armModel3D.BeginAnimation(dq);
-                                                           //    Thread.Sleep(1000);
-                                                           //}
+                                                               this.armModel3D.arm.OffsetQ(dQ);
+                                                               this.armModel3D.arm.CalcMetaDataForStanding();
+                                                               this.armModel3D.BuildModelVisual3DCollection();
+                                                               
+                                                               foreach (var mv in this.armModel3D.armModelVisual3D)
+                                                               {
+                                                                   this.viewport.Children.Add(mv);
+                                                               }
+                                                               Thread.Sleep(600);
+                                                           }
                                                        }
                                                        catch (Exception ex)
                                                        {

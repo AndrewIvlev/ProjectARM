@@ -83,7 +83,7 @@
     </ApplicationDefinition>
     <Compile Include="Common\DefaultDialogService.cs" />
     <Compile Include="Common\UserControlMod.cs" />
-    <Compile Include="Graphics3DModel\ArmMoveAnimation.cs" />
+    <Compile Include="MyAnimationMod.cs" />
     <Compile Include="Graphics3DModel\Model3D\CameraModel3D.cs" />
     <Compile Include="Common\IDialogService.cs" />
     <Compile Include="Common\IFileService.cs" />
