@@ -20,7 +20,24 @@
             <Setter Property="Control.Height" Value="26" />
             <Setter Property="Control.FontFamily" Value="Verdana" />
         </Style>
+        <Storyboard x:Key="StoryboardArmMoveAnimation">
+            <TimelineCollection x:Name="TimelineCollection">
+            </TimelineCollection>
+        </Storyboard>
     </Window.Resources>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="StartAnimation" >
+            <BeginStoryboard Storyboard="{StaticResource StoryboardArmMoveAnimation}" x:Name="ArmMoveAnimationBeginStoryboard"/>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <command:EventToCommand Command="{Binding OnKeyDownHandler}" PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.025*"></RowDefinition>
@@ -124,7 +141,7 @@
                     <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="15" >Анимация движения</Label>
                     <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="10, 5"/>
                     <WrapPanel ItemHeight="50" ItemWidth="120" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="Старт" Command="{Binding StartStopAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <Button x:Name="StartAnimation" Content="Старт" Command="{Binding StartStopAnimation}" Style="{StaticResource ButtonStyle}"  />
                         <Button Content="Пауза" Command="{Binding PauseAnimation}" Style="{StaticResource ButtonStyle}"  />
                         <Label Content="Скорость" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,10" Width="70"/>
                         <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
@@ -232,10 +249,5 @@
             </EventTrigger>
         </Grid.Triggers>
     </Grid>
-    
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="KeyDown">
-            <command:EventToCommand Command="{Binding OnKeyDownHandler}" PassEventArgsToCommand="True" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+
 </Window>

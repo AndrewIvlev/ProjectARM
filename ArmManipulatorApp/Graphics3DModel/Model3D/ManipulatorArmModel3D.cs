@@ -2,8 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Media;
@@ -21,8 +19,6 @@
 
         public List<ModelVisual3D> armModelVisual3D;
         
-        private Storyboard storyboard;
-
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
         /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
@@ -34,7 +30,6 @@
             this.coeff = coeff;
             this.arm = arm;
             this.armModelVisual3D = new List<ModelVisual3D>();
-            this.storyboard = new Storyboard();
         }
 
         public void ClearModelVisual3DCollection(Viewport3D viewport)
@@ -123,85 +118,129 @@
 
             return joint;
         }
-        
-        // TODO: complete this method
-        public void ManipulatorMoveAnimation()
-        {
-            var timelineCollection = new TimelineCollection();
-            for (var i = 1; i < this.arm.N; i++)
-            {
-                var j = 0;
-                DoubleAnimation animation = new DoubleAnimation();
-                animation.To = 40;
-                animation.DecelerationRatio = 1;
-                animation.Duration = TimeSpan.FromSeconds(0.15);
-                animation.AutoReverse = true;
-                (((this.armModelVisual3D[j].Transform as Transform3DGroup).Children[1] as RotateTransform3D)
-                 .Rotation as AxisAngleRotation3D).BeginAnimation(AxisAngleRotation3D.AngleProperty, animation);
-                //Storyboard.SetTarget(animation1, button1);
-                //Storyboard.SetTargetProperty(animation1, new PropertyPath(MarginProperty));
-            }
 
-            this.storyboard.Children = timelineCollection;
-            this.storyboard.Begin();
-        }
-
-        public void TransformUpdate(double[] q)
+        public void BeginAnimation(double[] dQ, ref Storyboard storyboard)
         {
             for (var i = 0; i < this.arm.N; i++)
             {
+                var timeLineCollection = new TimelineCollection();
                 switch (this.arm.Units[i].Type)
                 {
                     case 'R':
-                        var rotAxis = this.arm.GetZAxis(i);
+                        var rotAxis = VRConvert.ConvertFromRealToVirtual(this.arm.GetZAxis(i), this.coeff);
                         this.arm.CalcMetaDataForStanding();
-                        var centerRot = this.arm.F(i);
+                        var centerRot = VRConvert.ConvertFromRealToVirtual((Point3D)this.arm.F(i), this.coeff);
+                        
                         for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1) + 1; j++)
                         {
-                            // TODO: omg it seems to me that the CenterX, CenterY and CenterZ no corresponds to my xyz axis ((
-                            // Кажется проблема здеськак минимум в том, что оси у меня располагаются иначе дефолтовых
-                            // Ещё возможна ошибка в rotAxis
-                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                            ((this.armModelVisual3D[j]
+                                  .Transform as Transform3DGroup)
                              .Children[1] as RotateTransform3D)
                                 .CenterX = centerRot.X;
-                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                            ((this.armModelVisual3D[j]
+                                  .Transform as Transform3DGroup)
                              .Children[1] as RotateTransform3D)
                                 .CenterY = centerRot.Y;
-                            ((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                            ((this.armModelVisual3D[j]
+                                  .Transform as Transform3DGroup)
                              .Children[1] as RotateTransform3D)
                                 .CenterZ = centerRot.Z;
 
-                            (((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                            (((this.armModelVisual3D[j]
+                                   .Transform as Transform3DGroup)
                               .Children[1] as RotateTransform3D)
                              .Rotation as AxisAngleRotation3D)
                                 .Axis = rotAxis;
 
-                            (((this.armModelVisual3D[j].Transform as Transform3DGroup)
-                              .Children[1] as RotateTransform3D)
-                             .Rotation as AxisAngleRotation3D)
-                                .Angle = MathFunctions.RadianToDegree(q[i]);
+                            //(((this.armModelVisual3D[j].Transform as Transform3DGroup)
+                            //  .Children[1] as RotateTransform3D)
+                            // .Rotation as AxisAngleRotation3D)
+                            //    .Angle = MathFunctions.RadianToDegree(dQ[i]);
+                            
+                            var animation = new DoubleAnimation();
+                            animation.To = MathFunctions.RadianToDegree(dQ[i]);;
+                            animation.DecelerationRatio = 1;
+                            animation.Duration = TimeSpan.FromSeconds(0.15);
+                            animation.AutoReverse = false;
+
+                            Storyboard.SetTarget(
+                                animation,
+                                ((this.armModelVisual3D[j]
+                                       .Transform as Transform3DGroup)
+                                  .Children[1] as RotateTransform3D)
+                                 .Rotation as AxisAngleRotation3D);
+                            Storyboard.SetTargetProperty(animation, new PropertyPath(AxisAngleRotation3D.AngleProperty));
+                            timeLineCollection.Add(animation);
                         }
 
                         break;
                     case 'P':
-                        var prismaticAxis = this.arm.GetZAxis(i);
+                        var prismaticAxis = VRConvert.ConvertFromRealToVirtual(this.arm.GetZAxis(i), this.coeff);
                         for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1) + 1; j++)
                         {
                             if (j == 2 * (i + 1) + 1) continue;
 
-                            ((armModelVisual3D[j].Transform as Transform3DGroup)
-                             .Children[0] as TranslateTransform3D)
-                                .OffsetX += prismaticAxis.X * q[i];
-                            ((armModelVisual3D[j].Transform as Transform3DGroup)
-                             .Children[0] as TranslateTransform3D)
-                                .OffsetY += prismaticAxis.Y * q[i];
-                            ((armModelVisual3D[j].Transform as Transform3DGroup)
-                             .Children[0] as TranslateTransform3D)
-                                .OffsetZ += prismaticAxis.Z * q[i];
+                            //((this.armModelVisual3D[j]
+                            //      .Transform as Transform3DGroup)
+                            // .Children[0] as TranslateTransform3D)
+                            //    .OffsetX += prismaticAxis.X * dQ[i] * this.coeff;
+                            //((this.armModelVisual3D[j]
+                            //      .Transform as Transform3DGroup)
+                            // .Children[0] as TranslateTransform3D)
+                            //    .OffsetY += prismaticAxis.Y * dQ[i] * this.coeff;
+                            //((this.armModelVisual3D[j]
+                            //      .Transform as Transform3DGroup)
+                            // .Children[0] as TranslateTransform3D)
+                            //    .OffsetZ += prismaticAxis.Z * dQ[i] * this.coeff;
+                            
+                            var animationX = new DoubleAnimation();
+                            animationX.To = dQ[i] * this.coeff;;
+                            animationX.DecelerationRatio = 1;
+                            animationX.Duration = TimeSpan.FromSeconds(0.15);
+                            animationX.AutoReverse = false;
+                            
+                            var animationY = new DoubleAnimation();
+                            animationY.To = dQ[i] * this.coeff;;
+                            animationY.DecelerationRatio = 1;
+                            animationY.Duration = TimeSpan.FromSeconds(0.15);
+                            animationY.AutoReverse = false;
+                            
+                            var animationZ = new DoubleAnimation();
+                            animationZ.To = dQ[i] * this.coeff;;
+                            animationZ.DecelerationRatio = 1;
+                            animationZ.Duration = TimeSpan.FromSeconds(0.15);
+                            animationZ.AutoReverse = false;
+
+                            Storyboard.SetTarget(
+                                animationX,
+                                ((this.armModelVisual3D[j]
+                                      .Transform as Transform3DGroup)
+                                 .Children[0] as TranslateTransform3D));
+                            Storyboard.SetTargetProperty(animationX, new PropertyPath(TranslateTransform3D.OffsetXProperty));
+                            
+                            Storyboard.SetTarget(
+                                animationY,
+                                ((this.armModelVisual3D[j]
+                                      .Transform as Transform3DGroup)
+                                 .Children[0] as TranslateTransform3D));
+                            Storyboard.SetTargetProperty(animationY, new PropertyPath(TranslateTransform3D.OffsetYProperty));
+                            
+                            Storyboard.SetTarget(
+                                animationZ,
+                                ((this.armModelVisual3D[j]
+                                      .Transform as Transform3DGroup)
+                                 .Children[0] as TranslateTransform3D));
+                            Storyboard.SetTargetProperty(animationZ, new PropertyPath(TranslateTransform3D.OffsetZProperty));
+
+                            timeLineCollection.Add(animationX);
+                            timeLineCollection.Add(animationY);
+                            timeLineCollection.Add(animationZ);
                         }
 
                         break;
                 }
+
+                storyboard.Children = timeLineCollection;
             }
         }
     }

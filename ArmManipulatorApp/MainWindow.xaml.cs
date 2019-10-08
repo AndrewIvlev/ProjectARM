@@ -1,7 +1,7 @@
 ﻿namespace ArmManipulatorApp
 {
     using System.Windows;
-    using System.Windows.Forms.DataVisualization.Charting;
+    using System.Windows.Media.Animation;
 
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.ViewModel;
@@ -14,7 +14,8 @@
             this.DataContext = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),
-                this.Viewport3D,
+                this.Viewport3D, 
+                (this.Resources["StoryboardArmMoveAnimation"] as Storyboard),
                 this.ArmConfigTextBox,
                 this.StepInCmToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox,
