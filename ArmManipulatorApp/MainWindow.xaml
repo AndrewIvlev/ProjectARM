@@ -52,7 +52,7 @@
                 <MenuItem Header="Создать" x:Name="NewTrackMenuItem" Command="{Binding CreateNewTrajectoryCommand}" />
                 <MenuItem Header="Открыть" Command="{Binding OpenExistingTrajectoryCommand}" />
                 <MenuItem Header="Сохранить" Command="{Binding SaveTrajectoryCommand}" />
-                <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" Command="{Binding EditTrajectoryCommand}" />
+                <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" />
             </MenuItem>
             <MenuItem Header="Препятствия">
                 <MenuItem Header="Добавить"/>
@@ -62,8 +62,7 @@
                 <Separator />
                 <MenuItem Header="Удалить все"/>
             </MenuItem>
-            <MenuItem Header="Настройки">
-            </MenuItem>
+            <MenuItem Header="Настройки" x:Name="SettingsMenuItem" Command="{Binding SettingsMenuItemClickCommand}" />
         </Menu>
 
         <Grid Grid.Column="0" Grid.Row="1" >
@@ -115,7 +114,20 @@
                </StackPanel>
             </Grid>
             <Grid x:Name="SettingsGrid" Visibility="Hidden">
-                <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.13*"></RowDefinition>
+                    <RowDefinition Height="0.13*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="0.14*"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
+                <Label Grid.Row="1" FontSize="15" >Матрица коэффициентов А:</Label>
+                <TextBox Grid.Row="2" Height="Auto" Name="MatrixATextBox"  TextWrapping="WrapWithOverflow" ></TextBox>
+                <Grid Grid.Row="3">
+                    <Button Content="Единичная матрица" HorizontalAlignment="Left" Command="{Binding SetMatrixAasEForArmTextBoxCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                    <Button Content="Применить" HorizontalAlignment="Right" Command="{Binding SetMatrixAForArmTextBoxCommand}" Style="{StaticResource ButtonStyle}" ></Button>
+                </Grid>
             </Grid>
         </Grid>
 
@@ -191,6 +203,10 @@
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="SettingsGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
@@ -202,6 +218,10 @@
                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="SettingsGrid">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
                         </ObjectAnimationUsingKeyFrames>
@@ -221,6 +241,10 @@
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="SettingsGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
@@ -230,6 +254,30 @@
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
                             <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="SettingsGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+
+            <!--/ Settings MenuItems Events-->
+            <EventTrigger RoutedEvent="MenuItem.Click" SourceName="SettingsMenuItem">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="SettingsGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Hidden}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="ManipulatorGrid">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Hidden}"/>
                         </ObjectAnimationUsingKeyFrames>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="TrajectoryGrid">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>

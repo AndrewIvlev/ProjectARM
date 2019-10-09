@@ -17,8 +17,11 @@
     using ArmManipulatorApp.MathModel.Trajectory;
 
     using ArmManipulatorArm.MathModel;
+    using ArmManipulatorArm.MathModel.Matrix;
 
     using MainApp.Common;
+
+    using Newtonsoft.Json;
 
     using Point3D = System.Windows.Media.Media3D.Point3D;
 
@@ -36,6 +39,7 @@
         
         private Viewport3D viewport;
         private TextBox armTextBox;
+        private TextBox matrixA;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
         private Chart DeltaChart;
@@ -55,6 +59,7 @@
             IFileService fileService,
             Viewport3D viewport,
             TextBox armTextBox,
+            TextBox matrixA,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox,
             Chart deltaChart)
@@ -63,6 +68,7 @@
             this.fileService = fileService;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
+            this.matrixA = matrixA;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
             this.DeltaChart = deltaChart;
@@ -689,6 +695,60 @@
                         }
                     },
                     (obj) => this.camera != null);
+            }
+        }
+
+        #endregion
+
+        #region Settings
+        
+        private RelayCommand settingsMenuItemClickCommand;
+        public RelayCommand SettingsMenuItemClickCommand
+        {
+            get
+            {
+                return this.settingsMenuItemClickCommand ?? 
+                       (this.settingsMenuItemClickCommand = new RelayCommand(
+                            obj =>
+                                   {
+                                       try
+                                       {
+                                           if (this.armModel3D != null)
+                                           {
+                                               var mA = this.armModel3D.arm.A;
+                                               this.matrixA.Text = JsonConvert.SerializeObject(mA, Formatting.Indented);
+                                           }
+                                       }
+                                       catch (Exception ex)
+                                       {
+                                           this.dialogService.ShowMessage(ex.Message);
+                                       }
+                                   }));
+            }
+        }
+        
+        private RelayCommand setMatrixAForArmTextBoxCommand;
+        public RelayCommand SetMatrixAForArmTextBoxCommand
+        {
+            get
+            {
+                return this.setMatrixAForArmTextBoxCommand ?? 
+                       (this.setMatrixAForArmTextBoxCommand = new RelayCommand(
+                            obj =>
+                                {
+                                    try
+                                    {
+                                        if (this.armModel3D != null)
+                                        {
+                                            var mA = JsonConvert.DeserializeObject<Matrix>(this.matrixA.Text);
+                                            this.armModel3D.arm.A = mA;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        this.dialogService.ShowMessage(ex.Message);
+                                    }
+                                }));
             }
         }
 
