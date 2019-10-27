@@ -14,9 +14,9 @@
         public int N;
         public BlockMatrix RootB;
         public Unit[] Units;
-        
+
         [JsonIgnore] public Matrix A { get; set; }
-        
+
         [JsonIgnore] public ArrayList T;
         [JsonIgnore] public Matrix D;
         [JsonIgnore] public Matrix C;
@@ -45,7 +45,7 @@
         }
 
         #region Seters & Geters
-        
+
         public void SetA(double[] A)
         {
             for (var i = 0; i < N; i++)
@@ -66,7 +66,7 @@
                 }
             }
         }
-        
+
         public void SetQ(double[] newQ)
         {
             for (var i = 0; i < N; i++)
@@ -74,7 +74,7 @@
                 this.Units[i].Q = newQ[i];
             }
         }
-        
+
         public void OffsetQ(double[] dQ)
         {
             for (var i = 0; i < N; i++)
@@ -93,7 +93,7 @@
 
             return result;
         }
-        
+
         public double GetUnitLen(int unit) => unit == 0
             ? RootB.ColumnAsVector3D(3).Length
             : Units[unit].B.ColumnAsVector3D(3).Length;
@@ -103,9 +103,9 @@
         public Vector3D Fn() => ((BlockMatrix)this.T[this.N]).ColumnAsVector3D(3);
 
         //That function return vector ( dFxqi, dFyqi, dFzqi )
-        public Vector3D GetdF(int i) => ((BlockMatrix) dT[i]).ColumnAsVector3D(3);
+        public Vector3D GetdF(int i) => ((BlockMatrix)dT[i]).ColumnAsVector3D(3);
 
-        public Vector3D GetZAxis(int i) => ((BlockMatrix) T[i]).ColumnAsVector3D(2);
+        public Vector3D GetZAxis(int i) => ((BlockMatrix)T[i]).ColumnAsVector3D(2);
 
         /// <summary>
         /// Вычисление максимально возможной длины манипулятора,
@@ -124,28 +124,57 @@
 
         public void CalcMetaDataForStanding()
         {
-            ArmMetaDataCalculator.Init(this);
-            ArmMetaDataCalculator.CalcSByUnitsType();
-            ArmMetaDataCalculator.CalcT();
+            this.CalcSByUnitsType();
+            this.CalcT();
         }
 
         public double[] Move(Point3D p)
         {
-            ArmMetaDataCalculator.Init(this);
-            ArmMetaDataCalculator.CalcSByUnitsType();
-            ArmMetaDataCalculator.CalcT();
-            
-            ArmMetaDataCalculator.CalcdS();
-            ArmMetaDataCalculator.CalcdT();
-            ArmMetaDataCalculator.CalcD();
-            ArmMetaDataCalculator.CalcC();
+            this.CalcSByUnitsType();
+            this.CalcT();
 
-            ArmMovementPlaning.Init(this);
-            var dQ = ArmMovementPlaning.LagrangeMethodToThePoint(p);
+            this.CalcdS();
+            this.CalcdT();
+            this.CalcD();
+            this.CalcC();
+            var dQ = this.LagrangeMethodToThePoint(p);
             this.OffsetQ(dQ);
             return dQ;
         }
-        
+
+        public double[] LagrangeMethodToThePoint(Point3D p)
+        {
+            var dQ = new double[this.N];
+
+            var f = this.F(this.N);
+            var d = new Point3D(
+                p.X - f.X,
+                p.Y - f.Y,
+                p.Z - f.Z);
+
+            var C = this.C;
+            var detC = Matrix.Det3D(C);
+            var Cx = Matrix.ConcatAsColumn(C, d, 0);
+            var detCx = Matrix.Det3D(Cx);
+            var Cy = Matrix.ConcatAsColumn(C, d, 1);
+            var detCy = Matrix.Det3D(Cy);
+            var Cz = Matrix.ConcatAsColumn(C, d, 2);
+            var detCz = Matrix.Det3D(Cz);
+
+            var μ = new Point3D(
+                detCx / detC,
+                detCy / detC,
+                detCz / detC);
+
+            for (var i = 0; i < this.N; i++)
+            {
+                var dF = this.GetdF(i);
+                dQ[i] = (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * this.A[i, i]);
+            }
+
+            return dQ;
+        }
+
 
         public double GetPointError(Point3D p) =>
             MathFunctions.NormaVector(new Point3D(
@@ -191,5 +220,123 @@
             return false;
         }
 
+        public void CalcdS()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                switch (this.Units[i].Type)
+                {
+                    case 'R':
+                        this.dS[i] = new BlockMatrix();
+                        this.dS[i][0, 0] = -Math.Sin(this.Units[i].Q);
+                        this.dS[i][0, 1] = -Math.Cos(this.Units[i].Q);
+                        this.dS[i][1, 0] = Math.Cos(this.Units[i].Q);
+                        this.dS[i][1, 1] = -Math.Sin(this.Units[i].Q);
+                        this.dS[i][2, 2] = 0;
+                        break;
+                    case 'P':
+                        this.dS[i] = new BlockMatrix();
+                        this.dS[i][0, 0] = 0;
+                        this.dS[i][1, 1] = 0;
+                        this.dS[i][2, 2] = 0;
+                        this.dS[i][2, 3] = 1;
+                        break;
+                    default:
+                        throw new Exception("Unexpected unit type");
+                }
+            }
+        }
+
+        // TODO: refactor this method, use already calculated matrix 
+        // multiplication in T чтобы заново не перемножать одни и те же матрицы
+        private BlockMatrix CalcdF(int index)
+        {
+            var dF = new BlockMatrix();
+            dF *= this.RootB;
+            for (var i = 1; i < this.N; i++)
+            {
+                dF *= i == index ? this.dS[i] : this.S[i];
+                dF *= this.Units[i].B;
+            }
+
+            return dF;
+        }
+
+        public void CalcdT()
+        {
+            this.dT = new ArrayList();
+            for (var i = 0; i < this.N; i++)
+                this.dT.Add(CalcdF(i));
+        }
+
+        /// <summary>
+        /// D is Matrix of gradients Fx, Fy and Fz
+        /// ( Fxq1 Fxq2 ... Fxqn )
+        /// ( Fyq1 Fyq2 ... Fyqn )
+        /// ( Fzq1 Fzq2 ... Fzqn )
+        /// </summary>
+        public void CalcD()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                var b = this.GetdF(i);
+                this.D[0, i] = b.X;
+                this.D[1, i] = b.Y;
+                this.D[2, i] = b.Z;
+            }
+        }
+
+        // Вычисляем матрицу коэффициентов
+        public void CalcC()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                this.C[0, 0] += this.D[0, i] * this.D[0, i];
+                this.C[0, 1] += this.D[0, i] * this.D[1, i];
+                this.C[0, 2] += this.D[0, i] * this.D[2, i];
+                this.C[1, 1] += this.D[1, i] * this.D[1, i];
+                this.C[1, 2] += this.D[1, i] * this.D[2, i];
+                this.C[2, 2] += this.D[2, i] * this.D[2, i];
+            }
+            this.C[1, 0] = this.C[0, 1];
+            this.C[2, 0] = this.C[0, 2];
+            this.C[2, 1] = this.C[1, 2];
+        }
+
+        public void CalcSByUnitsType()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                switch (this.Units[i].Type)
+                {
+                    case 'R':
+                        this.S[i] = new BlockMatrix();
+                        this.S[i][0, 0] = Math.Cos(this.Units[i].Q);
+                        this.S[i][0, 1] = -Math.Sin(this.Units[i].Q);
+                        this.S[i][1, 0] = Math.Sin(this.Units[i].Q);
+                        this.S[i][1, 1] = Math.Cos(this.Units[i].Q);
+                        break;
+                    case 'P':
+                        this.S[i] = new BlockMatrix();
+                        this.S[i][2, 3] = this.Units[i].Q;
+                        break;
+                    default:
+                        throw new Exception("Unexpected unit type");
+                }
+            }
+        }
+
+        // TODO: Сделать такой же массив, умножая с правой стороны
+        public void CalcT()
+        {
+            this.T = new ArrayList();
+            var tmp = new BlockMatrix();
+
+            this.T.Add(tmp = this.RootB * this.S[0]);
+            for (var i = 1; i < this.N; i++)
+                this.T.Add(tmp *= this.Units[i - 1].B * this.S[i]);
+
+            this.T.Add(tmp *= this.Units[this.N - 1].B);
+        }
     }
 }
