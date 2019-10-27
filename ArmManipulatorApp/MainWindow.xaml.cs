@@ -14,8 +14,10 @@
             this.DataContext = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),
+                this,
                 this.Viewport3D,
                 this.ArmConfigTextBox,
+                this.VectorQTextBox,
                 this.MatrixATextBox,
                 this.StepInCmToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox,

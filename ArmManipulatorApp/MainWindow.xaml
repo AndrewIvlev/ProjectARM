@@ -122,7 +122,7 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
-                <Label Grid.Row="1" FontSize="15" >Матрица коэффициентов А:</Label>
+                <Label Grid.Row="1" FontSize="15" >Вектор коэффициентов А для равнозначности обобщённых координат:</Label>
                 <TextBox Grid.Row="2" Height="Auto" Name="MatrixATextBox"  TextWrapping="WrapWithOverflow" ></TextBox>
                 <Grid Grid.Row="3">
                     <Button Content="Единичная матрица" HorizontalAlignment="Left" Command="{Binding SetMatrixAasEForArmTextBoxCommand}" Style="{StaticResource ButtonStyle}" ></Button>
@@ -146,12 +146,21 @@
                     <WrapPanel ItemHeight="50" ItemWidth="120" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button x:Name="StartAnimation" Content="Старт" Command="{Binding StartStopAnimation}" Style="{StaticResource ButtonStyle}"  />
                         <Button Content="Пауза" Command="{Binding PauseAnimation}" Style="{StaticResource ButtonStyle}"  />
+                        <!-->Temporary commented
                         <Label Content="Скорость" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,10" Width="70"/>
                         <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
+                        </-->
                     </WrapPanel>
                 </DockPanel>
-                <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="13" >Текущие данные</Label>
-                <Label x:Name="QLabel" Content="Current Generalized Coordinates: Q=(*,*, ... ,*)" VerticalAlignment="Top" />
+                <Label DockPanel.Dock="Top" HorizontalAlignment ="Center" FontSize="14" >Текущие данные</Label>
+                <Label x:Name="QLabel" Content="Generalized coordinates vector Q:" FontSize="14" Margin="10,0"/>
+                <WrapPanel>
+                    <TextBox x:Name="VectorQTextBox" HorizontalAlignment="Left" Width="139" Margin="5,7" ></TextBox>
+                    <Button Content="Применить" HorizontalAlignment="Right" 
+                            Command="{Binding ChangeVectorQFromTextBox}" 
+                            Style="{StaticResource ButtonStyle}" >
+                    </Button>
+                </WrapPanel>
                 <Label x:Name="PathLength" Content="Path length = 0 cm" />
             </StackPanel>
         </Grid>

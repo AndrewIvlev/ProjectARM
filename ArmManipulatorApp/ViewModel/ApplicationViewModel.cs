@@ -36,9 +36,11 @@
 
         IFileService fileService;
         IDialogService dialogService;
-        
+
+        private Window window;
         private Viewport3D viewport;
         private TextBox armTextBox;
+        private TextBox VectorQTextBox;
         private TextBox matrixA;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
@@ -57,8 +59,10 @@
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
+            Window window,
             Viewport3D viewport,
             TextBox armTextBox,
+            TextBox VectorQTextBox,
             TextBox matrixA,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox,
@@ -66,11 +70,15 @@
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
+
+            this.window = window;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
+            this.VectorQTextBox = VectorQTextBox;
             this.matrixA = matrixA;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
+
             this.DeltaChart = deltaChart;
             this.DeltaChart.ChartAreas.Add(new ChartArea("Default"));
             this.DeltaChart.Series.Add(new Series("Series1"));
@@ -134,7 +142,8 @@
                                                    this.fileService.OpenArm(this.dialogService.FilePath),
                                                    this.coeff);
                                                this.armModel3D.arm.DefaultA();
-                                               this.armModel3D.arm.CalcMetaDataForStanding();
+                                               this.armModel3D.arm.CalcSByUnitsType();
+                                               this.armModel3D.arm.CalcT();
                                                this.armModel3D.BuildModelVisual3DCollection();
 
                                                // After parsing manipulator configuration file
@@ -151,6 +160,7 @@
                                                }
 
                                                this.armTextBox.Text = File.ReadAllText(this.dialogService.FilePath);
+                                               this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
                                                this.dialogService.ShowMessage("Файл манипулятора открыт.");
                                            }
                                        }
@@ -187,6 +197,26 @@
             }
         }
 
+        public ICommand ChangeVectorQFromTextBox
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                    {
+                        try
+                        {
+                            this.armModel3D.arm.SetQ(JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                            this.armModel3D.BeginAnimation(
+                                JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                        }
+                        catch (Exception ex)
+                        {
+                            this.dialogService.ShowMessage(ex.Message);
+                        }
+                    });
+            }
+        }
         #endregion
 
         #region Trajectory
@@ -493,16 +523,29 @@
                         {
                             var deltaList = new double[this.track3D.track.SplitPoints.Count];
 
-                            for (var i = 1; i < this.track3D.track.SplitPoints.Count; i++)
+                            this.armModel3D.arm.CalcSByUnitsType();
+                            this.armModel3D.arm.CalcT();
+                            var indexOfStartPoint = 1;
+                            for (var i = indexOfStartPoint; i < this.track3D.track.SplitPoints.Count; i++)
                             {
                                 var point = this.track3D.track.SplitPoints[i];
-                                var dQ = this.armModel3D.arm.Move(point);
-                                this.dQList.Add(dQ);
+
+                                this.armModel3D.arm.CalcdS();
+                                this.armModel3D.arm.CalcdT();
+                                this.armModel3D.arm.CalcD();
+                                this.armModel3D.arm.CalcC();
+                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(point);
+                                this.armModel3D.arm.OffsetQ(dQ);
+                                //this.dQList.Add(dQ);
+
+                                this.armModel3D.arm.CalcSByUnitsType();
+                                this.armModel3D.arm.CalcT();
                                 deltaList[i] = this.armModel3D.arm.GetPointError(point);
                             }
 
                             this.DeltaChart.Series["Series1"].Points.Clear();
-                            this.DeltaChart.Series["Series1"].Points.DataBindXY(Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray(), deltaList);
+                            this.DeltaChart.Series["Series1"].Points.DataBindXY(
+                                Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray(), deltaList);
                         }
                         catch (Exception ex)
                         {
@@ -524,17 +567,12 @@
                                                            // RunWorkerAsync
                                                            foreach (var dQ in this.dQList)
                                                            {
-                                                               this.armModel3D.ClearModelVisual3DCollection(this.viewport);
-
                                                                this.armModel3D.arm.OffsetQ(dQ);
-                                                               this.armModel3D.arm.CalcMetaDataForStanding();
-                                                               this.armModel3D.BuildModelVisual3DCollection();
-                                                               
-                                                               foreach (var mv in this.armModel3D.armModelVisual3D)
-                                                               {
-                                                                   this.viewport.Children.Add(mv);
-                                                               }
-                                                               Thread.Sleep(600);
+                                                               this.armModel3D.arm.CalcSByUnitsType();
+                                                               this.armModel3D.arm.CalcT();
+                                                               this.armModel3D.BeginAnimation(dQ);
+                                                                    
+                                                               //Thread.Sleep(600);
                                                            }
                                                        }
                                                        catch (Exception ex)

@@ -135,9 +135,7 @@
                 {
                     case 'R':
                         var rotAxis = VRConvert.ConvertFromRealToVirtual(this.arm.GetZAxis(i), this.coeff);
-                        this.arm.CalcMetaDataForStanding();
                         var centerRot = VRConvert.ConvertFromRealToVirtual((Point3D)this.arm.F(i), this.coeff);
-                        
                         for (var j = 2 * (i + 1); j < 2 * (this.arm.N + 1) + 1; j++)
                         {
                             ((this.armModelVisual3D[j]

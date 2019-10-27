@@ -121,27 +121,7 @@
         //}
 
         #endregion
-
-        public void CalcMetaDataForStanding()
-        {
-            this.CalcSByUnitsType();
-            this.CalcT();
-        }
-
-        public double[] Move(Point3D p)
-        {
-            this.CalcSByUnitsType();
-            this.CalcT();
-
-            this.CalcdS();
-            this.CalcdT();
-            this.CalcD();
-            this.CalcC();
-            var dQ = this.LagrangeMethodToThePoint(p);
-            this.OffsetQ(dQ);
-            return dQ;
-        }
-
+        
         public double[] LagrangeMethodToThePoint(Point3D p)
         {
             var dQ = new double[this.N];
@@ -176,11 +156,11 @@
         }
 
 
-        public double GetPointError(Point3D p) =>
-            MathFunctions.NormaVector(new Point3D(
-                p.X - this.F(this.N).X,
-                p.Y - this.F(this.N).Y,
-                p.Z - this.F(this.N).Z));
+        public double GetPointError(Point3D p)
+        {
+            return MathFunctions.NormaVector(
+                new Point3D(p.X - this.F(this.N).X, p.Y - this.F(this.N).Y, p.Z - this.F(this.N).Z));
+        }
 
         public static bool operator ==(Arm a, Arm b)
         {
@@ -330,11 +310,13 @@
         public void CalcT()
         {
             this.T = new ArrayList();
-            var tmp = new BlockMatrix();
 
+            BlockMatrix tmp;
             this.T.Add(tmp = this.RootB * this.S[0]);
             for (var i = 1; i < this.N; i++)
+            {
                 this.T.Add(tmp *= this.Units[i - 1].B * this.S[i]);
+            }
 
             this.T.Add(tmp *= this.Units[this.N - 1].B);
         }
