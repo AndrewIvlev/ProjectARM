@@ -18,7 +18,7 @@
                 this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
-                this.MatrixATextBox,
+                this.WithConditionNumberRadioButton,
                 this.StepInCmToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox,
                 this.DeltaChart);

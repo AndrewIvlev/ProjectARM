@@ -41,7 +41,7 @@
         private Viewport3D viewport;
         private TextBox armTextBox;
         private TextBox VectorQTextBox;
-        private TextBox matrixA;
+        private RadioButton withConditionNumberRadioButton;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
         private Chart DeltaChart;
@@ -62,8 +62,8 @@
             Window window,
             Viewport3D viewport,
             TextBox armTextBox,
-            TextBox VectorQTextBox,
-            TextBox matrixA,
+            TextBox vectorQTextBox,
+            RadioButton withConditionNumberRadioButton,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox,
             Chart deltaChart)
@@ -74,8 +74,8 @@
             this.window = window;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
-            this.VectorQTextBox = VectorQTextBox;
-            this.matrixA = matrixA;
+            this.VectorQTextBox = vectorQTextBox;
+            this.withConditionNumberRadioButton = withConditionNumberRadioButton;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
@@ -197,26 +197,6 @@
             }
         }
 
-        public ICommand ChangeVectorQFromTextBox
-        {
-            get
-            {
-                return new RelayCommand(
-                    obj =>
-                    {
-                        try
-                        {
-                            this.armModel3D.arm.SetQ(JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
-                            this.armModel3D.BeginAnimation(
-                                JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
-                        }
-                        catch (Exception ex)
-                        {
-                            this.dialogService.ShowMessage(ex.Message);
-                        }
-                    });
-            }
-        }
         #endregion
 
         #region Trajectory
@@ -521,6 +501,11 @@
                     {
                         try
                         {
+                            if (this.withConditionNumberRadioButton.IsPressed)
+                            {
+                                //TODO: calculating condition number in foreach below
+                            }
+
                             var deltaList = new double[this.track3D.track.SplitPoints.Count];
 
                             this.armModel3D.arm.CalcSByUnitsType();
@@ -739,54 +724,26 @@
         #endregion
 
         #region Settings
-        
-        private RelayCommand settingsMenuItemClickCommand;
-        public RelayCommand SettingsMenuItemClickCommand
+
+
+        public ICommand ChangeVectorQFromTextBox
         {
             get
             {
-                return this.settingsMenuItemClickCommand ?? 
-                       (this.settingsMenuItemClickCommand = new RelayCommand(
-                            obj =>
-                                   {
-                                       try
-                                       {
-                                           if (this.armModel3D != null)
-                                           {
-                                               var mA = this.armModel3D.arm.A;
-                                               this.matrixA.Text = JsonConvert.SerializeObject(mA, Formatting.Indented);
-                                           }
-                                       }
-                                       catch (Exception ex)
-                                       {
-                                           this.dialogService.ShowMessage(ex.Message);
-                                       }
-                                   }));
-            }
-        }
-        
-        private RelayCommand setMatrixAForArmTextBoxCommand;
-        public RelayCommand SetMatrixAForArmTextBoxCommand
-        {
-            get
-            {
-                return this.setMatrixAForArmTextBoxCommand ?? 
-                       (this.setMatrixAForArmTextBoxCommand = new RelayCommand(
-                            obj =>
-                                {
-                                    try
-                                    {
-                                        if (this.armModel3D != null)
-                                        {
-                                            var mA = JsonConvert.DeserializeObject<Matrix>(this.matrixA.Text);
-                                            this.armModel3D.arm.A = mA;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        this.dialogService.ShowMessage(ex.Message);
-                                    }
-                                }));
+                return new RelayCommand(
+                    obj =>
+                        {
+                            try
+                            {
+                                this.armModel3D.arm.SetQ(JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                                this.armModel3D.BeginAnimation(
+                                    JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                            }
+                            catch (Exception ex)
+                            {
+                                this.dialogService.ShowMessage(ex.Message);
+                            }
+                        });
             }
         }
 
