@@ -173,15 +173,15 @@
                             ((this.armModelVisual3D[j]
                                   .Transform as Transform3DGroup)
                              .Children[2 * i] as TranslateTransform3D)
-                                .OffsetX = prismaticAxis.X * dQ[i] * this.coeff;
+                                .OffsetX = prismaticAxis.X * dQ[i];
                             ((this.armModelVisual3D[j]
                                   .Transform as Transform3DGroup)
                              .Children[2 * i] as TranslateTransform3D)
-                                .OffsetY = prismaticAxis.Y * dQ[i] * this.coeff;
+                                .OffsetY = prismaticAxis.Y * dQ[i];
                             ((this.armModelVisual3D[j]
                                   .Transform as Transform3DGroup)
                              .Children[2 * i] as TranslateTransform3D)
-                                .OffsetZ = prismaticAxis.Z * dQ[i] * this.coeff;
+                                .OffsetZ = prismaticAxis.Z * dQ[i];
                         }
 
                         break;

@@ -15,7 +15,7 @@
         public BlockMatrix RootB;
         public Unit[] Units;
 
-        [JsonIgnore] public Matrix A { get; set; }
+        [JsonIgnore] public double[] A { get; set; }
 
         [JsonIgnore] public ArrayList T;
         [JsonIgnore] public Matrix D;
@@ -32,13 +32,14 @@
             for (var i = 0; i < N; i++)
                 Units[i] = units[i];
 
-            A = new Matrix(N, N);
+            A = new double[N];
             D = new Matrix(3, N);
             C = new Matrix(3, 3);
             S = new BlockMatrix[N];
             dS = new BlockMatrix[N];
             for (var i = 0; i < N; i++)
             {
+                A[i] = (double)1 / this.N;
                 S[i] = new BlockMatrix();
                 dS[i] = new BlockMatrix();
             }
@@ -52,18 +53,7 @@
             {
                 if (Math.Abs(A[i]) < 0)
                     throw new Exception("The coefficient must be non-zero.");
-                this.A[i, i] = A[i];
-            }
-        }
-
-        public void DefaultA()
-        {
-            for (var i = 0; i < N; i++)
-            {
-                for (var j = 0; j < N; j++)
-                {
-                    this.A[i, j] = i == j ? 1 : 0;
-                }
+                this.A[i] = A[i];
             }
         }
 
@@ -99,9 +89,7 @@
             : Units[unit].B.ColumnAsVector3D(3).Length;
 
         public Vector3D F(int i) => ((BlockMatrix)this.T[i]).ColumnAsVector3D(3);
-
-        public Vector3D Fn() => ((BlockMatrix)this.T[this.N]).ColumnAsVector3D(3);
-
+        
         //That function return vector ( dFxqi, dFyqi, dFzqi )
         public Vector3D GetdF(int i) => ((BlockMatrix)dT[i]).ColumnAsVector3D(3);
 
@@ -111,7 +99,6 @@
         /// Вычисление максимально возможной длины манипулятора,
         /// которая равна сумме длин всех звеньев плюс макисмальные длины звеньев поступательного типа
         /// </summary>
-        /// <returns></returns>
         public double MaxLength() => this.Units.Sum(unit => unit.GetLength());
 
         //public void AllAngleToRadianFromDegree()
@@ -149,7 +136,7 @@
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.GetdF(i);
-                dQ[i] = (μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) / (2 * this.A[i, i]);
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
 
             return dQ;

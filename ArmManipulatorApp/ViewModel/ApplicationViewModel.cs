@@ -107,7 +107,6 @@
                                    {
                                        try
                                        {
-                                          
                                        }
                                        catch (Exception ex)
                                        {
@@ -141,7 +140,6 @@
                                                this.armModel3D = new ManipulatorArmModel3D(
                                                    this.fileService.OpenArm(this.dialogService.FilePath),
                                                    this.coeff);
-                                               this.armModel3D.arm.DefaultA();
                                                this.armModel3D.arm.CalcSByUnitsType();
                                                this.armModel3D.arm.CalcT();
                                                this.armModel3D.BuildModelVisual3DCollection();
@@ -223,7 +221,7 @@
                                             }
                                         }
 
-                                        var firstPoint = this.armModel3D.arm.Fn();
+                                        var firstPoint = this.armModel3D.arm.F(this.armModel3D.arm.N);
                                         this.track3D = new TrajectoryModel3D(
                                             new Trajectory((Point3D)firstPoint),
                                             this.viewport,
@@ -736,6 +734,9 @@
                             try
                             {
                                 this.armModel3D.arm.SetQ(JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                                this.armModel3D.arm.CalcSByUnitsType();
+                                this.armModel3D.arm.CalcT();
+
                                 this.armModel3D.BeginAnimation(
                                     JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
                             }

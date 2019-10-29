@@ -128,6 +128,9 @@
                             <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
                         </WrapPanel>
                     </DockPanel>
+                    <ListBox>
+                        <!-- Для каждой обобщённой координаты ползунок для её изменения/-->
+                    </ListBox>
                 </StackPanel>
             </Grid>
             <Grid x:Name="Obstacle" Visibility="Hidden">
