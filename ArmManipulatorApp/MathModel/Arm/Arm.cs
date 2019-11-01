@@ -273,7 +273,7 @@
             this.dT = new ArrayList();
             for (var i = 0; i < this.N; i++)
             {
-                this.dT.Add(CalcdF(i));
+                this.dT.Add(this.CalcdF(i));
             }
         }
 
@@ -294,21 +294,37 @@
             }
         }
 
-        // Вычисляем матрицу коэффициентов
+        // Вычисляем матрицу коэффициентов для метода Лагранжа
         public void CalcC()
         {
             for (var i = 0; i < this.N; i++)
             {
+                // C xx
                 this.C[0, 0] += this.D[0, i] * this.D[0, i];
+                
+                // C xy
                 this.C[0, 1] += this.D[0, i] * this.D[1, i];
+
+                // C xz
                 this.C[0, 2] += this.D[0, i] * this.D[2, i];
+
+                // C yy
                 this.C[1, 1] += this.D[1, i] * this.D[1, i];
+
+                // C yz
                 this.C[1, 2] += this.D[1, i] * this.D[2, i];
+
+                // C zz
                 this.C[2, 2] += this.D[2, i] * this.D[2, i];
             }
 
+            // C yx
             this.C[1, 0] = this.C[0, 1];
+            
+            // C zx
             this.C[2, 0] = this.C[0, 2];
+            
+            // C zy
             this.C[2, 1] = this.C[1, 2];
         }
     }
