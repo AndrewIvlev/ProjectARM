@@ -55,9 +55,16 @@ namespace ArmManipulatorArm.MathModel.Matrix
                 return false;
 
             for(var i = 0; i < a.Rows; i++)
+            {
                 for (var j = 0; j < a.Columns; j++)
+                {
                     if (Math.Abs(a[i, j] - b[i, j]) > 0)
+                    {
+                        Console.WriteLine($"Element left matrix [{i},{j}] = {a[i, j]} not equal to element of right matrix = {b[i, j]}");
                         return false;
+                    }
+                }
+            }
 
             return true;
         }

@@ -144,6 +144,8 @@
             <StackPanel>
                 <Separator Height="10"></Separator>
                 <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
+                <Separator Height="5"></Separator>
+
                 <Label x:Name="QLabel" Content="Вектор обобщённых координат q:" FontSize="14" Margin="10,0"/>
                 <WrapPanel>
                     <TextBox x:Name="VectorQTextBox" HorizontalAlignment="Left" Width="139" Margin="10,7" ></TextBox>
@@ -156,6 +158,14 @@
                 <Separator Height="5"></Separator>
 
                 <RadioButton x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="Вычисляя число обусловленности"/>
+                <Separator Height="5"></Separator>
+
+                <RadioButton x:Name="WithRepeatPlanning" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
+                <WrapPanel>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0">до приближения к точке на</TextBlock>
+                    <TextBox x:Name="ThreshelodDelta" HorizontalAlignment="Left" Width="40"  ></TextBox>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">см.</TextBlock>
+                </WrapPanel>
 
                 <Separator Height="5"></Separator>
 

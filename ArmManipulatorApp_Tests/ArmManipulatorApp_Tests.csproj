@@ -72,8 +72,12 @@
     <None Include="ManipConfigFiles\3RPR.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="ManipConfigFiles\PRR.json" />
-    <None Include="ManipConfigFiles\R.json" />
+    <None Include="ManipConfigFiles\PRR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="ManipConfigFiles\R.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

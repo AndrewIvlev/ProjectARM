@@ -45,8 +45,6 @@
             }
         }
 
-        #region Seters & Geters
-
         public void SetA(double[] A)
         {
             for (var i = 0; i < N; i++)
@@ -88,6 +86,44 @@
             ? RootB.ColumnAsVector3D(3).Length
             : Units[unit].B.ColumnAsVector3D(3).Length;
 
+        public void CalcSByUnitsType()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                switch (this.Units[i].Type)
+                {
+                    case 'R':
+                        this.S[i] = new BlockMatrix();
+                        this.S[i][0, 0] = Math.Cos(this.Units[i].Q);
+                        this.S[i][0, 1] = -Math.Sin(this.Units[i].Q);
+                        this.S[i][1, 0] = Math.Sin(this.Units[i].Q);
+                        this.S[i][1, 1] = Math.Cos(this.Units[i].Q);
+                        break;
+                    case 'P':
+                        this.S[i] = new BlockMatrix();
+                        this.S[i][2, 3] = this.Units[i].Q;
+                        break;
+                    default:
+                        throw new Exception("Unexpected unit type");
+                }
+            }
+        }
+
+        // TODO: Сделать такой же массив, умножая с правой стороны
+        public void CalcT()
+        {
+            this.T = new ArrayList();
+
+            BlockMatrix tmp;
+            this.T.Add(tmp = this.RootB * this.S[0]);
+            for (var i = 1; i < this.N; i++)
+            {
+                this.T.Add(tmp *= this.Units[i - 1].B * this.S[i]);
+            }
+
+            this.T.Add(tmp * this.Units[this.N - 1].B);
+        }
+
         public Vector3D F(int i) => ((BlockMatrix)this.T[i]).ColumnAsVector3D(3);
         
         //That function return vector ( dFxqi, dFyqi, dFzqi )
@@ -101,14 +137,17 @@
         /// </summary>
         public double MaxLength() => this.Units.Sum(unit => unit.GetLength());
 
-        //public void AllAngleToRadianFromDegree()
-        //{
-        //    for (int i = 0; i < N; i++)
-        //        units[i].angle = - DegreeToRadian(units[i].angle);
-        //}
+        public void AllAngleToRadianFromDegree()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                if (this.Units[i].Type == 'P')
+                {
+                    this.Units[i].Q = -MathFunctions.DegreeToRadian(this.Units[i].Q);
+                }
+            }
+        }
 
-        #endregion
-        
         public double[] LagrangeMethodToThePoint(Point3D p)
         {
             var dQ = new double[this.N];
@@ -136,7 +175,7 @@
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.GetdF(i);
-                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / (2 * this.A[i]);
             }
 
             return dQ;
@@ -214,13 +253,13 @@
             }
         }
 
-        // TODO: refactor this method, use already calculated matrix 
-        // multiplication in T чтобы заново не перемножать одни и те же матрицы
+        // TODO: refactor this method, use already calculated matrix multiplication in T
+        // чтобы заново не перемножать одни и те же матрицы
         private BlockMatrix CalcdF(int index)
         {
             var dF = new BlockMatrix();
             dF *= this.RootB;
-            for (var i = 1; i < this.N; i++)
+            for (var i = 0; i < this.N; i++)
             {
                 dF *= i == index ? this.dS[i] : this.S[i];
                 dF *= this.Units[i].B;
@@ -233,7 +272,9 @@
         {
             this.dT = new ArrayList();
             for (var i = 0; i < this.N; i++)
+            {
                 this.dT.Add(CalcdF(i));
+            }
         }
 
         /// <summary>
@@ -265,47 +306,10 @@
                 this.C[1, 2] += this.D[1, i] * this.D[2, i];
                 this.C[2, 2] += this.D[2, i] * this.D[2, i];
             }
+
             this.C[1, 0] = this.C[0, 1];
             this.C[2, 0] = this.C[0, 2];
             this.C[2, 1] = this.C[1, 2];
-        }
-
-        public void CalcSByUnitsType()
-        {
-            for (var i = 0; i < this.N; i++)
-            {
-                switch (this.Units[i].Type)
-                {
-                    case 'R':
-                        this.S[i] = new BlockMatrix();
-                        this.S[i][0, 0] = Math.Cos(this.Units[i].Q);
-                        this.S[i][0, 1] = -Math.Sin(this.Units[i].Q);
-                        this.S[i][1, 0] = Math.Sin(this.Units[i].Q);
-                        this.S[i][1, 1] = Math.Cos(this.Units[i].Q);
-                        break;
-                    case 'P':
-                        this.S[i] = new BlockMatrix();
-                        this.S[i][2, 3] = this.Units[i].Q;
-                        break;
-                    default:
-                        throw new Exception("Unexpected unit type");
-                }
-            }
-        }
-
-        // TODO: Сделать такой же массив, умножая с правой стороны
-        public void CalcT()
-        {
-            this.T = new ArrayList();
-
-            BlockMatrix tmp;
-            this.T.Add(tmp = this.RootB * this.S[0]);
-            for (var i = 1; i < this.N; i++)
-            {
-                this.T.Add(tmp *= this.Units[i - 1].B * this.S[i]);
-            }
-
-            this.T.Add(tmp *= this.Units[this.N - 1].B);
         }
     }
 }
