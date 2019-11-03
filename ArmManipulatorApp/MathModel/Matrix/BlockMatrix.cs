@@ -75,18 +75,5 @@ namespace ArmManipulatorArm.MathModel.Matrix
                 [2, 2] = A[2, 0] * B[0, 2] + A[2, 1] * B[1, 2] + A[2, 2] * B[2, 2],
                 [2, 3] = A[2, 0] * B[0, 3] + A[2, 1] * B[1, 3] + A[2, 2] * B[2, 3] + A[2, 3]
             };
-
-        public void Print()
-        {
-            for (var i = 0; i < 3; i++)
-            {
-                for (var j = 0; j < 4; j++)
-                {
-                    Console.Write(this[i, j] + @" ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-        }
     }
 }

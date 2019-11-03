@@ -261,6 +261,45 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
+        public void Det3DCalculateCorrect()
+        {
+            var expectedDet = -1;
+            var A = new Matrix(3, 3)
+            {
+                [0, 0] = 2, [0, 1] = 5, [0, 2] = 7,
+                [1, 0] = 6, [1, 1] = 3, [1, 2] = 4,
+                [2, 0] = 5, [2, 1] = -2, [2, 2] = -3
+            };
+
+            var actualDet = Matrix.Det3D(A);
+
+            Assert.AreEqual(expectedDet, actualDet);
+        }
+
+        [Test]
+        public void InvertMatrixIsCorrect()
+        {
+            var A = new Matrix(3, 3)
+            {
+                [0, 0] = 2, [0, 1] = 5, [0, 2] = 7,
+                [1, 0] = 6, [1, 1] = 3, [1, 2] = 4,
+                [2, 0] = 5, [2, 1] = -2, [2, 2] = -3
+            };
+
+            var expInvertA = new Matrix(3, 3)
+            {
+                [0, 0] = 1, [0, 1] = -1, [0, 2] = 1,
+                [1, 0] = -38, [1, 1] = 41, [1, 2] = -34,
+                [2, 0] = 27, [2, 1] = -29, [2, 2] = 24
+            };
+
+            var actualInvertA = A.Invert3D(Matrix.Det3D(A));
+            actualInvertA.Print();
+
+            Assert.IsTrue(expInvertA == actualInvertA);
+        }
+
+        [Test]
         public void CalculationTMatrixIsCorrect()
         {
             var fileName = "3RPR.json";
@@ -514,10 +553,16 @@ namespace ArmManipulatorApp_Tests
             arm.CalcdT();
             arm.CalcD();
 
-            var expC = new Matrix();
+            var expC = new Matrix(3, 3)
+                       {
+                           [0, 0] = 5000, [0, 1] = -600, [0, 2] = -1000,
+                           [1, 0] = -600, [1, 1] = 4961, [1, 2] = 3330,
+                           [2, 0] = -1000, [2, 1] = 3330, [2, 2] = 12800
+                       };
 
             arm.CalcC();
             var actualC = arm.C;
+            actualC.Print();
 
             Assert.IsTrue(expC == actualC);
         }

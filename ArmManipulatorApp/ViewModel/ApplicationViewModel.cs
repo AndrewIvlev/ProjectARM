@@ -517,7 +517,7 @@
                                 this.armModel3D.arm.CalcdT();
                                 this.armModel3D.arm.CalcD();
                                 this.armModel3D.arm.CalcC();
-                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(point);
+                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(point, out double cond);
                                 this.armModel3D.arm.OffsetQ(dQ);
                                 //this.dQList.Add(dQ);
 

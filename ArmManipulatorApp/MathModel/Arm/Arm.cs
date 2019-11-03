@@ -148,7 +148,7 @@
             }
         }
 
-        public double[] LagrangeMethodToThePoint(Point3D p)
+        public double[] LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond = false)
         {
             var dQ = new double[this.N];
 
@@ -160,6 +160,20 @@
 
             var C = this.C;
             var detC = Matrix.Det3D(C);
+
+            cond = 0;
+            if (withCond)
+            {
+                if (detC == 0)
+                {
+                    cond = double.MaxValue;
+                }
+                else
+                {
+                    cond = C.NormF() * C.Invert3D(detC).NormF();
+                }
+            }
+
             var Cx = Matrix.ConcatAsColumn(C, d, 0);
             var detCx = Matrix.Det3D(Cx);
             var Cy = Matrix.ConcatAsColumn(C, d, 1);
