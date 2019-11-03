@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -11,6 +12,7 @@
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
+    using System.Windows.Threading;
 
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.Graphics3DModel;
@@ -29,7 +31,7 @@
     public class ApplicationViewModel
     {
         private ManipulatorArmModel3D armModel3D;
-        private TrajectoryModel3D track3D;
+        public TrajectoryModel3D track3D;
         private CameraModel3D camera;
         private SceneModel3D scene;
         private CursorPointModel3D cursorForAnchorPointCreation;
@@ -43,14 +45,11 @@
         private TextBox VectorQTextBox;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
-        private Chart Chart;
         
         // Buffer of all calculated q's for animation
         private List<double[]> dQList;
 
         private Point MousePos;
-
-        private bool WithCond;
 
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
@@ -64,8 +63,7 @@
             TextBox armTextBox,
             TextBox vectorQTextBox,
             TextBox stepInCmToSplitTextBox,
-            TextBox numberOfPointsToSplitTextBox,
-            Chart chart)
+            TextBox numberOfPointsToSplitTextBox)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
@@ -76,23 +74,7 @@
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
-            this.Chart = chart;
-            this.Chart.ChartAreas.Add(new ChartArea("Default"));
-            this.Chart.Series.Add(new Series("DeltaSeries"));
-            this.Chart.Series["DeltaSeries"].ChartArea = "Default";
-            this.Chart.Series["DeltaSeries"].ChartType = SeriesChartType.Line;
-            this.Chart.Series.Add(new Series("CondSeries"));
-            this.Chart.Series["CondSeries"].ChartArea = "Default";
-            this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
-            //this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Black;
-
-            // Add random values for chart display
-            int[] axisXData = { 0, 50, 100 };
-            double[] axisYData = { 5.3, 1.3, 7.3 };
-            this.Chart.Series["DeltaSeries"].Points.DataBindXY(axisXData, axisYData);
-
             this.dQList = new List<double[]>();
-            this.WithCond = false;
             this.coeff = 3;
         }
 
@@ -494,54 +476,55 @@
         #endregion
 
         #region Planning trajectory
+        
+        public void PlanningMovementAlongTrajectory(object sender, bool withCond, bool withRepeatPlan, double threshold, out int resIterCount, out double[] deltaList, out double[] condList)
+        {
+            var iterationCount = 1;
+            var splitPointsCount = this.track3D.track.SplitPoints.Count;
+            deltaList = new double[splitPointsCount];
+            condList = new double[splitPointsCount];
 
-        private RelayCommand trackPlanningCommand;
-        public RelayCommand TrackPlanningCommand => this.trackPlanningCommand ??
-            (this.trackPlanningCommand = new RelayCommand(obj =>
+            this.armModel3D.arm.CalcSByUnitsType();
+            this.armModel3D.arm.CalcT();
+            var indexOfStartPoint = 1;
+            for (var i = indexOfStartPoint; i < splitPointsCount; i++)
+            {
+                var point = this.track3D.track.SplitPoints[i];
+
+                this.armModel3D.arm.CalcdS();
+                this.armModel3D.arm.CalcdT();
+                this.armModel3D.arm.CalcD();
+                this.armModel3D.arm.CalcC();
+                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
+                    point,
+                    out var cond,
+                    withCond);
+                this.armModel3D.arm.OffsetQ(dQ);
+                //this.dQList.Add(dQ);
+
+                this.armModel3D.arm.CalcSByUnitsType();
+                this.armModel3D.arm.CalcT();
+
+                var delta = this.armModel3D.arm.GetPointError(point);
+                deltaList[i] = delta;
+                condList[i] = cond;
+                
+                ++iterationCount;
+                if (withRepeatPlan)
+                {
+                    if (delta > threshold)
                     {
-                        try
-                        {
-                            var count = this.track3D.track.SplitPoints.Count;
-                            var deltaList = new double[count];
-                            var condList = new double[count];
+                        i--;
+                    }
+                }
+                else
+                {
+                    (sender as BackgroundWorker).ReportProgress(iterationCount);
+                }
+            }
 
-                            this.armModel3D.arm.CalcSByUnitsType();
-                            this.armModel3D.arm.CalcT();
-                            var indexOfStartPoint = 1;
-                            for (var i = indexOfStartPoint; i < count; i++)
-                            {
-                                var point = this.track3D.track.SplitPoints[i];
-
-                                this.armModel3D.arm.CalcdS();
-                                this.armModel3D.arm.CalcdT();
-                                this.armModel3D.arm.CalcD();
-                                this.armModel3D.arm.CalcC();
-                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
-                                    point,
-                                    out double cond,
-                                    this.WithCond);
-                                this.armModel3D.arm.OffsetQ(dQ);
-                                //this.dQList.Add(dQ);
-
-                                this.armModel3D.arm.CalcSByUnitsType();
-                                this.armModel3D.arm.CalcT();
-
-                                deltaList[i] = this.armModel3D.arm.GetPointError(point);
-                                condList[i] = cond;
-                            }
-
-                            this.Chart.Series["DeltaSeries"].Points.Clear();
-                            this.Chart.Series["DeltaSeries"].Points.DataBindXY(
-                                Enumerable.Range(0, count).ToArray(), deltaList);
-                            this.Chart.Series["CondSeries"].Points.Clear();
-                            this.Chart.Series["CondSeries"].Points.DataBindXY(
-                                Enumerable.Range(0, count).ToArray(), condList);
-                        }
-                        catch (Exception ex)
-                        {
-                            this.dialogService.ShowMessage(ex.Message);
-                        }
-                    }));
+            resIterCount = iterationCount;
+        }
 
         #endregion
 
@@ -729,27 +712,7 @@
         #endregion
 
         #region Settings
-
-
-        public ICommand WithCondRadioButtonClick
-        {
-            get
-            {
-                return new RelayCommand(
-                    obj =>
-                        {
-                            try
-                            {
-                                this.WithCond = (bool)((CheckBox)((RoutedEventArgs)obj).Source).IsChecked;
-                            }
-                            catch (Exception ex)
-                            {
-                                this.dialogService.ShowMessage(ex.Message);
-                            }
-                        });
-            }
-        }
-
+        
         public ICommand ChangeVectorQFromTextBox
         {
             get

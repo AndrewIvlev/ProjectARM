@@ -148,7 +148,7 @@
             }
         }
 
-        public double[] LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond = false)
+        public double[] LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond)
         {
             var dQ = new double[this.N];
 
