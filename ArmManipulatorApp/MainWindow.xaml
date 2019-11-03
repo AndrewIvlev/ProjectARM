@@ -157,10 +157,19 @@
 
                 <Separator Height="5"></Separator>
 
-                <RadioButton x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="Вычисляя число обусловленности"/>
+                <CheckBox x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="Вычисляя число обусловленности">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Checked">
+                            <command:EventToCommand Command="{Binding WithCondRadioButtonClick}" PassEventArgsToCommand="True" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Unchecked">
+                            <command:EventToCommand Command="{Binding WithCondRadioButtonClick}" PassEventArgsToCommand="True" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </CheckBox>
                 <Separator Height="5"></Separator>
 
-                <RadioButton x:Name="WithRepeatPlanning" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
+                <CheckBox x:Name="WithRepeatPlanning" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
                 <WrapPanel>
                     <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</TextBlock>
                     <TextBox x:Name="ThresholdDelta" HorizontalAlignment="Left" Width="40" ></TextBox>
@@ -170,7 +179,11 @@
                 <Separator Height="5"></Separator>
 
                 <TextBlock Margin="10,5" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
-                <ComboBox x:Name="comboBox" Width="253"/>
+                <ComboBox x:Name="comboBox" Width="253">
+                    <ComboBoxItem IsSelected="True">Без уравновешивания</ComboBoxItem>
+                    <ComboBoxItem>Общее конструктивное</ComboBoxItem>
+                    <ComboBoxItem>Итеративное</ComboBoxItem>
+                </ComboBox>
                 <Separator Height="10"></Separator>
                 <Label x:Name="PathLength" Content="Длина пути = 0 см" FontSize="14" Margin="10,0" />
                 <Label x:Name="WorkingTime" Content="Время работы алгоритма = 0 сек" FontSize="14" Margin="10,0" />

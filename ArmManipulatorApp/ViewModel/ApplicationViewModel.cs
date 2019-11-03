@@ -9,6 +9,7 @@
     using System.Windows.Controls;
     using System.Windows.Forms.DataVisualization.Charting;
     using System.Windows.Input;
+    using System.Windows.Media;
     using System.Windows.Media.Animation;
 
     using ArmManipulatorApp.Common;
@@ -37,19 +38,19 @@
         IFileService fileService;
         IDialogService dialogService;
 
-        private Window window;
         private Viewport3D viewport;
         private TextBox armTextBox;
         private TextBox VectorQTextBox;
-        private RadioButton withConditionNumberRadioButton;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
-        private Chart DeltaChart;
+        private Chart Chart;
         
         // Buffer of all calculated q's for animation
         private List<double[]> dQList;
 
         private Point MousePos;
+
+        private bool WithCond;
 
         /// <summary>
         /// Задаёт отношение реальных физических величин манипулятора
@@ -59,38 +60,39 @@
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
-            Window window,
             Viewport3D viewport,
             TextBox armTextBox,
             TextBox vectorQTextBox,
-            RadioButton withConditionNumberRadioButton,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox,
-            Chart deltaChart)
+            Chart chart)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
 
-            this.window = window;
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
-            this.withConditionNumberRadioButton = withConditionNumberRadioButton;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
-            this.DeltaChart = deltaChart;
-            this.DeltaChart.ChartAreas.Add(new ChartArea("Default"));
-            this.DeltaChart.Series.Add(new Series("Series1"));
-            this.DeltaChart.Series["Series1"].ChartArea = "Default";
-            this.DeltaChart.Series["Series1"].ChartType = SeriesChartType.Line;
+            this.Chart = chart;
+            this.Chart.ChartAreas.Add(new ChartArea("Default"));
+            this.Chart.Series.Add(new Series("DeltaSeries"));
+            this.Chart.Series["DeltaSeries"].ChartArea = "Default";
+            this.Chart.Series["DeltaSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series.Add(new Series("CondSeries"));
+            this.Chart.Series["CondSeries"].ChartArea = "Default";
+            this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
+            //this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Black;
 
             // Add random values for chart display
             int[] axisXData = { 0, 50, 100 };
             double[] axisYData = { 5.3, 1.3, 7.3 };
-            this.DeltaChart.Series["Series1"].Points.DataBindXY(axisXData, axisYData);
+            this.Chart.Series["DeltaSeries"].Points.DataBindXY(axisXData, axisYData);
 
             this.dQList = new List<double[]>();
+            this.WithCond = false;
             this.coeff = 3;
         }
 
@@ -127,7 +129,7 @@
                                    {
                                        try
                                        {
-                                           if (this.dialogService.OpenFileDialog())
+                                           if (this.dialogService.OpenFileDialog("ArmManipulatorApp_Tests\\ManipConfigFiles"))
                                            {
                                                if (this.armModel3D != null)
                                                {
@@ -252,7 +254,7 @@
                                {
                                    try
                                    {
-                                       if (this.dialogService.OpenFileDialog())
+                                       if (this.dialogService.OpenFileDialog("ArmManipulatorApp_Tests\\Tracks"))
                                        {
                                            this.track3D?.RemoveAnchorTrackFromViewport();
                                            this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.coeff);
@@ -499,17 +501,14 @@
                     {
                         try
                         {
-                            if (this.withConditionNumberRadioButton.IsPressed)
-                            {
-                                //TODO: calculating condition number in foreach below
-                            }
-
-                            var deltaList = new double[this.track3D.track.SplitPoints.Count];
+                            var count = this.track3D.track.SplitPoints.Count;
+                            var deltaList = new double[count];
+                            var condList = new double[count];
 
                             this.armModel3D.arm.CalcSByUnitsType();
                             this.armModel3D.arm.CalcT();
                             var indexOfStartPoint = 1;
-                            for (var i = indexOfStartPoint; i < this.track3D.track.SplitPoints.Count; i++)
+                            for (var i = indexOfStartPoint; i < count; i++)
                             {
                                 var point = this.track3D.track.SplitPoints[i];
 
@@ -517,18 +516,26 @@
                                 this.armModel3D.arm.CalcdT();
                                 this.armModel3D.arm.CalcD();
                                 this.armModel3D.arm.CalcC();
-                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(point, out double cond);
+                                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
+                                    point,
+                                    out double cond,
+                                    this.WithCond);
                                 this.armModel3D.arm.OffsetQ(dQ);
                                 //this.dQList.Add(dQ);
 
                                 this.armModel3D.arm.CalcSByUnitsType();
                                 this.armModel3D.arm.CalcT();
+
                                 deltaList[i] = this.armModel3D.arm.GetPointError(point);
+                                condList[i] = cond;
                             }
 
-                            this.DeltaChart.Series["Series1"].Points.Clear();
-                            this.DeltaChart.Series["Series1"].Points.DataBindXY(
-                                Enumerable.Range(0, this.track3D.track.SplitPoints.Count).ToArray(), deltaList);
+                            this.Chart.Series["DeltaSeries"].Points.Clear();
+                            this.Chart.Series["DeltaSeries"].Points.DataBindXY(
+                                Enumerable.Range(0, count).ToArray(), deltaList);
+                            this.Chart.Series["CondSeries"].Points.Clear();
+                            this.Chart.Series["CondSeries"].Points.DataBindXY(
+                                Enumerable.Range(0, count).ToArray(), condList);
                         }
                         catch (Exception ex)
                         {
@@ -723,6 +730,25 @@
 
         #region Settings
 
+
+        public ICommand WithCondRadioButtonClick
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                        {
+                            try
+                            {
+                                this.WithCond = (bool)((CheckBox)((RoutedEventArgs)obj).Source).IsChecked;
+                            }
+                            catch (Exception ex)
+                            {
+                                this.dialogService.ShowMessage(ex.Message);
+                            }
+                        });
+            }
+        }
 
         public ICommand ChangeVectorQFromTextBox
         {

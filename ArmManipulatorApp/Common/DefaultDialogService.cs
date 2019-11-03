@@ -1,5 +1,7 @@
 ﻿namespace ArmManipulatorApp.Common
 {
+    using System.IO;
+    using System.Reflection;
     using System.Windows;
 
     using Microsoft.Win32;
@@ -8,14 +10,17 @@
     {
         public string FilePath { get; set; }
 
-        public bool OpenFileDialog()
+        public bool OpenFileDialog(string dir)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            openFileDialog.InitialDirectory = Path.Combine(Directory.GetParent(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).Parent.Parent.FullName, dir);
             if (openFileDialog.ShowDialog() == true)
             {
-                FilePath = openFileDialog.FileName;
+                this.FilePath = openFileDialog.FileName;
                 return true;
             }
+
             return false;
         }
 
@@ -24,9 +29,10 @@
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             if (saveFileDialog.ShowDialog() == true)
             {
-                FilePath = saveFileDialog.FileName;
+                this.FilePath = saveFileDialog.FileName;
                 return true;
             }
+
             return false;
         }
 

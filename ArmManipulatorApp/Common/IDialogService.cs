@@ -4,7 +4,7 @@
     {
         void ShowMessage(string message);
         string FilePath { get; set; }
-        bool OpenFileDialog();
+        bool OpenFileDialog(string directory);
         bool SaveFileDialog();
     }
 }
