@@ -115,15 +115,15 @@
                     <ProgressBar x:Name="PathPlanningProgressBar" Height="18" Margin="10, 5"/>
                     <WrapPanel VerticalAlignment="Bottom" ItemWidth="120" HorizontalAlignment="Center">
                         <Button Content="Посчитать" Width="97" Click="PlanningTrack_Click" Style="{StaticResource ButtonStyle}"/>
-                        <Button Content="Отмена" Width="88" Command="{Binding CancelCalculationCommand}" Style="{StaticResource ButtonStyle}"/>
+                        <Button Content="Отмена" Width="88" Click="CancelPlanningTrack_Click" Style="{StaticResource ButtonStyle}"/>
                     </WrapPanel>
                     <Separator Height="10"></Separator>
                     <DockPanel LastChildFill="True" >
                         <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Анимация движения</Label>
-                        <Slider DockPanel.Dock="Top" x:Name="SliderPlay" Margin="10, 5"/>
+                        <Slider DockPanel.Dock="Top" x:Name="SliderAnimation" ValueChanged="AnimationSliderValueChanged" Margin="10, 5"/>
                         <WrapPanel ItemHeight="50" ItemWidth="120" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button x:Name="StartAnimation" Content="Старт" Width="97" Command="{Binding StartStopAnimation}" Style="{StaticResource ButtonStyle}"  />
-                            <Button Content="Пауза" Width="88" Command="{Binding PauseAnimation}" Style="{StaticResource ButtonStyle}"  />
+                            <Button Content="Старт" Width="97" Click="BeginAnimation_Click" Style="{StaticResource ButtonStyle}"  />
+                            <Button Content="Пауза" Width="88" Click="PauseAnimation_Click" Style="{StaticResource ButtonStyle}"  />
                             <Label Content="Скорость" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,10" Width="70"/>
                             <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
                         </WrapPanel>
@@ -186,7 +186,7 @@
 
         <Grid Grid.Column="2" Grid.Row="2">
             <WindowsFormsHost>
-                <dvc:Chart x:Name="DeltaChart" Height="60"/>
+                <dvc:Chart x:Name="Chart" Height="60"/>
             </WindowsFormsHost>
         </Grid>
 

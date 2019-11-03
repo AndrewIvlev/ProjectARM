@@ -476,18 +476,25 @@
         #endregion
 
         #region Planning trajectory
-        
-        public void PlanningMovementAlongTrajectory(object sender, bool withCond, bool withRepeatPlan, double threshold, out int resIterCount, out double[] deltaList, out double[] condList)
+
+        public void PlanningMovementAlongTrajectory(
+            DoWorkEventArgs e,
+            object sender,
+            bool withCond,
+            bool withRepeatPlan,
+            double threshold,
+            out int resIterCount,
+            out List<double> deltaList,
+            out List<double> condList)
         {
-            var iterationCount = 1;
             var splitPointsCount = this.track3D.track.SplitPoints.Count;
-            deltaList = new double[splitPointsCount];
-            condList = new double[splitPointsCount];
+            deltaList = new List<double>();
+            condList = new List<double>();
 
             this.armModel3D.arm.CalcSByUnitsType();
             this.armModel3D.arm.CalcT();
-            var indexOfStartPoint = 1;
-            for (var i = indexOfStartPoint; i < splitPointsCount; i++)
+            resIterCount = 0;
+            for (var i = 1; i < splitPointsCount; i++)
             {
                 var point = this.track3D.track.SplitPoints[i];
 
@@ -506,10 +513,10 @@
                 this.armModel3D.arm.CalcT();
 
                 var delta = this.armModel3D.arm.GetPointError(point);
-                deltaList[i] = delta;
-                condList[i] = cond;
+                deltaList.Add(delta);
+                condList.Add(cond);
                 
-                ++iterationCount;
+                ++resIterCount;
                 if (withRepeatPlan)
                 {
                     if (delta > threshold)
@@ -519,54 +526,46 @@
                 }
                 else
                 {
-                    (sender as BackgroundWorker).ReportProgress(iterationCount);
+                    (sender as BackgroundWorker).ReportProgress(resIterCount + 1);
+                }
+
+                if (((BackgroundWorker)sender).CancellationPending == true)
+                {
+                    e.Cancel = true;
+                    return;
                 }
             }
 
-            resIterCount = iterationCount;
+            e.Cancel = true;
         }
 
         #endregion
 
         #region Moving animation
 
-        private RelayCommand startStopAnimation;
-        public RelayCommand StartStopAnimation
-            => this.startStopAnimation ?? (this.startStopAnimation = new RelayCommand(
-                                               obj =>
-                                                   {
-                                                       try
-                                                       {
-                                                           // RunWorkerAsync
-                                                           foreach (var dQ in this.dQList)
-                                                           {
-                                                               this.armModel3D.arm.OffsetQ(dQ);
-                                                               this.armModel3D.arm.CalcSByUnitsType();
-                                                               this.armModel3D.arm.CalcT();
-                                                               this.armModel3D.BeginAnimation(dQ);
-                                                                    
-                                                               //Thread.Sleep(600);
-                                                           }
-                                                       }
-                                                       catch (Exception ex)
-                                                       {
-                                                           this.dialogService.ShowMessage(ex.Message);
-                                                       }
-                                                   }));
+        public void BeginAnimation(
+            DoWorkEventArgs e,
+            object sender)
+        {
+            for (var i = 0; i < this.dQList.Count; i++)
+            {
+                var dQ = this.dQList[i];
+                this.armModel3D.arm.OffsetQ(dQ);
+                this.armModel3D.arm.CalcSByUnitsType();
+                this.armModel3D.arm.CalcT();
+                this.armModel3D.BeginAnimation(dQ);
 
-        private RelayCommand pauseAnimation;
-        public RelayCommand PauseAnimation
-            => this.pauseAnimation ?? (this.pauseAnimation = new RelayCommand(
-                                           obj =>
-                                               {
-                                                   try
-                                                   {
-                                                   }
-                                                   catch (Exception ex)
-                                                   {
-                                                       this.dialogService.ShowMessage(ex.Message);
-                                                   }
-                                               }));
+                Thread.Sleep(600); //TODO: add value from slider speed
+
+                (sender as BackgroundWorker).ReportProgress(i);
+
+                if (((BackgroundWorker)sender).CancellationPending == true)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+        }
 
         #endregion
 
