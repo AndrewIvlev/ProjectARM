@@ -11,10 +11,10 @@
 
         public Point3D position;
 
-        public CursorPointModel3D(Point3D position)
+        public CursorPointModel3D(Point3D position, double radius)
         {
             var meshCircle = new MeshGeometry3D();
-            MeshGeometry3DHelper.AddSphere(meshCircle, position, 9, 8, 8);
+            MeshGeometry3DHelper.AddSphere(meshCircle, position, radius, 8, 8);
             var brush3 = Brushes.Purple;
             var material3 = new DiffuseMaterial(brush3);
             var circleCursor = new GeometryModel3D(meshCircle, material3);

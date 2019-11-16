@@ -7,8 +7,8 @@
     {
         public int selectedPointIndex;
 
-        public PointSelectorModel3D(Point3D position, int selectedPointIndex = 0)
-            : base(position)
+        public PointSelectorModel3D(Point3D position, double radius, int selectedPointIndex = 0)
+            : base(position, radius)
         {
             this.selectedPointIndex = selectedPointIndex;
         }

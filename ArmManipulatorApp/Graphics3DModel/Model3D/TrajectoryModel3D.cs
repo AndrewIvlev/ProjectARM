@@ -26,28 +26,33 @@
         /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         /// </summary>
         private double coeff;
+        private double pointRadius;
+        private double trackLineRadius;
 
-        public TrajectoryModel3D(Trajectory track, Viewport3D viewport, double coeff = 1)
+        public TrajectoryModel3D(Trajectory track, Viewport3D viewport, double thickness, double coeff = 1)
         {
             this.coeff = coeff;
+            this.pointRadius = thickness * this.coeff / 2;
+            this.trackLineRadius = this.pointRadius * 0.90;
             this.track = track;
             this.viewport = viewport;
             this.trackModelVisual3D = new List<ModelVisual3D>();
             this.splitTrackModelVisual3D = new List<ModelVisual3D>();
             
             this.trackModelVisual3D.Add(
-                this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[0], this.coeff)));
+                this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[0], this.coeff), this.pointRadius));
             for (var i = 1; i < this.track.AnchorPoints.Count; i++)
             {
                 var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(
                         this.track.AnchorPoints[i - 1],
                         this.coeff),
-                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff),
+                    this.trackLineRadius);
 
                 this.trackModelVisual3D.Add(trackLineMV3D);
                 this.trackModelVisual3D.Add(
-                    this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff)));
+                    this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[i], this.coeff), this.pointRadius));
             }
 
             foreach (var splitPoint in this.track.SplitPoints)
@@ -65,18 +70,19 @@
                 VRConvert.ConvertFromRealToVirtual(
                     this.track.AnchorPoints[this.track.AnchorPoints.Count - 2],
                     this.coeff),
-                newVirtualPoint);
-            var trackAnchorPointMV3D = this.CreateAnchorPointModelVisual3D(newVirtualPoint);
+                newVirtualPoint,
+                this.trackLineRadius);
+            var trackAnchorPointMV3D = this.CreateAnchorPointModelVisual3D(newVirtualPoint, this.pointRadius);
 
             this.trackModelVisual3D.Add(trackLineMV3D);
             this.trackModelVisual3D.Add(trackAnchorPointMV3D);
         }
 
-        private ModelVisual3D CreateAnchorPointModelVisual3D(Point3D center)
+        private ModelVisual3D CreateAnchorPointModelVisual3D(Point3D center, double radius)
         {
             var anchorPointModelVisual3D = new ModelVisual3D();
             var anchorPointMeshGeometry3D = new MeshGeometry3D();
-            MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, center, 8, 8, 8);
+            MeshGeometry3DHelper.AddSphere(anchorPointMeshGeometry3D, center, radius, 8, 8);
             var anchorPointBrush = Brushes.GreenYellow;
             var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
             var anchorPointGeometryModel = new GeometryModel3D(anchorPointMeshGeometry3D, anchorPointMaterial);
@@ -99,7 +105,7 @@
             return splitPointModelVisual3D;
         }
 
-        private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D startPoint, Point3D endPoint)
+        private ModelVisual3D CreateTrajectoryLineModelVisual3D(Point3D startPoint, Point3D endPoint, double radius)
         {
             var trajectoryLineModelVisual3D = new ModelVisual3D();
             var trajectoryLineMeshGeometry3D = new MeshGeometry3D();
@@ -107,7 +113,7 @@
                 trajectoryLineMeshGeometry3D,
                 new Point3D(startPoint.X, startPoint.Y, startPoint.Z),
                 new Vector3D(endPoint.X - startPoint.X, endPoint.Y - startPoint.Y, endPoint.Z - startPoint.Z),
-                2);
+                radius);
             var anchorPointBrush = Brushes.MediumPurple;
             var anchorPointMaterial = new DiffuseMaterial(anchorPointBrush);
             var anchorPointGeometryModel = new GeometryModel3D(trajectoryLineMeshGeometry3D, anchorPointMaterial);
@@ -197,16 +203,19 @@
             {
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1], this.coeff),
-                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff),
+                    this.trackLineRadius);
             }
             else
             {
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 - 1] = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint - 1], this.coeff),
-                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff),
+                    this.trackLineRadius);
                 this.trackModelVisual3D[indexOfAnchorPoint * 2 + 1] = this.CreateTrajectoryLineModelVisual3D(
                     VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint], this.coeff),
-                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1], this.coeff));
+                    VRConvert.ConvertFromRealToVirtual(this.track.AnchorPoints[indexOfAnchorPoint + 1], this.coeff),
+                    this.trackLineRadius);
             }
         }
 

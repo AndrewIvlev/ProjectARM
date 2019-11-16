@@ -96,8 +96,8 @@
                             </WrapPanel>
                             <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                             <WrapPanel>
-                                <Label Content="введите шаг разбиения в см." />
-                                <TextBox x:Name="StepInCmToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <Label Content="введите шаг разбиения в метрах." />
+                                <TextBox x:Name="StepInMeterToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
                             <Button Content="Разделить траекторию" Command="{Binding SplitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <ListBox>
@@ -162,9 +162,9 @@
 
                 <CheckBox x:Name="WithRepeatPlanningCheckBox" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
                 <WrapPanel>
-                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</TextBlock>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,90,0" >до приближения к точке на</TextBlock>
                     <TextBox x:Name="ThresholdForRepeatPlanning" HorizontalAlignment="Left" Width="40" ></TextBox>
-                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">см.</TextBlock>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">метров</TextBlock>
                 </WrapPanel>
 
                 <Separator Height="5"></Separator>
@@ -176,7 +176,7 @@
                     <ComboBoxItem>с итеративным учётом чувствительности</ComboBoxItem>
                 </ComboBox>
                 <Separator Height="10"></Separator>
-                <Label x:Name="PathLength" Content="Длина пути = 0 см" FontSize="14" Margin="10,0" />
+                <Label x:Name="PathLength" Content="Длина пути = 0 м." FontSize="14" Margin="10,0" />
                 <Label x:Name="WorkingTime" Content="Время работы алгоритма = 0 сек" FontSize="14" Margin="10,0" />
             </StackPanel>
         </Grid>

@@ -167,7 +167,7 @@
                                 {
                                     try
                                     {
-                                        if (this.dialogService.SaveFileDialog() == true)
+                                        if (this.dialogService.SaveFileDialog())
                                         {
                                             this.fileService.SaveArm(this.dialogService.FilePath, this.armModel3D.arm);
                                             this.dialogService.ShowMessage("Файл манипулятора сохранен.");
@@ -207,10 +207,12 @@
                                             }
                                         }
 
+                                        var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                         var firstPoint = this.armModel3D.arm.F(this.armModel3D.arm.N);
                                         this.track3D = new TrajectoryModel3D(
                                             new Trajectory((Point3D)firstPoint),
                                             this.viewport,
+                                            thickness,
                                             this.coeff);
                                         foreach (var mv in this.track3D.trackModelVisual3D)
                                         {
@@ -344,10 +346,12 @@
                                        try
                                        {
                                            UserControlMod.Mod = UserMod.CameraRotation;
+                                           var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                            var trajectoryLastPoint =
                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
                                            this.pointSelector = new PointSelectorModel3D(
                                                VRConvert.ConvertFromRealToVirtual(trajectoryLastPoint, this.coeff),
+                                               (thickness * this.coeff / 2) * 0.8,
                                                this.track3D.track.AnchorPoints.Count - 1);
                                            this.viewport.Children.Add(this.pointSelector.ModelVisual3D);
                                        }
@@ -629,11 +633,13 @@
                                         {
                                             var trajectoryFirstPoint =
                                                 this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
+                                            var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                             this.cursorForAnchorPointCreation = new CursorPointModel3D(
                                                 new Point3D(
                                                     trajectoryFirstPoint.X * this.coeff,
                                                     trajectoryFirstPoint.Y * this.coeff,
-                                                    trajectoryFirstPoint.Z * this.coeff));
+                                                    trajectoryFirstPoint.Z * this.coeff),
+                                                (thickness * this.coeff / 2) * 0.8);
                                             this.viewport.Children.Add(this.cursorForAnchorPointCreation.ModelVisual3D);
                                         }
                                         else
@@ -641,10 +647,11 @@
                                             var nextMousePos = Mouse.GetPosition(obj as IInputElement);
                                             this.viewport.Children.Remove(this.cursorForAnchorPointCreation.ModelVisual3D);
                                             this.cursorForAnchorPointCreation.MoveByOffset(
-                                                new Point3D(
+                                                VRConvert.ConvertFromVirtualToReal(new Point3D(
                                                     nextMousePos.X - this.MousePos.X,
                                                     -nextMousePos.Y + this.MousePos.Y,
-                                                    0));
+                                                    0),
+                                                    this.coeff));
                                             this.viewport.Children.Add(this.cursorForAnchorPointCreation.ModelVisual3D);
                                             this.MousePos = nextMousePos;
                                         }
