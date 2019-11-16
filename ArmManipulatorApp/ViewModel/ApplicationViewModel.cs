@@ -75,7 +75,7 @@
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
             this.dQList = new List<double[]>();
-            this.coeff = 3;
+            this.coeff = 10;
         }
 
         #region Manipulator
@@ -126,13 +126,15 @@
                                                    this.coeff);
                                                this.armModel3D.arm.CalcSByUnitsType();
                                                this.armModel3D.arm.CalcT();
-                                               this.armModel3D.BuildModelVisual3DCollection();
+                                               var maxArmLength = this.armModel3D.arm.MaxLength();
+
+                                               var thickness = (maxArmLength / this.armModel3D.arm.N) * 0.13;
+                                               this.armModel3D.BuildModelVisual3DCollection(thickness);
 
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
-                                               var maxArmLength = this.armModel3D.arm.MaxLength();
-                                               this.camera = new CameraModel3D(10 * maxArmLength);
-                                               this.scene = new SceneModel3D(10 * maxArmLength, 3);
+                                               this.camera = new CameraModel3D(this.coeff * maxArmLength);
+                                               this.scene = new SceneModel3D(this.coeff * maxArmLength * 2, this.coeff * thickness * 0.5);
                                                
                                                this.viewport.Camera = this.camera.PerspectiveCamera;
                                                this.viewport.Children.Add(this.scene.ModelVisual3D);
@@ -526,7 +528,7 @@
                 }
                 else
                 {
-                    (sender as BackgroundWorker).ReportProgress(resIterCount + 1);
+                    ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
                 }
 
                 if (((BackgroundWorker)sender).CancellationPending == true)

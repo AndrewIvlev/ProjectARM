@@ -19,6 +19,7 @@
 
             // Scene plane building
             var halfSideLength = sideLength / 2;
+            var axisRadius = axisThickness / 2;
             var planeGeometryModel3D = new GeometryModel3D();
             var planeMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddTriangle(
@@ -41,7 +42,7 @@
                 xAxisMeshGeometry3D,
                 new Point3D(0, 0, 0),
                 new Vector3D(halfSideLength, 0, 0),
-                axisThickness);
+                axisRadius);
             xAxisGeometryModel3D.Geometry = xAxisMeshGeometry3D;
             xAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Green);
 
@@ -52,7 +53,7 @@
                 yAxisMeshGeometry3D,
                 new Point3D(0, 0, 0), 
                 new Vector3D(0, halfSideLength, 0),
-                axisThickness);
+                axisRadius);
             yAxisGeometryModel3D.Geometry = yAxisMeshGeometry3D;
             yAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Red);
 
@@ -63,7 +64,7 @@
                 zAxisMeshGeometry3D,
                 new Point3D(0, 0, 0), 
                 new Vector3D(0, 0, halfSideLength),
-                axisThickness);
+                axisRadius);
             zAxisGeometryModel3D.Geometry = zAxisMeshGeometry3D;
             zAxisGeometryModel3D.Material = new DiffuseMaterial(Brushes.Blue);
 

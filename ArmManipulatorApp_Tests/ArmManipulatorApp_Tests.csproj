@@ -63,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ManipConfigFiles\RRPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ManipConfigFiles\PRP.json" />
     <None Include="ManipConfigFiles\RP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
