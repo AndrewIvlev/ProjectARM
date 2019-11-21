@@ -43,6 +43,7 @@
         private Viewport3D viewport;
         private TextBox armTextBox;
         private TextBox VectorQTextBox;
+        private Label pathLengthLabel;
         private TextBox stepInCmToSplitTextBox;
         private TextBox numberOfPointsToSplitTextBox;
         
@@ -62,6 +63,7 @@
             Viewport3D viewport,
             TextBox armTextBox,
             TextBox vectorQTextBox,
+            Label pathLength,
             TextBox stepInCmToSplitTextBox,
             TextBox numberOfPointsToSplitTextBox)
         {
@@ -71,6 +73,7 @@
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
+            this.pathLengthLabel = pathLength;
             this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
             this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
@@ -243,7 +246,8 @@
                                        if (this.dialogService.OpenFileDialog("ArmManipulatorApp_Tests\\Tracks"))
                                        {
                                            this.track3D?.RemoveAnchorTrackFromViewport();
-                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.coeff);
+                                           var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
+                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, thickness, this.coeff);
                                            this.track3D.AddAnchorTrackToViewport();
                                            this.dialogService.ShowMessage("Файл траектории открыт.");
                                        }
@@ -301,6 +305,8 @@
                                                this.track3D.RemoveAnchorTrackFromViewport();
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                                this.track3D.AddAnchorTrackToViewport();
+
+                                               this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м.";
                                            }
                                        }
                                        catch (Exception ex)
@@ -374,20 +380,20 @@
                             {
                                 if (this.pointSelector != null)
                                 {
-                                    var deltaZ = 0.5;
+                                    var deltaZ = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                     switch (((KeyEventArgs)obj).Key)
                                     {
                                         case Key.W: // Increase z coordinate of point
                                             this.track3D.RemoveAnchorTrackFromViewport();
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, deltaZ);
                                             this.track3D.AddAnchorTrackToViewport();
-                                            this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, deltaZ), this.coeff));
+                                            this.pointSelector.MoveByOffset(new Point3D(0, 0, deltaZ * this.coeff));
                                             break;
                                         case Key.S: // Decrease z coordinate of point
                                             this.track3D.RemoveAnchorTrackFromViewport();
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, -deltaZ);
                                             this.track3D.AddAnchorTrackToViewport();
-                                            this.pointSelector.MoveByOffset(VRConvert.ConvertFromRealToVirtual(new Point3D(0, 0, -deltaZ), this.coeff));
+                                            this.pointSelector.MoveByOffset(new Point3D(0, 0, -deltaZ * this.coeff));
                                             break;
                                         case Key.D: // Select next point
                                             if (this.pointSelector.selectedPointIndex
@@ -395,8 +401,7 @@
                                             {
                                                 this.pointSelector.selectedPointIndex++;
                                                 var newSelectorPosition = VRConvert.ConvertFromRealToVirtual(
-                                                    this.track3D.track.AnchorPoints[this.pointSelector
-                                                        .selectedPointIndex],
+                                                    this.track3D.track.AnchorPoints[this.pointSelector.selectedPointIndex],
                                                     this.coeff);
                                                 this.pointSelector.MoveTo(newSelectorPosition);
                                             }
@@ -453,7 +458,8 @@
                                     {
                                         this.track3D.RemoveSplitTrackFromViewport();
                                         this.track3D.SplitPath(step);
-                                        this.track3D.AddSplitTrackToViewport();
+                                        //this.track3D.AddSplitTrackToViewport();
+                                        this.dialogService.ShowMessage("Путь успешно разделён.");
                                     }
                                     else
                                     {
@@ -464,7 +470,8 @@
                                 {
                                     this.track3D.RemoveSplitTrackFromViewport();
                                     this.track3D.SplitPath(numberOfSplitPoints);
-                                    this.track3D.AddSplitTrackToViewport();
+                                    //this.track3D.AddSplitTrackToViewport();
+                                    this.dialogService.ShowMessage("Путь успешно разделён.");
                                 }
                                 else
                                 {

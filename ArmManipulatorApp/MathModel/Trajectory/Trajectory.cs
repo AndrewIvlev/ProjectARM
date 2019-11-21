@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Media.Media3D;
 
@@ -50,8 +51,14 @@
             return index;
         }
 
-        public void AddAnchorPoint(Point3D NAP) => AnchorPoints.Add(NAP); //NAP = New Anchor Point
-        
+        //NAP = New Anchor Point
+        public void AddAnchorPoint(Point3D NAP)
+        {
+            var lastPoint = this.AnchorPoints.Last();
+            this.AnchorPoints.Add(NAP);
+            this.Length += (lastPoint - this.AnchorPoints.Last()).Length;
+        }
+
         public double DistanceBetweenPoints(Point3D p1, Point3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
 
         public double GetLen()

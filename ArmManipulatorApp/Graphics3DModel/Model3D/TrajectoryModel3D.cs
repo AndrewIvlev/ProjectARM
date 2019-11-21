@@ -64,7 +64,7 @@
 
         public void AddAnchorPoint(Point3D newVirtualPoint)
         {
-            this.track.AnchorPoints.Add(VRConvert.ConvertFromVirtualToReal(newVirtualPoint, this.coeff));
+            this.track.AddAnchorPoint(VRConvert.ConvertFromVirtualToReal(newVirtualPoint, this.coeff));
 
             var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
                 VRConvert.ConvertFromRealToVirtual(

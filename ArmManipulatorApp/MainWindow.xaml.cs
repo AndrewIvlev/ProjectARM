@@ -33,6 +33,7 @@
                 this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
+                this.PathLength,
                 this.StepInMeterToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox);
             this.DataContext = this.appViewModel;

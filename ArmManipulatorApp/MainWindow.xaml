@@ -162,9 +162,9 @@
 
                 <CheckBox x:Name="WithRepeatPlanningCheckBox" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
                 <WrapPanel>
-                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,90,0" >до приближения к точке на</TextBlock>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</TextBlock>
                     <TextBox x:Name="ThresholdForRepeatPlanning" HorizontalAlignment="Left" Width="40" ></TextBox>
-                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">метров</TextBlock>
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">м.</TextBlock>
                 </WrapPanel>
 
                 <Separator Height="5"></Separator>
