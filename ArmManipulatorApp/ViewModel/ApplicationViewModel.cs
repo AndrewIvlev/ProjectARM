@@ -136,7 +136,7 @@
 
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
-                                               this.camera = new CameraModel3D(this.coeff * maxArmLength);
+                                               this.camera = new CameraModel3D(this.coeff * maxArmLength * 2);
                                                this.scene = new SceneModel3D(this.coeff * maxArmLength * 2, this.coeff * thickness * 0.5);
                                                
                                                this.viewport.Camera = this.camera.PerspectiveCamera;
@@ -221,8 +221,10 @@
                                         {
                                             this.viewport.Children.Add(mv);
                                         }
-                                        
+
+                                        this.camera = new CameraModel3D(this.coeff * this.armModel3D.arm.MaxLength() * 2);
                                         this.camera.ViewFromAbove();
+                                        this.viewport.Camera = this.camera.PerspectiveCamera;
                                         UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
                                     }
                                     catch (Exception ex)
@@ -270,7 +272,7 @@
                        {
                            try
                            {
-                               if (this.dialogService.SaveFileDialog() == true)
+                               if (this.dialogService.SaveFileDialog())
                                {
                                    this.fileService.SaveTrack(this.dialogService.FilePath, this.track3D.track);
                                    this.dialogService.ShowMessage("Файл траектории сохранен.");
@@ -297,7 +299,9 @@
                                        {
                                            if (UserControlMod.Mod != UserMod.TrajectoryAnchorPointCreation)
                                            {
+                                               this.camera = new CameraModel3D(this.coeff * this.armModel3D.arm.MaxLength() * 2);
                                                this.camera.ViewFromAbove();
+                                               this.viewport.Camera = this.camera.PerspectiveCamera;
                                                UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
                                            }
                                            else
@@ -593,6 +597,11 @@
                         {
                             try
                             {
+                                if (UserControlMod.Mod == UserMod.TrajectoryAnchorPointCreation)
+                                {
+                                    return;
+                                }
+
                                 // TODO: rewrite this without magic number 1024
                                 this.camera.Zoom.ScaleX += (double)((MouseWheelEventArgs)obj).Delta / 1024;
                                 this.camera.Zoom.ScaleY += (double)((MouseWheelEventArgs)obj).Delta / 1024;
