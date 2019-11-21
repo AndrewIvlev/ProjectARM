@@ -191,11 +191,7 @@
                 throw new Exception("Can't change z coordinate of first trajectory point!");
             }
 
-            // TODO: Offset doesn't change Point3D value ;(
-            // this.track.AnchorPoints[indexOfAnchorPoint].Offset(0, 0, deltaZ);
-            // Temporary solution:
-            var tmpPoint = this.track.AnchorPoints[indexOfAnchorPoint];
-            this.track.AnchorPoints[indexOfAnchorPoint] = new Point3D(tmpPoint.X, tmpPoint.Y, tmpPoint.Z + deltaZ);
+            this.track.AnchorPointOffsetZ(indexOfAnchorPoint, deltaZ);
 
             ((TranslateTransform3D)this.trackModelVisual3D[indexOfAnchorPoint * 2].Transform).OffsetZ += deltaZ * this.coeff;
 

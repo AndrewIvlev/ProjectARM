@@ -392,12 +392,16 @@
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, deltaZ);
                                             this.track3D.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, deltaZ * this.coeff));
+
+                                            this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м.";
                                             break;
                                         case Key.S: // Decrease z coordinate of point
                                             this.track3D.RemoveAnchorTrackFromViewport();
                                             this.track3D.ChangeAnchorPointZ(this.pointSelector.selectedPointIndex, -deltaZ);
                                             this.track3D.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, -deltaZ * this.coeff));
+
+                                            this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м.";
                                             break;
                                         case Key.D: // Select next point
                                             if (this.pointSelector.selectedPointIndex
@@ -431,6 +435,8 @@
                                     this.track3D.RemoveAnchorTrackFromViewport();
                                     this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                     this.track3D.AddAnchorTrackToViewport();
+
+                                    this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м.";
                                 }
                             }
                             catch (Exception ex)

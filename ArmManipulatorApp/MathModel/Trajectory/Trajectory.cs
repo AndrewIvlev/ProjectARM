@@ -59,6 +59,30 @@
             this.Length += (lastPoint - this.AnchorPoints.Last()).Length;
         }
 
+        public void AnchorPointOffsetZ(int index, double deltaZ)
+        {
+            if (index == 0 || index > this.AnchorPoints.Count - 1)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            var oldPoint = this.AnchorPoints[index];
+            this.AnchorPoints[index] = new Point3D(oldPoint.X, oldPoint.Y, oldPoint.Z + deltaZ);
+
+            var oldLengthLeft = (this.AnchorPoints[index - 1] - oldPoint).Length;
+            var newLengthLeft = (this.AnchorPoints[index - 1] - this.AnchorPoints[index]).Length;
+            if (index == this.AnchorPoints.Count - 1)
+            {
+                this.Length = this.Length - oldLengthLeft + newLengthLeft;
+            }
+            else
+            {
+                var oldLengthRight = (oldPoint - this.AnchorPoints[index + 1]).Length;
+                var newLengthRight = (this.AnchorPoints[index] - this.AnchorPoints[index + 1]).Length;
+                this.Length = this.Length - oldLengthLeft - oldLengthRight + newLengthLeft + newLengthRight;
+            }
+        }
+
         public double DistanceBetweenPoints(Point3D p1, Point3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
 
         public double GetLen()
