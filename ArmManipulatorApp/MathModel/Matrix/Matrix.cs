@@ -202,6 +202,17 @@ namespace ArmManipulatorArm.MathModel.Matrix
             return Math.Sqrt(frobeniusNorm);
         }
 
+        public double ConditionNumber()
+        {
+            var det = Det3D(this);
+            return this.NormF() * this.Invert3D(det).NormF();
+        }  
+        
+        public double ConditionNumber(double det)
+        {
+            return this.NormF() * this.Invert3D(det).NormF();
+        }
+
         public void ToE()
         {
             if (this.Rows != this.Columns)

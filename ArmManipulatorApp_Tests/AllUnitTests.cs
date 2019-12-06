@@ -7,11 +7,15 @@ using NUnit.Framework;
 
 namespace ArmManipulatorApp_Tests
 {
+    using System.Windows.Media.Media3D;
+
+    using Newtonsoft.Json.Linq;
+
     [TestFixture]
     public class AllUnitTests
     {
         private string ManipulatorConfigDirectory;
-
+        
         [SetUp]
         public void SetUp()
         {
@@ -49,7 +53,7 @@ namespace ArmManipulatorApp_Tests
                 new BlockMatrix(new[,] {
                     { 1.0, 0.0, 0.0, 0.0 },
                     { 0.0, 1.0, 0.0, 0.0 },
-                    { 0.0, 0.0, 1.0, 10.0}
+                    { 0.0, 0.0, 1.0, 0.1}
                 }),
                 new[]
                 {
@@ -60,7 +64,7 @@ namespace ArmManipulatorApp_Tests
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 20.0 }
+                            { 0.0, 1.0, 0.0, 0.4 }
                             })
                     },
                     new Unit
@@ -69,7 +73,7 @@ namespace ArmManipulatorApp_Tests
                         Q = 0,
                         B = new BlockMatrix(new[,]
                         {
-                            { 0.0, 0.0, 1.0, 20.0 },
+                            { 0.0, 0.0, 1.0, 0.4 },
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 }
                         })
@@ -81,7 +85,7 @@ namespace ArmManipulatorApp_Tests
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 },
-                            { 0.0, 0.0, 1.0, 10.0 }
+                            { 0.0, 0.0, 1.0, 0.2 }
                         })
 
                     },
@@ -92,7 +96,7 @@ namespace ArmManipulatorApp_Tests
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 30.0 }
+                            { 0.0, 1.0, 0.0, 0.2 }
                         })
                     },
                     new Unit{
@@ -101,7 +105,7 @@ namespace ArmManipulatorApp_Tests
                         B = new BlockMatrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 0.0, 1.0, 10.0 },
+                            { 0.0, 0.0, 1.0, 0.1 },
                             { 0.0, 1.0, 0.0, 0.0 }
                         })
                     }
@@ -277,6 +281,38 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
+        public void MatrixFrobeniusNorm()
+        {
+            var expectedNorm = 13;
+            var A = new Matrix(3, 3)
+                        {
+                            [0, 0] = 2, [0, 1] = 3, [0, 2] = 5,
+                            [1, 0] = 3, [1, 1] = 1, [1, 2] = 4,
+                            [2, 0] = 5, [2, 1] = 4, [2, 2] = 8
+                        };
+
+            var actualNorm = A.NormF();
+
+            Assert.AreEqual(expectedNorm, actualNorm, "Frobenius norm fo matrix A calculated incorrectly");
+        }
+
+        [Test]
+        public void MatrixFrobeniusNorm2()
+        {
+            var expectedNorm = 12.609520212918492;
+            var A = new Matrix(3, 3)
+                        {
+                            [0, 0] = 1, [0, 1] = 0, [0, 2] = -4,
+                            [1, 0] = -2, [1, 1] = 8, [1, 2] = 0,
+                            [2, 0] = 3, [2, 1] = 4, [2, 2] = 7
+                        };
+
+            var actualNorm = A.NormF();
+
+            Assert.AreEqual(expectedNorm, actualNorm, "Frobenius norm fo matrix A calculated incorrectly");
+        }
+
+        [Test]
         public void InvertMatrixIsCorrect()
         {
             var A = new Matrix(3, 3)
@@ -297,6 +333,45 @@ namespace ArmManipulatorApp_Tests
             actualInvertA.Print();
 
             Assert.IsTrue(expInvertA == actualInvertA);
+        }
+
+        [Test]
+        public void InvertMatrixIsCorrect2()
+        {
+            var A = new Matrix(3, 3)
+                        {
+                            [0, 0] = 2, [0, 1] = 2, [0, 2] = 5,
+                            [1, 0] = 3, [1, 1] = 1, [1, 2] = 4,
+                            [2, 0] = 4, [2, 1] = 1, [2, 2] = 8
+                        };
+
+            var expInvertA = new Matrix(3, 3)
+            {
+                [0, 0] = -4.0 / 13.0, [0, 1] = 11.0 / 13.0, [0, 2] = -3.0 / 13.0,
+                [1, 0] = 8.0 / 13.0, [1, 1] = 4.0 / 13.0, [1, 2] = -7.0 / 13,
+                [2, 0] = 1.0 / 13.0, [2, 1] = -6.0 / 13, [2, 2] = 4.0 / 13.0
+            };
+
+            var actualInvertA = A.Invert3D(Matrix.Det3D(A));
+            actualInvertA.Print();
+
+            Assert.IsTrue(expInvertA == actualInvertA);
+        }
+
+        [Test]
+        public void ConditionNumberCalculation()
+        {
+            var expectedCond = 51;
+            var A = new Matrix(3, 3)
+                        {
+                            [0, 0] = 2, [0, 1] = 3, [0, 2] = 5,
+                            [1, 0] = 3, [1, 1] = 1, [1, 2] = 4,
+                            [2, 0] = 5, [2, 1] = 4, [2, 2] = 8
+                        };
+
+            var actualCond = A.ConditionNumber();
+
+            Assert.AreEqual(expectedCond, actualCond, "Condition numbers is not equal");
         }
 
         [Test]
@@ -411,6 +486,73 @@ namespace ArmManipulatorApp_Tests
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
+        }
+
+        [TestCase(new []{0.0, 0.0, 0.0, 0.0}, ExpectedResult = new []{40.0, 0.0, 20.0})]
+        [TestCase(new []{0.0, 1.57079632679, 0.0, 0.0}, ExpectedResult = new []{ 1.9586355432497926E-10d, 0.0, 60.0})]
+        [TestCase(new []{1.5, 1.5, 1.0, -1.4}, ExpectedResult = new []{ -0.53171233269779827, -7.4978988944619385, 53.314837876865518})]
+        [TestCase(new []{3.14, -3.14, 3.0, 1.5}, ExpectedResult = new[] { 33.723173129315335, -0.053709378155719502, 29.921253070736867})]
+        public double[] ArmCalculationGrabCoordinatesByF(double[] q)
+        {
+            var fileName = "RRPR.json";
+            var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
+            var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
+
+            arm.SetQ(q);
+            arm.CalcSByUnitsType();
+            arm.CalcT();
+            var expectedF = arm.F(arm.N);
+
+            return new[] { expectedF.X, expectedF.Y, expectedF.Z };
+        }
+
+        [TestCase(new[] { 0.158270036075493, 0.156193858992778, 12.8400865737088, 0.0155346145872388}, 0.1)]
+        [TestCase(new[] { 3.14, -3.14, 5, 1.52}, 0.6)]
+        public void ArmCalculation_dFsByXYandZ(double[] q, double permissibleError)
+        {
+            var fileName = "RRPR.json";
+            var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
+            var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
+            var len = arm.GetLenAsArray();
+
+            var expected_dFxdq1 = -Math.Sin(q[0]) * ((Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) * len[3] + Math.Cos(q[1]) * (len[1] + q[2] + len[2]));
+            var expected_dFxdq2 = -Math.Sin(q[1]) * (Math.Cos(q[0]) * Math.Cos(q[3]) * len[3] + Math.Cos(q[0]) * (len[1] + q[2] + len[2]))+ len[3] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
+            var expected_dFxdq3 = Math.Cos(q[0]) * Math.Cos(q[1]);
+            var expected_dFxdq4 = - len[3] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[3] * Math.Cos(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+
+            var expected_dFydq1 = Math.Cos(q[0]) * (len[3] * (Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) + Math.Cos(q[1]) * (len[2] + q[2] + len[1]));
+            var expected_dFydq2 = -Math.Sin(q[1]) * (Math.Sin(q[0]) * Math.Cos(q[3]) * len[3] + Math.Sin(q[0] * (len[2] + q[2] + len[1])) + len[3] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]));
+            var expected_dFydq3 = Math.Sin(q[0]) * Math.Cos(q[1]);
+            var expected_dFydq4 = -len[3] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[3] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+
+            var expected_dFzdq1 = 0;
+            var expected_dFzdq2 = Math.Cos(q[1]) * (len[3] * Math.Cos(q[3]) + len[2] + len[1] + q[2]) + Math.Sin(q[1]) * Math.Sin(q[3]) * len[3];
+            var expected_dFzdq3 = Math.Sin(q[1]);
+            var expected_dFzdq4 = -len[3] * (Math.Sin(q[1]) * Math.Sin(q[3]) + Math.Cos(q[1]) * Math.Cos(q[3]));
+
+            arm.SetQ(q);
+            arm.CalcSByUnitsType();
+            arm.CalcdS();
+            arm.CalcdT();
+            var dFdq1 = arm.GetdF(0);
+            var dFdq2 = arm.GetdF(1);
+            var dFdq3 = arm.GetdF(2);
+            var dFdq4 = arm.GetdF(3);
+
+            Assert.IsTrue(Math.Abs(expected_dFxdq1 - dFdq1.X) < permissibleError, $"Big error by dFxdq1 which actual {dFdq1.X} but expected is {expected_dFxdq1}");
+            Assert.IsTrue(Math.Abs(expected_dFxdq2 - dFdq2.X) < permissibleError, $"Big error by dFxdq2 which actual {dFdq2.X} but expected is {expected_dFxdq2}");
+            Assert.IsTrue(Math.Abs(expected_dFxdq3 - dFdq3.X) < permissibleError, $"Big error by dFxdq3 which actual {dFdq3.X} but expected is {expected_dFxdq3}");
+            Assert.IsTrue(Math.Abs(expected_dFxdq4 - dFdq4.X) < permissibleError, $"Big error by dFxdq4 which actual {dFdq4.X} but expected is {expected_dFxdq4}");
+
+            Assert.IsTrue(Math.Abs(expected_dFydq1 - dFdq1.Y) < permissibleError, $"Big error by dFydq1 which actual {dFdq1.Y} but expected is {expected_dFydq1}");
+            Assert.IsTrue(Math.Abs(expected_dFydq2 - dFdq2.Y) < permissibleError, $"Big error by dFydq2 which actual {dFdq2.Y} but expected is {expected_dFydq2}");
+            Assert.IsTrue(Math.Abs(expected_dFydq3 - dFdq3.Y) < permissibleError, $"Big error by dFydq3 which actual {dFdq3.Y} but expected is {expected_dFydq3}");
+            Assert.IsTrue(Math.Abs(expected_dFydq4 - dFdq4.Y) < permissibleError, $"Big error by dFydq4 which actual {dFdq4.Y} but expected is {expected_dFydq4}");
+
+            Assert.IsTrue(Math.Abs(expected_dFzdq1 - dFdq1.Z) < permissibleError, $"Big error by dFzdq1 which actual {dFdq1.Z} but expected is {expected_dFzdq1}");
+            Assert.IsTrue(Math.Abs(expected_dFzdq2 - dFdq2.Z) < permissibleError, $"Big error by dFzdq2 which actual {dFdq2.Z} but expected is {expected_dFzdq2}");
+            Assert.IsTrue(Math.Abs(expected_dFzdq3 - dFdq3.Z) < permissibleError, $"Big error by dFzdq3 which actual {dFdq3.Z} but expected is {expected_dFzdq3}");
+            Assert.IsTrue(Math.Abs(expected_dFzdq4 - dFdq4.Z) < permissibleError, $"Big error by dFzdq4 which actual {dFdq4.Z} but expected is {expected_dFzdq4}");
         }
 
         [Test]
@@ -545,7 +687,7 @@ namespace ArmManipulatorApp_Tests
         [Test]
         public void CalculationCMatrixIsCorrect()
         {
-            var fileName = "3RPR.json";
+            var fileName = "Only_for_test_3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
             arm.CalcSByUnitsType();

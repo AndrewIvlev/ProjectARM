@@ -91,6 +91,17 @@
             ? this.RootB.ColumnAsVector3D(3).Length
             : this.Units[unit].B.ColumnAsVector3D(3).Length;
 
+        public double[] GetLenAsArray()
+        {
+            var lens = new double[this.N + 1];
+            for (var i = 0; i < this.N + 1; i++)
+            {
+                lens[i] = i == 0 ? this.RootB.ColumnAsVector3D(3).Length : this.Units[i - 1].B.ColumnAsVector3D(3).Length;
+            }
+
+            return lens;
+        }
+
         public void CalcSByUnitsType()
         {
             for (var i = 0; i < this.N; i++)
