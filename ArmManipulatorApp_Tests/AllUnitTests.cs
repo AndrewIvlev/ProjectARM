@@ -50,63 +50,69 @@ namespace ArmManipulatorApp_Tests
             #region Actual Arm
 
             var arm = new Arm(
-                new BlockMatrix(new[,] {
+                new Matrix(new[,] {
                     { 1.0, 0.0, 0.0, 0.0 },
                     { 0.0, 1.0, 0.0, 0.0 },
-                    { 0.0, 0.0, 1.0, 0.1}
+                    { 0.0, 0.0, 1.0, 0.1},
+                    {0.0, 0.0, 0.0, 1.0 }
                 }),
                 new[]
                 {
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 0.4 }
+                            { 0.0, 1.0, 0.0, 0.4 },
+                            {0.0, 0.0, 0.0, 1.0 }
                             })
                     },
                     new Unit
                     {
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.4 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 0.0 }
+                            { 0.0, 1.0, 0.0, 0.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     },
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 },
-                            { 0.0, 0.0, 1.0, 0.2 }
+                            { 0.0, 0.0, 1.0, 0.2 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
 
                     },
                     new Unit{
                         Type = 'P',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 0.2 }
+                            { 0.0, 1.0, 0.0, 0.2 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     },
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 0.1 },
-                            { 0.0, 1.0, 0.0, 0.0 }
+                            { 0.0, 1.0, 0.0, 0.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     }
                 });
@@ -128,7 +134,8 @@ namespace ArmManipulatorApp_Tests
                     "\"M\":[" +
                         "[-1.0,0.0,0.0,0.0]," +
                         "[0.0,0.0,1.0,1.0]," +
-                        "[0.0,1.0,0.0,0.0]" +
+                        "[0.0,1.0,0.0,0.0]," +
+                        "[0.0,0.0,0.0,1.0]" +
                     "]}," +
                 "\"Units\":[" +
                     "{\"Type\":\"R\"," +
@@ -136,95 +143,110 @@ namespace ArmManipulatorApp_Tests
                     "\"B\":{\"M\":[" +
                         "[-1.0,0.0,0.0,0.0]," +
                         "[0.0,0.0,1.0,0.0]," +
-                        "[0.0,1.0,0.0,2.0]]}}," +
-                    "{\"Type\":\"R\"," +
+                        "[0.0,1.0,0.0,2.0]," +
+                        "[0.0,0.0,0.0,1.0]" +
+                    "]}}," + 
+                "{\"Type\":\"R\"," +
                     "\"Q\":0.0," +
                     "\"B\":{\"M\":[" +
                         "[0.0,0.0,1.0,2.0]," +
                         "[1.0,0.0,0.0,0.0]," +
-                        "[0.0,1.0,0.0,0.0]]}}," +
+                        "[0.0,1.0,0.0,0.0]," +
+                        "[0.0,0.0,0.0,1.0]" +
+                "]}}," +
                     "{\"Type\":\"R\"," +
                 "\"Q\":0.0," +
                     "\"B\":{\"M\":[" +
                         "[1.0,0.0,0.0,0.0]," +
                         "[0.0,1.0,0.0,0.0]," +
-                        "[0.0,0.0,1.0,1.0]]}}," +
+                        "[0.0,0.0,1.0,1.0]," +
+                        "[0.0,0.0,0.0,1.0]" +
+                "]}}," +
                     "{\"Type\":\"P\"," +
                 "\"Q\":0.0," +
                 "\"B\":{\"M\":[" +
                 "[0.0,0.0,1.0,0.0]," +
                 "[1.0,0.0,0.0,0.0]," +
-                "[0.0,1.0,0.0,3.0]]}}," +
+                "[0.0,1.0,0.0,3.0]," +
+                "[0.0,0.0,0.0,1.0]" + 
+                "]}}," +
                     "{\"Type\":\"R\"," +
                 "\"Q\":0.0," +
                 "\"B\":{\"M\":[" +
                 "[-1.0,0.0,0.0,0.0]," +
                 "[0.0,0.0,1.0,1.0]," +
-                "[0.0,1.0,0.0,0.0]]}}" +
-                "]}";
+                "[0.0,1.0,0.0,0.0]," +
+                "[0.0,0.0,0.0,1.0]" + 
+                "]}}]}";
             
             #endregion
 
             #region Actual Arm
 
             var model = new Arm(
-                new BlockMatrix(new [,] { 
+                new Matrix(new [,] { 
                     {-1.0, 0.0, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 1.0 },
-                    { 0.0, 1.0, 0.0, 0.0}
+                    { 0.0, 1.0, 0.0, 0.0},
+                    {0.0, 0.0, 0.0, 1.0 }
                 }),
                 new []
                 {
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             {-1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 2.0 }
+                            { 0.0, 1.0, 0.0, 2.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                             })
                     },
                     new Unit
                     {
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 2.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 0.0 }
+                            { 0.0, 1.0, 0.0, 0.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     },
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 1.0, 0.0, 0.0 },
-                            { 0.0, 0.0, 1.0, 1.0 }
+                            { 0.0, 0.0, 1.0, 1.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
 
                     },
                     new Unit{
                         Type = 'P',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
                             { 1.0, 0.0, 0.0, 0.0 },
-                            { 0.0, 1.0, 0.0, 3.0 }
+                            { 0.0, 1.0, 0.0, 3.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     },
                     new Unit{
                         Type = 'R',
                         Q = 0,
-                        B = new BlockMatrix(new[,]
+                        B = new Matrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
                             { 0.0, 0.0, 1.0, 1.0 },
-                            { 0.0, 1.0, 0.0, 0.0 }
+                            { 0.0, 1.0, 0.0, 0.0 },
+                            {0.0, 0.0, 0.0, 1.0 }
                         })
                     }
                 });
@@ -380,7 +402,7 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Calculating expected result
             var expT = arm.RootB 
@@ -392,8 +414,8 @@ namespace ArmManipulatorApp_Tests
             expT.Print();
 
             // Getting actual result
-            arm.CalcT();
-            var actualT = (BlockMatrix)arm.T[arm.N];
+            arm.Calc_T();
+            var actualT = (Matrix)arm.T[arm.N];
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
@@ -405,7 +427,7 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Calculating expected result
             var expT = arm.RootB
@@ -416,8 +438,8 @@ namespace ArmManipulatorApp_Tests
             expT.Print();
 
             // Getting actual result
-            arm.CalcT();
-            var actualT = (BlockMatrix)arm.T[arm.N - 1];
+            arm.Calc_T();
+            var actualT = (Matrix)arm.T[arm.N - 1];
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
@@ -429,7 +451,7 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Calculating expected result
             var expT = arm.RootB
@@ -439,8 +461,8 @@ namespace ArmManipulatorApp_Tests
             expT.Print();
 
             // Getting actual result
-            arm.CalcT();
-            var actualT = (BlockMatrix)arm.T[arm.N - 2];
+            arm.Calc_T();
+            var actualT = (Matrix)arm.T[arm.N - 2];
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
@@ -452,7 +474,7 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Calculating expected result
             var expT = arm.RootB
@@ -461,8 +483,8 @@ namespace ArmManipulatorApp_Tests
             expT.Print();
 
             // Getting actual result
-            arm.CalcT();
-            var actualT = (BlockMatrix)arm.T[arm.N - 3];
+            arm.Calc_T();
+            var actualT = (Matrix)arm.T[arm.N - 3];
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
@@ -474,15 +496,15 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Calculating expected result
             var expT = arm.RootB * arm.S[0] * arm.Units[0].B;
             expT.Print();
 
             // Getting actual result
-            arm.CalcT();
-            var actualT = (BlockMatrix)arm.T[arm.N - 4];
+            arm.Calc_T();
+            var actualT = (Matrix)arm.T[arm.N - 4];
             actualT.Print();
 
             Assert.IsTrue(expT == actualT);
@@ -491,6 +513,7 @@ namespace ArmManipulatorApp_Tests
         [TestCase(new []{0.0, 0.0, 0.0, 0.0}, ExpectedResult = new []{40.0, 0.0, 20.0})]
         [TestCase(new []{0.0, 1.57079632679, 0.0, 0.0}, ExpectedResult = new []{ 1.9586355432497926E-10d, 0.0, 60.0})]
         [TestCase(new []{1.5, 1.5, 1.0, -1.4}, ExpectedResult = new []{ -0.53171233269779827, -7.4978988944619385, 53.314837876865518})]
+        [TestCase(new []{1.5, 1.5, 3.0, 2.0}, ExpectedResult = new []{ 0.7859011526976365, 11.082322191155701, 48.123079171891767})]
         [TestCase(new []{3.14, -3.14, 3.0, 1.5}, ExpectedResult = new[] { 33.723173129315335, -0.053709378155719502, 29.921253070736867})]
         public double[] ArmCalculationGrabCoordinatesByF(double[] q)
         {
@@ -499,8 +522,8 @@ namespace ArmManipulatorApp_Tests
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
 
             arm.SetQ(q);
-            arm.CalcSByUnitsType();
-            arm.CalcT();
+            arm.Build_S_ForAllUnits_ByUnitsType();
+            arm.Calc_T();
             var expectedF = arm.F(arm.N);
 
             return new[] { expectedF.X, expectedF.Y, expectedF.Z };
@@ -515,29 +538,29 @@ namespace ArmManipulatorApp_Tests
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
             var len = arm.GetLenAsArray();
 
-            var expected_dFxdq1 = -Math.Sin(q[0]) * ((Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) * len[3] + Math.Cos(q[1]) * (len[1] + q[2] + len[2]));
-            var expected_dFxdq2 = -Math.Sin(q[1]) * (Math.Cos(q[0]) * Math.Cos(q[3]) * len[3] + Math.Cos(q[0]) * (len[1] + q[2] + len[2]))+ len[3] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
+            var expected_dFxdq1 = -Math.Sin(q[0]) * ((Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) * len[4] + Math.Cos(q[1]) * (len[2] + q[2] + len[3]));
+            var expected_dFxdq2 = -Math.Sin(q[1]) * (Math.Cos(q[0]) * Math.Cos(q[3]) * len[4] + Math.Cos(q[0]) * (len[2] + q[2] + len[3]))+ len[4] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
             var expected_dFxdq3 = Math.Cos(q[0]) * Math.Cos(q[1]);
-            var expected_dFxdq4 = - len[3] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[3] * Math.Cos(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+            var expected_dFxdq4 = -len[4] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[4] * Math.Cos(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
 
-            var expected_dFydq1 = Math.Cos(q[0]) * (len[3] * (Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) + Math.Cos(q[1]) * (len[2] + q[2] + len[1]));
-            var expected_dFydq2 = -Math.Sin(q[1]) * (Math.Sin(q[0]) * Math.Cos(q[3]) * len[3] + Math.Sin(q[0] * (len[2] + q[2] + len[1])) + len[3] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]));
+            var expected_dFydq1 = Math.Cos(q[0]) * (len[4] * (Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) + Math.Cos(q[1]) * (len[2] + q[2] + len[3]));
+            var expected_dFydq2 = -Math.Sin(q[1]) * (Math.Sin(q[0]) * Math.Cos(q[3]) * len[4] + Math.Sin(q[0]) * (len[2] + q[2] + len[3])) + len[4] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
             var expected_dFydq3 = Math.Sin(q[0]) * Math.Cos(q[1]);
-            var expected_dFydq4 = -len[3] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[3] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+            var expected_dFydq4 = -len[4] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[4] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
 
             var expected_dFzdq1 = 0;
-            var expected_dFzdq2 = Math.Cos(q[1]) * (len[3] * Math.Cos(q[3]) + len[2] + len[1] + q[2]) + Math.Sin(q[1]) * Math.Sin(q[3]) * len[3];
+            var expected_dFzdq2 = Math.Cos(q[1]) * (len[4] * Math.Cos(q[3]) + len[2] + len[3] + q[2]) + Math.Sin(q[1]) * Math.Sin(q[3]) * len[4];
             var expected_dFzdq3 = Math.Sin(q[1]);
-            var expected_dFzdq4 = -len[3] * (Math.Sin(q[1]) * Math.Sin(q[3]) + Math.Cos(q[1]) * Math.Cos(q[3]));
+            var expected_dFzdq4 = -len[4] * (Math.Sin(q[1]) * Math.Sin(q[3]) + Math.Cos(q[1]) * Math.Cos(q[3]));
 
             arm.SetQ(q);
-            arm.CalcSByUnitsType();
-            arm.CalcdS();
-            arm.CalcdT();
-            var dFdq1 = arm.GetdF(0);
-            var dFdq2 = arm.GetdF(1);
-            var dFdq3 = arm.GetdF(2);
-            var dFdq4 = arm.GetdF(3);
+            arm.Build_S_ForAllUnits_ByUnitsType();
+            arm.Build_dS();
+            arm.Calc_dT();
+            var dFdq1 = arm.Get_dF(0);
+            var dFdq2 = arm.Get_dF(1);
+            var dFdq3 = arm.Get_dF(2);
+            var dFdq4 = arm.Get_dF(3);
 
             Assert.IsTrue(Math.Abs(expected_dFxdq1 - dFdq1.X) < permissibleError, $"Big error by dFxdq1 which actual {dFdq1.X} but expected is {expected_dFxdq1}");
             Assert.IsTrue(Math.Abs(expected_dFxdq2 - dFdq2.X) < permissibleError, $"Big error by dFxdq2 which actual {dFdq2.X} but expected is {expected_dFxdq2}");
@@ -556,32 +579,34 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
-        public void CalculationDSMatricesIsCorrect()
+        public void Calculation_dS_MatricesIsCorrect()
         {
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
+            arm.Build_S_ForAllUnits_ByUnitsType();
 
             // Expected dS matrices:
-            var dS1 = new Matrix(3, 4) 
+            var dS1 = new Matrix(4, 4) 
                           {
                               [0, 0] = 0, [0, 1] = -1, [0, 2] = 0, [0, 3] = 0,
                               [1, 0] = 1, [1, 1] = 0, [1, 2] = 0, [1, 3] = 0,
-                              [2, 0] = 0, [2, 1] = 0, [2, 2] = 0, [2, 3] = 0
+                              [2, 0] = 0, [2, 1] = 0, [2, 2] = 0, [2, 3] = 0,
+                              [3, 0] = 0, [3, 1] = 0, [3, 2] = 0, [3, 3] = 0
                           };
             var dS2 = dS1;
             var dS3 = dS1;
-            var dS4 = new Matrix(3, 4)
+            var dS4 = new Matrix(4, 4)
                           {
                               [0, 0] = 0, [0, 1] = 0, [0, 2] = 0, [0, 3] = 0,
                               [1, 0] = 0, [1, 1] = 0, [1, 2] = 0, [1, 3] = 0,
-                              [2, 0] = 0, [2, 1] = 0, [2, 2] = 0, [2, 3] = 1
+                              [2, 0] = 0, [2, 1] = 0, [2, 2] = 0, [2, 3] = 1,
+                              [3, 0] = 0, [3, 1] = 0, [3, 2] = 0, [3, 3] = 0
                           };
             var dS5 = dS1;
 
             // Actual dS matrices:
-            arm.CalcdS();
+            arm.Build_dS();
             var actual_dS1 = arm.dS[0];
             var actual_dS2 = arm.dS[1];
             var actual_dS3 = arm.dS[2];
@@ -601,8 +626,8 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
-            arm.CalcdS();
+            arm.Build_S_ForAllUnits_ByUnitsType();
+            arm.Build_dS();
             
             var exp_dT1 = arm.RootB
                           * arm.dS[0] * arm.Units[0].B
@@ -638,12 +663,12 @@ namespace ArmManipulatorApp_Tests
                           * arm.S[3] * arm.Units[3].B
                           * arm.dS[4] * arm.Units[4].B;
 
-            arm.CalcdT();
-            var actual_dT1 = (BlockMatrix)arm.dT[0];
-            var actual_dT2 = (BlockMatrix)arm.dT[1];
-            var actual_dT3 = (BlockMatrix)arm.dT[2];
-            var actual_dT4 = (BlockMatrix)arm.dT[3];
-            var actual_dT5 = (BlockMatrix)arm.dT[4];
+            arm.Calc_dT();
+            var actual_dT1 = (Matrix)arm.dT[0];
+            var actual_dT2 = (Matrix)arm.dT[1];
+            var actual_dT3 = (Matrix)arm.dT[2];
+            var actual_dT4 = (Matrix)arm.dT[3];
+            var actual_dT5 = (Matrix)arm.dT[4];
 
             Assert.IsTrue(exp_dT1 == actual_dT1);
             Assert.IsTrue(exp_dT2 == actual_dT2);
@@ -658,15 +683,15 @@ namespace ArmManipulatorApp_Tests
             var fileName = "3RPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
-            arm.CalcdS();
-            arm.CalcdT();
+            arm.Build_S_ForAllUnits_ByUnitsType();
+            arm.Build_dS();
+            arm.Calc_dT();
 
-            var dT1 = (BlockMatrix)arm.dT[0];
-            var dT2 = (BlockMatrix)arm.dT[1];
-            var dT3 = (BlockMatrix)arm.dT[2];
-            var dT4 = (BlockMatrix)arm.dT[3];
-            var dT5 = (BlockMatrix)arm.dT[4];
+            var dT1 = (Matrix)arm.dT[0];
+            var dT2 = (Matrix)arm.dT[1];
+            var dT3 = (Matrix)arm.dT[2];
+            var dT4 = (Matrix)arm.dT[3];
+            var dT5 = (Matrix)arm.dT[4];
             // D is Matrix of gradients Fx, Fy and Fz
             // ( Fxq1 Fxq2 ... Fxqn )
             // ( Fyq1 Fyq2 ... Fyqn )
@@ -678,28 +703,64 @@ namespace ArmManipulatorApp_Tests
                                [2, 0] = dT1[2, 3], [2, 1] = dT2[2, 3], [2, 2] = dT3[2, 3], [2, 3] = dT4[2, 3], [2, 4] = dT5[2, 3],
                            };
 
-            arm.CalcD();
+            arm.Build_D();
             var actualD = arm.D;
 
             Assert.IsTrue(expD == actualD);
         }
 
-        [Test]
-        public void CalculationCMatrixIsCorrect()
+        [TestCase(new[] { 0.0, 0.0, 0.0, 0.0 })]
+        [TestCase(new[] { 0.0, 1.57079632679, 0.0, 0.0 })]
+        [TestCase(new[] { 1.5, 1.5, 1.0, -1.4 })]
+        [TestCase(new[] { 1.5, 1.5, 3.0, 2.0 })]
+        [TestCase(new[] { 3.14, -3.14, 3.0, 1.5 })]
+        public void CalculationCMatrixIsCorrect(double[] q)
         {
-            var fileName = "Only_for_test_3RPR.json";
+            var fileName = "RRPR.json";
             var jsonFilePath = Path.Combine(ManipulatorConfigDirectory, fileName);
             var arm = JsonConvert.DeserializeObject<Arm>(File.ReadAllText(jsonFilePath));
-            arm.CalcSByUnitsType();
-            arm.CalcdS();
-            arm.CalcdT();
-            arm.CalcD();
+            var len = arm.GetLenAsArray();
+
+            var expected_dFxdq1 = -Math.Sin(q[0]) * ((Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) * len[4] + Math.Cos(q[1]) * (len[2] + q[2] + len[3]));
+            var expected_dFxdq2 = -Math.Sin(q[1]) * (Math.Cos(q[0]) * Math.Cos(q[3]) * len[4] + Math.Cos(q[0]) * (len[2] + q[2] + len[3])) + len[4] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
+            var expected_dFxdq3 = Math.Cos(q[0]) * Math.Cos(q[1]);
+            var expected_dFxdq4 = -len[4] * Math.Cos(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[4] * Math.Cos(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+
+            var expected_dFydq1 = Math.Cos(q[0]) * (len[4] * (Math.Cos(q[1]) * Math.Cos(q[3]) + Math.Sin(q[1]) * Math.Sin(q[3])) + Math.Cos(q[1]) * (len[2] + q[2] + len[3]));
+            var expected_dFydq2 = -Math.Sin(q[1]) * (Math.Sin(q[0]) * Math.Cos(q[3]) * len[4] + Math.Sin(q[0]) * (len[2] + q[2] + len[3])) + len[4] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]);
+            var expected_dFydq3 = Math.Sin(q[0]) * Math.Cos(q[1]);
+            var expected_dFydq4 = -len[4] * Math.Sin(q[0]) * Math.Cos(q[1]) * Math.Sin(q[3]) + len[4] * Math.Sin(q[0]) * Math.Sin(q[1]) * Math.Cos(q[3]);
+
+            var expected_dFzdq1 = 0;
+            var expected_dFzdq2 = Math.Cos(q[1]) * (len[4] * Math.Cos(q[3]) + len[2] + len[3] + q[2]) + Math.Sin(q[1]) * Math.Sin(q[3]) * len[4];
+            var expected_dFzdq3 = Math.Sin(q[1]);
+            var expected_dFzdq4 = -len[4] * (Math.Sin(q[1]) * Math.Sin(q[3]) + Math.Cos(q[1]) * Math.Cos(q[3]));
+
+            arm.Build_S_ForAllUnits_ByUnitsType();
+            arm.Build_dS();
+            arm.Calc_dT();
+            arm.Build_D();
 
             var expC = new Matrix(3, 3)
                        {
-                           [0, 0] = 5000, [0, 1] = -600, [0, 2] = -1000,
-                           [1, 0] = -600, [1, 1] = 4961, [1, 2] = 3330,
-                           [2, 0] = -1000, [2, 1] = 3330, [2, 2] = 12800
+                           // C xx
+                           [0, 0] = expected_dFxdq1 * expected_dFxdq1 + expected_dFxdq2 * expected_dFxdq2 + expected_dFxdq3 * expected_dFxdq3 + expected_dFxdq4 * expected_dFxdq4,
+                           // C xy
+                           [0, 1] = expected_dFxdq1 * expected_dFydq1 + expected_dFxdq2 * expected_dFydq2 + expected_dFxdq3 * expected_dFydq3 + expected_dFxdq4 * expected_dFydq4,
+                           // C xz
+                           [0, 2] =  expected_dFxdq1 * expected_dFzdq1 + expected_dFxdq2 * expected_dFzdq2 + expected_dFxdq3 * expected_dFzdq3 + expected_dFxdq4 * expected_dFzdq4,
+                           // C yy
+                           [1, 0] =  expected_dFydq1 * expected_dFydq1 + expected_dFydq2 * expected_dFydq2 + expected_dFydq3 * expected_dFydq3 + expected_dFydq4 * expected_dFydq4,
+                           // C yz
+                           [1, 1] =  expected_dFydq1 * expected_dFzdq1 + expected_dFydq2 * expected_dFzdq2 + expected_dFydq3 * expected_dFzdq3 + expected_dFydq4 * expected_dFzdq4,
+                           // C zz
+                           [1, 2] =  expected_dFzdq1 * expected_dFzdq1 + expected_dFzdq2 * expected_dFzdq2 + expected_dFzdq3 * expected_dFzdq3 + expected_dFzdq4 * expected_dFzdq4,
+                           // C yx
+                           [2, 0] =  expected_dFxdq1 * expected_dFydq1 + expected_dFxdq2 * expected_dFydq2 + expected_dFxdq3 * expected_dFydq3 + expected_dFxdq4 * expected_dFydq4,
+                           // C zx
+                           [2, 1] = expected_dFxdq1 * expected_dFzdq1 + expected_dFxdq2 * expected_dFzdq2 + expected_dFxdq3 * expected_dFzdq3 + expected_dFxdq4 * expected_dFzdq4,
+                           // C zy
+                           [2, 2] =  expected_dFzdq1* expected_dFzdq1 + expected_dFzdq2* expected_dFzdq2 + expected_dFzdq3* expected_dFzdq3 + expected_dFzdq4* expected_dFzdq4
                        };
 
             arm.CalcC();

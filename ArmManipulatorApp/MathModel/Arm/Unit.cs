@@ -20,13 +20,13 @@
         /// <summary>
         /// Matrix orientation and position of unit
         /// </summary>
-        public BlockMatrix B;
+        public Matrix B;
 
         public Unit()
         {
             this.Type = 'T';
             this.Q = 0;
-            this.B = new BlockMatrix();
+            this.B = new Matrix(4, 4);
         }
 
         public static bool operator ==(Unit a, Unit b)

@@ -86,7 +86,11 @@
             // Grip unit:
             jointBrush = Brushes.Blue;
             this.armModelVisual3D.Add(
-                this.CreateArmJointModelVisual3D(VRConvert.ConvertFromRealToVirtual(sup, this.coeff), jointRadius, jointBrush, this.arm.N));
+                this.CreateArmJointModelVisual3D(
+                    VRConvert.ConvertFromRealToVirtual(sup, this.coeff),
+                    jointRadius,
+                    jointBrush,
+                    this.arm.N));
         }
 
         private ModelVisual3D CreateArmBoneModelVisual3D(Point3D start, Point3D end, double radius, int addTransforms = 0)

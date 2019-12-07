@@ -43,6 +43,20 @@ namespace ArmManipulatorArm.MathModel.Matrix
                 M[i, j] = A.M[i, j];
         }
 
+        public Matrix(double[,] mDoubles)
+        {
+            this.Rows = 4;
+            this.Columns = 4;
+            M = new double[4, 4];
+            for (var i = 0; i < 4; i++)
+            {
+                for (var j = 0; j < 4; j++)
+                {
+                    M[i, j] = mDoubles[i, j];
+                }
+            }
+        }
+
         public double this[int i, int j]
         {
             get => M[i, j];
@@ -106,6 +120,8 @@ namespace ArmManipulatorArm.MathModel.Matrix
             m[0, 0] * (m[1, 1] * m[2, 2] - m[2, 1] * m[1, 2]) 
             - m[0, 1] * (m[1, 0] * m[2, 2] - m[1, 2] * m[2, 0])
             + m[0, 2] * (m[1, 0] * m[2, 1] - m[2, 0] * m[1, 1]);
+
+        public Vector3D ColumnAsVector3D(int i) => new Vector3D(M[0, i], M[1, i], M[2, i]);
 
         public Matrix Invert3D(double det)
         {

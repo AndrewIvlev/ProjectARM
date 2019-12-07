@@ -127,8 +127,8 @@
                                                this.armModel3D = new ManipulatorArmModel3D(
                                                    this.fileService.OpenArm(this.dialogService.FilePath),
                                                    this.coeff);
-                                               this.armModel3D.arm.CalcSByUnitsType();
-                                               this.armModel3D.arm.CalcT();
+                                               this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                                               this.armModel3D.arm.Calc_T();
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
 
                                                var thickness = (maxArmLength / this.armModel3D.arm.N) * 0.13;
@@ -514,26 +514,26 @@
             deltaList = new List<double>();
             condList = new List<double>();
 
-            this.armModel3D.arm.CalcSByUnitsType();
-            this.armModel3D.arm.CalcT();
+            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+            this.armModel3D.arm.Calc_T();
             resIterCount = 0;
             for (var i = 1; i < splitPointsCount; i++)
             {
                 var point = this.track3D.track.SplitPoints[i];
 
-                this.armModel3D.arm.CalcdS();
-                this.armModel3D.arm.CalcdT();
-                this.armModel3D.arm.CalcD();
+                this.armModel3D.arm.Build_dS();
+                this.armModel3D.arm.Calc_dT();
+                this.armModel3D.arm.Build_D();
                 this.armModel3D.arm.CalcC();
-                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
+                var dQ = this.armModel3D.arm.RRPR_LagrangeMethodToThePoint(
                     point,
                     out var cond,
                     withCond);
                 this.armModel3D.arm.OffsetQ(dQ);
                 //this.dQList.Add(dQ);
 
-                this.armModel3D.arm.CalcSByUnitsType();
-                this.armModel3D.arm.CalcT();
+                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                this.armModel3D.arm.Calc_T();
 
                 var delta = this.armModel3D.arm.GetPointError(point);
                 deltaList.Add(delta);
@@ -574,8 +574,8 @@
             {
                 var dQ = this.dQList[i];
                 this.armModel3D.arm.OffsetQ(dQ);
-                this.armModel3D.arm.CalcSByUnitsType();
-                this.armModel3D.arm.CalcT();
+                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                this.armModel3D.arm.Calc_T();
                 this.armModel3D.BeginAnimation(dQ);
 
                 Thread.Sleep(600); //TODO: add value from slider speed
@@ -753,8 +753,8 @@
                             try
                             {
                                 this.armModel3D.arm.SetQ(JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
-                                this.armModel3D.arm.CalcSByUnitsType();
-                                this.armModel3D.arm.CalcT();
+                                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                                this.armModel3D.arm.Calc_T();
 
                                 this.armModel3D.BeginAnimation(
                                     JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));

@@ -96,7 +96,6 @@
     <Compile Include="MathModel\Delta.cs" />
     <Compile Include="MathModel\Arm\Arm.cs" />
     <Compile Include="MathModel\MathFunctions.cs" />
-    <Compile Include="MathModel\Matrix\BlockMatrix.cs" />
     <Compile Include="MathModel\Matrix\LinearSystemSolver.cs" />
     <Compile Include="MathModel\Matrix\Matrix.cs" />
     <Compile Include="MathModel\Arm\Unit.cs" />
