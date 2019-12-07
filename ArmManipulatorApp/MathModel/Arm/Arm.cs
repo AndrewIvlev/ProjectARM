@@ -461,7 +461,7 @@
         }
 
         // Вычисляем матрицу коэффициентов для метода Лагранжа
-        public void CalcC()
+        public void Calc_C()
         {
             for (var i = 0; i < this.N; i++)
             {

@@ -83,6 +83,25 @@ namespace ArmManipulatorArm.MathModel.Matrix
             return true;
         }
 
+        public static bool IsEqualWithPermissibleError(Matrix a, Matrix b, double permissibleError)
+        {
+            if (a.Rows != b.Rows || a.Columns != b.Columns)
+                return false;
+
+            for (var i = 0; i < a.Rows; i++)
+            {
+                for (var j = 0; j < a.Columns; j++)
+                {
+                    if (Math.Abs(a[i, j] - b[i, j]) > permissibleError)
+                    {
+                        Console.WriteLine($"Element left matrix [{i},{j}] = {a[i, j]} not near with element of right matrix = {b[i, j]} with permissible error {permissibleError}");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
         public static bool operator !=(Matrix a, Matrix b)
         {
             if (a.Rows != b.Rows || a.Columns != b.Columns)

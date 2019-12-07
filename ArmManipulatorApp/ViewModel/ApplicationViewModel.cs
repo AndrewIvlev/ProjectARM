@@ -524,8 +524,8 @@
                 this.armModel3D.arm.Build_dS();
                 this.armModel3D.arm.Calc_dT();
                 this.armModel3D.arm.Build_D();
-                this.armModel3D.arm.CalcC();
-                var dQ = this.armModel3D.arm.RRPR_LagrangeMethodToThePoint(
+                this.armModel3D.arm.Calc_C();
+                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
                     point,
                     out var cond,
                     withCond);
