@@ -168,16 +168,33 @@
             }
         }
 
-        public double[] LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond)
+        /// <summary>
+        /// Решение задачи по нахождению минимума вектора обобщённых координат
+        /// </summary>
+        /// <param name="p">Желаемое положение схвата</param>
+        /// <param name="d">Желаемое смещение</param>
+        /// <param name="b">Реальное смещение</param>
+        /// <param name="cond">Число обусловленности</param>
+        /// <param name="withCond"></param>
+        /// <returns></returns>
+        public void LagrangeMethodToThePoint(Point3D p, out double d, out double b, out double cond, bool withCond)
         {
             var dQ = new double[this.N];
 
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
             var f = this.F(this.N);
-            var d = new Point3D(
+            var D = new Vector3D(
                 p.X - f.X,
                 p.Y - f.Y,
                 p.Z - f.Z);
 
+            d = MathFunctions.NormaVector(D);
+
+            this.Build_dS();
+            this.Calc_dT();
+            this.Build_D();
+            this.Calc_C();
             var C = this.C;
             var detC = Matrix.Det3D(C);
 
@@ -194,11 +211,11 @@
                 }
             }
 
-            var Cx = Matrix.ConcatAsColumn(C, d, 0);
+            var Cx = Matrix.ConcatAsColumn(C, D, 0);
             var detCx = Matrix.Det3D(Cx);
-            var Cy = Matrix.ConcatAsColumn(C, d, 1);
+            var Cy = Matrix.ConcatAsColumn(C, D, 1);
             var detCy = Matrix.Det3D(Cy);
-            var Cz = Matrix.ConcatAsColumn(C, d, 2);
+            var Cz = Matrix.ConcatAsColumn(C, D, 2);
             var detCz = Matrix.Det3D(Cz);
 
             var μ = new Point3D(
@@ -212,7 +229,16 @@
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / (2 * this.A[i]);
             }
 
-            return dQ;
+            this.OffsetQ(dQ);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var newF = this.F(this.N);
+            var newD = new Vector3D(
+                newF.X - f.X,
+                newF.Y - f.Y,
+                newF.Z - f.Z);
+
+            b = MathFunctions.NormaVector(newD);
         }
 
         #region Temp for RRPR arm
@@ -222,7 +248,7 @@
             var dQ = new double[this.N];
 
             var f = this.F(this.N);
-            var d = new Point3D(
+            var d = new Vector3D(
                 p.X - f.X,
                 p.Y - f.Y,
                 p.Z - f.Z);

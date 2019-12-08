@@ -12,11 +12,13 @@
 
     public partial class MainWindow : Window
     {
-        BackgroundWorker worker;
+        BackgroundWorker splittingTrackWorker;
+        BackgroundWorker planningWorker;
         BackgroundWorker animationWorker;
 
         private int IterationCount;
-        private List<double> DeltaList;
+        private List<double> bList;
+        private List<double> dList;
         private List<double> CondList;
         private double ThresholdForPlanning;
         private bool WithRepeatPlanning;
@@ -33,17 +35,22 @@
                 this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
-                this.PathLength,
-                this.StepInMeterToSplitTextBox,
-                this.NumberOfPointsToSplitTextBox);
+                this.PathLength);
             this.DataContext = this.appViewModel;
 
-            this.worker = new BackgroundWorker();
-            this.worker.WorkerSupportsCancellation = true;
-            this.worker.WorkerReportsProgress = true;
-            this.worker.DoWork += this.worker_DoWork;
-            this.worker.ProgressChanged += this.worker_ProgressChanged;
-            this.worker.RunWorkerCompleted += this.worker_RunWorkerCompleted;
+            this.planningWorker = new BackgroundWorker();
+            this.planningWorker.WorkerSupportsCancellation = true;
+            this.planningWorker.WorkerReportsProgress = true;
+            this.planningWorker.DoWork += this.PlanningWorkerDoWork;
+            this.planningWorker.ProgressChanged += this.PlanningWorkerProgressChanged;
+            this.planningWorker.RunWorkerCompleted += this.PlanningWorkerRunPlanningWorkerCompleted;
+
+            this.splittingTrackWorker = new BackgroundWorker();
+            this.splittingTrackWorker.WorkerSupportsCancellation = true;
+            this.splittingTrackWorker.WorkerReportsProgress = true;
+            this.splittingTrackWorker.DoWork += this.SplittingTrackWorkerDoWork;
+            this.splittingTrackWorker.ProgressChanged += this.SplittingTrackWorkerProgressChanged;
+            this.splittingTrackWorker.RunWorkerCompleted += this.SplittingTrackWorkerRunSplittingTrackWorkerCompleted;
 
             this.animationWorker = new BackgroundWorker();
             this.animationWorker.WorkerReportsProgress = true;
@@ -56,9 +63,12 @@
             this.ThresholdForPlanning = double.MaxValue;
             
             this.Chart.ChartAreas.Add(new ChartArea("Default"));
-            this.Chart.Series.Add(new Series("DeltaSeries"));
-            this.Chart.Series["DeltaSeries"].ChartArea = "Default";
-            this.Chart.Series["DeltaSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series.Add(new Series("bSeries"));
+            this.Chart.Series["bSeries"].ChartArea = "Default";
+            this.Chart.Series["bSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series.Add(new Series("dSeries"));
+            this.Chart.Series["dSeries"].ChartArea = "Default";
+            this.Chart.Series["dSeries"].ChartType = SeriesChartType.Line;
             this.Chart.Series.Add(new Series("CondSeries"));
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
@@ -66,12 +76,56 @@
             // Add some values for chart display
             int[] axisXData = { 0, 50, 100 };
             double[] axisYData = { 5.3, 1.3, 7.3 };
-            this.Chart.Series["DeltaSeries"].Points.DataBindXY(axisXData, axisYData);
+            this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
         }
+
+        #region Splitting trajectory region
+
+        private void SplittingTrackWorkerDoWork(object sender, DoWorkEventArgs e)
+        {
+            this.appViewModel.SplitTrajectoryCommand(
+                e,
+                sender,
+                this.StepInMeterToSplitTextBox.Text,
+                this.NumberOfPointsToSplitTextBox.Text);
+        }
+
+        private void SplittingTrackWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.PathSplittingProgressBar.Value = e.ProgressPercentage;
+        }
+
+        private void StartSplittingTrack_Click(object sender, RoutedEventArgs e)
+        {
+            this.WithCond = (bool)this.WithConditionNumberRadioButton.IsChecked;
+
+            this.WithRepeatPlanning = (bool)this.WithRepeatPlanningCheckBox.IsChecked;
+            this.ThresholdForPlanning = this.WithRepeatPlanning ? double.Parse(this.ThresholdForRepeatPlanning.Text) : double.MaxValue;
+            this.PathSplittingProgressBar.IsIndeterminate = this.WithRepeatPlanning;
+            this.PathSplittingProgressBar.Maximum = this.appViewModel.track3D.track.SplitPoints.Count;
+            this.PathSplittingProgressBar.Value = 0;
+
+            this.splittingTrackWorker.RunWorkerAsync();
+        }
+
+        private void CancelSplittingTrack_Click(object sender, RoutedEventArgs e)
+        {
+            this.splittingTrackWorker.CancelAsync();
+        }
+
+        private void SplittingTrackWorkerRunSplittingTrackWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.Chart.Series["bSeries"].Points.Clear();
+            this.Chart.Series["bSeries"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+                this.bList);
+        }
+
+        #endregion
 
         #region Arm movement planning region
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void PlanningWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             this.appViewModel.PlanningMovementAlongTrajectory(
                 e,
@@ -80,11 +134,12 @@
                 this.WithRepeatPlanning,
                 this.ThresholdForPlanning,
                 out this.IterationCount,
-                out this.DeltaList,
+                out this.bList,
+                out this.dList,
                 out this.CondList);
         }
 
-        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void PlanningWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             this.PathPlanningProgressBar.Value = e.ProgressPercentage;
         }
@@ -99,25 +154,30 @@
             this.PathPlanningProgressBar.Maximum = this.appViewModel.track3D.track.SplitPoints.Count;
             this.PathPlanningProgressBar.Value = 0;
 
-            this.worker.RunWorkerAsync();
+            this.planningWorker.RunWorkerAsync();
         }
         
         private void CancelPlanningTrack_Click(object sender, RoutedEventArgs e)
         {
-            this.worker.CancelAsync();
+            this.planningWorker.CancelAsync();
         }
 
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Chart.Series["DeltaSeries"].Points.Clear();
-            this.Chart.Series["DeltaSeries"].Points.DataBindXY(
+            this.Chart.Series["bSeries"].Points.Clear();
+            this.Chart.Series["bSeries"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.DeltaList);
+                this.bList);
 
-            this.Chart.Series["CondSeries"].Points.Clear();
-            this.Chart.Series["CondSeries"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.CondList);
+            //this.Chart.Series["dSeries"].Points.Clear();
+            //this.Chart.Series["dSeries"].Points.DataBindXY(
+            //    Enumerable.Range(0, this.IterationCount).ToArray(),
+            //    this.dList);
+
+            //this.Chart.Series["CondSeries"].Points.Clear();
+            //this.Chart.Series["CondSeries"].Points.DataBindXY(
+            //    Enumerable.Range(0, this.IterationCount).ToArray(),
+            //    this.CondList);
         }
 
         #endregion

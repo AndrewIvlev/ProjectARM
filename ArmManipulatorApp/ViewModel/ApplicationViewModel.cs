@@ -44,8 +44,6 @@
         private TextBox armTextBox;
         private TextBox VectorQTextBox;
         private Label pathLengthLabel;
-        private TextBox stepInCmToSplitTextBox;
-        private TextBox numberOfPointsToSplitTextBox;
         
         // Buffer of all calculated q's for animation
         private List<double[]> dQList;
@@ -63,9 +61,7 @@
             Viewport3D viewport,
             TextBox armTextBox,
             TextBox vectorQTextBox,
-            Label pathLength,
-            TextBox stepInCmToSplitTextBox,
-            TextBox numberOfPointsToSplitTextBox)
+            Label pathLength)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
@@ -74,8 +70,6 @@
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
             this.pathLengthLabel = pathLength;
-            this.stepInCmToSplitTextBox = stepInCmToSplitTextBox;
-            this.numberOfPointsToSplitTextBox = numberOfPointsToSplitTextBox;
 
             this.dQList = new List<double[]>();
             this.coeff = 10;
@@ -447,52 +441,40 @@
             }
         }
 
-        public ICommand SplitTrajectoryCommand
+        public void SplitTrajectoryCommand(
+            DoWorkEventArgs e,
+            object sender,
+            string stepInMToSplitStr,
+            string numberOfPointsToSplit)
         {
-            get
+            if (stepInMToSplitStr != string.Empty && numberOfPointsToSplit != string.Empty)
             {
-                return new RelayCommand(
-                    obj =>
-                        {
-                            try
-                            {
-                                var stepInCmToSplitStr = this.stepInCmToSplitTextBox.Text;
-                                var numberOfPointsToSplitStr = this.numberOfPointsToSplitTextBox.Text;
-                                if (stepInCmToSplitStr != string.Empty && numberOfPointsToSplitStr != string.Empty)
-                                {
-                                    MessageBox.Show("Please choose only one option.");
-                                }
-                                else if (stepInCmToSplitStr != string.Empty)
-                                {
-                                    if (double.TryParse(stepInCmToSplitStr, out var step))
-                                    {
-                                        this.track3D.RemoveSplitTrackFromViewport();
-                                        this.track3D.SplitPath(step);
-                                        //this.track3D.AddSplitTrackToViewport();
-                                        this.dialogService.ShowMessage("Путь успешно разделён.");
-                                    }
-                                    else
-                                    {
-                                        MessageBox.Show("Invalid input of split step!");
-                                    }
-                                }
-                                else if (int.TryParse(numberOfPointsToSplitStr, out var numberOfSplitPoints))
-                                {
-                                    this.track3D.RemoveSplitTrackFromViewport();
-                                    this.track3D.SplitPath(numberOfSplitPoints);
-                                    //this.track3D.AddSplitTrackToViewport();
-                                    this.dialogService.ShowMessage("Путь успешно разделён.");
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Invalid input of split step!");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                this.dialogService.ShowMessage(ex.Message);
-                            }
-                        });
+                MessageBox.Show("Please choose only one option.");
+            }
+            else if (stepInMToSplitStr != string.Empty)
+            {
+                if (double.TryParse(stepInMToSplitStr, out var step))
+                {
+                    this.track3D.RemoveSplitTrackFromViewport();
+                    this.track3D.SplitPath(step);
+                    //this.track3D.AddSplitTrackToViewport();
+                    this.dialogService.ShowMessage("Путь успешно разделён.");
+                }
+                else
+                {
+                    MessageBox.Show("Invalid input of split step!");
+                }
+            }
+            else if (int.TryParse(numberOfPointsToSplit, out var numberOfSplitPoints))
+            {
+                this.track3D.RemoveSplitTrackFromViewport();
+                this.track3D.SplitPath(numberOfSplitPoints);
+                //this.track3D.AddSplitTrackToViewport();
+                this.dialogService.ShowMessage("Путь успешно разделён.");
+            }
+            else
+            {
+                MessageBox.Show("Invalid input of split step!");
             }
         }
 
@@ -507,42 +489,36 @@
             bool withRepeatPlan,
             double threshold,
             out int resIterCount,
-            out List<double> deltaList,
+            out List<double> bList,
+            out List<double> dList,
             out List<double> condList)
         {
             var splitPointsCount = this.track3D.track.SplitPoints.Count;
-            deltaList = new List<double>();
+            bList = new List<double>();
+            dList = new List<double>();
             condList = new List<double>();
 
-            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
-            this.armModel3D.arm.Calc_T();
             resIterCount = 0;
             for (var i = 1; i < splitPointsCount; i++)
             {
                 var point = this.track3D.track.SplitPoints[i];
 
-                this.armModel3D.arm.Build_dS();
-                this.armModel3D.arm.Calc_dT();
-                this.armModel3D.arm.Build_D();
-                this.armModel3D.arm.Calc_C();
-                var dQ = this.armModel3D.arm.LagrangeMethodToThePoint(
+                this.armModel3D.arm.LagrangeMethodToThePoint(
                     point,
+                    out var d,
+                    out var b,
                     out var cond,
                     withCond);
-                this.armModel3D.arm.OffsetQ(dQ);
                 //this.dQList.Add(dQ);
 
-                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
-                this.armModel3D.arm.Calc_T();
-
-                var delta = this.armModel3D.arm.GetPointError(point);
-                deltaList.Add(delta);
+                bList.Add(b);
+                dList.Add(d);
                 condList.Add(cond);
                 
                 ++resIterCount;
                 if (withRepeatPlan)
                 {
-                    if (delta > threshold)
+                    if (b > threshold)
                     {
                         i--;
                     }

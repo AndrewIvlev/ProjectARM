@@ -7,10 +7,6 @@ using NUnit.Framework;
 
 namespace ArmManipulatorApp_Tests
 {
-    using System.Windows.Media.Media3D;
-
-    using Newtonsoft.Json.Linq;
-
     [TestFixture]
     public class AllUnitTests
     {

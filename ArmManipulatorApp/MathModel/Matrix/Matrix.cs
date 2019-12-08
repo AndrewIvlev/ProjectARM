@@ -283,7 +283,7 @@ namespace ArmManipulatorArm.MathModel.Matrix
         /// <param name="a">Matrix</param>
         /// <param name="v">Column</param>
         /// <param name="i">Index</param>
-        public static Matrix ConcatAsColumn(Matrix a, Point3D v, int i)
+        public static Matrix ConcatAsColumn(Matrix a, Vector3D v, int i)
         {
             if (a.Rows != 3)
                 throw new ArgumentOutOfRangeException();

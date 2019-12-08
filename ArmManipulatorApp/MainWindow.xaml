@@ -99,7 +99,10 @@
                                 <Label Content="введите шаг разбиения в метрах." />
                                 <TextBox x:Name="StepInMeterToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
-                            <Button Content="Разделить траекторию" Command="{Binding SplitTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Разделить траекторию" Click="StartSplittingTrack_Click" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Отмена" Width="88" Click="CancelSplittingTrack_Click" Style="{StaticResource ButtonStyle}"/>
+                            <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Прогресс разбиения траектории</Label>
+                            <ProgressBar x:Name="PathSplittingProgressBar" Height="18" Margin="10, 5"/>
                             <ListBox>
                                 <!-- Список точек пути, с возможностью редактирования их координат/-->
                                 <!-- Выводить реальные значения, при изменении с помощью coeff переводить в виртуальные координаты/-->
