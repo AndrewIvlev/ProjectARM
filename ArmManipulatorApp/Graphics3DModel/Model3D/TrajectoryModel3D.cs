@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
     using System.Windows.Controls;
@@ -158,24 +159,24 @@
             return trajectoryLineModelVisual3D;
         }
         
-        public void SplitPath(double step)
+        public void SplitPath(DoWorkEventArgs e, object sender, double step)
         {
-            this.track.SplitTrack(step);
+            this.track.SplitTrack(e, sender, step);
 
-            foreach (var splitPoint in this.track.SplitPoints)
-            {
-                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
-            }
+            // foreach (var splitPoint in this.track.SplitPoints)
+            // {
+            //     this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
+            // }
         }
         
-        public void SplitPath(int numOfSplitPoints)
+        public void SplitPath(DoWorkEventArgs e, object sender, int numOfSplitPoints)
         {
-            this.track.SplitTrack(numOfSplitPoints);
+            this.track.SplitTrack(e, sender, numOfSplitPoints);
 
-            foreach (var splitPoint in this.track.SplitPoints)
-            {
-                this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
-            }
+            // foreach (var splitPoint in this.track.SplitPoints)
+            // {
+            //     this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
+            // }
         }
 
         /// <summary>

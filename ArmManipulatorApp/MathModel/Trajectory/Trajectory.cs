@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Windows;
     using System.Windows.Media.Media3D;
@@ -111,7 +112,7 @@
 
         #region Split Trajectory
 
-        public void SplitTrack(double step)
+        public void SplitTrack(DoWorkEventArgs e, object sender, double step)
         {
             this.SplitPoints.Clear();
             for (var i = 1; i < this.AnchorPoints.Count; i++)
@@ -134,11 +135,19 @@
             }
 
             this.SplitPoints.Add(this.AnchorPoints[this.AnchorPoints.Count - 1]);
+            ((BackgroundWorker)sender).ReportProgress(1);
         }
 
-        public void SplitTrack(int numSplitPoint)
+        public void SplitTrack(DoWorkEventArgs e, object sender, int numSplitPoint)
         {
             throw new NotImplementedException();
+            //((BackgroundWorker)sender).ReportProgress(0);
+
+            //if (((BackgroundWorker)sender).CancellationPending == true)
+            //{
+            //    e.Cancel = true;
+            //    return;
+            //}
         }
 
         // TODO: remove it 2D realization

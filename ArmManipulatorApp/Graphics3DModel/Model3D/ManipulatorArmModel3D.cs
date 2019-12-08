@@ -32,12 +32,9 @@
             this.armModelVisual3D = new List<ModelVisual3D>();
         }
 
-        public void ClearModelVisual3DCollection(Viewport3D viewport)
+        public void ClearModelVisual3DCollection()
         {
-            foreach (var mv in this.armModelVisual3D)
-            {
-                viewport.Children.Remove(mv);
-            }
+            this.armModelVisual3D.Clear();
         }
 
         public void BuildModelVisual3DCollection(double thickness)

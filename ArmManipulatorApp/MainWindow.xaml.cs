@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Linq;
     using System.Windows;
     using System.Windows.Forms.DataVisualization.Charting;
@@ -21,8 +22,13 @@
         private List<double> dList;
         private List<double> CondList;
         private double ThresholdForPlanning;
+        private string StepInMeterToSplit;
+        private string NumberOfPointsToSplit;
         private bool WithRepeatPlanning;
         private bool WithCond;
+        private bool SplitByStep;
+
+        Stopwatch timePlanning;
 
         private ApplicationViewModel appViewModel;
 
@@ -53,6 +59,7 @@
             this.splittingTrackWorker.RunWorkerCompleted += this.SplittingTrackWorkerRunSplittingTrackWorkerCompleted;
 
             this.animationWorker = new BackgroundWorker();
+            this.animationWorker.WorkerSupportsCancellation = true;
             this.animationWorker.WorkerReportsProgress = true;
             this.animationWorker.DoWork += this.animationWorker_DoWork;
             this.animationWorker.ProgressChanged += this.animationWorker_ProgressChanged;
@@ -83,11 +90,14 @@
 
         private void SplittingTrackWorkerDoWork(object sender, DoWorkEventArgs e)
         {
-            this.appViewModel.SplitTrajectoryCommand(
-                e,
-                sender,
-                this.StepInMeterToSplitTextBox.Text,
-                this.NumberOfPointsToSplitTextBox.Text);
+            if (this.SplitByStep)
+            {
+                this.appViewModel.SplitTrajectory(e, sender, double.Parse(this.StepInMeterToSplit));
+            }
+            else
+            {
+                this.appViewModel.SplitTrajectory(e, sender, int.Parse(this.NumberOfPointsToSplit));
+            }
         }
 
         private void SplittingTrackWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -97,15 +107,43 @@
 
         private void StartSplittingTrack_Click(object sender, RoutedEventArgs e)
         {
-            this.WithCond = (bool)this.WithConditionNumberRadioButton.IsChecked;
+            this.StepInMeterToSplit = this.StepInMeterToSplitTextBox.Text;
+            this.NumberOfPointsToSplit = this.NumberOfPointsToSplitTextBox.Text;
+            
+            if (this.StepInMeterToSplit != string.Empty && this.NumberOfPointsToSplit != string.Empty)
+            {
+                MessageBox.Show("Нужно выбрать только один вариант разбиения.");
+            }
+            else if (this.StepInMeterToSplit != string.Empty)
+            {
+                if (double.TryParse(this.StepInMeterToSplit, out var step))
+                {
+                    this.SplitByStep = true;
 
-            this.WithRepeatPlanning = (bool)this.WithRepeatPlanningCheckBox.IsChecked;
-            this.ThresholdForPlanning = this.WithRepeatPlanning ? double.Parse(this.ThresholdForRepeatPlanning.Text) : double.MaxValue;
-            this.PathSplittingProgressBar.IsIndeterminate = this.WithRepeatPlanning;
-            this.PathSplittingProgressBar.Maximum = this.appViewModel.track3D.track.SplitPoints.Count;
-            this.PathSplittingProgressBar.Value = 0;
+                    this.PathSplittingProgressBar.IsIndeterminate = true;
+                    this.PathSplittingProgressBar.Maximum = 1;
+                    this.PathSplittingProgressBar.Value = 0;
 
-            this.splittingTrackWorker.RunWorkerAsync();
+                    this.splittingTrackWorker.RunWorkerAsync();
+                }
+                else
+                {
+                    MessageBox.Show("Некорректный ввод шага разбиения!");
+                }
+            }
+            else if (int.TryParse(this.NumberOfPointsToSplit, out var numberOfSplitPoints))
+            {
+                this.SplitByStep = false;
+
+                this.PathSplittingProgressBar.Maximum = numberOfSplitPoints;
+                this.PathSplittingProgressBar.Value = 0;
+
+                this.splittingTrackWorker.RunWorkerAsync();
+            }
+            else
+            {
+                MessageBox.Show("Некорректный ввод шага разбиения!");
+            }
         }
 
         private void CancelSplittingTrack_Click(object sender, RoutedEventArgs e)
@@ -115,10 +153,7 @@
 
         private void SplittingTrackWorkerRunSplittingTrackWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Chart.Series["bSeries"].Points.Clear();
-            this.Chart.Series["bSeries"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.bList);
+            this.PathSplittingProgressBar.IsIndeterminate = false;
         }
 
         #endregion
@@ -153,13 +188,16 @@
             this.PathPlanningProgressBar.IsIndeterminate = this.WithRepeatPlanning;
             this.PathPlanningProgressBar.Maximum = this.appViewModel.track3D.track.SplitPoints.Count;
             this.PathPlanningProgressBar.Value = 0;
-
+               
+            this.timePlanning = Stopwatch.StartNew();
             this.planningWorker.RunWorkerAsync();
         }
         
         private void CancelPlanningTrack_Click(object sender, RoutedEventArgs e)
         {
             this.planningWorker.CancelAsync();
+            this.timePlanning.Stop();
+            this.WorkingTime.Content = $"Время работы алгоритма = {this.timePlanning.ElapsedMilliseconds * 60} сек.";
         }
 
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -198,12 +236,13 @@
 
         private void animationWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.appViewModel.BeginAnimation(e, sender);
+            this.appViewModel.BeginAnimation(e, sender, this.Viewport3D);
         }
 
         private void animationWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             this.SliderAnimation.Value = e.ProgressPercentage;
+            //this.Viewport3D.UpdateLayout();
         }
 
         private void animationWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -212,7 +251,6 @@
 
         private void AnimationSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            throw new System.NotImplementedException();
         }
 
         #endregion

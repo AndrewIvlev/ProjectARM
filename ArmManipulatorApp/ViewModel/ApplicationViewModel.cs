@@ -8,10 +8,12 @@
     using System.Threading;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Forms;
     using System.Windows.Forms.DataVisualization.Charting;
     using System.Windows.Input;
     using System.Windows.Media;
     using System.Windows.Media.Animation;
+    using System.Windows.Media.Media3D;
     using System.Windows.Threading;
 
     using ArmManipulatorApp.Common;
@@ -26,7 +28,11 @@
 
     using Newtonsoft.Json;
 
+    using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+    using Label = System.Windows.Controls.Label;
+    using MessageBox = System.Windows.MessageBox;
     using Point3D = System.Windows.Media.Media3D.Point3D;
+    using TextBox = System.Windows.Controls.TextBox;
 
     public class ApplicationViewModel
     {
@@ -46,7 +52,7 @@
         private Label pathLengthLabel;
         
         // Buffer of all calculated q's for animation
-        private List<double[]> dQList;
+        private List<double[]> qList;
 
         private Point MousePos;
 
@@ -55,6 +61,7 @@
         /// от пиксельной характеристики виртуальной 3D модели манипулятора: len(px) = coeff * len(cm)
         /// </summary>
         private double coeff;
+        private double thickness;
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
@@ -71,7 +78,7 @@
             this.VectorQTextBox = vectorQTextBox;
             this.pathLengthLabel = pathLength;
 
-            this.dQList = new List<double[]>();
+            this.qList = new List<double[]>();
             this.coeff = 10;
         }
 
@@ -112,10 +119,7 @@
                                            {
                                                if (this.armModel3D != null)
                                                {
-                                                   foreach (var mv in this.armModel3D.armModelVisual3D)
-                                                   {
-                                                       this.viewport.Children.Remove(mv);
-                                                   }
+                                                   this.viewport.Children.Clear();
                                                }
 
                                                this.armModel3D = new ManipulatorArmModel3D(
@@ -125,13 +129,13 @@
                                                this.armModel3D.arm.Calc_T();
                                                var maxArmLength = this.armModel3D.arm.MaxLength();
 
-                                               var thickness = (maxArmLength / this.armModel3D.arm.N) * 0.13;
-                                               this.armModel3D.BuildModelVisual3DCollection(thickness);
+                                               this.thickness = (maxArmLength / this.armModel3D.arm.N) * 0.13;
+                                               this.armModel3D.BuildModelVisual3DCollection(this.thickness);
 
                                                // After parsing manipulator configuration file
                                                // on the screen appears 3D scene with axis and manipulator
                                                this.camera = new CameraModel3D(this.coeff * maxArmLength * 2);
-                                               this.scene = new SceneModel3D(this.coeff * maxArmLength * 2, this.coeff * thickness * 0.5);
+                                               this.scene = new SceneModel3D(this.coeff * maxArmLength * 2, this.coeff * this.thickness * 0.5);
                                                
                                                this.viewport.Camera = this.camera.PerspectiveCamera;
                                                this.viewport.Children.Add(this.scene.ModelVisual3D);
@@ -139,6 +143,12 @@
                                                {
                                                    this.viewport.Children.Add(mv);
                                                }
+
+                                               this.viewport.Children.Add(
+                                                   new ModelVisual3D
+                                                       {
+                                                           Content = new AmbientLight(Brushes.White.Color)
+                                                       });
 
                                                this.armTextBox.Text = File.ReadAllText(this.dialogService.FilePath);
                                                this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
@@ -204,12 +214,12 @@
                                             }
                                         }
 
-                                        var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
+                                        this.thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                         var firstPoint = this.armModel3D.arm.F(this.armModel3D.arm.N);
                                         this.track3D = new TrajectoryModel3D(
                                             new Trajectory((Point3D)firstPoint),
                                             this.viewport,
-                                            thickness,
+                                            this.thickness,
                                             this.coeff);
                                         foreach (var mv in this.track3D.trackModelVisual3D)
                                         {
@@ -242,8 +252,7 @@
                                        if (this.dialogService.OpenFileDialog("ArmManipulatorApp_Tests\\Tracks"))
                                        {
                                            this.track3D?.RemoveAnchorTrackFromViewport();
-                                           var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
-                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, thickness, this.coeff);
+                                           this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.thickness, this.coeff);
                                            this.track3D.AddAnchorTrackToViewport();
                                            this.dialogService.ShowMessage("Файл траектории открыт.");
                                        }
@@ -350,12 +359,11 @@
                                        try
                                        {
                                            UserControlMod.Mod = UserMod.CameraRotation;
-                                           var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                            var trajectoryLastPoint =
                                                this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
                                            this.pointSelector = new PointSelectorModel3D(
                                                VRConvert.ConvertFromRealToVirtual(trajectoryLastPoint, this.coeff),
-                                               (thickness * this.coeff / 2) * 0.8,
+                                               (this.thickness * this.coeff / 2) * 0.8,
                                                this.track3D.track.AnchorPoints.Count - 1);
                                            this.viewport.Children.Add(this.pointSelector.ModelVisual3D);
                                        }
@@ -378,7 +386,7 @@
                             {
                                 if (this.pointSelector != null)
                                 {
-                                    var deltaZ = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
+                                    var deltaZ = this.thickness;
                                     switch (((KeyEventArgs)obj).Key)
                                     {
                                         case Key.W: // Increase z coordinate of point
@@ -441,41 +449,16 @@
             }
         }
 
-        public void SplitTrajectoryCommand(
-            DoWorkEventArgs e,
-            object sender,
-            string stepInMToSplitStr,
-            string numberOfPointsToSplit)
+        public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr)
         {
-            if (stepInMToSplitStr != string.Empty && numberOfPointsToSplit != string.Empty)
-            {
-                MessageBox.Show("Please choose only one option.");
-            }
-            else if (stepInMToSplitStr != string.Empty)
-            {
-                if (double.TryParse(stepInMToSplitStr, out var step))
-                {
-                    this.track3D.RemoveSplitTrackFromViewport();
-                    this.track3D.SplitPath(step);
-                    //this.track3D.AddSplitTrackToViewport();
-                    this.dialogService.ShowMessage("Путь успешно разделён.");
-                }
-                else
-                {
-                    MessageBox.Show("Invalid input of split step!");
-                }
-            }
-            else if (int.TryParse(numberOfPointsToSplit, out var numberOfSplitPoints))
-            {
-                this.track3D.RemoveSplitTrackFromViewport();
-                this.track3D.SplitPath(numberOfSplitPoints);
-                //this.track3D.AddSplitTrackToViewport();
-                this.dialogService.ShowMessage("Путь успешно разделён.");
-            }
-            else
-            {
-                MessageBox.Show("Invalid input of split step!");
-            }
+            this.track3D.SplitPath(e, sender, stepInMToSplitStr);
+            MessageBox.Show("Путь успешно разделён.");
+        }
+
+        public void SplitTrajectory(DoWorkEventArgs e, object sender, int numberOfSplitPoints)
+        {
+            this.track3D.SplitPath(e, sender, numberOfSplitPoints);
+            MessageBox.Show("Путь успешно разделён.");
         }
 
         #endregion
@@ -498,6 +481,8 @@
             dList = new List<double>();
             condList = new List<double>();
 
+            this.qList.Clear();
+
             resIterCount = 0;
             for (var i = 1; i < splitPointsCount; i++)
             {
@@ -509,7 +494,7 @@
                     out var b,
                     out var cond,
                     withCond);
-                //this.dQList.Add(dQ);
+                this.qList.Add(this.armModel3D.arm.GetQ());
 
                 bList.Add(b);
                 dList.Add(d);
@@ -544,19 +529,78 @@
 
         public void BeginAnimation(
             DoWorkEventArgs e,
-            object sender)
+            object sender,
+            Viewport3D viewport3D)
         {
-            for (var i = 0; i < this.dQList.Count; i++)
+            // Temporary for building arm by q values
+            //App.Current.Dispatcher.Invoke(
+            //    DispatcherPriority.SystemIdle,
+            //    new Action(delegate
+            //        {
+            //            var qq = new double[]{0.785398, -0.226893, 10, 1.5708}; //45* 13* 10 -90*
+            //            foreach (var mv in this.armModel3D.armModelVisual3D)
+            //            {
+            //                viewport3D.Children.Remove(mv);
+            //            }
+
+            //            viewport3D.UpdateLayout();
+
+            //            this.armModel3D.arm.SetQ(qq);
+            //            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+            //            this.armModel3D.arm.Calc_T();
+
+            //            this.armModel3D.ClearModelVisual3DCollection();
+            //            this.armModel3D.BuildModelVisual3DCollection(this.thickness);
+
+            //            foreach (var mv in this.armModel3D.armModelVisual3D)
+            //            {
+            //                viewport3D.Children.Add(mv);
+            //            }
+
+            //            e.Cancel = true;
+            //        }));
+
+            //e.Cancel = true;
+            //return;
+
+            for (var i = 0; i < this.qList.Count; i++)
             {
-                var dQ = this.dQList[i];
-                this.armModel3D.arm.OffsetQ(dQ);
-                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
-                this.armModel3D.arm.Calc_T();
-                this.armModel3D.BeginAnimation(dQ);
+                var q = this.qList[i];
 
-                Thread.Sleep(600); //TODO: add value from slider speed
+                Thread.Sleep(60); //TODO: add value from speed slider
+                App.Current.Dispatcher.Invoke(
+                    DispatcherPriority.SystemIdle,
+                    new Action(
+                        delegate
+                        {
+                            // TODO: Доделать анимацию по нормальному (с помощью Storyboard и transformation)
+                            //this.armModel3D.arm.OffsetQ(dQ);
+                            //this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                            //this.armModel3D.arm.Calc_T();
+                            //this.armModel3D.BeginAnimation(dQ);
 
-                (sender as BackgroundWorker).ReportProgress(i);
+                            // костыль анимации ;(
+                            foreach (var mv in this.armModel3D.armModelVisual3D)
+                            {
+                                viewport3D.Children.Remove(mv);
+                            }
+
+                            viewport3D.UpdateLayout();
+
+                            this.armModel3D.arm.SetQ(q);
+                            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                            this.armModel3D.arm.Calc_T();
+
+                            this.armModel3D.ClearModelVisual3DCollection();
+                            this.armModel3D.BuildModelVisual3DCollection(this.thickness);
+
+                            foreach (var mv in this.armModel3D.armModelVisual3D)
+                            {
+                                viewport3D.Children.Add(mv);
+                            }
+                        }));
+
+                ((BackgroundWorker)sender).ReportProgress(i);
 
                 if (((BackgroundWorker)sender).CancellationPending == true)
                 {
@@ -631,13 +675,12 @@
                                         {
                                             var trajectoryFirstPoint =
                                                 this.track3D.track.AnchorPoints[this.track3D.track.AnchorPoints.Count - 1];
-                                            var thickness = (this.armModel3D.arm.MaxLength() / this.armModel3D.arm.N) * 0.13;
                                             this.cursorForAnchorPointCreation = new CursorPointModel3D(
                                                 new Point3D(
                                                     trajectoryFirstPoint.X * this.coeff,
                                                     trajectoryFirstPoint.Y * this.coeff,
                                                     trajectoryFirstPoint.Z * this.coeff),
-                                                (thickness * this.coeff / 2) * 0.8);
+                                                (this.thickness * this.coeff / 2) * 0.8);
                                             this.viewport.Children.Add(this.cursorForAnchorPointCreation.ModelVisual3D);
                                         }
                                         else
