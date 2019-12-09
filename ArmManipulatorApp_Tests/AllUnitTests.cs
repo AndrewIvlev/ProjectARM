@@ -7,6 +7,8 @@ using NUnit.Framework;
 
 namespace ArmManipulatorApp_Tests
 {
+    using System.Windows.Media.Media3D;
+
     [TestFixture]
     public class AllUnitTests
     {
@@ -299,6 +301,42 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
+        public void System3x3Solver_worksCorrect()
+        {
+            var expectedX = new Vector3D(1, 2, 3);
+            var A = new Matrix(3, 3)
+            {
+                [0, 0] = 1, [0, 1] = 0, [0, 2] = 1,
+                [1, 0] = 0, [1, 1] = 2, [1, 2] = -1,
+                [2, 0] = 3, [2, 1] = -1, [2, 2] = 0
+            };
+
+            var b = new Vector3D(4, 1, 1);
+
+            var actualX = Matrix.System3x3Solver(A, b);
+
+            Assert.AreEqual(expectedX, actualX);
+        }
+
+        [Test]
+        public void System3x3Solver_worksCorrect2()
+        {
+            var expectedX = new Vector3D(0, -2, 3);
+            var A = new Matrix(3, 3)
+            {
+                [0, 0] = 1, [0, 1] = 2, [0, 2] = 1,
+                [1, 0] = -3, [1, 1] = -1, [1, 2] = -1,
+                [2, 0] = -2, [2, 1] = 2, [2, 2] = 3
+            };
+
+            var b = new Vector3D(-1, -1, 5);
+
+            var actualX = Matrix.System3x3Solver(A, b);
+
+            Assert.AreEqual(expectedX, actualX);
+        }
+
+        [Test]
         public void MatrixFrobeniusNorm()
         {
             var expectedNorm = 13;
@@ -347,8 +385,17 @@ namespace ArmManipulatorApp_Tests
                 [2, 0] = 27, [2, 1] = -29, [2, 2] = 24
             };
 
+            Console.WriteLine("A matrix:");
+            A.Print();
             var actualInvertA = A.Invert3D(Matrix.Det3D(A));
+            Console.WriteLine("Invert A matrix:");
             actualInvertA.Print();
+
+            var E = new Matrix(3);
+            E.ToE();
+
+            var shouldBeE = A * actualInvertA;
+            Assert.IsTrue(shouldBeE == E);
 
             Assert.IsTrue(expInvertA == actualInvertA);
         }

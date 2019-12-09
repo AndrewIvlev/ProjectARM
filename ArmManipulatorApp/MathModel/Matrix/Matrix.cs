@@ -4,6 +4,8 @@ using Newtonsoft.Json;
 
 namespace ArmManipulatorArm.MathModel.Matrix
 {
+    using System.Runtime.CompilerServices;
+
     public class Matrix
     {
         public double[,] M;
@@ -13,6 +15,9 @@ namespace ArmManipulatorArm.MathModel.Matrix
 
         [JsonIgnore]
         public int Columns;
+
+        [JsonIgnore]
+        private static bool LogIsOn = false;
 
         public Matrix()
         {
@@ -142,6 +147,8 @@ namespace ArmManipulatorArm.MathModel.Matrix
 
         public Vector3D ColumnAsVector3D(int i) => new Vector3D(M[0, i], M[1, i], M[2, i]);
 
+        public Matrix Invert3D() => this.Invert3D(Det3D(this));
+
         public Matrix Invert3D(double det)
         {
             if (this.Rows != 3 || this.Columns != 3)
@@ -203,6 +210,53 @@ namespace ArmManipulatorArm.MathModel.Matrix
                        };
         }
 
+        public static Vector3D System3x3Solver(Matrix A, Vector3D b) => System3x3Solver(A, Det3D(A), b);
+
+        public static Vector3D System3x3Solver(Matrix A, double detA, Vector3D b)
+        {
+            if (LogIsOn)
+            {
+                Console.WriteLine("A matrix:\n");
+                A.Print();
+                Console.WriteLine(b.ToString());
+            }
+
+            var Ax = ConcatAsColumn(A, b, 0);
+            if (LogIsOn)
+            {
+                Console.WriteLine("A matrix after concatenation with b as first column:\n");
+                A.Print();
+                Console.WriteLine("A1 matrix:\n");
+                Ax.Print();
+            }
+            var detAx = Det3D(Ax);
+            var Ay = ConcatAsColumn(A, b, 1);
+            if (LogIsOn)
+            {
+                Console.WriteLine("A matrix after concatenation with b as second column:\n");
+                A.Print();
+                Console.WriteLine("A2 matrix:\n");
+                Ay.Print();
+            }
+
+            var detAy = Det3D(Ay);
+            var Az = ConcatAsColumn(A, b, 2);
+            if (LogIsOn)
+            {
+                Console.WriteLine("A matrix after concatenation with b as third column:\n");
+                A.Print();
+                Console.WriteLine("A3 matrix:\n");
+                Az.Print();
+            }
+
+            var detAz = Det3D(Az);
+
+            return new Vector3D(
+                detAx / detA,
+                detAy / detA,
+                detAz / detA);
+        }
+        
         public void SwapColumns(int c1, int c2)
         {
             for (var i = 0; i < this.Rows; i++)
@@ -287,7 +341,7 @@ namespace ArmManipulatorArm.MathModel.Matrix
         {
             if (a.Rows != 3)
                 throw new ArgumentOutOfRangeException();
-
+            
             var res = new Matrix(a)
             {
                 [0, i] = v.X,

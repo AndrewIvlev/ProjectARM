@@ -30,7 +30,6 @@
 
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
     using Label = System.Windows.Controls.Label;
-    using MessageBox = System.Windows.MessageBox;
     using Point3D = System.Windows.Media.Media3D.Point3D;
     using TextBox = System.Windows.Controls.TextBox;
 
@@ -62,6 +61,7 @@
         /// </summary>
         private double coeff;
         private double thickness;
+        private bool ShowAllMessageBox = false;
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
@@ -152,7 +152,8 @@
 
                                                this.armTextBox.Text = File.ReadAllText(this.dialogService.FilePath);
                                                this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
-                                               this.dialogService.ShowMessage("Файл манипулятора открыт.");
+                                               if (this.ShowAllMessageBox)
+                                                   this.dialogService.ShowMessage("Файл манипулятора открыт.");
                                            }
                                        }
                                        catch (Exception ex)
@@ -254,7 +255,8 @@
                                            this.track3D?.RemoveAnchorTrackFromViewport();
                                            this.track3D = new TrajectoryModel3D(this.fileService.OpenTrack(this.dialogService.FilePath), this.viewport, this.thickness, this.coeff);
                                            this.track3D.AddAnchorTrackToViewport();
-                                           this.dialogService.ShowMessage("Файл траектории открыт.");
+                                           if (this.ShowAllMessageBox)
+                                               this.dialogService.ShowMessage("Файл траектории открыт.");
                                        }
                                    }
                                    catch (Exception ex)
@@ -452,13 +454,15 @@
         public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr)
         {
             this.track3D.SplitPath(e, sender, stepInMToSplitStr);
-            MessageBox.Show("Путь успешно разделён.");
+            if (this.ShowAllMessageBox)
+                this.dialogService.ShowMessage("Путь успешно разделён.");
         }
 
         public void SplitTrajectory(DoWorkEventArgs e, object sender, int numberOfSplitPoints)
         {
             this.track3D.SplitPath(e, sender, numberOfSplitPoints);
-            MessageBox.Show("Путь успешно разделён.");
+            if (this.ShowAllMessageBox)
+                this.dialogService.ShowMessage("Путь успешно разделён.");
         }
 
         #endregion
@@ -474,11 +478,13 @@
             out int resIterCount,
             out List<double> bList,
             out List<double> dList,
+            out List<double> deltaList,
             out List<double> condList)
         {
             var splitPointsCount = this.track3D.track.SplitPoints.Count;
             bList = new List<double>();
             dList = new List<double>();
+            deltaList = new List<double>();
             condList = new List<double>();
 
             this.qList.Clear();
@@ -490,14 +496,16 @@
 
                 this.armModel3D.arm.LagrangeMethodToThePoint(
                     point,
-                    out var d,
                     out var b,
+                    out var d,
+                    out var delta,
                     out var cond,
                     withCond);
                 this.qList.Add(this.armModel3D.arm.GetQ());
 
                 bList.Add(b);
                 dList.Add(d);
+                deltaList.Add(delta);
                 condList.Add(cond);
                 
                 ++resIterCount;

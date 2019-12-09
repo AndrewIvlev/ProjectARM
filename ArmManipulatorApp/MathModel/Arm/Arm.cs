@@ -42,7 +42,7 @@
             this.dS = new Matrix[this.N];
             for (var i = 0; i < this.N; i++)
             {
-                this.A[i] = (double)1 / this.N;
+                this.A[i] = 1.0 / this.N;
                 this.S[i] = new Matrix(4, 4);
                 this.dS[i] = new Matrix(4, 4);
             }
@@ -146,7 +146,17 @@
         public Vector3D F(int i) => ((Matrix)this.T[i]).ColumnAsVector3D(3);
         
         // That function return vector ( dFxqi, dFyqi, dFzqi )
-        public Vector3D Get_dF(int i) => ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+        public Vector3D Get_dF(int i)
+        {
+            var dFdQi = this.D.ColumnAsVector3D(i);
+
+            Console.WriteLine($"dFxdQ{i + 1} = {dFdQi.X}");
+            Console.WriteLine($"dFydQ{i + 1} = {dFdQi.Y}");
+            Console.WriteLine($"dFzdQ{i + 1} = {dFdQi.Z}");
+            Console.WriteLine();
+
+            return dFdQi;
+        }
 
         public Vector3D GetZAxis(int i) => ((Matrix)this.T[i]).ColumnAsVector3D(2);
 
@@ -172,15 +182,16 @@
         /// Решение задачи по нахождению минимума вектора обобщённых координат
         /// </summary>
         /// <param name="p">Желаемое положение схвата</param>
-        /// <param name="d">Желаемое смещение</param>
         /// <param name="b">Реальное смещение</param>
+        /// <param name="d">Желаемое смещение</param>
+        /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности</param>
         /// <param name="withCond"></param>
         /// <returns></returns>
-        public void LagrangeMethodToThePoint(Point3D p, out double d, out double b, out double cond, bool withCond)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, out double cond, bool withCond)
         {
-            var dQ = new double[this.N];
-
+            Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
+            Console.WriteLine("Planning trajectory to the point " + p);
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
             var f = this.F(this.N);
@@ -188,6 +199,7 @@
                 p.X - f.X,
                 p.Y - f.Y,
                 p.Z - f.Z);
+            Console.WriteLine("Desired grip offset " + D);
 
             d = MathFunctions.NormaVector(D);
 
@@ -195,8 +207,8 @@
             this.Calc_dT();
             this.Build_D();
             this.Calc_C();
-            var C = this.C;
-            var detC = Matrix.Det3D(C);
+            var detC = Matrix.Det3D(this.C);
+            Console.WriteLine("Determinant of matrix C is " + detC + "\n");
 
             cond = 0;
             if (withCond)
@@ -207,27 +219,21 @@
                 }
                 else
                 {
-                    cond = C.NormF() * C.Invert3D(detC).NormF();
+                    cond = this.C.NormF() * this.C.Invert3D(detC).NormF();
+                    Console.WriteLine("Condition number of matrix C is " + cond + "\n");
                 }
             }
 
-            var Cx = Matrix.ConcatAsColumn(C, D, 0);
-            var detCx = Matrix.Det3D(Cx);
-            var Cy = Matrix.ConcatAsColumn(C, D, 1);
-            var detCy = Matrix.Det3D(Cy);
-            var Cz = Matrix.ConcatAsColumn(C, D, 2);
-            var detCz = Matrix.Det3D(Cz);
+            var μ = Matrix.System3x3Solver(this.C, detC, D);
+            Console.WriteLine(@"μ = " + μ + "\n");
 
-            var μ = new Point3D(
-                detCx / detC,
-                detCy / detC,
-                detCz / detC);
-
+            var dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.Get_dF(i);
-                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / (2 * this.A[i]);
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
+            Console.WriteLine($"dq = " + JsonConvert.SerializeObject(dQ) + "\n");
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
@@ -239,6 +245,13 @@
                 newF.Z - f.Z);
 
             b = MathFunctions.NormaVector(newD);
+            
+            var Delta = new Vector3D(
+                newF.X - p.X,
+                newF.Y - p.Y,
+                newF.Z - p.Z);
+
+            delta = MathFunctions.NormaVector(Delta);
         }
 
         #region Temp for RRPR arm
@@ -377,12 +390,6 @@
 
         #endregion
 
-        public double GetPointError(Point3D p)
-        {
-            return MathFunctions.NormaVector(
-                new Point3D(p.X - this.F(this.N).X, p.Y - this.F(this.N).Y, p.Z - this.F(this.N).Z));
-        }
-
         public static bool operator ==(Arm a, Arm b)
         {
             if (a.N != b.N)
@@ -479,7 +486,7 @@
         {
             for (var i = 0; i < this.N; i++)
             {
-                var b = this.Get_dF(i);
+                var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
                 this.D[0, i] = b.X;
                 this.D[1, i] = b.Y;
                 this.D[2, i] = b.Z;

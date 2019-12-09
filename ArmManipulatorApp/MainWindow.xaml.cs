@@ -20,6 +20,7 @@
         private int IterationCount;
         private List<double> bList;
         private List<double> dList;
+        private List<double> deltaList;
         private List<double> CondList;
         private double ThresholdForPlanning;
         private string StepInMeterToSplit;
@@ -73,17 +74,23 @@
             this.Chart.Series.Add(new Series("bSeries"));
             this.Chart.Series["bSeries"].ChartArea = "Default";
             this.Chart.Series["bSeries"].ChartType = SeriesChartType.Line;
+
             this.Chart.Series.Add(new Series("dSeries"));
             this.Chart.Series["dSeries"].ChartArea = "Default";
             this.Chart.Series["dSeries"].ChartType = SeriesChartType.Line;
+
+            this.Chart.Series.Add(new Series("deltaSeries"));
+            this.Chart.Series["deltaSeries"].ChartArea = "Default";
+            this.Chart.Series["deltaSeries"].ChartType = SeriesChartType.Line;
+
             this.Chart.Series.Add(new Series("CondSeries"));
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
 
             // Add some values for chart display
-            int[] axisXData = { 0, 50, 100 };
-            double[] axisYData = { 5.3, 1.3, 7.3 };
-            this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
+            //int[] axisXData = { 0, 50, 100 };
+            //double[] axisYData = { 5.3, 1.3, 7.3 };
+            //this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
         }
 
         #region Splitting trajectory region
@@ -171,6 +178,7 @@
                 out this.IterationCount,
                 out this.bList,
                 out this.dList,
+                out this.deltaList,
                 out this.CondList);
         }
 
@@ -202,15 +210,20 @@
 
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Chart.Series["bSeries"].Points.Clear();
-            this.Chart.Series["bSeries"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.bList);
+        //    this.Chart.Series["bSeries"].Points.Clear();
+        //    this.Chart.Series["bSeries"].Points.DataBindXY(
+        //        Enumerable.Range(0, this.IterationCount).ToArray(),
+        //        this.bList);
 
-            //this.Chart.Series["dSeries"].Points.Clear();
-            //this.Chart.Series["dSeries"].Points.DataBindXY(
-            //    Enumerable.Range(0, this.IterationCount).ToArray(),
-            //    this.dList);
+        //    this.Chart.Series["dSeries"].Points.Clear();
+        //    this.Chart.Series["dSeries"].Points.DataBindXY(
+        //        Enumerable.Range(0, this.IterationCount).ToArray(),
+        //        this.dList);
+
+            this.Chart.Series["deltaSeries"].Points.Clear();
+            this.Chart.Series["deltaSeries"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+                this.deltaList);
 
             //this.Chart.Series["CondSeries"].Points.Clear();
             //this.Chart.Series["CondSeries"].Points.DataBindXY(

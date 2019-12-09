@@ -114,6 +114,7 @@
 
         public void SplitTrack(DoWorkEventArgs e, object sender, double step)
         {
+            Console.WriteLine("Try to divide track with step " + step);
             this.SplitPoints.Clear();
             for (var i = 1; i < this.AnchorPoints.Count; i++)
             {
@@ -136,6 +137,9 @@
 
             this.SplitPoints.Add(this.AnchorPoints[this.AnchorPoints.Count - 1]);
             ((BackgroundWorker)sender).ReportProgress(1);
+
+            Console.WriteLine("Track divided successfully");
+            Console.WriteLine("----Number of all points is " + this.SplitPoints.Count);
         }
 
         public void SplitTrack(DoWorkEventArgs e, object sender, int numSplitPoint)
