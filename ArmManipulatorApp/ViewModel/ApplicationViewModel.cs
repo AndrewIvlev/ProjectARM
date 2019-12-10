@@ -494,19 +494,24 @@
             {
                 var point = this.track3D.track.SplitPoints[i];
 
-                this.armModel3D.arm.LagrangeMethodToThePoint(
+                this.armModel3D.arm.AccordLagrangeMethodToThePoint(
                     point,
                     out var b,
                     out var d,
-                    out var delta,
-                    out var cond,
-                    withCond);
+                    out var delta);
+                //this.armModel3D.arm.AccordLagrangeMethodToThePoint(
+                //    point,
+                //    out var b,
+                //    out var d,
+                //    out var delta,
+                //    out var cond,
+                //    withCond);
                 this.qList.Add(this.armModel3D.arm.GetQ());
 
                 bList.Add(b);
                 dList.Add(d);
                 deltaList.Add(delta);
-                condList.Add(cond);
+                //condList.Add(cond);
                 
                 ++resIterCount;
                 if (withRepeatPlan)

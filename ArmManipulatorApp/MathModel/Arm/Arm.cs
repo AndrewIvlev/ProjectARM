@@ -3,11 +3,15 @@
     using System;
     using System.Collections;
     using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Windows.Media.Animation;
     using System.Windows.Media.Media3D;
 
-    using ArmManipulatorArm.MathModel.Matrix;
+    using Accord.Math.Optimization;
 
     using Newtonsoft.Json;
+
+    using Matrix = ArmManipulatorArm.MathModel.Matrix.Matrix;
 
     public class Arm
     {
@@ -253,6 +257,156 @@
 
             delta = MathFunctions.NormaVector(Delta);
         }
+
+        #region Accord region
+
+        public void AccordLagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta)
+        {
+            Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
+            Console.WriteLine("Planning trajectory to the point " + p);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var f = this.F(this.N);
+            var D = new Vector3D(
+                p.X - f.X,
+                p.Y - f.Y,
+                p.Z - f.Z);
+            Console.WriteLine("Desired grip offset " + D);
+
+            d = MathFunctions.NormaVector(D);
+
+            this.Build_dS();
+            this.Calc_dT();
+            this.Build_D();
+
+            var dQ = this.AccordMethod(D);
+            Console.WriteLine($"dq = " + JsonConvert.SerializeObject(dQ) + "\n");
+
+            this.OffsetQ(dQ);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var newF = this.F(this.N);
+            var newD = new Vector3D(
+                newF.X - f.X,
+                newF.Y - f.Y,
+                newF.Z - f.Z);
+
+            b = MathFunctions.NormaVector(newD);
+
+            var Delta = new Vector3D(
+                newF.X - p.X,
+                newF.Y - p.Y,
+                newF.Z - p.Z);
+
+            delta = MathFunctions.NormaVector(Delta);
+        }
+
+        #region Constraints
+
+        public double Fx(double[] q)
+        {
+            //this.SetQ(q);
+            //this.Build_S_ForAllUnits_ByUnitsType();
+            //this.Calc_T();
+            return this.F(this.N).X;
+        }
+
+        public double Fy(double[] q)
+        {
+            //this.SetQ(q);
+            //this.Build_S_ForAllUnits_ByUnitsType();
+            //this.Calc_T();
+            return this.F(this.N).Y;
+        }
+
+        public double Fz(double[] q)
+        {
+            //this.SetQ(q);
+            //this.Build_S_ForAllUnits_ByUnitsType();
+            //this.Calc_T();
+            return this.F(this.N).Z;
+        }
+
+        #endregion
+
+        #region Gradients
+        
+        public double[] gradFx(double[] q)
+        {
+            var grad = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+                grad[i] = this.Get_dF(i).X;
+            return grad;
+        }
+
+        public double[] gradFy(double[] q)
+        {
+            var grad = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+                grad[i] = this.Get_dF(i).Y;
+            return grad;
+        }
+
+        public double[] gradFz(double[] q)
+        {
+            var grad = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+                grad[i] = this.Get_dF(i).Z;
+            return grad;
+        }
+
+        #endregion
+
+        private double[] AccordMethod(Vector3D d)
+        {
+            var functionQ = new NonlinearObjectiveFunction(4,
+                function: q => this.A[0] * q[0] * q[0] + this.A[1] * q[1] * q[1] + this.A[2] * q[2] * q[2] + this.A[3] * q[3] * q[3],
+                gradient: q => new[] { 2.0 * q[0], 2.0 * q[1], 2.0 * q[2], 2.0 * q[3] });
+
+            NonlinearConstraint[] constraints =
+            {
+                new NonlinearConstraint(4,
+                    function: q => this.Fx(q),
+                    gradient: q => gradFx(q),
+                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.X),
+                new NonlinearConstraint(4,
+                    function: q => this.Fy(q),
+                    gradient: q => gradFy(q),
+                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.Y),
+                new NonlinearConstraint(4,
+                    function: q => this.Fx(q),
+                    gradient: q => gradFz(q),
+                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.Z)
+            };
+
+            var inner = new BroydenFletcherGoldfarbShanno(4);
+            inner.LineSearch = LineSearch.BacktrackingArmijo;
+            inner.Corrections = 7;
+
+            var solver = new AugmentedLagrangian(inner, functionQ, constraints);
+
+            var inr = inner;
+            var solv = solver.Optimizer;
+            var isTrue = solver.Minimize();
+            double minimum = solver.Value;
+
+            double[] solution = solver.Solution;
+            return solution;
+            //double[] expected =
+            //{
+            //    1.0 / Math.Sqrt(3.0), 1.0 / Math.Sqrt(6.0), -1.0 / 3.0
+            //};
+
+
+            //for (int i = 0; i < expected.Length; i++)
+            //    Assert.AreEqual(expected[i], solver.Solution[i], 1e-3);
+            //Assert.AreEqual(-0.078567420132031968, minimum, 1e-4);
+
+            //double expectedMinimum = function.Function(solver.Solution);
+            //Assert.AreEqual(expectedMinimum, minimum);
+        }
+
+        #endregion
 
         #region Temp for RRPR arm
 
