@@ -601,6 +601,7 @@ namespace ArmManipulatorApp_Tests
             arm.Build_S_ForAllUnits_ByUnitsType();
             arm.Build_dS();
             arm.Calc_dT();
+            arm.Build_D();
             var dFdq1 = arm.Get_dF(0);
             var dFdq2 = arm.Get_dF(1);
             var dFdq3 = arm.Get_dF(2);
