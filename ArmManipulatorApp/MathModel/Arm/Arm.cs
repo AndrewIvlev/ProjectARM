@@ -357,26 +357,34 @@
 
         #endregion
 
+        /// <summary>
+        /// http://accord-framework.net/docs/html/N_Accord_Math_Optimization.htm
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
         private double[] AccordMethod(Vector3D d)
         {
-            var functionQ = new NonlinearObjectiveFunction(4,
-                function: q => this.A[0] * q[0] * q[0] + this.A[1] * q[1] * q[1] + this.A[2] * q[2] * q[2] + this.A[3] * q[3] * q[3],
-                gradient: q => new[] { 2.0 * q[0], 2.0 * q[1], 2.0 * q[2], 2.0 * q[3] });
+            //var functionQ = new NonlinearObjectiveFunction(
+            //    4,
+            //    function: q => this.A[0] * q[0] * q[0] + this.A[1] * q[1] * q[1] + this.A[2] * q[2] * q[2] + this.A[3] * q[3] * q[3],
+            //    gradient: q => new[] { 2.0 * q[0], 2.0 * q[1], 2.0 * q[2], 2.0 * q[3] });
 
-            NonlinearConstraint[] constraints =
+            var functionQ = new QuadraticObjectiveFunction("");
+
+            var constraints = new NonlinearConstraint[]
             {
-                new NonlinearConstraint(4,
-                    function: q => this.Fx(q),
-                    gradient: q => gradFx(q),
-                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.X),
-                new NonlinearConstraint(4,
-                    function: q => this.Fy(q),
-                    gradient: q => gradFy(q),
-                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.Y),
-                new NonlinearConstraint(4,
-                    function: q => this.Fx(q),
-                    gradient: q => gradFz(q),
-                    shouldBe: ConstraintType.LesserThanOrEqualTo, value: d.Z)
+                new NonlinearConstraint(
+                    functionQ,
+                    constraint: q => this.Fx(new[] { q[0], q[1], q[2], q[3] }) == d.X,
+                    gradient: q => this.gradFx(new[] { q[0], q[1], q[2], q[3] })),
+                new NonlinearConstraint(
+                    functionQ,
+                    constraint: q => this.Fy(new[] { q[0], q[1], q[2], q[3] }) == d.Y,
+                    gradient: q => this.gradFy(new[] { q[0], q[1], q[2], q[3] })),
+                new NonlinearConstraint(
+                    functionQ,
+                    constraint: q => this.Fx(new[] { q[0], q[1], q[2], q[3] }) == d.Z,
+                    gradient: q => this.gradFz(new[] { q[0], q[1], q[2], q[3] }))
             };
 
             var inner = new BroydenFletcherGoldfarbShanno(4);
