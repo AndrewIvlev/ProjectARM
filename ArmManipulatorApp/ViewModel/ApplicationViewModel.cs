@@ -451,9 +451,11 @@
             }
         }
 
-        public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr)
+        public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr, out List<double> distanceBetweenSplitPoints, out int CountOfSplitPoints)
         {
             this.track3D.SplitPath(e, sender, stepInMToSplitStr);
+            distanceBetweenSplitPoints = this.track3D.track.GetListOfDistanceBetweenSplitPoints();
+            CountOfSplitPoints = this.track3D.track.SplitPoints.Count;
             if (this.ShowAllMessageBox)
                 this.dialogService.ShowMessage("Путь успешно разделён.");
         }

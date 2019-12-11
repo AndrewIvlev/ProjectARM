@@ -22,6 +22,7 @@
         private List<double> dList;
         private List<double> deltaList;
         private List<double> CondList;
+        private List<double> DistanceBetweenSplitPoints;
         private double ThresholdForPlanning;
         private string StepInMeterToSplit;
         private string NumberOfPointsToSplit;
@@ -87,6 +88,10 @@
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
 
+            this.Chart.Series.Add(new Series("SplitPointsDistance"));
+            this.Chart.Series["SplitPointsDistance"].ChartArea = "Default";
+            this.Chart.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
+
             // Add some values for chart display
             //int[] axisXData = { 0, 50, 100 };
             //double[] axisYData = { 5.3, 1.3, 7.3 };
@@ -99,7 +104,7 @@
         {
             if (this.SplitByStep)
             {
-                this.appViewModel.SplitTrajectory(e, sender, double.Parse(this.StepInMeterToSplit));
+                this.appViewModel.SplitTrajectory(e, sender, double.Parse(this.StepInMeterToSplit), out this.DistanceBetweenSplitPoints, out this.IterationCount);
             }
             else
             {
@@ -161,6 +166,11 @@
         private void SplittingTrackWorkerRunSplittingTrackWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.PathSplittingProgressBar.IsIndeterminate = false;
+
+            this.Chart.Series["SplitPointsDistance"].Points.Clear();
+            this.Chart.Series["SplitPointsDistance"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount - 1).ToArray(),
+                this.DistanceBetweenSplitPoints);
         }
 
         #endregion

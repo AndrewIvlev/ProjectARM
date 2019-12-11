@@ -145,19 +145,6 @@
 
         public Vector3D F(int i) => ((Matrix)this.T[i]).ColumnAsVector3D(3);
         
-        // That function return vector ( dFxqi, dFyqi, dFzqi )
-        public Vector3D Get_dF(int i)
-        {
-            var dFdQi = this.D.ColumnAsVector3D(i);
-
-            Console.WriteLine($"dFxdQ{i + 1} = {dFdQi.X}");
-            Console.WriteLine($"dFydQ{i + 1} = {dFdQi.Y}");
-            Console.WriteLine($"dFzdQ{i + 1} = {dFdQi.Z}");
-            Console.WriteLine();
-
-            return dFdQi;
-        }
-
         public Vector3D GetZAxis(int i) => ((Matrix)this.T[i]).ColumnAsVector3D(2);
 
         /// <summary>
@@ -207,10 +194,14 @@
             this.Calc_dT();
             this.Build_D();
             this.Calc_C();
+            Console.WriteLine("Matrix C:");
+            this.C.Print();
             var detC = Matrix.Det3D(this.C);
             Console.WriteLine("Determinant of matrix C is " + detC + "\n");
 
-            cond = 0;
+            #region Condition number
+
+            cond = 0.0;
             if (withCond)
             {
                 if (detC == 0)
@@ -224,16 +215,20 @@
                 }
             }
 
+            #endregion
+
             var μ = Matrix.System3x3Solver(this.C, detC, D);
-            Console.WriteLine(@"μ = " + μ + "\n");
+            Console.WriteLine($"mu = {μ}\n");
 
             var dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.Get_dF(i);
+                this.Print_dF(i);
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
-            Console.WriteLine($"dq = " + JsonConvert.SerializeObject(dQ) + "\n");
+            Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
+            Console.WriteLine($"Value of Q function = {this.functionQ()}");
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
@@ -254,6 +249,16 @@
             delta = MathFunctions.NormaVector(Delta);
         }
 
+        public double functionQ()
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.N; i++)
+            {
+                res += this.A[i] * Math.Pow(this.Units[i].Q, 2);
+            }
+
+            return res;
+        }
         #region Temp for RRPR arm
 
         public double[] RRPR_LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond)
@@ -268,17 +273,17 @@
 
             var C = new Matrix(3, 3);
             // C xx
-            C[0, 0] = this.expected_dFxdq1 * this.expected_dFxdq1 + this.expected_dFxdq2 * this.expected_dFxdq2 + this.expected_dFxdq3 * this.expected_dFxdq3 + this.expected_dFxdq4 * this.expected_dFxdq4;
+            C[0, 0] = this.expected_dFxdq1 * this.expected_dFxdq1 / this.A[0] + this.expected_dFxdq2 * this.expected_dFxdq2 / this.A[1] + this.expected_dFxdq3 * this.expected_dFxdq3 / this.A[2] + this.expected_dFxdq4 * this.expected_dFxdq4 / this.A[3];
             // C xy
-            C[0, 1] = this.expected_dFxdq1 * this.expected_dFydq1 + this.expected_dFxdq2 * this.expected_dFydq2 + this.expected_dFxdq3 * this.expected_dFydq3 + this.expected_dFxdq4 * this.expected_dFydq4;
+            C[0, 1] = this.expected_dFxdq1 * this.expected_dFydq1 / this.A[0] + this.expected_dFxdq2 * this.expected_dFydq2 / this.A[1] + this.expected_dFxdq3 * this.expected_dFydq3 / this.A[2] + this.expected_dFxdq4 * this.expected_dFydq4 / this.A[3];
             // C xz
-            C[0, 2] = this.expected_dFxdq1 * this.expected_dFzdq1 + this.expected_dFxdq2 * this.expected_dFzdq2 + this.expected_dFxdq3 * this.expected_dFzdq3 + this.expected_dFxdq4 * this.expected_dFzdq4;
+            C[0, 2] = this.expected_dFxdq1 * this.expected_dFzdq1 / this.A[0] + this.expected_dFxdq2 * this.expected_dFzdq2 / this.A[1] + this.expected_dFxdq3 * this.expected_dFzdq3 / this.A[2] + this.expected_dFxdq4 * this.expected_dFzdq4 / this.A[3];
             // C yy
-            C[1, 1] = this.expected_dFydq1 * this.expected_dFydq1 + this.expected_dFydq2 * this.expected_dFydq2 + this.expected_dFydq3 * this.expected_dFydq3 + this.expected_dFydq4 * this.expected_dFydq4;
+            C[1, 1] = this.expected_dFydq1 * this.expected_dFydq1 / this.A[0] + this.expected_dFydq2 * this.expected_dFydq2 / this.A[1] + this.expected_dFydq3 * this.expected_dFydq3 / this.A[2] + this.expected_dFydq4 * this.expected_dFydq4 / this.A[3];
             // C yz
-            C[1, 2] = this.expected_dFydq1 * this.expected_dFzdq1 + this.expected_dFydq2 * this.expected_dFzdq2 + this.expected_dFydq3 * this.expected_dFzdq3 + this.expected_dFydq4 * this.expected_dFzdq4;
+            C[1, 2] = this.expected_dFydq1 * this.expected_dFzdq1 / this.A[0] + this.expected_dFydq2 * this.expected_dFzdq2 / this.A[1] + this.expected_dFydq3 * this.expected_dFzdq3 / this.A[2] + this.expected_dFydq4 * this.expected_dFzdq4 / this.A[3];
             // C zz
-            C[2, 2] = this.expected_dFzdq1 * this.expected_dFzdq1 + this.expected_dFzdq2 * this.expected_dFzdq2 + this.expected_dFzdq3 * this.expected_dFzdq3 + this.expected_dFzdq4 * this.expected_dFzdq4;
+            C[2, 2] = this.expected_dFzdq1 * this.expected_dFzdq1 / this.A[0] + this.expected_dFzdq2 * this.expected_dFzdq2 / this.A[1] + this.expected_dFzdq3 * this.expected_dFzdq3 / this.A[2] + this.expected_dFzdq4 * this.expected_dFzdq4 / this.A[3];
             // C yx
             C[1, 0] = this.C[0, 1];
             // C zx
@@ -493,28 +498,47 @@
             }
         }
 
+        // That function return vector ( dFxqi, dFyqi, dFzqi )
+        public Vector3D Get_dF(int i)
+        {
+            var dFdQi = this.D.ColumnAsVector3D(i);
+            return dFdQi;
+        }
+
+        public void Print_dF(int i)
+        {
+            var dFdQi = this.D.ColumnAsVector3D(i);
+            Console.WriteLine($"dFxdQ{i + 1} = {dFdQi.X}");
+            Console.WriteLine($"dFydQ{i + 1} = {dFdQi.Y}");
+            Console.WriteLine($"dFzdQ{i + 1} = {dFdQi.Z}");
+            Console.WriteLine();
+        }
+
         // Вычисляем матрицу коэффициентов для метода Лагранжа
         public void Calc_C()
         {
+            this.C = new Matrix(3, 3);
             for (var i = 0; i < this.N; i++)
             {
+                var dF = this.Get_dF(i);
+                
                 // C xx
-                this.C[0, 0] += this.D[0, i] * this.D[0, i];
+                this.C[0, 0] += dF.X * dF.X / this.A[i];
                 
                 // C xy
-                this.C[0, 1] += this.D[0, i] * this.D[1, i];
+                this.C[0, 1] += dF.X * dF.Y / this.A[i];
 
                 // C xz
-                this.C[0, 2] += this.D[0, i] * this.D[2, i];
+                this.C[0, 2] += dF.X * dF.Z / this.A[i];
 
                 // C yy
-                this.C[1, 1] += this.D[1, i] * this.D[1, i];
+                this.C[1, 1] += dF.Y * dF.Y / this.A[i];
 
                 // C yz
-                this.C[1, 2] += this.D[1, i] * this.D[2, i];
+                this.C[1, 2] += dF.Y * dF.Z / this.A[i];
 
                 // C zz
-                this.C[2, 2] += this.D[2, i] * this.D[2, i];
+                this.C[2, 2] += dF.Z * dF.Z / this.A[i];
             }
 
             // C yx

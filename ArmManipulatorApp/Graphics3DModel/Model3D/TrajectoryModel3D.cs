@@ -158,7 +158,7 @@
             trajectoryLineModelVisual3D.Transform = transformGroup;
             return trajectoryLineModelVisual3D;
         }
-        
+
         public void SplitPath(DoWorkEventArgs e, object sender, double step)
         {
             this.track.SplitTrack(e, sender, step);

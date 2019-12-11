@@ -7,6 +7,8 @@
     using System.Windows;
     using System.Windows.Media.Media3D;
 
+    using ArmManipulatorArm.MathModel;
+
     public class Trajectory
     {
         public List<Point3D> AnchorPoints;
@@ -140,6 +142,17 @@
 
             Console.WriteLine("Track divided successfully");
             Console.WriteLine("----Number of all points is " + this.SplitPoints.Count);
+        }
+
+        public List<double> GetListOfDistanceBetweenSplitPoints()
+        {
+            var list = new List<double>();
+            for (var i = 0; i < this.SplitPoints.Count - 1; i++)
+            {
+                list.Add(MathFunctions.NormaVector(this.SplitPoints[i] - this.SplitPoints[i + 1]));
+            }
+
+            return list;
         }
 
         public void SplitTrack(DoWorkEventArgs e, object sender, int numSplitPoint)
