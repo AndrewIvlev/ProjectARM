@@ -757,8 +757,8 @@ namespace ArmManipulatorApp_Tests
         [TestCase(new[] { 0.0, 0.0, 0.0, 0.0 }, 0)]
         [TestCase(new[] { 1.5, 1.5, 3.0, 2.0 }, 0.000000000001)]
         [TestCase(new[] { 0.0, 1.57079632679, 0.0, 0.0 }, 0.000000000001)]
-        [TestCase(new[] { 1.5, 1.5, 1.0, -1.4 }, 0.000000000001)]
-        [TestCase(new[] { 3.14, -3.14, 5.0, 1.52 }, 0.000000000001)]
+        [TestCase(new[] { 1.5, 1.5, 1.0, -1.4 }, 0.0000000001)]
+        [TestCase(new[] { 3.14, -3.14, 5.0, 1.52 }, 0.0000000001)]
         public void CalculationCMatrixIsCorrect(double[] q, double permissibleError)
         {
             var fileName = "RRPR.json";
@@ -790,24 +790,24 @@ namespace ArmManipulatorApp_Tests
             var expC = new Matrix(3, 3)
                        {
                            // C xx
-                           [0, 0] = expected_dFxdq1 * expected_dFxdq1 + expected_dFxdq2 * expected_dFxdq2 + expected_dFxdq3 * expected_dFxdq3 + expected_dFxdq4 * expected_dFxdq4,
+                           [0, 0] = expected_dFxdq1 * expected_dFxdq1 / arm.A[0] + expected_dFxdq2 * expected_dFxdq2 / arm.A[1] + expected_dFxdq3 * expected_dFxdq3 / arm.A[2] + expected_dFxdq4 * expected_dFxdq4 / arm.A[3],
                            // C xy
-                           [0, 1] = expected_dFxdq1 * expected_dFydq1 + expected_dFxdq2 * expected_dFydq2 + expected_dFxdq3 * expected_dFydq3 + expected_dFxdq4 * expected_dFydq4,
+                           [0, 1] = expected_dFxdq1 * expected_dFydq1 / arm.A[0] + expected_dFxdq2 * expected_dFydq2 / arm.A[1] + expected_dFxdq3 * expected_dFydq3 / arm.A[2] + expected_dFxdq4 * expected_dFydq4 / arm.A[3],
                            // C xz
-                           [0, 2] =  expected_dFxdq1 * expected_dFzdq1 + expected_dFxdq2 * expected_dFzdq2 + expected_dFxdq3 * expected_dFzdq3 + expected_dFxdq4 * expected_dFzdq4,
+                           [0, 2] =  expected_dFxdq1 * expected_dFzdq1 / arm.A[0] + expected_dFxdq2 * expected_dFzdq2 / arm.A[1] + expected_dFxdq3 * expected_dFzdq3 / arm.A[2] + expected_dFxdq4 * expected_dFzdq4 / arm.A[3],
                            // C yx
-                           [1, 0] =  expected_dFydq1 * expected_dFxdq1 + expected_dFydq2 * expected_dFxdq2 + expected_dFydq3 * expected_dFxdq3 + expected_dFydq4 * expected_dFxdq4,
+                           [1, 0] =  expected_dFydq1 * expected_dFxdq1 / arm.A[0] + expected_dFydq2 * expected_dFxdq2 / arm.A[1] + expected_dFydq3 * expected_dFxdq3 / arm.A[2] + expected_dFydq4 * expected_dFxdq4 / arm.A[3],
                            // C yy
-                           [1, 1] =  expected_dFydq1 * expected_dFydq1 + expected_dFydq2 * expected_dFydq2 + expected_dFydq3 * expected_dFydq3 + expected_dFydq4 * expected_dFydq4,
+                           [1, 1] =  expected_dFydq1 * expected_dFydq1 / arm.A[0] + expected_dFydq2 * expected_dFydq2 / arm.A[1] + expected_dFydq3 * expected_dFydq3 / arm.A[2] + expected_dFydq4 * expected_dFydq4 / arm.A[3],
                            // C yz
-                           [1, 2] =  expected_dFydq1 * expected_dFzdq1 + expected_dFydq2 * expected_dFzdq2 + expected_dFydq3 * expected_dFzdq3 + expected_dFydq4 * expected_dFzdq4,
+                           [1, 2] =  expected_dFydq1 * expected_dFzdq1 / arm.A[0] + expected_dFydq2 * expected_dFzdq2 / arm.A[1] + expected_dFydq3 * expected_dFzdq3 / arm.A[2] + expected_dFydq4 * expected_dFzdq4 / arm.A[3],
                            // C zx
-                           [2, 0] =  expected_dFxdq1 * expected_dFzdq1 + expected_dFxdq2 * expected_dFzdq2 + expected_dFxdq3 * expected_dFzdq3 + expected_dFxdq4 * expected_dFzdq4,
+                           [2, 0] =  expected_dFxdq1 * expected_dFzdq1 / arm.A[0] + expected_dFxdq2 * expected_dFzdq2 / arm.A[1] + expected_dFxdq3 * expected_dFzdq3 / arm.A[2] + expected_dFxdq4 * expected_dFzdq4 / arm.A[3],
                            // C zy
-                           [2, 1] = expected_dFydq1 * expected_dFzdq1 + expected_dFydq2 * expected_dFzdq2 + expected_dFydq3 * expected_dFzdq3 + expected_dFydq4 * expected_dFzdq4,
+                           [2, 1] = expected_dFydq1 * expected_dFzdq1 / arm.A[0] + expected_dFydq2 * expected_dFzdq2 / arm.A[1] + expected_dFydq3 * expected_dFzdq3 / arm.A[2] + expected_dFydq4 * expected_dFzdq4 / arm.A[3],
                            // C zz
-                           [2, 2] =  expected_dFzdq1* expected_dFzdq1 + expected_dFzdq2* expected_dFzdq2 + expected_dFzdq3* expected_dFzdq3 + expected_dFzdq4* expected_dFzdq4
-                       };
+                           [2, 2] =  expected_dFzdq1* expected_dFzdq1 / arm.A[0] + expected_dFzdq2* expected_dFzdq2 / arm.A[1] + expected_dFzdq3* expected_dFzdq3 / arm.A[2] + expected_dFzdq4* expected_dFzdq4 / arm.A[3]
+            };
             Console.WriteLine(@"Expected C:\n");
             expC.Print();
 
