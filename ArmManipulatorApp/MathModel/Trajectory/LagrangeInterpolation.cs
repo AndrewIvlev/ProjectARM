@@ -1,39 +1,38 @@
-﻿using System.Collections.Generic;
-
-namespace ArmManipulatorApp.MathModel.Trajectory
+﻿namespace ArmManipulatorApp.MathModel.Trajectory
 {
+    using System.Collections.Generic;
+    using System.Windows.Media.Media3D;
+
     public class LagrangeInterpolate
     {
-        private List<double> allX = new List<double>();
-        private List<double> allY = new List<double>();
-
-        public void Add(double x, double y)
-        {
-            allX.Add(x);
-            allY.Add(y);
-        }
-        public int GetCount() => allX.Count;
+        public List<Point3D> DataPoints = new List<Point3D>();
         
-        public double InterpolateX(double x)
+        public int GetCount() => DataPoints.Count;
+        
+        public double Interpolate(double x, double y)
         {
-            double y = 0;
-            for (var i = 0; i <= allX.Count - 1; i++)
+            double z = 0;
+            var n = this.DataPoints.Count;
+            for (var c = 0; c < n; c++)
             {
                 double numerator = 1;
                 double denominator = 1;
-                for (var c = 0; c <= allX.Count - 1; c++)
+                for (var i = 0; i < n; i++)
                 {
-                    if (c != i)
+                    if (i != c)
                     {
-                        numerator *= (x - allX[c]);
-                        denominator *= (allX[i] - allX[c]);
-
+                        for (var j = 0; j < n; j++)
+                        {
+                            numerator *= (x - this.DataPoints[i].X) * (y - this.DataPoints[j].Y);
+                            denominator *= (this.DataPoints[n].X - this.DataPoints[j].X) * (this.DataPoints[n].Y - this.DataPoints[j].Y);
+                        }
                     }
                 }
-                y += allY[i] * (numerator / denominator);
-            }
-            return y;
-        }
 
+                z += this.DataPoints[c].Z * (numerator / denominator);
+            }
+
+            return z;
+        }
     }
 }

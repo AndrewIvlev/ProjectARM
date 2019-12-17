@@ -229,62 +229,15 @@
 
         #region Interpolation
 
-        public void Interpolate(ref LagrangeInterpolate[] interpolate)
+        public void Interpolate()
         {
-            var j = 0;
-            for (var i = 0; i < AnchorPoints.Count - 1; i++)
+            var interpolator = new LagrangeInterpolate();
+
+            foreach (var anchorPoint in this.AnchorPoints)
             {
-                var Xcurr = AnchorPoints[i].X;
-                var Xnext = AnchorPoints[i + 1].X;
-                interpolate[j].Add(Xcurr, AnchorPoints[i].Y);
-                if (Xnext > Xcurr) continue;
-                if ( interpolate[0].GetCount() != 1) j++;
-                do
-                {
-                    interpolate[j].Add(Xcurr, AnchorPoints[i].Y);
-                    if (++i == AnchorPoints.Count - 1) break;
-                    Xcurr = AnchorPoints[i].X;
-                    Xnext = AnchorPoints[i + 1].X;
-                } while (Xnext < Xcurr);
-                interpolate[j].Add(Xcurr, AnchorPoints[i].Y);
-                if (i == AnchorPoints.Count - 1) break;
-                i--;
-                j++;
+                interpolator.DataPoints.Add(anchorPoint);
             }
-
-            interpolate[j].Add(AnchorPoints[AnchorPoints.Count - 1].X, AnchorPoints[AnchorPoints.Count - 1].Y);
         }
-
-        //public void Interpolate(LagrangeInterpolate[] interpolate)
-        //{
-        //    var j = 0;
-        //    for (var i = 0; i < NumOfExtraPoints - 1; i++)
-        //    {
-        //        var Xcurr = ExactExtra[i].X;
-        //        var Xnext = ExactExtra[i + 1].X;
-        //        if (Xcurr == Xnext) continue;
-        //        ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
-        //        SplitPoints.Add(new Point3D((int)Xcurr, (int)ExactExtra[i].Y, 0));
-        //        if (Xnext > Xcurr) continue;
-        //        if(interpolate[0].GetCount() != 1) j++;
-        //        do
-        //        {
-        //            ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
-        //            SplitPoints.Add(new Point3D((int)Xcurr, (int)ExactExtra[i].Y, 0));
-        //            if (++i == NumOfExtraPoints - 1) break;
-        //            Xcurr = ExactExtra[i].X;
-        //            Xnext = ExactExtra[i + 1].X;
-        //            if (Xcurr == Xnext) i++;
-        //        } while (Xnext < Xcurr);
-        //        ExactExtra[i].Y = interpolate[j].InterpolateX(Xcurr);
-        //        SplitPoints.Add(new Point3D((int)Xcurr, (int)ExactExtra[i].Y, 0));
-        //        if (i == NumOfExtraPoints - 1) break;
-        //        i--;
-        //        j++;
-        //    }
-        //    ExactExtra[NumOfExtraPoints - 1].Y = interpolate[j].InterpolateX(ExactExtra[NumOfExtraPoints - 1].X);
-        //    SplitPoints.Add(new Point3D((int)ExactExtra[NumOfExtraPoints - 1].X, (int)ExactExtra[NumOfExtraPoints - 1].Y, 0));
-        //}
         
         #endregion
     }

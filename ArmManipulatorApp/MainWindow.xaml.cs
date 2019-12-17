@@ -220,25 +220,27 @@
 
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-        //    this.Chart.Series["bSeries"].Points.Clear();
-        //    this.Chart.Series["bSeries"].Points.DataBindXY(
-        //        Enumerable.Range(0, this.IterationCount).ToArray(),
-        //        this.bList);
+            this.Chart.Series["SplitPointsDistance"].Points.Clear();
+         
+            //    this.Chart.Series["bSeries"].Points.Clear();
+            //    this.Chart.Series["bSeries"].Points.DataBindXY(
+            //        Enumerable.Range(0, this.IterationCount).ToArray(),
+            //        this.bList);
 
-        //    this.Chart.Series["dSeries"].Points.Clear();
-        //    this.Chart.Series["dSeries"].Points.DataBindXY(
-        //        Enumerable.Range(0, this.IterationCount).ToArray(),
-        //        this.dList);
+            //    this.Chart.Series["dSeries"].Points.Clear();
+            //    this.Chart.Series["dSeries"].Points.DataBindXY(
+            //        Enumerable.Range(0, this.IterationCount).ToArray(),
+            //        this.dList);
 
             this.Chart.Series["deltaSeries"].Points.Clear();
             this.Chart.Series["deltaSeries"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount).ToArray(),
                 this.deltaList);
 
-            //this.Chart.Series["CondSeries"].Points.Clear();
-            //this.Chart.Series["CondSeries"].Points.DataBindXY(
-            //    Enumerable.Range(0, this.IterationCount).ToArray(),
-            //    this.CondList);
+            this.Chart.Series["CondSeries"].Points.Clear();
+            this.Chart.Series["CondSeries"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+                this.CondList);
         }
 
         #endregion
