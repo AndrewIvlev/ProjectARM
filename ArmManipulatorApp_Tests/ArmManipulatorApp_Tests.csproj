@@ -86,10 +86,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="Tracks\little_track_for_3RPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Tracks\Spiral_for_3RPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Tracks\track_for_3RPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Tracks\track_for_RRPR.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Deltas\" />
-    <Folder Include="Tracks\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArmManipulatorApp\ArmManipulatorApp.csproj">

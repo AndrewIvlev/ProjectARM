@@ -14,6 +14,12 @@
         public List<Point3D> AnchorPoints;
         public List<Point3D> SplitPoints;
 
+        /// <summary>
+        /// Function for interpolation
+        /// P(s) = (X(s), Y(s), Z(s))
+        /// </summary>
+        public List<double> StepsValue;
+
         public double Length;
         public bool IsSplit;
 
@@ -22,6 +28,7 @@
             this.IsSplit = false;
             this.AnchorPoints = new List<Point3D>();
             this.SplitPoints = new List<Point3D>();
+            this.StepsValue = new List<double>();
         }
 
         public Trajectory(Point3D StartPoint)
@@ -29,6 +36,7 @@
             this.IsSplit = false;
             this.AnchorPoints = new List<Point3D> { StartPoint };
             this.SplitPoints = new List<Point3D>();
+            this.StepsValue = new List<double>();
         }
 
         public Trajectory(List<Point3D> anchorPoints, List<Point3D> splitPoints = null)
@@ -41,16 +49,17 @@
         public int NearestPointIndex(Point3D O) //Возвращает индекс ближайшей опорной точки к точке О
         {
             var index = -1;
-            double MinDist = 8192;
-            foreach (var P in AnchorPoints)
+            var minDist = 8192.0;
+            foreach (var anchorPoint in this.AnchorPoints)
             {
-                var dist = DistanceBetweenPoints(O, P);
-                if (dist < MinDist)
+                var dist = MathFunctions.NormaVector(O - anchorPoint);
+                if (dist < minDist)
                 {
-                    MinDist = dist;
-                    index = AnchorPoints.IndexOf(P);
+                    minDist = dist;
+                    index = AnchorPoints.IndexOf(anchorPoint);
                 }
             }
+
             return index;
         }
 
@@ -85,31 +94,16 @@
                 this.Length = this.Length - oldLengthLeft - oldLengthRight + newLengthLeft + newLengthRight;
             }
         }
-
-        public double DistanceBetweenPoints(Point3D p1, Point3D p2) => Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
-
+        
         public double GetLen()
         {
             double len = 0;
-            for ( var i = 1; i < AnchorPoints.Count; i++)
-                len += DistanceBetweenPoints(AnchorPoints[i - 1], AnchorPoints[i]);
+            for (var i = 1; i < this.AnchorPoints.Count; i++)
+            {
+                len += MathFunctions.NormaVector(this.AnchorPoints[i - 1] - this.AnchorPoints[i]);
+            }
+
             return len;
-        }
-
-        public static void Swap<T>(IList<T> list, int indexA, int indexB)
-        {
-            var tmp = list[indexA];
-            list[indexA] = list[indexB];
-            list[indexB] = tmp;
-        }
-
-        public double[] GetSteps()
-        {
-            var len = GetLen();
-            var res = new double[AnchorPoints.Count];
-            for (var i = 0; i < AnchorPoints.Count; i++)
-                res[i] = DistanceBetweenPoints(AnchorPoints[0], AnchorPoints[i]) / len;
-            return res;
         }
 
         #region Split Trajectory
@@ -194,7 +188,7 @@
         //    NumOfExtraPoints = index;
         //    IsSplit = true;
         //}
-        
+
         // TODO: remove it 2D realization
         //public void SplitTrajectory(int k)
         //{
@@ -229,16 +223,236 @@
 
         #region Interpolation
 
-        public void Interpolate()
+        public void Calc_Steps()
         {
-            var interpolator = new LagrangeInterpolate();
-
-            foreach (var anchorPoint in this.AnchorPoints)
+            this.StepsValue.Clear();
+            var len = this.GetLen();
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
             {
-                interpolator.DataPoints.Add(anchorPoint);
+                var step = 0.0;
+                for (var j = 0; j < i; j++)
+                {
+                    step += MathFunctions.NormaVector(this.AnchorPoints[j] - this.AnchorPoints[j + 1]);
+                }
+
+                this.StepsValue.Add(step / len);
             }
         }
-        
+
+        public void SplitViaInterpolation(DoWorkEventArgs e, object sender, double delta)
+        {
+            this.Calc_Steps();
+            this.SplitPoints.Clear();
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var step = delta / MathFunctions.NormaVector((Vector3D)this.DerivativeLagrangePolynomial(this.StepsValue[i]));
+                this.SplitPoints.Add(this.LagrangePolynomial(step));
+            }
+
+            ((BackgroundWorker)sender).ReportProgress(1);
+
+            Console.WriteLine("Track divided successfully");
+            Console.WriteLine("----Number of all points is " + this.SplitPoints.Count);
+        }
+
+        public Point3D LagrangePolynomial(double s)
+        {
+            var res = new Point3D();
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                res.X = this.LagrangePolynomial_X(s);
+                res.Y = this.LagrangePolynomial_Y(s);
+                res.Z = this.LagrangePolynomial_Z(s);
+            }
+
+            return res;
+        }
+
+        public Point3D DerivativeLagrangePolynomial(double s)
+        {
+            var res = new Point3D();
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                res.X = this.LagrangePolynomial_X_dS(s);
+                res.Y = this.LagrangePolynomial_Y_dS(s);
+                res.Z = this.LagrangePolynomial_Z_dS(s);
+            }
+
+            return res;
+        }
+
+        public double LagrangePolynomial_X(double s)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 1.0;
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
+                {
+                    if (j != i)
+                    {
+                        p *= (s - this.StepsValue[j]) / (this.StepsValue[i] - this.StepsValue[j]);
+                    }
+                }
+
+                res += this.AnchorPoints[i].X * p;
+            }
+
+            return res;
+        }
+
+        public double LagrangePolynomial_Y(double s)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 1.0;
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
+                {
+                    if (j != i)
+                    {
+                        p *= (s - this.StepsValue[j]) / (this.StepsValue[i] - this.StepsValue[j]);
+                    }
+                }
+
+                res += this.AnchorPoints[i].Y * p;
+            }
+
+            return res;
+        }
+
+        public double LagrangePolynomial_Z(double s)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 1.0;
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
+                {
+                    if (j != i)
+                    {
+                        p *= (s - this.StepsValue[j]) / (this.StepsValue[i] - this.StepsValue[j]);
+                    }
+                }
+
+                res += this.AnchorPoints[i].Z * p;
+            }
+
+            return res;
+        }
+
+        public double LagrangePolynomial_X_dS(double s)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 0.0;
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    var d = 1.0;
+                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    {
+                        if (j != k)
+                        {
+                            if (j != i)
+                            {
+                                d *= s - this.StepsValue[j];
+                            }
+                        }
+                    }
+
+                    p += d;
+                }
+
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    if (k != i)
+                    {
+                        p /= this.StepsValue[i] - this.StepsValue[k];
+                    }
+                }
+
+                res += this.AnchorPoints[i].X * p;
+            }
+                
+            return res;
+        }
+
+        public double LagrangePolynomial_Y_dS(double s)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 0.0;
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    var d = 1.0;
+                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    {
+                        if (j != k)
+                        {
+                            if (j != i)
+                            {
+                                d *= s - this.StepsValue[j];
+                            }
+                        }
+                    }
+
+                    p += d;
+                }
+
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    if (k != i)
+                    {
+                        p /= this.StepsValue[i] - this.StepsValue[k];
+                    }
+                }
+
+                res += this.AnchorPoints[i].Y * p;
+            }
+
+            return res;
+        }
+
+        public double LagrangePolynomial_Z_dS(double s)
+        {
+
+            var res = 0.0;
+            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            {
+                var p = 0.0;
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    var d = 1.0;
+                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    {
+                        if (j != k)
+                        {
+                            if (j != i)
+                            {
+                                d *= s - this.StepsValue[j];
+                            }
+                        }
+                    }
+
+                    p += d;
+                }
+
+                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                {
+                    if (k != i)
+                    {
+                        p /= this.StepsValue[i] - this.StepsValue[k];
+                    }
+                }
+
+                res += this.AnchorPoints[i].Z * p;
+            }
+
+            return res;
+        }
+
         #endregion
     }
 }

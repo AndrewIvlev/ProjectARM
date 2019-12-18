@@ -7,17 +7,22 @@ using NUnit.Framework;
 
 namespace ArmManipulatorApp_Tests
 {
+    using System.Collections.Generic;
     using System.Windows.Media.Media3D;
+
+    using ArmManipulatorApp.MathModel.Trajectory;
 
     [TestFixture]
     public class AllUnitTests
     {
         private string ManipulatorConfigDirectory;
+        private string TrajectoriesDirectory;
         
         [SetUp]
         public void SetUp()
         {
-            ManipulatorConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfigFiles");
+            this.ManipulatorConfigDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "ManipConfigFiles");
+            this.TrajectoriesDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "Tracks");
         }
 
         [TestCase("3RPR.json")]
@@ -817,6 +822,127 @@ namespace ArmManipulatorApp_Tests
             actualC.Print();
 
             Assert.IsTrue(Matrix.IsEqualWithPermissibleError(expC, actualC, permissibleError));
+        }
+
+        [Test]
+        public void LagrangePolynomial_X_Test_Middle()
+        {
+            var fileName = "little_track_for_3RPR.json";
+            var jsonFilePath = Path.Combine(this.TrajectoriesDirectory, fileName);
+            var track = JsonConvert.DeserializeObject<Trajectory>(File.ReadAllText(jsonFilePath));
+
+            track.Calc_Steps();
+            var s = track.StepsValue[3];
+            var actualResult = track.LagrangePolynomial_X(s);
+
+            #region Convinient math objects
+
+            var x0 = track.AnchorPoints[0].X;
+            var x1 = track.AnchorPoints[1].X;
+            var x2 = track.AnchorPoints[2].X;
+            var x3 = track.AnchorPoints[3].X;
+            var x4 = track.AnchorPoints[4].X;
+            var x5 = track.AnchorPoints[5].X;
+
+            var s0 = track.StepsValue[0];
+            var s1 = track.StepsValue[1];
+            var s2 = track.StepsValue[2];
+            var s3 = track.StepsValue[3];
+            var s4 = track.StepsValue[4];
+            var s5 = track.StepsValue[5];
+
+            #endregion
+
+            var expectedResult =
+                x0 * (s - s1) * (s - s2) * (s - s3) * (s - s4) * (s - s5)
+                / ((s0 - s1) * (s0 - s2) * (s0 - s3) * (s0 - s4) * (s0 - s5))
+                + x1 * (s - s0) * (s - s2) * (s - s3) * (s - s4) * (s - s5)
+                / ((s1 - s0) * (s1 - s2) * (s1 - s3) * (s1 - s4) * (s1 - s5))
+                + x2 * (s - s0) * (s - s1) * (s - s3) * (s - s4) * (s - s5)
+                / ((s2 - s0) * (s2 - s1) * (s2 - s3) * (s2 - s4) * (s2 - s5))
+                + x3 * (s - s0) * (s - s1) * (s - s2) * (s - s4) * (s - s5)
+                / ((s3 - s0) * (s3 - s1) * (s3 - s2) * (s3 - s4) * (s3 - s5))
+                + x4 * (s - s0) * (s - s1) * (s - s2) * (s - s3) * (s - s5)
+                / ((s4 - s0) * (s4 - s1) * (s4 - s2) * (s4 - s3) * (s4 - s5))
+                + x5 * (s - s0) * (s - s1) * (s - s2) * (s - s3) * (s - s4)
+                / ((s5 - s0) * (s5 - s1) * (s5 - s2) * (s5 - s3) * (s5 - s4));
+
+            Assert.IsTrue(Math.Abs(expectedResult - actualResult) < 0.0000000000000001);
+        }
+
+        [Test]
+        public void LagrangePolynomial_X_dS_Test_Middle()
+        {
+            var fileName = "little_track_for_3RPR.json";
+            var jsonFilePath = Path.Combine(this.TrajectoriesDirectory, fileName);
+            var track = JsonConvert.DeserializeObject<Trajectory>(File.ReadAllText(jsonFilePath));
+
+            track.Calc_Steps();
+            var s = track.StepsValue[3];
+            var actualResult = track.LagrangePolynomial_X_dS(s);
+
+            #region Convinient math objects
+
+            var x0 = track.AnchorPoints[0].X;
+            var x1 = track.AnchorPoints[1].X;
+            var x2 = track.AnchorPoints[2].X;
+            var x3 = track.AnchorPoints[3].X;
+            var x4 = track.AnchorPoints[4].X;
+            var x5 = track.AnchorPoints[5].X;
+
+            var s0 = track.StepsValue[0];
+            var s1 = track.StepsValue[1];
+            var s2 = track.StepsValue[2];
+            var s3 = track.StepsValue[3];
+            var s4 = track.StepsValue[4];
+            var s5 = track.StepsValue[5];
+
+            #endregion
+
+            var expectedResult =
+                x0 * ((s - s2) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s1) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s1) * (s - s2) * (s - s4) * (s - s5)
+                + (s - s1) * (s - s2) * (s - s3) * (s - s5)
+                + (s - s1) * (s - s2) * (s - s3) * (s - s4))
+                / ((s0 - s1) * (s0 - s2) * (s0 - s3) * (s0 - s4) * (s0 - s5))
+
+                + x1 * ((s - s2) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s2) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s2) * (s - s3) * (s - s5)
+                + (s - s0) * (s - s2) * (s - s3) * (s - s4))
+                / ((s1 - s0) * (s1 - s2) * (s1 - s3) * (s1 - s4) * (s1 - s5))
+
+                + x2 * ((s - s1) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s3) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s3) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s3) * (s - s4))
+                / ((s2 - s0) * (s2 - s1) * (s2 - s3) * (s2 - s4) * (s2 - s5))
+
+                + x3 * ((s - s1) * (s - s2) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s2) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s4) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s4))
+                / ((s3 - s0) * (s3 - s1) * (s3 - s2) * (s3 - s4) * (s3 - s5))
+
+                + x4 * ((s - s1) * (s - s2) * (s - s3) * (s - s5)
+                + (s - s0) * (s - s2) * (s - s3) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s3) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s5)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s3))
+                / ((s4 - s0) * (s4 - s1) * (s4 - s2) * (s4 - s3) * (s4 - s5))
+
+                + x5 * ((s - s1) * (s - s2) * (s - s3) * (s - s4)
+                + (s - s0) * (s - s2) * (s - s3) * (s - s4)
+                + (s - s0) * (s - s1) * (s - s3) * (s - s4)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s4)
+                + (s - s0) * (s - s1) * (s - s2) * (s - s3))
+                / ((s5 - s0) * (s5 - s1) * (s5 - s2) * (s5 - s3) * (s5 - s4));
+
+            Assert.AreEqual(expectedResult, actualResult);
         }
     }
 }

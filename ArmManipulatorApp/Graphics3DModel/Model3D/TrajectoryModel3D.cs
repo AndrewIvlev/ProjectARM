@@ -159,9 +159,16 @@
             return trajectoryLineModelVisual3D;
         }
 
-        public void SplitPath(DoWorkEventArgs e, object sender, double step)
+        public void SplitPath(DoWorkEventArgs e, object sender, double step, bool splitTrackWithInterpolation)
         {
-            this.track.SplitTrack(e, sender, step);
+            if (splitTrackWithInterpolation)
+            {
+                this.track.SplitViaInterpolation(e, sender, step);
+            }
+            else
+            {
+                this.track.SplitTrack(e, sender, step);
+            }
 
             // foreach (var splitPoint in this.track.SplitPoints)
             // {

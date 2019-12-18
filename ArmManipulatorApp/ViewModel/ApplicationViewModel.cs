@@ -21,9 +21,6 @@
     using ArmManipulatorApp.Graphics3DModel.Model3D;
     using ArmManipulatorApp.MathModel.Trajectory;
 
-    using ArmManipulatorArm.MathModel;
-    using ArmManipulatorArm.MathModel.Matrix;
-
     using MainApp.Common;
 
     using Newtonsoft.Json;
@@ -62,6 +59,7 @@
         private double coeff;
         private double thickness;
         private bool ShowAllMessageBox = false;
+        private bool SplitTrackWithInterpolation = false;
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
@@ -453,7 +451,8 @@
 
         public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr, out List<double> distanceBetweenSplitPoints, out int CountOfSplitPoints)
         {
-            this.track3D.SplitPath(e, sender, stepInMToSplitStr);
+            this.track3D.SplitPath(e, sender, stepInMToSplitStr, this.SplitTrackWithInterpolation);
+         
             distanceBetweenSplitPoints = this.track3D.track.GetListOfDistanceBetweenSplitPoints();
             CountOfSplitPoints = this.track3D.track.SplitPoints.Count;
             if (this.ShowAllMessageBox)
@@ -465,6 +464,36 @@
             this.track3D.SplitPath(e, sender, numberOfSplitPoints);
             if (this.ShowAllMessageBox)
                 this.dialogService.ShowMessage("Путь успешно разделён.");
+        }
+
+        public ICommand InterpolateTrajectoryCommand
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                        {
+                            try
+                            {
+                                var trackLen = this.track3D.track.GetLen();
+                                if (trackLen > 0)
+                                {
+                                    this.SplitTrackWithInterpolation = true;
+                                    this.dialogService.ShowMessage(
+                                        "Интерполяция траектории произведена успешно.\nВведите шаг и разделите траекторию.");
+                                }
+                                else
+                                {
+                                    throw new Exception("Что-то пошло не так ;(");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                this.dialogService.ShowMessage(ex.Message);
+                            }
+                        },
+                    (obj) => this.camera != null);
+            }
         }
 
         #endregion
