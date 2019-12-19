@@ -59,7 +59,7 @@
         private double coeff;
         private double thickness;
         private bool ShowAllMessageBox = false;
-        private bool SplitTrackWithInterpolation = false;
+        public bool SplitTrackWithInterpolation = false;
 
         public ApplicationViewModel(IDialogService dialogService,
             IFileService fileService,
@@ -449,21 +449,33 @@
             }
         }
 
+        public void ShowSplitTrack()
+        {
+            this.track3D.RemoveAnchorTrackFromViewport();
+            this.track3D.RemoveSplitTrackFromViewport();
+            this.track3D.ShowInterpolatedTrack();
+            this.track3D.AddSplitTrackToViewport();
+        }
+
         public void SplitTrajectory(DoWorkEventArgs e, object sender, double stepInMToSplitStr, out List<double> distanceBetweenSplitPoints, out int CountOfSplitPoints)
         {
             this.track3D.SplitPath(e, sender, stepInMToSplitStr, this.SplitTrackWithInterpolation);
-         
+            
             distanceBetweenSplitPoints = this.track3D.track.GetListOfDistanceBetweenSplitPoints();
             CountOfSplitPoints = this.track3D.track.SplitPoints.Count;
             if (this.ShowAllMessageBox)
+            {
                 this.dialogService.ShowMessage("Путь успешно разделён.");
+            }
         }
 
         public void SplitTrajectory(DoWorkEventArgs e, object sender, int numberOfSplitPoints)
         {
             this.track3D.SplitPath(e, sender, numberOfSplitPoints);
             if (this.ShowAllMessageBox)
+            {
                 this.dialogService.ShowMessage("Путь успешно разделён.");
+            }
         }
 
         public ICommand InterpolateTrajectoryCommand
@@ -606,7 +618,7 @@
             {
                 var q = this.qList[i];
 
-                Thread.Sleep(60); //TODO: add value from speed slider
+                //Thread.Sleep(60); //TODO: add value from speed slider
                 App.Current.Dispatcher.Invoke(
                     DispatcherPriority.SystemIdle,
                     new Action(

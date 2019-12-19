@@ -159,6 +159,41 @@
             return trajectoryLineModelVisual3D;
         }
 
+        public void ShowInterpolatedTrack()
+        {
+            // TODO: calculate step by formula depending by distance between split points.
+            var step = 1;
+            if (this.track.SplitPoints.Count > 2000)
+            {
+                step = 4;
+            }
+            else if (this.track.SplitPoints.Count > 4000)
+            {
+                step = 13;
+            }
+            else if (this.track.SplitPoints.Count > 7000)
+            {
+                step = 30;
+            }
+
+
+            this.splitTrackModelVisual3D.Add(
+                this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[0], this.coeff), this.pointRadius));
+            for (var i = 1; i + step < this.track.SplitPoints.Count; i += step)
+            {
+                var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
+                    VRConvert.ConvertFromRealToVirtual(
+                        this.track.SplitPoints[i - 1],
+                        this.coeff),
+                    VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[i + step], this.coeff),
+                    this.trackLineRadius);
+
+                this.splitTrackModelVisual3D.Add(trackLineMV3D);
+                this.splitTrackModelVisual3D.Add(
+                    this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[i], this.coeff), this.pointRadius));
+            }
+        }
+
         public void SplitPath(DoWorkEventArgs e, object sender, double step, bool splitTrackWithInterpolation)
         {
             if (splitTrackWithInterpolation)

@@ -878,7 +878,7 @@ namespace ArmManipulatorApp_Tests
             var track = JsonConvert.DeserializeObject<Trajectory>(File.ReadAllText(jsonFilePath));
 
             track.Calc_Steps();
-            var s = track.StepsValue[3];
+            var s = track.StepsValue[3] + 0.1;
             var actualResult = track.LagrangePolynomial_X_dS(s);
 
             #region Convinient math objects
@@ -901,48 +901,42 @@ namespace ArmManipulatorApp_Tests
 
             var expectedResult =
                 x0 * ((s - s2) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s1) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s1) * (s - s2) * (s - s4) * (s - s5)
-                + (s - s1) * (s - s2) * (s - s3) * (s - s5)
-                + (s - s1) * (s - s2) * (s - s3) * (s - s4))
+                + (s - s1) * ((s - s3) * (s - s4) * (s - s5)
+                + (s - s2) * ((s - s4) * (s - s5)
+                + (s - s3) * ((s - s5) + (s - s4)))))
                 / ((s0 - s1) * (s0 - s2) * (s0 - s3) * (s0 - s4) * (s0 - s5))
 
                 + x1 * ((s - s2) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s2) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s2) * (s - s3) * (s - s5)
-                + (s - s0) * (s - s2) * (s - s3) * (s - s4))
+                + (s - s0) * ((s - s3) * (s - s4) * (s - s5)
+                + (s - s2) * ((s - s4) * (s - s5)
+                + (s - s3) * ((s - s5) + (s - s4)))))
                 / ((s1 - s0) * (s1 - s2) * (s1 - s3) * (s1 - s4) * (s1 - s5))
 
                 + x2 * ((s - s1) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s3) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s3) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s3) * (s - s4))
+                + (s - s0) * ((s - s3) * (s - s4) * (s - s5)
+                + (s - s1) * ((s - s4) * (s - s5)
+                + (s - s3) * ((s - s5) + (s - s4)))))
                 / ((s2 - s0) * (s2 - s1) * (s2 - s3) * (s2 - s4) * (s2 - s5))
 
                 + x3 * ((s - s1) * (s - s2) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s2) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s4) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s4))
+                + (s - s0) * ((s - s2) * (s - s4) * (s - s5)
+                + (s - s1) * ((s - s4) * (s - s5)
+                + (s - s2) * ((s - s5) + (s - s4)))))
                 / ((s3 - s0) * (s3 - s1) * (s3 - s2) * (s3 - s4) * (s3 - s5))
 
                 + x4 * ((s - s1) * (s - s2) * (s - s3) * (s - s5)
-                + (s - s0) * (s - s2) * (s - s3) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s3) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s5)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s3))
+                + (s - s0) * ((s - s2) * (s - s3) * (s - s5)
+                + (s - s1) * ((s - s3) * (s - s5)
+                + (s - s2) * ((s - s5) + (s - s3)))))
                 / ((s4 - s0) * (s4 - s1) * (s4 - s2) * (s4 - s3) * (s4 - s5))
 
                 + x5 * ((s - s1) * (s - s2) * (s - s3) * (s - s4)
-                + (s - s0) * (s - s2) * (s - s3) * (s - s4)
-                + (s - s0) * (s - s1) * (s - s3) * (s - s4)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s4)
-                + (s - s0) * (s - s1) * (s - s2) * (s - s3))
+                + (s - s0) * ((s - s2) * (s - s3) * (s - s4)
+                + (s - s1) * ((s - s3) * (s - s4)
+                + (s - s2) * ((s - s4) + (s - s3)))))
                 / ((s5 - s0) * (s5 - s1) * (s5 - s2) * (s5 - s3) * (s5 - s4));
 
-            Assert.AreEqual(expectedResult, actualResult);
+            Assert.IsTrue(Math.Abs(expectedResult - actualResult) < 0.00000000000001);
         }
     }
 }

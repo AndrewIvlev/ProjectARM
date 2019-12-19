@@ -243,10 +243,12 @@
         {
             this.Calc_Steps();
             this.SplitPoints.Clear();
-            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            var stepK = this.StepsValue[0];
+            while (stepK < this.StepsValue[this.AnchorPoints.Count - 1])
             {
-                var step = delta / MathFunctions.NormaVector((Vector3D)this.DerivativeLagrangePolynomial(this.StepsValue[i]));
-                this.SplitPoints.Add(this.LagrangePolynomial(step));
+                this.SplitPoints.Add(this.LagrangePolynomial(stepK));
+                var deltaStep = delta / MathFunctions.NormaVector((Vector3D)this.DerivativeLagrangePolynomial(stepK));
+                stepK += deltaStep;
             }
 
             ((BackgroundWorker)sender).ReportProgress(1);
@@ -344,35 +346,38 @@
         public double LagrangePolynomial_X_dS(double s)
         {
             var res = 0.0;
-            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            for (var k = 0; k < this.AnchorPoints.Count; k++)
             {
                 var p = 0.0;
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var i = 0; i < this.AnchorPoints.Count; i++)
                 {
-                    var d = 1.0;
-                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    if (i != k)
                     {
-                        if (j != k)
+                        var d = 1.0;
+                        for (var j = 0; j < this.AnchorPoints.Count; j++)
                         {
-                            if (j != i)
+                            if (j != k)
                             {
-                                d *= s - this.StepsValue[j];
+                                if (j != i)
+                                {
+                                    d *= s - this.StepsValue[j];
+                                }
                             }
                         }
-                    }
 
-                    p += d;
+                        p += d;
+                    }
                 }
 
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
                 {
-                    if (k != i)
+                    if (j != k)
                     {
-                        p /= this.StepsValue[i] - this.StepsValue[k];
+                        p /= this.StepsValue[k] - this.StepsValue[j];
                     }
                 }
 
-                res += this.AnchorPoints[i].X * p;
+                res += this.AnchorPoints[k].X * p;
             }
                 
             return res;
@@ -381,35 +386,38 @@
         public double LagrangePolynomial_Y_dS(double s)
         {
             var res = 0.0;
-            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            for (var k = 0; k < this.AnchorPoints.Count; k++)
             {
                 var p = 0.0;
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var i = 0; i < this.AnchorPoints.Count; i++)
                 {
-                    var d = 1.0;
-                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    if (i != k)
                     {
-                        if (j != k)
+                        var d = 1.0;
+                        for (var j = 0; j < this.AnchorPoints.Count; j++)
                         {
-                            if (j != i)
+                            if (j != k)
                             {
-                                d *= s - this.StepsValue[j];
+                                if (j != i)
+                                {
+                                    d *= s - this.StepsValue[j];
+                                }
                             }
                         }
-                    }
 
-                    p += d;
+                        p += d;
+                    }
                 }
 
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
                 {
-                    if (k != i)
+                    if (j != k)
                     {
-                        p /= this.StepsValue[i] - this.StepsValue[k];
+                        p /= this.StepsValue[k] - this.StepsValue[j];
                     }
                 }
 
-                res += this.AnchorPoints[i].Y * p;
+                res += this.AnchorPoints[k].Y * p;
             }
 
             return res;
@@ -417,37 +425,39 @@
 
         public double LagrangePolynomial_Z_dS(double s)
         {
-
             var res = 0.0;
-            for (var i = 0; i < this.AnchorPoints.Count; i++)
+            for (var k = 0; k < this.AnchorPoints.Count; k++)
             {
                 var p = 0.0;
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var i = 0; i < this.AnchorPoints.Count; i++)
                 {
-                    var d = 1.0;
-                    for (var j = 0; j < this.AnchorPoints.Count; j++)
+                    if (i != k)
                     {
-                        if (j != k)
+                        var d = 1.0;
+                        for (var j = 0; j < this.AnchorPoints.Count; j++)
                         {
-                            if (j != i)
+                            if (j != k)
                             {
-                                d *= s - this.StepsValue[j];
+                                if (j != i)
+                                {
+                                    d *= s - this.StepsValue[j];
+                                }
                             }
                         }
-                    }
 
-                    p += d;
+                        p += d;
+                    }
                 }
 
-                for (var k = 0; k < this.AnchorPoints.Count; k++)
+                for (var j = 0; j < this.AnchorPoints.Count; j++)
                 {
-                    if (k != i)
+                    if (j != k)
                     {
-                        p /= this.StepsValue[i] - this.StepsValue[k];
+                        p /= this.StepsValue[k] - this.StepsValue[j];
                     }
                 }
 
-                res += this.AnchorPoints[i].Z * p;
+                res += this.AnchorPoints[k].Z * p;
             }
 
             return res;

@@ -171,6 +171,11 @@
             this.Chart.Series["SplitPointsDistance"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount - 1).ToArray(),
                 this.DistanceBetweenSplitPoints);
+
+            if (this.appViewModel.SplitTrackWithInterpolation)
+            {
+                this.appViewModel.ShowSplitTrack();
+            }
         }
 
         #endregion
