@@ -11,6 +11,8 @@
     using ArmManipulatorApp.Common;
     using ArmManipulatorApp.ViewModel;
 
+    // TODO: refactor by MVVM pattern
+
     public partial class MainWindow : Window
     {
         BackgroundWorker splittingTrackWorker;
