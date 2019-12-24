@@ -55,6 +55,9 @@
                 <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" />
             </MenuItem>
             <MenuItem Header="Движение" x:Name="MovingMenuItem"></MenuItem>
+            <MenuItem Header="Настройки" x:Name="SettingsMenuItem"></MenuItem>
+            
+            <!--> TODO: Препятствия
             <MenuItem Header="Препятствия">
                 <MenuItem Header="Добавить"/>
                 <MenuItem Header="Открыть"/>
@@ -63,6 +66,7 @@
                 <Separator />
                 <MenuItem Header="Удалить все"/>
             </MenuItem>
+            </-->
         </Menu>
 
         <Grid Grid.Column="0" Grid.Row="1" >
@@ -145,11 +149,10 @@
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="2">
-            <StackPanel>
+            <StackPanel x:Name="SettingsStackPanel">
                 <Separator Height="10"></Separator>
                 <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
                 <Separator Height="5"></Separator>
-
                 <Label x:Name="QLabel" Content="Вектор обобщённых координат q:" FontSize="14" Margin="10,0"/>
                 <WrapPanel>
                     <TextBox x:Name="VectorQTextBox" HorizontalAlignment="Left" Width="139" Margin="10,7" ></TextBox>
@@ -158,30 +161,42 @@
                             Style="{StaticResource ButtonStyle}" >
                     </Button>
                 </WrapPanel>
-
                 <Separator Height="5"></Separator>
-
                 <CheckBox x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="С выводом числа обусловленности"/>
                 <Separator Height="5"></Separator>
-
-                <CheckBox x:Name="WithRepeatPlanningCheckBox" FontSize="14" Margin="10,5" Content="С повторным планированием"/>
+                <RadioButton x:Name="WithoutRepeatPlanningCheckBox" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
+                <TextBlock FontSize="14" Margin="10,5" Text="С повторным планированием"/>
                 <WrapPanel>
-                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</TextBlock>
-                    <TextBox x:Name="ThresholdForRepeatPlanning" HorizontalAlignment="Left" Width="40" ></TextBox>
+                    <RadioButton x:Name="WithRepeatPlanningByThresholdCheckBox" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</RadioButton>
+                    <TextBox x:Name="ThresholdForRepeatPlanning" HorizontalAlignment="Left" Width="35" ></TextBox>
                     <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">м.</TextBlock>
                 </WrapPanel>
-
+                <TextBlock Text="или" FontSize="14" Margin="10,0,5,0"></TextBlock>
+                <WrapPanel>
+                    <RadioButton x:Name="WithRepeatPlanningByCountCheckBox" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >к каждой точке k раз, где k = </RadioButton>
+                    <TextBox x:Name="RepeatCountForThePointPlanning" HorizontalAlignment="Left" Width="40" ></TextBox>
+                </WrapPanel>
                 <Separator Height="5"></Separator>
 
+                <!--> TODO: A[i] coeffs variation
                 <TextBlock Margin="10,5" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
                 <ComboBox x:Name="comboBox" Width="253">
                     <ComboBoxItem IsSelected="True">без уравновешивания</ComboBoxItem>
                     <ComboBoxItem>с общим конструктивным уравновешиванием</ComboBoxItem>
                     <ComboBoxItem>с итеративным учётом чувствительности</ComboBoxItem>
                 </ComboBox>
+                </-->
+            </StackPanel>
+            <StackPanel x:Name="ResultsStackPanel" Visibility="Hidden">
                 <Separator Height="10"></Separator>
+                <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Результаты работы алгоритма</Label>
+                <Separator Height="5"></Separator>
+                <Separator Height="5"></Separator>
+                <TextBlock Margin="10,5" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
+                <Separator Height="10"></Separator>
+                <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
                 <Label x:Name="PathLength" Content="Длина пути = 0 м." FontSize="14" Margin="10,0" />
-                <Label x:Name="WorkingTime" Content="Время работы алгоритма = 0 сек." FontSize="14" Margin="10,0" />
+                <Label Content="Конечное значение обобщённых координат q:" FontSize="14" Margin="10,0"/>
             </StackPanel>
         </Grid>
 
