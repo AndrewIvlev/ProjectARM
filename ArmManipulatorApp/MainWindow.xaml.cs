@@ -20,14 +20,16 @@
                 this.VectorQTextBox,
                 this.PathLength,
                 this.Chart,
+                this.ChartUpper,
+                this.ChartLower,
                 this.WithConditionNumberRadioButton,
-                this.WithRepeatPlanningCheckBox,
+                this.WithRepeatPlanningRadioButton,
                 this.PathSplittingProgressBar,
                 this.PathPlanningProgressBar,
                 this.StepInMeterToSplitTextBox,
                 this.NumberOfPointsToSplitTextBox,
                 this.ThresholdForRepeatPlanning,
-                this.WorkingTime,
+                //this.WorkingTime,
                 this.SliderAnimation);
 
             this.DataContext = this.appViewModel;

@@ -165,7 +165,7 @@
                 <Separator Height="5"></Separator>
                 <CheckBox x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="С выводом числа обусловленности"/>
                 <Separator Height="5"></Separator>
-                <RadioButton x:Name="WithoutRepeatPlanningCheckBox" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
+                <RadioButton x:Name="WithRepeatPlanningRadioButton" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
                 <TextBlock FontSize="14" Margin="10,5" Text="С повторным планированием"/>
                 <WrapPanel>
                     <RadioButton x:Name="WithRepeatPlanningByThresholdCheckBox" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</RadioButton>
@@ -207,6 +207,12 @@
         <Grid Grid.Column="2" Grid.Row="2">
             <WindowsFormsHost>
                 <dvc:Chart x:Name="Chart" Height="60"/>
+            </WindowsFormsHost>
+            <WindowsFormsHost>
+                <dvc:Chart x:Name="ChartUpper" Height="30"/>
+            </WindowsFormsHost>
+            <WindowsFormsHost>
+                <dvc:Chart x:Name="ChartLower" Height="30"/>
             </WindowsFormsHost>
         </Grid>
 

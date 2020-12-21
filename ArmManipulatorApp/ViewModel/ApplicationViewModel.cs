@@ -27,6 +27,7 @@
     using Newtonsoft.Json;
 
     using CheckBox = System.Windows.Controls.CheckBox;
+    using RadioButton = System.Windows.Controls.RadioButton;
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
     using Label = System.Windows.Controls.Label;
     using Point3D = System.Windows.Media.Media3D.Point3D;
@@ -86,9 +87,13 @@
 
         private Chart Chart;
 
+        private Chart ChartUpper;
+
+        private Chart ChartLower;
+
         private CheckBox WithConditionNumberRadioButton;
 
-        private CheckBox WithRepeatPlanningCheckBox;
+        private RadioButton WithRepeatPlanningRadioButton;
 
         private ProgressBar PathSplittingProgressBar;
 
@@ -100,7 +105,7 @@
 
         private TextBox ThresholdForRepeatPlanning;
 
-        private Label WorkingTime;
+        //private Label WorkingTime;
 
         private Slider SliderAnimation;
 
@@ -136,14 +141,16 @@
             TextBox vectorQTextBox,
             Label pathLength,
             Chart Chart,
+            Chart ChartUpper,
+            Chart ChartLower,
             CheckBox WithConditionNumberRadioButton,
-            CheckBox WithRepeatPlanningCheckBox,
+            RadioButton WithRepeatPlanningRadioButton,
             ProgressBar PathSplittingProgressBar,
             ProgressBar PathPlanningProgressBar,
             TextBox StepInMeterToSplitTextBox,
             TextBox NumberOfPointsToSplitTextBox,
             TextBox ThresholdForRepeatPlanning,
-            Label WorkingTime,
+            //Label WorkingTime,
             Slider SliderAnimation)
         {
             this.dialogService = dialogService;
@@ -158,7 +165,7 @@
             this.StepInMeterToSplitTextBox = StepInMeterToSplitTextBox;
             this.NumberOfPointsToSplitTextBox = NumberOfPointsToSplitTextBox;
             this.ThresholdForRepeatPlanning = ThresholdForRepeatPlanning;
-            this.WorkingTime = WorkingTime;
+            //this.WorkingTime = WorkingTime;
             this.SliderAnimation = SliderAnimation;
             this.qList = new List<double[]>();
             this.coeff = 10;
@@ -188,7 +195,9 @@
             this.WithRepeatPlanning = false;
             this.ThresholdForPlanning = double.MaxValue;
             this.WithConditionNumberRadioButton = WithConditionNumberRadioButton;
-            this.WithRepeatPlanningCheckBox = WithRepeatPlanningCheckBox;
+            this.WithRepeatPlanningRadioButton = WithRepeatPlanningRadioButton;
+
+            #region Charts initializing
 
             this.Chart = Chart;
             this.Chart.ChartAreas.Add(new ChartArea("Default"));
@@ -216,6 +225,52 @@
             //int[] axisXData = { 0, 50, 100 };
             //double[] axisYData = { 5.3, 1.3, 7.3 };
             //this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
+
+            this.ChartUpper = ChartUpper;
+            this.ChartUpper.ChartAreas.Add(new ChartArea("Default"));
+            this.ChartUpper.Series.Add(new Series("bSeries"));
+            this.ChartUpper.Series["bSeries"].ChartArea = "Default";
+            this.ChartUpper.Series["bSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartUpper.Series.Add(new Series("dSeries"));
+            this.ChartUpper.Series["dSeries"].ChartArea = "Default";
+            this.ChartUpper.Series["dSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartUpper.Series.Add(new Series("deltaSeries"));
+            this.ChartUpper.Series["deltaSeries"].ChartArea = "Default";
+            this.ChartUpper.Series["deltaSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartUpper.Series.Add(new Series("CondSeries"));
+            this.ChartUpper.Series["CondSeries"].ChartArea = "Default";
+            this.ChartUpper.Series["CondSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartUpper.Series.Add(new Series("SplitPointsDistance"));
+            this.ChartUpper.Series["SplitPointsDistance"].ChartArea = "Default";
+            this.ChartUpper.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
+
+            this.ChartLower = ChartLower;
+            this.ChartLower.ChartAreas.Add(new ChartArea("Default"));
+            this.ChartLower.Series.Add(new Series("bSeries"));
+            this.ChartLower.Series["bSeries"].ChartArea = "Default";
+            this.ChartLower.Series["bSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartLower.Series.Add(new Series("dSeries"));
+            this.ChartLower.Series["dSeries"].ChartArea = "Default";
+            this.ChartLower.Series["dSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartLower.Series.Add(new Series("deltaSeries"));
+            this.ChartLower.Series["deltaSeries"].ChartArea = "Default";
+            this.ChartLower.Series["deltaSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartLower.Series.Add(new Series("CondSeries"));
+            this.ChartLower.Series["CondSeries"].ChartArea = "Default";
+            this.ChartLower.Series["CondSeries"].ChartType = SeriesChartType.Line;
+
+            this.ChartLower.Series.Add(new Series("SplitPointsDistance"));
+            this.ChartLower.Series["SplitPointsDistance"].ChartArea = "Default";
+            this.ChartLower.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
+
+            #endregion
         }
 
         #region Manipulator
@@ -1191,10 +1246,10 @@
                             {
                                 this.WithCond = (bool)this.WithConditionNumberRadioButton.IsChecked;
 
-                                this.WithRepeatPlanning = (bool)this.WithRepeatPlanningCheckBox.IsChecked;
-                                this.ThresholdForPlanning = this.WithRepeatPlanning
-                                                                ? double.Parse(this.ThresholdForRepeatPlanning.Text)
-                                                                : double.MaxValue;
+                                this.WithRepeatPlanning = (bool)this.WithRepeatPlanningRadioButton.IsChecked;
+                                //this.ThresholdForPlanning = this.WithRepeatPlanning
+                                //                                ? double.Parse(this.ThresholdForRepeatPlanning.Text)
+                                //                                : double.MaxValue;
                                 this.PathPlanningProgressBar.IsIndeterminate = this.WithRepeatPlanning;
                                 this.PathPlanningProgressBar.Maximum = this.track3D.track.SplitPoints.Count;
                                 this.PathPlanningProgressBar.Value = 0;
@@ -1221,7 +1276,7 @@
                             {
                                 this.planningWorker.CancelAsync();
                                 this.timePlanning.Stop();
-                                this.WorkingTime.Content = $"Время работы алгоритма = {this.timePlanning.ElapsedMilliseconds * 60} сек.";
+                                //this.WorkingTime.Content = $"Время работы алгоритма = {this.timePlanning.ElapsedMilliseconds * 60} сек.";
                             }
                             catch (Exception ex)
                             {
@@ -1245,15 +1300,25 @@
             //        Enumerable.Range(0, this.IterationCount).ToArray(),
             //        this.dList);
 
-            this.Chart.Series["deltaSeries"].Points.Clear();
-            this.Chart.Series["deltaSeries"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.deltaList);
+            if (this.WithCond)
+            {
+                this.ChartUpper.Series["deltaSeries"].Points.Clear();
+                this.ChartUpper.Series["deltaSeries"].Points.DataBindXY(
+                    Enumerable.Range(0, this.IterationCount).ToArray(),
+                    this.deltaList);
 
-            this.Chart.Series["CondSeries"].Points.Clear();
-            this.Chart.Series["CondSeries"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                this.CondList);
+                this.ChartLower.Series["CondSeries"].Points.Clear();
+                this.ChartLower.Series["CondSeries"].Points.DataBindXY(
+                    Enumerable.Range(0, this.IterationCount).ToArray(),
+                    this.CondList);
+            }
+            else
+            {
+                this.Chart.Series["deltaSeries"].Points.Clear();
+                this.Chart.Series["deltaSeries"].Points.DataBindXY(
+                    Enumerable.Range(0, this.IterationCount).ToArray(),
+                    this.deltaList);
+            }
         }
 
         #endregion
