@@ -194,26 +194,14 @@
             }
         }
 
-        public void SplitPath(DoWorkEventArgs e, object sender, double step, bool splitTrackWithInterpolation)
+        public void SplitPathWithInterpolation(DoWorkEventArgs e, object sender, double step)
         {
-            if (splitTrackWithInterpolation)
-            {
-                this.track.SplitViaInterpolation(e, sender, step);
-            }
-            else
-            {
-                this.track.SplitTrack(e, sender, step);
-            }
-
-            // foreach (var splitPoint in this.track.SplitPoints)
-            // {
-            //     this.splitTrackModelVisual3D.Add(this.CreateSplitPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(splitPoint, this.coeff)));
-            // }
+            this.track.SplitViaInterpolation(e, sender, step);
         }
-        
-        public void SplitPath(DoWorkEventArgs e, object sender, int numOfSplitPoints)
+
+        public void SplitPath(DoWorkEventArgs e, object sender, double step)
         {
-            this.track.SplitTrack(e, sender, numOfSplitPoints);
+            this.track.SplitTrack(e, sender, step);
 
             // foreach (var splitPoint in this.track.SplitPoints)
             // {

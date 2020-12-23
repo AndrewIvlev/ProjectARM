@@ -21,11 +21,9 @@
         public List<double> StepsValue;
 
         public double Length;
-        public bool IsSplit;
 
         public Trajectory()
         {
-            this.IsSplit = false;
             this.AnchorPoints = new List<Point3D>();
             this.SplitPoints = new List<Point3D>();
             this.StepsValue = new List<double>();
@@ -33,7 +31,6 @@
 
         public Trajectory(Point3D StartPoint)
         {
-            this.IsSplit = false;
             this.AnchorPoints = new List<Point3D> { StartPoint };
             this.SplitPoints = new List<Point3D>();
             this.StepsValue = new List<double>();
@@ -43,7 +40,6 @@
         {
             this.AnchorPoints = anchorPoints;
             this.SplitPoints = splitPoints;
-            this.IsSplit = splitPoints != null;
         }
 
         public int NearestPointIndex(Point3D O) //Возвращает индекс ближайшей опорной точки к точке О
@@ -98,9 +94,19 @@
         public double GetLen()
         {
             double len = 0;
-            for (var i = 1; i < this.AnchorPoints.Count; i++)
+            if (this.SplitPoints.Count > 0)
             {
-                len += MathFunctions.NormaVector(this.AnchorPoints[i - 1] - this.AnchorPoints[i]);
+                for (var i = 1; i < this.SplitPoints.Count; i++)
+                {
+                    len += MathFunctions.NormaVector(this.SplitPoints[i - 1] - this.SplitPoints[i]);
+                }
+            }
+            else
+            {
+                for (var i = 1; i < this.AnchorPoints.Count; i++)
+                {
+                    len += MathFunctions.NormaVector(this.AnchorPoints[i - 1] - this.AnchorPoints[i]);
+                }
             }
 
             return len;
@@ -149,18 +155,6 @@
             return list;
         }
 
-        public void SplitTrack(DoWorkEventArgs e, object sender, int numSplitPoint)
-        {
-            throw new NotImplementedException();
-            //((BackgroundWorker)sender).ReportProgress(0);
-
-            //if (((BackgroundWorker)sender).CancellationPending == true)
-            //{
-            //    e.Cancel = true;
-            //    return;
-            //}
-        }
-
         // TODO: remove it 2D realization
         //public void SplitTrajectory(double step)
         //{
@@ -186,7 +180,6 @@
         //    ExactExtra[index++] = AnchorPoints[AnchorPoints.Count - 1];
         //    SplitPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
         //    NumOfExtraPoints = index;
-        //    IsSplit = true;
         //}
 
         // TODO: remove it 2D realization
@@ -216,7 +209,6 @@
         //    ExactExtra[index++] = AnchorPoints[AnchorPoints.Count - 1];
         //    SplitPoints.Add(AnchorPoints[AnchorPoints.Count - 1]);
         //    NumOfExtraPoints = index;
-        //    IsSplit = true;
         //}
 
         #endregion

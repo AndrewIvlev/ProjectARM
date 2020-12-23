@@ -75,8 +75,6 @@
 
         private bool ShowAllMessageBox = false;
 
-        public bool SplitTrackWithInterpolation = false;
-
         Stopwatch timePlanning;
 
         BackgroundWorker splittingTrackWorker;
@@ -91,7 +89,9 @@
 
         private Chart ChartLower;
 
-        private CheckBox WithConditionNumberRadioButton;
+        private CheckBox WithConditionNumberCheckBox;
+
+        private CheckBox WithInterpolationCheckBox;
 
         private RadioButton WithRepeatPlanningRadioButton;
 
@@ -123,11 +123,15 @@
 
         private double ThresholdForPlanning;
 
+        private double stepInMeterToSplit;
+
         private string StepInMeterToSplit;
 
         private string NumberOfPointsToSplit;
 
         private bool WithRepeatPlanning;
+
+        private bool SplitTrackWithInterpolation;
 
         private bool WithCond;
 
@@ -143,7 +147,8 @@
             Chart Chart,
             Chart ChartUpper,
             Chart ChartLower,
-            CheckBox WithConditionNumberRadioButton,
+            CheckBox WithConditionNumberCheckBox,
+            CheckBox WithInterpolationCheckBox,
             RadioButton WithRepeatPlanningRadioButton,
             ProgressBar PathSplittingProgressBar,
             ProgressBar PathPlanningProgressBar,
@@ -194,7 +199,8 @@
             this.WithCond = false;
             this.WithRepeatPlanning = false;
             this.ThresholdForPlanning = double.MaxValue;
-            this.WithConditionNumberRadioButton = WithConditionNumberRadioButton;
+            this.WithConditionNumberCheckBox = WithConditionNumberCheckBox;
+            this.WithInterpolationCheckBox = WithInterpolationCheckBox;
             this.WithRepeatPlanningRadioButton = WithRepeatPlanningRadioButton;
 
             #region Charts initializing
@@ -685,52 +691,20 @@
             out List<double> distanceBetweenSplitPoints,
             out int CountOfSplitPoints)
         {
-            this.track3D.SplitPath(e, sender, stepInMToSplitStr, this.SplitTrackWithInterpolation);
+            if (this.SplitTrackWithInterpolation)
+            {
+                this.track3D.SplitPathWithInterpolation(e, sender, stepInMToSplitStr);
+            }
+            else
+            {
+                this.track3D.SplitPath(e, sender, stepInMToSplitStr);
+            }
 
             distanceBetweenSplitPoints = this.track3D.track.GetListOfDistanceBetweenSplitPoints();
             CountOfSplitPoints = this.track3D.track.SplitPoints.Count;
             if (this.ShowAllMessageBox)
             {
                 this.dialogService.ShowMessage("Путь успешно разделён.");
-            }
-        }
-
-        public void SplitTrajectory(DoWorkEventArgs e, object sender, int numberOfSplitPoints)
-        {
-            this.track3D.SplitPath(e, sender, numberOfSplitPoints);
-            if (this.ShowAllMessageBox)
-            {
-                this.dialogService.ShowMessage("Путь успешно разделён.");
-            }
-        }
-
-        public ICommand InterpolateTrajectoryCommand
-        {
-            get
-            {
-                return new RelayCommand(
-                    obj =>
-                        {
-                            try
-                            {
-                                var trackLen = this.track3D.track.GetLen();
-                                if (trackLen > 0)
-                                {
-                                    this.SplitTrackWithInterpolation = true;
-                                    this.dialogService.ShowMessage(
-                                        "Интерполяция траектории произведена успешно.\nВведите шаг и разделите траекторию.");
-                                }
-                                else
-                                {
-                                    throw new Exception("Что-то пошло не так ;(");
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                this.dialogService.ShowMessage(ex.Message);
-                            }
-                        },
-                    (obj) => this.camera != null);
             }
         }
 
@@ -763,31 +737,61 @@
             {
                 var point = this.track3D.track.SplitPoints[i];
 
-                this.armModel3D.arm.LagrangeMethodToThePoint(
-                    point,
-                    out var b,
-                    out var d,
-                    out var delta,
-                    out var cond,
-                    withCond);
-                this.qList.Add(this.armModel3D.arm.GetQ());
-
-                bList.Add(b);
-                dList.Add(d);
-                deltaList.Add(delta);
-                condList.Add(cond);
-
-                ++resIterCount;
-                if (withRepeatPlan)
+                if (withCond)
                 {
-                    if (b > threshold)
+                    this.armModel3D.arm.LagrangeMethodToThePoint(
+                        point,
+                        out var b,
+                        out var d,
+                        out var delta,
+                        out var cond);
+
+                    this.qList.Add(this.armModel3D.arm.GetQ());
+
+                    bList.Add(b);
+                    dList.Add(d);
+                    deltaList.Add(delta);
+                    condList.Add(cond);
+
+                    ++resIterCount;
+                    if (withRepeatPlan)
                     {
-                        i--;
+                        if (b > threshold)
+                        {
+                            i--;
+                        }
+                    }
+                    else
+                    {
+                        ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
                     }
                 }
                 else
                 {
-                    ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
+                    this.armModel3D.arm.LagrangeMethodToThePoint(
+                        point,
+                        out var b,
+                        out var d,
+                        out var delta);
+
+                    this.qList.Add(this.armModel3D.arm.GetQ());
+
+                    bList.Add(b);
+                    dList.Add(d);
+                    deltaList.Add(delta);
+
+                    ++resIterCount;
+                    if (withRepeatPlan)
+                    {
+                        if (b > threshold)
+                        {
+                            i--;
+                        }
+                    }
+                    else
+                    {
+                        ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
+                    }
                 }
 
                 if (((BackgroundWorker)sender).CancellationPending == true)
@@ -1074,19 +1078,12 @@
 
         private void SplittingTrackWorkerDoWork(object sender, DoWorkEventArgs e)
         {
-            if (this.SplitByStep)
-            {
-                this.SplitTrajectory(
-                    e,
-                    sender,
-                    double.Parse(this.StepInMeterToSplit),
-                    out this.DistanceBetweenSplitPoints,
-                    out this.IterationCount);
-            }
-            else
-            {
-                this.SplitTrajectory(e, sender, int.Parse(this.NumberOfPointsToSplit));
-            }
+            this.SplitTrajectory(
+                e,
+                sender,
+                this.stepInMeterToSplit,
+                out this.DistanceBetweenSplitPoints,
+                out this.IterationCount);
         }
 
         private void SplittingTrackWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -1113,14 +1110,14 @@
                                 }
                                 else if (this.StepInMeterToSplit != string.Empty)
                                 {
-                                    if (double.TryParse(this.StepInMeterToSplit, out var step))
+                                    if (double.TryParse(this.StepInMeterToSplit, out this.stepInMeterToSplit))
                                     {
-                                        this.SplitByStep = true;
-
+                                        this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
+                                        
                                         this.PathSplittingProgressBar.IsIndeterminate = true;
                                         this.PathSplittingProgressBar.Maximum = 1;
                                         this.PathSplittingProgressBar.Value = 0;
-
+                                        
                                         this.splittingTrackWorker.RunWorkerAsync();
                                     }
                                     else
@@ -1130,9 +1127,13 @@
                                 }
                                 else if (int.TryParse(this.NumberOfPointsToSplit, out var numberOfSplitPoints))
                                 {
-                                    this.SplitByStep = false;
+                                    var trackLen = this.track3D.track.GetLen();
+                                    this.stepInMeterToSplit = trackLen / (double)int.Parse(this.NumberOfPointsToSplit);
 
-                                    this.PathSplittingProgressBar.Maximum = numberOfSplitPoints;
+                                    this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
+
+                                    this.PathSplittingProgressBar.IsIndeterminate = true;
+                                    this.PathSplittingProgressBar.Maximum = 1;
                                     this.PathSplittingProgressBar.Value = 0;
 
                                     this.splittingTrackWorker.RunWorkerAsync();
@@ -1178,10 +1179,7 @@
                 Enumerable.Range(0, this.IterationCount - 1).ToArray(),
                 this.DistanceBetweenSplitPoints);
 
-            if (this.SplitTrackWithInterpolation)
-            {
-                this.ShowSplitTrack();
-            }
+            this.ShowSplitTrack();
         }
 
         #endregion
@@ -1217,7 +1215,7 @@
                         {
                             try
                             {
-                                this.WithCond = (bool)this.WithConditionNumberRadioButton.IsChecked;
+                                this.WithCond = (bool)this.WithConditionNumberCheckBox.IsChecked;
 
                                 this.WithRepeatPlanning = (bool)this.WithRepeatPlanningRadioButton.IsChecked;
                                 //this.ThresholdForPlanning = this.WithRepeatPlanning

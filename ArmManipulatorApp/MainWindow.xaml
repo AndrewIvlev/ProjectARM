@@ -88,14 +88,14 @@
                 <StackPanel>
                     <Grid>
                         <StackPanel>
-                            <Button Content="Добавить опорную точку" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
-                            <Button Content="Завершить добавление точек" Command="{Binding FinishAddingTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
-                            <Button Content="Изменить z координату точки" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <Button Content="Интерполяция" Command="{Binding InterpolateTrajectoryCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <Button Content="Добавить опорную точку" IsEnabled="False" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Завершить добавление точек" IsEnabled="False" Command="{Binding FinishAddingTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Изменить z координату точки" IsEnabled="False" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <CheckBox x:Name="WithInterpolationCheckBox" IsEnabled="False" Content="Интерполяция" Style="{StaticResource ButtonStyle}"/>
                             <Label Content="Разделение траектории" HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" />
                             <WrapPanel>
                                 <Label Content="С шагом разбиения в метрах:" />
-                                <TextBox x:Name="StepInMeterToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <TextBox x:Name="StepInMeterToSplitTextBox" IsEnabled="False" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
                             <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                             <WrapPanel>
@@ -104,8 +104,8 @@
                             </WrapPanel>
                             <ProgressBar x:Name="PathSplittingProgressBar" Height="18" Margin="10, 5"/>
                             <WrapPanel VerticalAlignment="Bottom" ItemWidth="130" HorizontalAlignment="Center">
-                                <Button Content="Разделить" Command="{Binding StartSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" Width="103" />
-                                <Button Content="Отмена" Width="88" Command="{Binding CancelSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" />
+                                <Button Content="Разделить" IsEnabled="False" Command="{Binding StartSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" Width="103" />
+                                <Button Content="Отмена" IsEnabled="False" Width="88" Command="{Binding CancelSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" />
                             </WrapPanel>
                             <ListBox>
                                 <!-- TODO /-->
@@ -163,7 +163,7 @@
                     </Button>
                 </WrapPanel>
                 <Separator Height="5"></Separator>
-                <CheckBox x:Name="WithConditionNumberRadioButton" FontSize="14" Margin="10,5" Content="С выводом числа обусловленности"/>
+                <CheckBox x:Name="WithConditionNumberCheckBox" FontSize="14" Margin="10,5" Content="С выводом числа обусловленности"/>
                 <Separator Height="5"></Separator>
                 <RadioButton x:Name="WithRepeatPlanningRadioButton" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
                 <TextBlock FontSize="14" Margin="10,5" Text="С повторным планированием"/>

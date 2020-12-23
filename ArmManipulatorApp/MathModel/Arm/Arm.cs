@@ -24,6 +24,8 @@
         [JsonIgnore] public Matrix[] S;
         [JsonIgnore] public Matrix[] dS;
 
+        [JsonIgnore] private double detC;
+
         public Arm(Matrix rootB, Unit[] units)
         {
             this.N = units.Length;
@@ -172,10 +174,8 @@
         /// <param name="b">Реальное смещение</param>
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
-        /// <param name="cond">Число обусловленности</param>
-        /// <param name="withCond"></param>
         /// <returns></returns>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, out double cond, bool withCond)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta)
         {
             Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             Console.WriteLine("Planning trajectory to the point " + p);
@@ -196,28 +196,10 @@
             this.Calc_C();
             Console.WriteLine("Matrix C:");
             this.C.Print();
-            var detC = Matrix.Det3D(this.C);
-            Console.WriteLine("Determinant of matrix C is " + detC + "\n");
+            this.detC = Matrix.Det3D(this.C);
+            Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
 
-            #region Condition number
-
-            cond = 0.0;
-            if (withCond)
-            {
-                if (detC == 0)
-                {
-                    cond = double.MaxValue;
-                }
-                else
-                {
-                    cond = this.C.NormF() * this.C.Invert3D(detC).NormF();
-                    Console.WriteLine("Condition number of matrix C is " + cond + "\n");
-                }
-            }
-
-            #endregion
-
-            var μ = Matrix.System3x3Solver(this.C, detC, D);
+            var μ = Matrix.System3x3Solver(this.C, this.detC, D);
             Console.WriteLine($"mu = {μ}\n");
 
             var dQ = new double[this.N];
@@ -227,6 +209,7 @@
                 this.Print_dF(i);
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
+
             Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
             Console.WriteLine($"Value of Q function = {this.functionQ()}");
 
@@ -247,6 +230,20 @@
                 newF.Z - p.Z);
 
             delta = MathFunctions.NormaVector(Delta);
+        }
+
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, out double cond)
+        {
+            this.LagrangeMethodToThePoint(p, out b, out d, out delta);
+            if (this.detC == 0)
+            {
+                cond = double.MaxValue;
+            }
+            else
+            {
+                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+            }
         }
 
         public double functionQ()
