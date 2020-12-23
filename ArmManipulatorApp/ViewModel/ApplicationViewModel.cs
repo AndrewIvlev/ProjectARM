@@ -200,7 +200,12 @@
             #region Charts initializing
 
             this.Chart = Chart;
-            this.Chart.ChartAreas.Add(new ChartArea("Default"));
+            var chartArea = new ChartArea("Default");
+            chartArea.AxisX.IsMarginVisible = false;
+            chartArea.AxisY.IsMarginVisible = false;
+            chartArea.AxisX.Title = "x(m)";
+            chartArea.AxisY.Title = "y(m)";
+            this.Chart.ChartAreas.Add(chartArea);
             this.Chart.Series.Add(new Series("bSeries"));
             this.Chart.Series["bSeries"].ChartArea = "Default";
             this.Chart.Series["bSeries"].ChartType = SeriesChartType.Line;
@@ -222,53 +227,21 @@
             this.Chart.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
 
             // Add some values for chart display
-            //int[] axisXData = { 0, 50, 100 };
-            //double[] axisYData = { 5.3, 1.3, 7.3 };
-            //this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
+            int[] axisXData = { 0, 1 };
+            double[] axisYData = { 0.0, 1.0 };
+            this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
 
             this.ChartUpper = ChartUpper;
             this.ChartUpper.ChartAreas.Add(new ChartArea("Default"));
-            this.ChartUpper.Series.Add(new Series("bSeries"));
-            this.ChartUpper.Series["bSeries"].ChartArea = "Default";
-            this.ChartUpper.Series["bSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartUpper.Series.Add(new Series("dSeries"));
-            this.ChartUpper.Series["dSeries"].ChartArea = "Default";
-            this.ChartUpper.Series["dSeries"].ChartType = SeriesChartType.Line;
-
             this.ChartUpper.Series.Add(new Series("deltaSeries"));
             this.ChartUpper.Series["deltaSeries"].ChartArea = "Default";
             this.ChartUpper.Series["deltaSeries"].ChartType = SeriesChartType.Line;
 
-            this.ChartUpper.Series.Add(new Series("CondSeries"));
-            this.ChartUpper.Series["CondSeries"].ChartArea = "Default";
-            this.ChartUpper.Series["CondSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartUpper.Series.Add(new Series("SplitPointsDistance"));
-            this.ChartUpper.Series["SplitPointsDistance"].ChartArea = "Default";
-            this.ChartUpper.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
-
             this.ChartLower = ChartLower;
             this.ChartLower.ChartAreas.Add(new ChartArea("Default"));
-            this.ChartLower.Series.Add(new Series("bSeries"));
-            this.ChartLower.Series["bSeries"].ChartArea = "Default";
-            this.ChartLower.Series["bSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartLower.Series.Add(new Series("dSeries"));
-            this.ChartLower.Series["dSeries"].ChartArea = "Default";
-            this.ChartLower.Series["dSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartLower.Series.Add(new Series("deltaSeries"));
-            this.ChartLower.Series["deltaSeries"].ChartArea = "Default";
-            this.ChartLower.Series["deltaSeries"].ChartType = SeriesChartType.Line;
-
             this.ChartLower.Series.Add(new Series("CondSeries"));
             this.ChartLower.Series["CondSeries"].ChartArea = "Default";
             this.ChartLower.Series["CondSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartLower.Series.Add(new Series("SplitPointsDistance"));
-            this.ChartLower.Series["SplitPointsDistance"].ChartArea = "Default";
-            this.ChartLower.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
 
             #endregion
         }
@@ -1200,7 +1173,7 @@
         {
             this.PathSplittingProgressBar.IsIndeterminate = false;
 
-            this.Chart.Series["SplitPointsDistance"].Points.Clear();
+            this.ClearAllChartSeries(this.Chart);
             this.Chart.Series["SplitPointsDistance"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount - 1).ToArray(),
                 this.DistanceBetweenSplitPoints);
@@ -1288,7 +1261,7 @@
 
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Chart.Series["SplitPointsDistance"].Points.Clear();
+            this.ClearAllChartSeries(this.Chart);
 
             //    this.Chart.Series["bSeries"].Points.Clear();
             //    this.Chart.Series["bSeries"].Points.DataBindXY(
@@ -1302,19 +1275,24 @@
 
             if (this.WithCond)
             {
-                this.ChartUpper.Series["deltaSeries"].Points.Clear();
+                this.Chart.Hide();
+                this.ChartUpper.Show();
+                this.ChartLower.Show();
+
                 this.ChartUpper.Series["deltaSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.deltaList);
 
-                this.ChartLower.Series["CondSeries"].Points.Clear();
                 this.ChartLower.Series["CondSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.CondList);
             }
             else
             {
-                this.Chart.Series["deltaSeries"].Points.Clear();
+                this.Chart.Show();
+                this.ChartUpper.Hide();
+                this.ChartLower.Hide();
+
                 this.Chart.Series["deltaSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.deltaList);
@@ -1382,6 +1360,18 @@
 
         private void AnimationSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+        }
+
+        #endregion
+
+        #region private
+
+        private void ClearAllChartSeries(Chart chart)
+        {
+            foreach (var series in chart.Series)
+            {
+                series.Points.Clear();
+            }
         }
 
         #endregion

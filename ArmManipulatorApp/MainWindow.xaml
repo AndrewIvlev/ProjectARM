@@ -55,7 +55,7 @@
                 <MenuItem Header="Редактировать" x:Name="EditTrackMenuItem" />
             </MenuItem>
             <MenuItem Header="Движение" x:Name="MovingMenuItem"></MenuItem>
-            <MenuItem Header="Настройки" x:Name="SettingsMenuItem"></MenuItem>
+            <!--<MenuItem Header="Препятсвия" x:Name="ObstacleMenuItem"></MenuItem>-->
             
             <!--> TODO: Препятствия
             <MenuItem Header="Препятствия">
@@ -150,7 +150,7 @@
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="2">
-            <StackPanel x:Name="SettingsStackPanel">
+            <StackPanel x:Name="SettingsStackPanel" >
                 <Separator Height="10"></Separator>
                 <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
                 <Separator Height="5"></Separator>
@@ -188,9 +188,36 @@
                 </ComboBox>
                 </-->
             </StackPanel>
-            <StackPanel x:Name="ResultsStackPanel" Visibility="Hidden">
+        </Grid>
+
+        <GridSplitter Grid.Row="1" Grid.RowSpan="2"  Grid.Column="1" ShowsPreview="False" Width="3"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+
+        <Grid Grid.Column="2" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.80*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid  x:Name="MainChart" Grid.Column="0" >
+                <Grid>
+                    <WindowsFormsHost>
+                        <dvc:Chart x:Name="Chart" Height="60"/>
+                    </WindowsFormsHost>
+                </Grid>
+                <Grid  x:Name="DuoChart" Visibility="Hidden">
+                    <StackPanel>
+                    <WindowsFormsHost>
+                        <dvc:Chart x:Name="ChartUpper" Height="30"/>
+                    </WindowsFormsHost>
+                    <WindowsFormsHost>
+                        <dvc:Chart x:Name="ChartLower" Height="30"/>
+                    </WindowsFormsHost>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <StackPanel x:Name="ResultsStackPanel" Grid.Column="1">
                 <Separator Height="10"></Separator>
-                <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Результаты работы алгоритма</Label>
+                <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Текущие данные</Label>
                 <Separator Height="5"></Separator>
                 <Separator Height="5"></Separator>
                 <TextBlock Margin="10,5" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
@@ -199,21 +226,6 @@
                 <Label x:Name="PathLength" Content="Длина пути = 0 м." FontSize="14" Margin="10,0" />
                 <Label Content="Конечное значение обобщённых координат q:" FontSize="14" Margin="10,0"/>
             </StackPanel>
-        </Grid>
-
-        <GridSplitter Grid.Row="1" Grid.RowSpan="2"  Grid.Column="1" ShowsPreview="False" Width="3"
-                      HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-
-        <Grid Grid.Column="2" Grid.Row="2">
-            <WindowsFormsHost>
-                <dvc:Chart x:Name="Chart" Height="60"/>
-            </WindowsFormsHost>
-            <WindowsFormsHost>
-                <dvc:Chart x:Name="ChartUpper" Height="30"/>
-            </WindowsFormsHost>
-            <WindowsFormsHost>
-                <dvc:Chart x:Name="ChartLower" Height="30"/>
-            </WindowsFormsHost>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="1">
@@ -328,7 +340,7 @@
                 </BeginStoryboard>
             </EventTrigger>
             
-            <!--/ Moving MenuItem Events-->
+            <!--/ Motion MenuItem Events-->
             <EventTrigger RoutedEvent="MenuItem.Click" SourceName="MovingMenuItem">
                 <BeginStoryboard>
                     <Storyboard>
@@ -347,6 +359,9 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
+
+            <!--/ Settings MenuItem Events-->
+
         </Grid.Triggers>
     </Grid>
 
