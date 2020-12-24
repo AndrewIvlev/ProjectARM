@@ -71,6 +71,14 @@
             }
         }
 
+        public void SetQ(double allQ)
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                this.Units[i].Q = allQ;
+            }
+        }
+
         public void OffsetQ(double[] dQ)
         {
             for (var i = 0; i < this.N; i++)
@@ -174,8 +182,8 @@
         /// <param name="b">Реальное смещение</param>
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
-        /// <returns></returns>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta)
+        /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0)
         {
             Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             Console.WriteLine("Planning trajectory to the point " + p);
@@ -198,6 +206,42 @@
             this.C.Print();
             this.detC = Matrix.Det3D(this.C);
             Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
+
+
+            if (cond == 0)
+            {
+                if (this.detC == 0)
+                {
+                    cond = double.MaxValue;
+                }
+                else
+                {
+                    cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                    Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+                }
+            }
+
+            // Balancing by condition number
+            if (condTreshold > 0)
+            {
+                var norm1 = this.C.EuclidNormOfRow(0);
+                var norm2 = this.C.EuclidNormOfRow(1);
+                var norm3 = this.C.EuclidNormOfRow(2);
+
+                var diagNorm = new Matrix(3, 3)
+                {
+                    [0, 0] = 1.0 / norm1, [0, 1] = 0, [0, 2] = 0,
+                    [1, 0] = 0, [1, 1] = 1.0 / norm2, [1, 2] = 0,
+                    [2, 0] = 0, [2, 1] = 0, [2, 2] = 1.0 / norm3
+                };
+
+                this.C = diagNorm * this.C;
+                this.detC = Matrix.Det3D(this.C);
+                D = diagNorm * D;
+
+                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+            }
 
             var μ = Matrix.System3x3Solver(this.C, this.detC, D);
             Console.WriteLine($"mu = {μ}\n");
@@ -230,20 +274,6 @@
                 newF.Z - p.Z);
 
             delta = MathFunctions.NormaVector(Delta);
-        }
-
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, out double cond)
-        {
-            this.LagrangeMethodToThePoint(p, out b, out d, out delta);
-            if (this.detC == 0)
-            {
-                cond = double.MaxValue;
-            }
-            else
-            {
-                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
-                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
-            }
         }
 
         public double functionQ()

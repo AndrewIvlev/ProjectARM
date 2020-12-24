@@ -60,6 +60,8 @@
 
         private Label pathLengthLabel;
 
+        private Label IterationCountLabel;
+
         // Buffer of all calculated q's for animation
         private List<double[]> qList;
 
@@ -109,7 +111,7 @@
 
         private TextBox ThresholdForRepeatPlanning;
         
-        private TextBox ThresholdForBalancing;
+        private TextBox ThresholdForBalancingTextBox;
 
         private Label WorkingTime;
 
@@ -129,6 +131,8 @@
 
         private double ThresholdForPlanning;
 
+        private double ThresholdForBalancing;
+
         private double stepInMeterToSplit;
 
         private int NumberTimesRepeatPlanning;
@@ -136,6 +140,8 @@
         private bool SplitTrackWithInterpolation;
 
         private bool WithCond;
+
+        private bool WithBalancing;
 
         private bool SplitByStep;
 
@@ -146,6 +152,7 @@
             TextBox armTextBox,
             TextBox vectorQTextBox,
             Label pathLength,
+            Label IterationCountLabel,
             Chart Chart,
             CheckBox WithConditionNumberCheckBox,
             CheckBox WithBalancingCheckBox,
@@ -159,7 +166,7 @@
             TextBox NumberOfPointsToSplitTextBox,
             TextBox RepeatNumberTimesPlanningTextBox,
             TextBox ThresholdForRepeatPlanning,
-            TextBox ThresholdForBalancing,
+            TextBox ThresholdForBalancingTextBox,
             Label WorkingTime,
             Slider SliderAnimation)
         {
@@ -170,13 +177,14 @@
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
             this.pathLengthLabel = pathLength;
+            this.IterationCountLabel = IterationCountLabel;
             this.PathSplittingProgressBar = PathSplittingProgressBar;
             this.PathPlanningProgressBar = PathPlanningProgressBar;
             this.StepInMeterToSplitTextBox = StepInMeterToSplitTextBox;
             this.NumberOfPointsToSplitTextBox = NumberOfPointsToSplitTextBox;
             this.RepeatNumberTimesPlanningTextBox = RepeatNumberTimesPlanningTextBox;
             this.ThresholdForRepeatPlanning = ThresholdForRepeatPlanning;
-            this.ThresholdForBalancing = ThresholdForBalancing;
+            this.ThresholdForBalancingTextBox = ThresholdForBalancingTextBox;
             this.WorkingTime = WorkingTime;
             this.SliderAnimation = SliderAnimation;
             this.qList = new List<double[]>();
@@ -204,6 +212,8 @@
             this.animationWorker.RunWorkerCompleted += this.animationWorker_RunWorkerCompleted;
 
             this.WithCond = false;
+            this.WithBalancing = false;
+            this.ThresholdForBalancing = double.MaxValue;
             this.ThresholdForPlanning = double.MaxValue;
             this.NumberTimesRepeatPlanning = 1;
             this.WithConditionNumberCheckBox = WithConditionNumberCheckBox;
@@ -742,50 +752,28 @@
 
                 for (var j = 0; j < k; j++)
                 {
+                    var cond = this.WithCond ? 0.0 : 1.0;
+                    this.armModel3D.arm.LagrangeMethodToThePoint(
+                        point,
+                        out var b,
+                        out var d,
+                        out var delta,
+                        ref cond,
+                        this.ThresholdForBalancing);
+
+                    this.qList.Add(this.armModel3D.arm.GetQ());
+
+                    bList.Add(b);
+                    dList.Add(d);
+                    deltaList.Add(delta);
                     if (this.WithCond)
-                    {
-                        this.armModel3D.arm.LagrangeMethodToThePoint(
-                            point,
-                            out var b,
-                            out var d,
-                            out var delta,
-                            out var cond);
-
-                        this.qList.Add(this.armModel3D.arm.GetQ());
-
-                        bList.Add(b);
-                        dList.Add(d);
-                        deltaList.Add(delta);
                         condList.Add(cond);
 
-                        if (this.ThresholdForPlanning < double.MaxValue)
-                        {
-                            if (b > this.ThresholdForPlanning)
-                            {
-                                i--;
-                            }
-                        }
-                    }
-                    else
+                    if (this.ThresholdForPlanning < double.MaxValue)
                     {
-                        this.armModel3D.arm.LagrangeMethodToThePoint(
-                            point,
-                            out var b,
-                            out var d,
-                            out var delta);
-
-                        this.qList.Add(this.armModel3D.arm.GetQ());
-
-                        bList.Add(b);
-                        dList.Add(d);
-                        deltaList.Add(delta);
-
-                        if (this.ThresholdForPlanning < double.MaxValue)
+                        if (b > this.ThresholdForPlanning)
                         {
-                            if (b > this.ThresholdForPlanning)
-                            {
-                                i--;
-                            }
+                            i--;
                         }
                     }
                     ++resIterCount;
@@ -1044,29 +1032,29 @@
         #endregion
 
         #region Settings
-
+        
         public ICommand ChangeVectorQFromTextBox
         {
             get
             {
                 return new RelayCommand(
                     obj =>
+                    {
+                        try
                         {
-                            try
-                            {
-                                this.armModel3D.arm.SetQ(
-                                    JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
-                                this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
-                                this.armModel3D.arm.Calc_T();
+                            this.armModel3D.arm.SetQ(
+                                JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                            this.armModel3D.arm.Calc_T();
 
-                                this.armModel3D.BeginAnimation(
-                                    JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
-                            }
-                            catch (Exception ex)
-                            {
-                                this.dialogService.ShowMessage(ex.Message);
-                            }
-                        });
+                            this.armModel3D.BeginAnimation(
+                                JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+                        }
+                        catch (Exception ex)
+                        {
+                            this.dialogService.ShowMessage(ex.Message);
+                        }
+                    });
             }
         }
 
@@ -1210,6 +1198,15 @@
                             try
                             {
                                 this.WithCond = (bool)this.WithConditionNumberCheckBox.IsChecked;
+                                this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
+                                if (this.WithBalancing)
+                                {
+                                    this.ThresholdForBalancing = double.Parse(this.ThresholdForBalancingTextBox.Text);
+                                }
+                                else
+                                {
+                                    this.ThresholdForBalancing = 0;
+                                }
 
                                 if ((bool)this.WithRepeatPlanningByThresholdRadioButton.IsChecked)
                                 {
@@ -1221,9 +1218,14 @@
                                     this.NumberTimesRepeatPlanning = int.Parse(this.RepeatNumberTimesPlanningTextBox.Text);
                                     this.ThresholdForPlanning = double.MaxValue;
                                 }
+                                else
+                                {
+                                    this.NumberTimesRepeatPlanning = 1;
+                                    this.ThresholdForPlanning = double.MaxValue;
+                                }
 
                                 //this.PathPlanningProgressBar.IsIndeterminate = !(bool)this.WithoutRepeatPlanningRadioButton.IsChecked;
-                                this.PathPlanningProgressBar.Maximum = this.track3D.track.SplitPoints.Count;
+                                this.PathPlanningProgressBar.Maximum = this.track3D.track.SplitPoints.Count - 1;
                                 this.PathPlanningProgressBar.Value = 0;
 
                                 this.timePlanning = Stopwatch.StartNew();
@@ -1262,6 +1264,16 @@
         {
             this.timePlanning.Stop();
             this.WorkingTime.Content = $"Время работы алгоритма планирования = {timePlanning.ElapsedMilliseconds} мс";
+            this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
+
+            this.armModel3D.arm.SetQ(0.0);
+            this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
+            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+            this.armModel3D.arm.Calc_T();
+
+            this.armModel3D.BeginAnimation(
+                JsonConvert.DeserializeObject<double[]>(this.VectorQTextBox.Text));
+
             this.ClearAllChartSeries(this.Chart);
 
             //    this.Chart.Series["bSeries"].Points.Clear();

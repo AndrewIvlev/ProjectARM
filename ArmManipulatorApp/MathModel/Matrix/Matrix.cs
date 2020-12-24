@@ -138,6 +138,21 @@ namespace ArmManipulatorArm.MathModel.Matrix
             return AB;
         }
 
+        public static Vector3D operator *(Matrix A, Vector3D b)
+        {
+            if (A.Columns != 3)
+                throw new Exception(
+                    "Matrix and Vector are not conformable");
+
+            var Ab = new Vector3D();
+
+            Ab.X = A[0, 0] * b.X + A[0, 1] * b.Y + A[0, 2] * b.Z;
+            Ab.Y = A[1, 0] * b.X + A[1, 1] * b.Y + A[1, 2] * b.Z;
+            Ab.Z = A[2, 0] * b.X + A[2, 1] * b.Y + A[2, 2] * b.Z;
+
+            return Ab;
+        }
+
         public static double Det2D(Matrix m) => m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
 
         public static double Det3D(Matrix m) =>
@@ -212,6 +227,7 @@ namespace ArmManipulatorArm.MathModel.Matrix
 
         public static Vector3D System3x3Solver(Matrix A, Vector3D b) => System3x3Solver(A, Det3D(A), b);
 
+        // based on Cramer's rule
         public static Vector3D System3x3Solver(Matrix A, double detA, Vector3D b)
         {
             if (LogIsOn)
@@ -277,6 +293,10 @@ namespace ArmManipulatorArm.MathModel.Matrix
             }
         }
 
+        // Euclidean norm
+        public double EuclidNormOfRow(int i) => MathFunctions.NormaVector(new Vector3D(this[i, 0], this[i, 1], this[i, 2]));
+
+        // Frobenius norm
         public double NormF()
         {
             var frobeniusNorm = 0.0;

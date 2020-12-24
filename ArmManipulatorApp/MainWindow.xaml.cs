@@ -19,6 +19,7 @@
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
                 this.PathLength,
+                this.IterationCountLabel,
                 this.Chart,
                 this.WithConditionNumberCheckBox,
                 this.WithBalancingCheckBox,
