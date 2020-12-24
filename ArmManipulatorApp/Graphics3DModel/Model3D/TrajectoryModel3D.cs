@@ -246,38 +246,6 @@
             }
         }
 
-        public void RemoveAnchorTrackFromViewport()
-        {
-            foreach (var mv in this.trackModelVisual3D)
-            {
-                this.viewport.Children.Remove(mv);
-            }
-        }
-        
-        public void AddAnchorTrackToViewport()
-        {
-            foreach (var mv in this.trackModelVisual3D)
-            {
-                this.viewport.Children.Add(mv);
-            }
-        }
-
-        public void RemoveSplitTrackFromViewport()
-        {
-            foreach (var mv in this.splitTrackModelVisual3D)
-            {
-                this.viewport.Children.Remove(mv);
-            }
-        }
-        
-        public void AddSplitTrackToViewport()
-        {
-            foreach (var mv in this.splitTrackModelVisual3D)
-            {
-                this.viewport.Children.Add(mv);
-            }
-        }
-
         // TODO: remove it 
         //private void NeighborhoodLinesRotation()
         //{

@@ -235,11 +235,12 @@
                         </WindowsFormsHost>
                     </Grid>
                     <StackPanel x:Name="ResultsStackPanel" Grid.Column="1" Grid.RowSpan="2" >
-                        <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Текущие данные:</Label>
-                        <TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
+                        <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Данные:</Label>
+                        <!--<TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>-->
                         <Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />
                         <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
                         <Label x:Name="WorkingTime" Content="Время работы алгоритма планирования = 0 мс" FontSize="14" Margin="10,0"/>
+                        <Label x:Name="AverageDeltaLabel" Content="Средняя ошибка перемещения = 0 м" FontSize="14" Margin="10,0" />
                     </StackPanel>
                 </Grid>
             </Border>

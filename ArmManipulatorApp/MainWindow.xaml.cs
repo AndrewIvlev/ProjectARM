@@ -20,6 +20,7 @@
                 this.VectorQTextBox,
                 this.PathLength,
                 this.IterationCountLabel,
+                this.AverageDeltaLabel,
                 this.Chart,
                 this.WithConditionNumberCheckBox,
                 this.WithBalancingCheckBox,
