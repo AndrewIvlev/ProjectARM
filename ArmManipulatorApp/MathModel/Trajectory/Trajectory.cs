@@ -155,7 +155,7 @@
             return list;
         }
 
-        // TODO: remove it 2D realization
+        // TODO: Legacy 2D realization
         //public void SplitTrajectory(double step)
         //{
         //    var index = 0;
@@ -182,7 +182,7 @@
         //    NumOfExtraPoints = index;
         //}
 
-        // TODO: remove it 2D realization
+        // TODO: Legacy 2D realization
         //public void SplitTrajectory(int k)
         //{
         //    var index = 0;

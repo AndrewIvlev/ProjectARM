@@ -85,15 +85,17 @@
 
         private Chart Chart;
 
-        private Chart ChartUpper;
-
-        private Chart ChartLower;
-
         private CheckBox WithConditionNumberCheckBox;
+
+        private CheckBox WithBalancingCheckBox;
 
         private CheckBox WithInterpolationCheckBox;
 
-        private RadioButton WithRepeatPlanningRadioButton;
+        private RadioButton WithoutRepeatPlanningRadioButton;
+
+        private RadioButton WithRepeatPlanningByThresholdRadioButton;
+
+        private RadioButton WithRepeatPlanningByNumberTimesRadioButton;
 
         private ProgressBar PathSplittingProgressBar;
 
@@ -103,9 +105,13 @@
 
         private TextBox NumberOfPointsToSplitTextBox;
 
-        private TextBox ThresholdForRepeatPlanning;
+        private TextBox RepeatNumberTimesPlanningTextBox;
 
-        //private Label WorkingTime;
+        private TextBox ThresholdForRepeatPlanning;
+        
+        private TextBox ThresholdForBalancing;
+
+        private Label WorkingTime;
 
         private Slider SliderAnimation;
 
@@ -125,12 +131,8 @@
 
         private double stepInMeterToSplit;
 
-        private string StepInMeterToSplit;
-
-        private string NumberOfPointsToSplit;
-
-        private bool WithRepeatPlanning;
-
+        private int NumberTimesRepeatPlanning;
+        
         private bool SplitTrackWithInterpolation;
 
         private bool WithCond;
@@ -145,17 +147,20 @@
             TextBox vectorQTextBox,
             Label pathLength,
             Chart Chart,
-            Chart ChartUpper,
-            Chart ChartLower,
             CheckBox WithConditionNumberCheckBox,
+            CheckBox WithBalancingCheckBox,
             CheckBox WithInterpolationCheckBox,
-            RadioButton WithRepeatPlanningRadioButton,
+            RadioButton WithoutRepeatPlanningRadioButton,
+            RadioButton WithRepeatPlanningByThresholdRadioButton,
+            RadioButton WithRepeatPlanningByNumberTimesRadioButton,
             ProgressBar PathSplittingProgressBar,
             ProgressBar PathPlanningProgressBar,
             TextBox StepInMeterToSplitTextBox,
             TextBox NumberOfPointsToSplitTextBox,
+            TextBox RepeatNumberTimesPlanningTextBox,
             TextBox ThresholdForRepeatPlanning,
-            //Label WorkingTime,
+            TextBox ThresholdForBalancing,
+            Label WorkingTime,
             Slider SliderAnimation)
         {
             this.dialogService = dialogService;
@@ -169,8 +174,10 @@
             this.PathPlanningProgressBar = PathPlanningProgressBar;
             this.StepInMeterToSplitTextBox = StepInMeterToSplitTextBox;
             this.NumberOfPointsToSplitTextBox = NumberOfPointsToSplitTextBox;
+            this.RepeatNumberTimesPlanningTextBox = RepeatNumberTimesPlanningTextBox;
             this.ThresholdForRepeatPlanning = ThresholdForRepeatPlanning;
-            //this.WorkingTime = WorkingTime;
+            this.ThresholdForBalancing = ThresholdForBalancing;
+            this.WorkingTime = WorkingTime;
             this.SliderAnimation = SliderAnimation;
             this.qList = new List<double[]>();
             this.coeff = 10;
@@ -197,11 +204,14 @@
             this.animationWorker.RunWorkerCompleted += this.animationWorker_RunWorkerCompleted;
 
             this.WithCond = false;
-            this.WithRepeatPlanning = false;
             this.ThresholdForPlanning = double.MaxValue;
+            this.NumberTimesRepeatPlanning = 1;
             this.WithConditionNumberCheckBox = WithConditionNumberCheckBox;
+            this.WithBalancingCheckBox = WithBalancingCheckBox;
             this.WithInterpolationCheckBox = WithInterpolationCheckBox;
-            this.WithRepeatPlanningRadioButton = WithRepeatPlanningRadioButton;
+            this.WithoutRepeatPlanningRadioButton = WithoutRepeatPlanningRadioButton;
+            this.WithRepeatPlanningByThresholdRadioButton = WithRepeatPlanningByThresholdRadioButton;
+            this.WithRepeatPlanningByNumberTimesRadioButton = WithRepeatPlanningByNumberTimesRadioButton;
 
             #region Charts initializing
 
@@ -209,9 +219,13 @@
             var chartArea = new ChartArea("Default");
             chartArea.AxisX.IsMarginVisible = false;
             chartArea.AxisY.IsMarginVisible = false;
-            chartArea.AxisX.Title = "x(m)";
-            chartArea.AxisY.Title = "y(m)";
+            chartArea.AxisX.Title = "iteration";
+            chartArea.AxisY.Title = "d(m)";
+            chartArea.AxisY2.Title = "cond";
             this.Chart.ChartAreas.Add(chartArea);
+            this.Chart.ChartAreas["Default"].AxisY2.Enabled = AxisEnabled.True;
+
+
             this.Chart.Series.Add(new Series("bSeries"));
             this.Chart.Series["bSeries"].ChartArea = "Default";
             this.Chart.Series["bSeries"].ChartType = SeriesChartType.Line;
@@ -221,12 +235,15 @@
             this.Chart.Series["dSeries"].ChartType = SeriesChartType.Line;
 
             this.Chart.Series.Add(new Series("deltaSeries"));
+            this.Chart.Series["deltaSeries"].Color = System.Drawing.Color.Red;
             this.Chart.Series["deltaSeries"].ChartArea = "Default";
             this.Chart.Series["deltaSeries"].ChartType = SeriesChartType.Line;
 
             this.Chart.Series.Add(new Series("CondSeries"));
+            this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Green;
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series["CondSeries"].YAxisType = AxisType.Secondary;
 
             this.Chart.Series.Add(new Series("SplitPointsDistance"));
             this.Chart.Series["SplitPointsDistance"].ChartArea = "Default";
@@ -236,19 +253,7 @@
             int[] axisXData = { 0, 1 };
             double[] axisYData = { 0.0, 1.0 };
             this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
-
-            this.ChartUpper = ChartUpper;
-            this.ChartUpper.ChartAreas.Add(new ChartArea("Default"));
-            this.ChartUpper.Series.Add(new Series("deltaSeries"));
-            this.ChartUpper.Series["deltaSeries"].ChartArea = "Default";
-            this.ChartUpper.Series["deltaSeries"].ChartType = SeriesChartType.Line;
-
-            this.ChartLower = ChartLower;
-            this.ChartLower.ChartAreas.Add(new ChartArea("Default"));
-            this.ChartLower.Series.Add(new Series("CondSeries"));
-            this.ChartLower.Series["CondSeries"].ChartArea = "Default";
-            this.ChartLower.Series["CondSeries"].ChartType = SeriesChartType.Line;
-
+            
             #endregion
         }
 
@@ -528,7 +533,7 @@
                                                this.track3D.AddAnchorTrackToViewport();
 
                                                this.pathLengthLabel.Content =
-                                                   $"Длина пути = {this.track3D.track.Length} м.";
+                                                   $"Длина пути = {this.track3D.track.Length} м";
                                            }
                                        }
                                        catch (Exception ex)
@@ -617,7 +622,7 @@
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, deltaZ * this.coeff));
 
                                             this.pathLengthLabel.Content =
-                                                $"Длина пути = {this.track3D.track.Length} м.";
+                                                $"Длина пути = {this.track3D.track.Length} м";
                                             break;
                                         case Key.S: // Decrease z coordinate of point
                                             this.track3D.RemoveAnchorTrackFromViewport();
@@ -628,7 +633,7 @@
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, -deltaZ * this.coeff));
 
                                             this.pathLengthLabel.Content =
-                                                $"Длина пути = {this.track3D.track.Length} м.";
+                                                $"Длина пути = {this.track3D.track.Length} м";
                                             break;
                                         case Key.D: // Select next point
                                             if (this.pointSelector.selectedPointIndex
@@ -665,7 +670,7 @@
                                     this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                     this.track3D.AddAnchorTrackToViewport();
 
-                                    this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м.";
+                                    this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м";
                                 }
                             }
                             catch (Exception ex)
@@ -715,9 +720,6 @@
         public void PlanningMovementAlongTrajectory(
             DoWorkEventArgs e,
             object sender,
-            bool withCond,
-            bool withRepeatPlan,
-            double threshold,
             out int resIterCount,
             out List<double> bList,
             out List<double> dList,
@@ -733,67 +735,63 @@
             this.qList.Clear();
 
             resIterCount = 0;
+            var k = this.NumberTimesRepeatPlanning; // repeat planning to the same point k times
             for (var i = 1; i < splitPointsCount; i++)
             {
                 var point = this.track3D.track.SplitPoints[i];
 
-                if (withCond)
+                for (var j = 0; j < k; j++)
                 {
-                    this.armModel3D.arm.LagrangeMethodToThePoint(
-                        point,
-                        out var b,
-                        out var d,
-                        out var delta,
-                        out var cond);
-
-                    this.qList.Add(this.armModel3D.arm.GetQ());
-
-                    bList.Add(b);
-                    dList.Add(d);
-                    deltaList.Add(delta);
-                    condList.Add(cond);
-
-                    ++resIterCount;
-                    if (withRepeatPlan)
+                    if (this.WithCond)
                     {
-                        if (b > threshold)
+                        this.armModel3D.arm.LagrangeMethodToThePoint(
+                            point,
+                            out var b,
+                            out var d,
+                            out var delta,
+                            out var cond);
+
+                        this.qList.Add(this.armModel3D.arm.GetQ());
+
+                        bList.Add(b);
+                        dList.Add(d);
+                        deltaList.Add(delta);
+                        condList.Add(cond);
+
+                        if (this.ThresholdForPlanning < double.MaxValue)
                         {
-                            i--;
+                            if (b > this.ThresholdForPlanning)
+                            {
+                                i--;
+                            }
                         }
                     }
                     else
                     {
-                        ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
-                    }
-                }
-                else
-                {
-                    this.armModel3D.arm.LagrangeMethodToThePoint(
-                        point,
-                        out var b,
-                        out var d,
-                        out var delta);
+                        this.armModel3D.arm.LagrangeMethodToThePoint(
+                            point,
+                            out var b,
+                            out var d,
+                            out var delta);
 
-                    this.qList.Add(this.armModel3D.arm.GetQ());
+                        this.qList.Add(this.armModel3D.arm.GetQ());
 
-                    bList.Add(b);
-                    dList.Add(d);
-                    deltaList.Add(delta);
+                        bList.Add(b);
+                        dList.Add(d);
+                        deltaList.Add(delta);
 
-                    ++resIterCount;
-                    if (withRepeatPlan)
-                    {
-                        if (b > threshold)
+                        if (this.ThresholdForPlanning < double.MaxValue)
                         {
-                            i--;
+                            if (b > this.ThresholdForPlanning)
+                            {
+                                i--;
+                            }
                         }
                     }
-                    else
-                    {
-                        ((BackgroundWorker)sender).ReportProgress(resIterCount + 1);
-                    }
+                    ++resIterCount;
                 }
 
+                ((BackgroundWorker)sender).ReportProgress(i);
                 if (((BackgroundWorker)sender).CancellationPending == true)
                 {
                     e.Cancel = true;
@@ -1100,17 +1098,14 @@
                         {
                             try
                             {
-                                this.StepInMeterToSplit = this.StepInMeterToSplitTextBox.Text;
-                                this.NumberOfPointsToSplit = this.NumberOfPointsToSplitTextBox.Text;
-
-                                if (this.StepInMeterToSplit != string.Empty
-                                    && this.NumberOfPointsToSplit != string.Empty)
+                                if (this.StepInMeterToSplitTextBox.Text != string.Empty
+                                    && this.NumberOfPointsToSplitTextBox.Text != string.Empty)
                                 {
                                     this.dialogService.ShowMessage("Нужно выбрать только один вариант разбиения.");
                                 }
-                                else if (this.StepInMeterToSplit != string.Empty)
+                                else if (this.StepInMeterToSplitTextBox.Text != string.Empty)
                                 {
-                                    if (double.TryParse(this.StepInMeterToSplit, out this.stepInMeterToSplit))
+                                    if (double.TryParse(this.StepInMeterToSplitTextBox.Text, out this.stepInMeterToSplit))
                                     {
                                         this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
                                         
@@ -1125,10 +1120,10 @@
                                         this.dialogService.ShowMessage("Некорректный ввод шага разбиения!");
                                     }
                                 }
-                                else if (int.TryParse(this.NumberOfPointsToSplit, out var numberOfSplitPoints))
+                                else if (int.TryParse(this.NumberOfPointsToSplitTextBox.Text, out var numberOfSplitPoints))
                                 {
                                     var trackLen = this.track3D.track.GetLen();
-                                    this.stepInMeterToSplit = trackLen / (double)int.Parse(this.NumberOfPointsToSplit);
+                                    this.stepInMeterToSplit = trackLen / (double)numberOfSplitPoints;
 
                                     this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
 
@@ -1180,6 +1175,8 @@
                 this.DistanceBetweenSplitPoints);
 
             this.ShowSplitTrack();
+
+            this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.GetLen()} м";
         }
 
         #endregion
@@ -1191,9 +1188,6 @@
             this.PlanningMovementAlongTrajectory(
                 e,
                 sender,
-                this.WithCond,
-                this.WithRepeatPlanning,
-                this.ThresholdForPlanning,
                 out this.IterationCount,
                 out this.bList,
                 out this.dList,
@@ -1217,11 +1211,18 @@
                             {
                                 this.WithCond = (bool)this.WithConditionNumberCheckBox.IsChecked;
 
-                                this.WithRepeatPlanning = (bool)this.WithRepeatPlanningRadioButton.IsChecked;
-                                //this.ThresholdForPlanning = this.WithRepeatPlanning
-                                //                                ? double.Parse(this.ThresholdForRepeatPlanning.Text)
-                                //                                : double.MaxValue;
-                                this.PathPlanningProgressBar.IsIndeterminate = this.WithRepeatPlanning;
+                                if ((bool)this.WithRepeatPlanningByThresholdRadioButton.IsChecked)
+                                {
+                                    this.ThresholdForPlanning = double.Parse(this.ThresholdForRepeatPlanning.Text);
+                                    this.NumberTimesRepeatPlanning = 1;
+                                }
+                                else if ((bool)this.WithRepeatPlanningByNumberTimesRadioButton.IsChecked)
+                                {
+                                    this.NumberTimesRepeatPlanning = int.Parse(this.RepeatNumberTimesPlanningTextBox.Text);
+                                    this.ThresholdForPlanning = double.MaxValue;
+                                }
+
+                                //this.PathPlanningProgressBar.IsIndeterminate = !(bool)this.WithoutRepeatPlanningRadioButton.IsChecked;
                                 this.PathPlanningProgressBar.Maximum = this.track3D.track.SplitPoints.Count;
                                 this.PathPlanningProgressBar.Value = 0;
 
@@ -1259,6 +1260,8 @@
 
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            this.timePlanning.Stop();
+            this.WorkingTime.Content = $"Время работы алгоритма планирования = {timePlanning.ElapsedMilliseconds} мс";
             this.ClearAllChartSeries(this.Chart);
 
             //    this.Chart.Series["bSeries"].Points.Clear();
@@ -1273,24 +1276,16 @@
 
             if (this.WithCond)
             {
-                this.Chart.Hide();
-                this.ChartUpper.Show();
-                this.ChartLower.Show();
-
-                this.ChartUpper.Series["deltaSeries"].Points.DataBindXY(
+                this.Chart.Series["deltaSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.deltaList);
 
-                this.ChartLower.Series["CondSeries"].Points.DataBindXY(
+                this.Chart.Series["CondSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.CondList);
             }
             else
             {
-                this.Chart.Show();
-                this.ChartUpper.Hide();
-                this.ChartLower.Hide();
-
                 this.Chart.Series["deltaSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.deltaList);

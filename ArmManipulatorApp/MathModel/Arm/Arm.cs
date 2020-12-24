@@ -256,7 +256,8 @@
 
             return res;
         }
-        #region Temp for RRPR arm
+
+        #region Legacy of hardcoded RRPR arm
 
         public double[] RRPR_LagrangeMethodToThePoint(Point3D p, out double cond, bool withCond)
         {

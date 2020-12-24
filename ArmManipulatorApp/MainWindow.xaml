@@ -28,7 +28,7 @@
             <command:EventToCommand Command="{Binding OnKeyDownHandler}" PassEventArgsToCommand="True" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.025*"></RowDefinition>
@@ -56,7 +56,7 @@
             </MenuItem>
             <MenuItem Header="Движение" x:Name="MovingMenuItem"></MenuItem>
             <!--<MenuItem Header="Препятсвия" x:Name="ObstacleMenuItem"></MenuItem>-->
-            
+
             <!--> TODO: Препятствия
             <MenuItem Header="Препятствия">
                 <MenuItem Header="Добавить"/>
@@ -69,7 +69,7 @@
             </-->
         </Menu>
 
-        <Grid Grid.Column="0" Grid.Row="1" >
+        <Grid Grid.Column="0" Grid.Row="1">
             <Grid x:Name="ManipulatorGrid" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.1*"></RowDefinition>
@@ -88,30 +88,30 @@
                 <StackPanel>
                     <Grid>
                         <StackPanel>
-                            <Button Content="Добавить опорную точку" IsEnabled="False" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
-                            <Button Content="Завершить добавление точек" IsEnabled="False" Command="{Binding FinishAddingTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
-                            <Button Content="Изменить z координату точки" IsEnabled="False" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <CheckBox x:Name="WithInterpolationCheckBox" IsEnabled="False" Content="Интерполяция" Style="{StaticResource ButtonStyle}"/>
-                            <Label Content="Разделение траектории" HorizontalAlignment="Center" FontSize="13"  FontWeight="Bold" />
+                            <Button Content="Добавить опорную точку" Command="{Binding AddTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Завершить добавление точек" Command="{Binding FinishAddingTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}" />
+                            <Button Content="Изменить z координату точки" Command="{Binding UpDownTrajectoryAnchorPointsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            <CheckBox x:Name="WithInterpolationCheckBox" Content="Интерполяция" Style="{StaticResource ButtonStyle}"/>
+                            <Label Content="Разделение траектории" HorizontalAlignment="Center" FontSize="15"  FontWeight="Bold" />
                             <WrapPanel>
-                                <Label Content="С шагом разбиения в метрах:" />
-                                <TextBox x:Name="StepInMeterToSplitTextBox" IsEnabled="False" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <Label Content="С шагом разбиения в метрах:" FontSize="14" />
+                                <TextBox x:Name="StepInMeterToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
-                            <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
+                            <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center" FontSize="14" />
                             <WrapPanel>
-                                <Label Content="по количеству точек разбиения" />
-                                <TextBox x:Name="NumberOfPointsToSplitTextBox" IsEnabled="False" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                <Label Content="по количеству точек разбиения" FontSize="14" />
+                                <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
                             </WrapPanel>
                             <ProgressBar x:Name="PathSplittingProgressBar" Height="18" Margin="10, 5"/>
                             <WrapPanel VerticalAlignment="Bottom" ItemWidth="130" HorizontalAlignment="Center">
-                                <Button Content="Разделить" IsEnabled="False" Command="{Binding StartSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" Width="103" />
-                                <Button Content="Отмена" IsEnabled="False" Width="88" Command="{Binding CancelSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" />
+                                <Button Content="Разделить" Command="{Binding StartSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" Width="103" />
+                                <Button Content="Отмена" Width="88" Command="{Binding CancelSplittingTrack_Click}" Style="{StaticResource ButtonStyle}" />
                             </WrapPanel>
-                            <ListBox>
+                            <!--<ListBox>-->
                                 <!-- TODO /-->
                                 <!-- Список точек пути, с возможностью редактирования их координат/-->
                                 <!-- Выводить реальные значения, при изменении с помощью coeff переводить в виртуальные координаты/-->
-                            </ListBox>
+                            <!--</ListBox>-->
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -137,15 +137,15 @@
                             <Slider x:Name="SliderSpeed" VerticalAlignment="Center" />
                         </WrapPanel>
                     </DockPanel>
-                    <ListBox>
+                    <!--<ListBox>-->
                         <!-- Для каждой обобщённой координаты ползунок для её изменения/-->
-                    </ListBox>
+                    <!--</ListBox>-->
                 </StackPanel>
             </Grid>
             <Grid x:Name="Obstacle" Visibility="Hidden">
                 <StackPanel>
-                <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Препятствия</Label>
-               </StackPanel>
+                    <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Препятствия</Label>
+                </StackPanel>
             </Grid>
         </Grid>
 
@@ -164,18 +164,23 @@
                 </WrapPanel>
                 <Separator Height="5"></Separator>
                 <CheckBox x:Name="WithConditionNumberCheckBox" FontSize="14" Margin="10,5" Content="С выводом числа обусловленности"/>
+                <CheckBox x:Name="WithBalancingCheckBox" FontSize="14" Margin="10,0" Content="С уравновешиванием при числе "/>
+                <WrapPanel Margin="10,0" >
+                    <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">обусловленности большем</TextBlock>
+                    <TextBox  x:Name="ThresholdForBalancing" HorizontalAlignment="Left" Width="35" ></TextBox>
+                </WrapPanel>
                 <Separator Height="5"></Separator>
-                <RadioButton x:Name="WithRepeatPlanningRadioButton" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
+                <RadioButton x:Name="WithoutRepeatPlanningRadioButton" GroupName="RepeatPlanning" IsChecked="True" FontSize="14" Margin="10,5" Content="Без повторного планирования"/>
                 <TextBlock FontSize="14" Margin="10,5" Text="С повторным планированием"/>
                 <WrapPanel>
-                    <RadioButton x:Name="WithRepeatPlanningByThresholdCheckBox" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</RadioButton>
+                    <RadioButton x:Name="WithRepeatPlanningByThresholdRadioButton" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >до приближения к точке на</RadioButton>
                     <TextBox x:Name="ThresholdForRepeatPlanning" HorizontalAlignment="Left" Width="35" ></TextBox>
                     <TextBlock VerticalAlignment="Center" FontSize="14" Margin="5,0">м.</TextBlock>
                 </WrapPanel>
                 <TextBlock Text="или" FontSize="14" Margin="10,0,5,0"></TextBlock>
                 <WrapPanel>
-                    <RadioButton x:Name="WithRepeatPlanningByCountCheckBox" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >к каждой точке k раз, где k = </RadioButton>
-                    <TextBox x:Name="RepeatCountForThePointPlanning" HorizontalAlignment="Left" Width="40" ></TextBox>
+                    <RadioButton x:Name="WithRepeatPlanningByNumberTimesRadioButton" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >к каждой точке k раз, где k =</RadioButton>
+                    <TextBox x:Name="RepeatNumberTimesPlanningTextBox" HorizontalAlignment="Left" Width="40" >1</TextBox>
                 </WrapPanel>
                 <Separator Height="5"></Separator>
 
@@ -194,42 +199,32 @@
                       HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
         <Grid Grid.Column="2" Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35*"/>
+                <RowDefinition Height="324*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="0.80*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Grid  x:Name="MainChart" Grid.Column="0" >
-                <Grid>
-                    <WindowsFormsHost>
+            <Grid  x:Name="MainChart" Grid.Column="0" Grid.RowSpan="2" >
+                <WindowsFormsHost>
                         <dvc:Chart x:Name="Chart" Height="60"/>
                     </WindowsFormsHost>
-                </Grid>
-                <Grid  x:Name="DuoChart" Visibility="Hidden">
-                    <StackPanel>
-                    <WindowsFormsHost>
-                        <dvc:Chart x:Name="ChartUpper" Height="30"/>
-                    </WindowsFormsHost>
-                    <WindowsFormsHost>
-                        <dvc:Chart x:Name="ChartLower" Height="30"/>
-                    </WindowsFormsHost>
-                    </StackPanel>
-                </Grid>
             </Grid>
-            <StackPanel x:Name="ResultsStackPanel" Grid.Column="1">
-                <Separator Height="10"></Separator>
-                <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Текущие данные</Label>
-                <Separator Height="5"></Separator>
-                <Separator Height="5"></Separator>
-                <TextBlock Margin="10,5" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
-                <Separator Height="10"></Separator>
+            <StackPanel x:Name="ResultsStackPanel" Grid.Column="1" Grid.RowSpan="2" >
+                <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Текущие данные:</Label>
+                <TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>
+                <Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />
                 <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
-                <Label x:Name="PathLength" Content="Длина пути = 0 м." FontSize="14" Margin="10,0" />
+                <Label x:Name="WorkingTime" Content="Время работы алгоритма планирования = 0 мс" FontSize="14" Margin="10,0"/>
                 <Label Content="Конечное значение обобщённых координат q:" FontSize="14" Margin="10,0"/>
             </StackPanel>
         </Grid>
 
         <Grid Grid.Column="2" Grid.Row="1">
-            <Viewport3D x:Name="Viewport3D" ClipToBounds="True" >
+            <Border BorderBrush="Gray" BorderThickness="2">
+                <Viewport3D x:Name="Viewport3D" ClipToBounds="True" >
 
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseMove">
@@ -242,7 +237,8 @@
                         <command:EventToCommand Command="{Binding MouseLeftButtonDown}" PassEventArgsToCommand="True" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-            </Viewport3D>
+                </Viewport3D>
+            </Border>
         </Grid>
 
         <Grid.Triggers>
@@ -301,7 +297,7 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-            
+
             <!--/ Manipulator MenuItems Events-->
             <EventTrigger RoutedEvent="MenuItem.Click" SourceName="NewArmMenuItem">
                 <BeginStoryboard>
@@ -339,7 +335,7 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-            
+
             <!--/ Motion MenuItem Events-->
             <EventTrigger RoutedEvent="MenuItem.Click" SourceName="MovingMenuItem">
                 <BeginStoryboard>

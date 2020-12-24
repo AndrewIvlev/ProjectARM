@@ -13,6 +13,7 @@
     using ArmManipulatorApp.MathModel.Trajectory;
 
     using MainApp.Graphics3DModel.Model3D;
+    using Brushes = System.Windows.Media.Brushes;
 
     public class TrajectoryModel3D
     {
@@ -95,11 +96,10 @@
         
         private ModelVisual3D CreateSplitPointModelVisual3D(Point3D center)
         {
-            
             var splitPointModelVisual3D = new ModelVisual3D();
             var splitPointMeshGeometry3D = new MeshGeometry3D();
             MeshGeometry3DHelper.AddSphere(splitPointMeshGeometry3D, center, 6, 8, 8);
-            var splitPointBrush = Brushes.Red;
+            var splitPointBrush = System.Windows.Media.Brushes.Red;
             var splitPointMaterial = new DiffuseMaterial(splitPointBrush);
             var splitPointGeometryModel = new GeometryModel3D(splitPointMeshGeometry3D, splitPointMaterial);
             splitPointModelVisual3D.Content = splitPointGeometryModel;
