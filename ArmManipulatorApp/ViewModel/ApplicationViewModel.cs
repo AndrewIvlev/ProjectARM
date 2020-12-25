@@ -1195,7 +1195,9 @@
                             {
                                 this.planningWorker.CancelAsync();
                                 this.timePlanning.Stop();
-                                //this.WorkingTime.Content = $"Время работы алгоритма = {this.timePlanning.ElapsedMilliseconds * 60} сек.";
+                                this.WorkingTime.Content = $"Продолжительность планирования = {timePlanning.ElapsedMilliseconds} мс";
+                                this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
+                                this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.######}", this.deltaList.Average())} м";
                             }
                             catch (Exception ex)
                             {
@@ -1208,9 +1210,9 @@
         private void PlanningWorkerRunPlanningWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.timePlanning.Stop();
-            this.WorkingTime.Content = $"Время работы алгоритма планирования = {timePlanning.ElapsedMilliseconds} мс";
+            this.WorkingTime.Content = $"Продолжительность планирования = {timePlanning.ElapsedMilliseconds} мс";
             this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
-            this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {this.deltaList.Average()} м";
+            this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.#####}", this.deltaList.Average())} м";
 
             this.armModel3D.arm.SetQ(0.0);
             this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());

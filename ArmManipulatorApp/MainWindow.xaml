@@ -36,7 +36,7 @@
             <RowDefinition Height="0.46*" ></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="270"></ColumnDefinition>
+            <ColumnDefinition Width="273"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
@@ -101,7 +101,7 @@
                                     <Label Content="или" Height="26" VerticalContentAlignment="Center" VerticalAlignment="Center" FontSize="14" />
                                     <WrapPanel>
                                         <Label Content="по количеству точек разбиения" FontSize="14" />
-                                        <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="50"/>
+                                        <TextBox x:Name="NumberOfPointsToSplitTextBox" HorizontalAlignment="Left" Height="20" TextWrapping="Wrap" VerticalAlignment="Center" Width="43"/>
                                     </WrapPanel>
                                     <ProgressBar x:Name="PathSplittingProgressBar" Height="18" Margin="10, 5"/>
                                     <WrapPanel VerticalAlignment="Bottom" ItemWidth="130" HorizontalAlignment="Center">
@@ -183,7 +183,7 @@
                     <TextBlock Text="или" FontSize="14" Margin="10,0,5,0"></TextBlock>
                     <WrapPanel>
                         <RadioButton x:Name="WithRepeatPlanningByNumberTimesRadioButton" GroupName="RepeatPlanning" VerticalAlignment="Center" FontSize="14" Margin="10,0,5,0" >к каждой точке k раз, где k =</RadioButton>
-                        <TextBox x:Name="RepeatNumberTimesPlanningTextBox" HorizontalAlignment="Left" Width="40" >1</TextBox>
+                        <TextBox x:Name="RepeatNumberTimesPlanningTextBox" HorizontalAlignment="Left" Width="23" >1</TextBox>
                     </WrapPanel>
                     <Separator Height="5"></Separator>
 
@@ -239,7 +239,7 @@
                         <!--<TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>-->
                         <Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />
                         <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
-                        <Label x:Name="WorkingTime" Content="Время работы алгоритма планирования = 0 мс" FontSize="14" Margin="10,0"/>
+                        <Label x:Name="WorkingTime" Content="Продолжительность планирования = 0 мс" FontSize="14" Margin="10,0"/>
                         <Label x:Name="AverageDeltaLabel" Content="Средняя ошибка перемещения = 0 м" FontSize="14" Margin="10,0" />
                     </StackPanel>
                 </Grid>
