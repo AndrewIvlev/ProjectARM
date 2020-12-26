@@ -19,6 +19,7 @@
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
                 this.PathLength,
+                this.SplitStepPathLabel,
                 this.IterationCountLabel,
                 this.AverageDeltaLabel,
                 this.Chart,

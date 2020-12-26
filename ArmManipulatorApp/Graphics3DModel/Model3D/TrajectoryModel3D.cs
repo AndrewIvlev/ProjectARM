@@ -19,7 +19,6 @@
     {
         public Trajectory track;
 
-        private Viewport3D viewport;
         public List<ModelVisual3D> trackModelVisual3D;
         public List<ModelVisual3D> splitTrackModelVisual3D;
 
@@ -31,13 +30,12 @@
         private double pointRadius;
         private double trackLineRadius;
 
-        public TrajectoryModel3D(Trajectory track, Viewport3D viewport, double thickness, double coeff = 1)
+        public TrajectoryModel3D(Trajectory track, double thickness, double coeff = 1)
         {
             this.coeff = coeff;
             this.pointRadius = thickness * this.coeff / 2;
             this.trackLineRadius = this.pointRadius * 0.90;
             this.track = track;
-            this.viewport = viewport;
             this.trackModelVisual3D = new List<ModelVisual3D>();
             this.splitTrackModelVisual3D = new List<ModelVisual3D>();
             

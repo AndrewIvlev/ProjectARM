@@ -119,7 +119,6 @@
                     </Grid>
                     <Grid x:Name="MovingGrid" Visibility="Hidden">
                         <StackPanel>
-                            <Separator Height="10"></Separator>
                             <Label HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Прогресс алгоритма планирования</Label>
                             <ProgressBar x:Name="PathPlanningProgressBar" Height="18" Margin="10, 5"/>
                             <WrapPanel VerticalAlignment="Bottom" ItemWidth="120" HorizontalAlignment="Center">
@@ -238,6 +237,7 @@
                         <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Данные:</Label>
                         <!--<TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>-->
                         <Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />
+                        <Label x:Name="SplitStepPathLabel" Content="Шаг разбиения пути = 0 м" FontSize="14" Margin="10,0" />
                         <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
                         <Label x:Name="WorkingTime" Content="Продолжительность планирования = 0 мс" FontSize="14" Margin="10,0"/>
                         <Label x:Name="AverageDeltaLabel" Content="Средняя ошибка перемещения = 0 м" FontSize="14" Margin="10,0" />

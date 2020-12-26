@@ -38,7 +38,7 @@
     {
         private ManipulatorArmModel3D armModel3D;
 
-        public TrajectoryModel3D track3D;
+        private TrajectoryModel3D track3D;
 
         private CameraModel3D camera;
 
@@ -59,6 +59,8 @@
         private TextBox VectorQTextBox;
 
         private Label pathLengthLabel;
+
+        private Label SplitStepPathLabel;
 
         private Label IterationCountLabel;
 
@@ -152,6 +154,7 @@
             TextBox armTextBox,
             TextBox vectorQTextBox,
             Label pathLength,
+            Label SplitStepPathLabel,
             Label IterationCountLabel,
             Label AverageDeltaLabel,
             Chart Chart,
@@ -178,6 +181,7 @@
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
             this.pathLengthLabel = pathLength;
+            this.SplitStepPathLabel = SplitStepPathLabel;
             this.IterationCountLabel = IterationCountLabel;
             this.AverageDeltaLabel = AverageDeltaLabel;
             this.PathSplittingProgressBar = PathSplittingProgressBar;
@@ -232,10 +236,9 @@
             chartArea.AxisX.IsMarginVisible = false;
             chartArea.AxisY.IsMarginVisible = false;
             chartArea.AxisX.Title = "iteration";
-            chartArea.AxisY.Title = "d(m)";
+            chartArea.AxisY.Title = "Δ(м)";
             chartArea.AxisY2.Title = "cond";
             this.Chart.ChartAreas.Add(chartArea);
-            this.Chart.ChartAreas["Default"].AxisY2.Enabled = AxisEnabled.True;
 
 
             this.Chart.Series.Add(new Series("bSeries"));
@@ -410,14 +413,7 @@
                                                                    {
                                                                        try
                                                                        {
-                                                                           if (this.track3D != null)
-                                                                           {
-                                                                               foreach (var mv in this.track3D
-                                                                                   .trackModelVisual3D)
-                                                                               {
-                                                                                   this.viewport.Children.Remove(mv);
-                                                                               }
-                                                                           }
+                                                                           this.RemoveAnchorTrackFromViewport();
 
                                                                            this.thickness =
                                                                                (this.armModel3D.arm.MaxLength()
@@ -426,14 +422,10 @@
                                                                                this.armModel3D.arm.N);
                                                                            this.track3D = new TrajectoryModel3D(
                                                                                new Trajectory((Point3D)firstPoint),
-                                                                               this.viewport,
                                                                                this.thickness,
                                                                                this.coeff);
-                                                                           foreach (var mv in this.track3D
-                                                                               .trackModelVisual3D)
-                                                                           {
-                                                                               this.viewport.Children.Add(mv);
-                                                                           }
+
+                                                                           //this.AddAnchorTrackToViewport();
 
                                                                            this.camera = new CameraModel3D(
                                                                                this.coeff * this.armModel3D.arm
@@ -470,7 +462,6 @@
                                                                                   this.track3D = new TrajectoryModel3D(
                                                                                       this.fileService.OpenTrack(
                                                                                           this.dialogService.FilePath),
-                                                                                      this.viewport,
                                                                                       this.thickness,
                                                                                       this.coeff);
                                                                                   this.AddAnchorTrackToViewport();
@@ -538,7 +529,6 @@
                                            }
                                            else
                                            {
-                                               this.RemoveAnchorTrackFromViewport();
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                                this.AddAnchorTrackToViewport();
 
@@ -715,16 +705,18 @@
             }
         }
 
-        public void RemoveAnchorTrackFromViewport()
+        private void RemoveAnchorTrackFromViewport()
         {
             if (this.track3D == null) return;
             foreach (var mv in this.track3D.trackModelVisual3D)
             {
                 this.viewport.Children.Remove(mv);
             }
+
+            this.track3D.trackModelVisual3D.Clear();
         }
 
-        public void AddAnchorTrackToViewport()
+        private void AddAnchorTrackToViewport()
         {
             foreach (var mv in this.track3D.trackModelVisual3D)
             {
@@ -732,16 +724,18 @@
             }
         }
 
-        public void RemoveSplitTrackFromViewport()
+        private void RemoveSplitTrackFromViewport()
         {
             if (this.track3D == null) return;
             foreach (var mv in this.track3D.splitTrackModelVisual3D)
             {
                 this.viewport.Children.Remove(mv);
             }
+
+            this.track3D.splitTrackModelVisual3D.Clear();
         }
 
-        public void AddSplitTrackToViewport()
+        private void AddSplitTrackToViewport()
         {
             foreach (var mv in this.track3D.splitTrackModelVisual3D)
             {
@@ -970,14 +964,16 @@
                                 {
                                     if (double.TryParse(this.StepInMeterToSplitTextBox.Text, out this.stepInMeterToSplit))
                                     {
+                                        this.SplitStepPathLabel.Content = $"Шаг разбиения пути = {this.stepInMeterToSplit} м";
                                         this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
-                                        
+
                                         this.PathSplittingProgressBar.IsIndeterminate = true;
                                         this.PathSplittingProgressBar.Maximum = 1;
                                         this.PathSplittingProgressBar.Value = 0;
                                         this.RemoveAnchorTrackFromViewport();
                                         this.RemoveSplitTrackFromViewport();
 
+                                        this.RemoveAnchorTrackFromViewport();
 
                                         this.splittingTrackWorker.RunWorkerAsync();
                                     }
@@ -990,6 +986,8 @@
                                 {
                                     var trackLen = this.track3D.track.GetLen();
                                     this.stepInMeterToSplit = trackLen / (double)numberOfSplitPoints;
+                                    this.SplitStepPathLabel.Content = $"Шаг разбиения пути = {this.stepInMeterToSplit} м";
+                                    this.RemoveAnchorTrackFromViewport();
 
                                     this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
 
@@ -999,6 +997,7 @@
                                     this.RemoveAnchorTrackFromViewport();
                                     this.RemoveSplitTrackFromViewport();
 
+                                    this.RemoveAnchorTrackFromViewport();
 
                                     this.splittingTrackWorker.RunWorkerAsync();
                                 }
@@ -1143,6 +1142,8 @@
                             try
                             {
                                 this.WithCond = (bool)this.WithConditionNumberCheckBox.IsChecked;
+                                this.Chart.ChartAreas["Default"].AxisY2.Enabled = this.WithCond ? AxisEnabled.True : AxisEnabled.False;
+
                                 this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
                                 if (this.WithBalancing)
                                 {
