@@ -425,7 +425,7 @@
                                                                                this.thickness,
                                                                                this.coeff);
 
-                                                                           //this.AddAnchorTrackToViewport();
+                                                                           this.AddAnchorTrackToViewport();
 
                                                                            this.camera = new CameraModel3D(
                                                                                this.coeff * this.armModel3D.arm
@@ -529,6 +529,8 @@
                                            }
                                            else
                                            {
+                                               this.RemoveAnchorTrackFromViewport();
+                                               this.viewport.UpdateLayout();
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                                this.AddAnchorTrackToViewport();
 
@@ -962,7 +964,7 @@
                                 }
                                 else if (this.StepInMeterToSplitTextBox.Text != string.Empty)
                                 {
-                                    if (double.TryParse(this.StepInMeterToSplitTextBox.Text, out this.stepInMeterToSplit))
+                                    if (double.TryParse(this.StepInMeterToSplitTextBox.Text.Replace(',','.'), out this.stepInMeterToSplit))
                                     {
                                         this.SplitStepPathLabel.Content = $"Шаг разбиения пути = {this.stepInMeterToSplit} м";
                                         this.SplitTrackWithInterpolation = (bool)this.WithInterpolationCheckBox.IsChecked;
@@ -1147,7 +1149,7 @@
                                 this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
                                 if (this.WithBalancing)
                                 {
-                                    this.ThresholdForBalancing = double.Parse(this.ThresholdForBalancingTextBox.Text);
+                                    this.ThresholdForBalancing = double.Parse(this.ThresholdForBalancingTextBox.Text.Replace(',', '.'));
                                 }
                                 else
                                 {
@@ -1156,7 +1158,7 @@
 
                                 if ((bool)this.WithRepeatPlanningByThresholdRadioButton.IsChecked)
                                 {
-                                    this.ThresholdForPlanning = double.Parse(this.ThresholdForRepeatPlanning.Text);
+                                    this.ThresholdForPlanning = double.Parse(this.ThresholdForRepeatPlanning.Text.Replace(',', '.'));
                                     this.NumberTimesRepeatPlanning = 1;
                                 }
                                 else if ((bool)this.WithRepeatPlanningByNumberTimesRadioButton.IsChecked)
