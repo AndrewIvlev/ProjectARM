@@ -3,6 +3,7 @@
     using System;
 
     using ArmManipulatorArm.MathModel.Matrix;
+    using Newtonsoft.Json;
 
     public class Unit
     {
@@ -16,6 +17,9 @@
         /// Generalized coordinates vector
         /// </summary>
         public double Q;
+        public double qMin;
+        public double qMax;
+        [JsonIgnore] public bool v; // false if Q is <= qMin or >= qMax
 
         /// <summary>
         /// Matrix orientation and position of unit
@@ -26,6 +30,9 @@
         {
             this.Type = 'T';
             this.Q = 0;
+            this.qMin = double.MinValue;
+            this.qMax = double.MaxValue;
+            this.v = true;
             this.B = new Matrix(4, 4);
         }
 
@@ -40,6 +47,24 @@
             if (a.Q != b.Q)
             {
                 Console.WriteLine("Generalized coordinates are not equal.");
+                return false;
+            }
+
+            if (a.qMin != b.qMin)
+            {
+                Console.WriteLine("qMin values are not equal.");
+                return false;
+            }
+
+            if (a.qMax != b.qMax)
+            {
+                Console.WriteLine("qMax values are not equal.");
+                return false;
+            }
+
+            if (a.v != b.v)
+            {
+                Console.WriteLine("V values are not equal.");
                 return false;
             }
 

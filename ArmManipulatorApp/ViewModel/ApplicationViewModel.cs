@@ -95,6 +95,8 @@
 
         private CheckBox WithBalancingCheckBox;
 
+        private CheckBox WithLimitationsCheckBox;
+
         private CheckBox WithInterpolationCheckBox;
 
         private RadioButton WithoutRepeatPlanningRadioButton;
@@ -147,6 +149,8 @@
 
         private bool WithBalancing;
 
+        private bool WithLimitations;
+
         public ApplicationViewModel(
             IDialogService dialogService,
             IFileService fileService,
@@ -160,6 +164,7 @@
             Chart Chart,
             CheckBox WithConditionNumberCheckBox,
             CheckBox WithBalancingCheckBox,
+            CheckBox WithLimitationsCheckBox,
             CheckBox WithInterpolationCheckBox,
             RadioButton WithoutRepeatPlanningRadioButton,
             RadioButton WithRepeatPlanningByThresholdRadioButton,
@@ -224,6 +229,7 @@
             this.NumberTimesRepeatPlanning = 1;
             this.WithConditionNumberCheckBox = WithConditionNumberCheckBox;
             this.WithBalancingCheckBox = WithBalancingCheckBox;
+            this.WithLimitationsCheckBox = WithLimitationsCheckBox;
             this.WithInterpolationCheckBox = WithInterpolationCheckBox;
             this.WithoutRepeatPlanningRadioButton = WithoutRepeatPlanningRadioButton;
             this.WithRepeatPlanningByThresholdRadioButton = WithRepeatPlanningByThresholdRadioButton;
@@ -1086,7 +1092,8 @@
                         out var d,
                         out var delta,
                         ref cond,
-                        this.ThresholdForBalancing);
+                        this.ThresholdForBalancing,
+                        this.WithLimitations);
 
                     this.qList.Add(this.armModel3D.arm.GetQ());
 
@@ -1147,6 +1154,8 @@
                                 this.Chart.ChartAreas["Default"].AxisY2.Enabled = this.WithCond ? AxisEnabled.True : AxisEnabled.False;
 
                                 this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
+
+                                this.WithLimitations = (bool)this.WithLimitationsCheckBox.IsChecked;
                                 if (this.WithBalancing)
                                 {
                                     this.ThresholdForBalancing = double.Parse(this.ThresholdForBalancingTextBox.Text.Replace(',', '.'));

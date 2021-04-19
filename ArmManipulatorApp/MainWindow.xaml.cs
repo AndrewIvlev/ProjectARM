@@ -25,6 +25,7 @@
                 this.Chart,
                 this.WithConditionNumberCheckBox,
                 this.WithBalancingCheckBox,
+                this.WithLimitations,
                 this.WithInterpolationCheckBox,
                 this.WithoutRepeatPlanningRadioButton,
                 this.WithRepeatPlanningByThresholdRadioButton,

@@ -17,6 +17,8 @@
 
         [JsonIgnore] public double[] A { get; set; }
 
+        [JsonIgnore] private int countV;
+
         [JsonIgnore] public ArrayList T;
         [JsonIgnore] public Matrix D;
         [JsonIgnore] public Matrix C;
@@ -36,6 +38,8 @@
             {
                 this.Units[i] = units[i];
             }
+
+            this.countV = 0;
 
             this.A = new double[this.N];
             this.D = new Matrix(3, this.N);
@@ -183,10 +187,10 @@
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0, bool withLimitations = false)
         {
-            Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
-            Console.WriteLine("Planning trajectory to the point " + p);
+            // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
+            // Console.WriteLine("Planning trajectory to the point " + p);
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
             var f = this.F(this.N);
@@ -194,7 +198,7 @@
                 p.X - f.X,
                 p.Y - f.Y,
                 p.Z - f.Z);
-            Console.WriteLine("Desired grip offset " + D);
+            // Console.WriteLine("Desired grip offset " + D);
 
             d = MathFunctions.NormaVector(D);
 
@@ -202,10 +206,10 @@
             this.Calc_dT();
             this.Build_D();
             this.Calc_C();
-            Console.WriteLine("Matrix C:");
+            // Console.WriteLine("Matrix C:");
             this.C.Print();
             this.detC = Matrix.Det3D(this.C);
-            Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
+            // Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
 
 
             if (cond == 0)
@@ -217,7 +221,7 @@
                 else
                 {
                     cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
-                    Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+                    // Console.WriteLine("Condition number of matrix C is " + cond + "\n");
                 }
             }
 
@@ -244,7 +248,7 @@
             }
 
             var μ = Matrix.System3x3Solver(this.C, this.detC, D);
-            Console.WriteLine($"mu = {μ}\n");
+            // Console.WriteLine($"mu = {μ}\n");
 
             var dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
@@ -254,8 +258,16 @@
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
 
-            Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
-            Console.WriteLine($"Value of Q function = {this.functionQ()}");
+            // Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
+            // Console.WriteLine($"Value of Q function = {this.functionQ()}");
+
+            if (withLimitations)
+            {
+                dQ = this.GetProjectionOfQForLimitations(dQ);
+            }
+
+            // добавить "замораживание" - отключение вычисления производных dF для qi у которых v = false.
+            // вместо dF подставляются константные значения проекции qi
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
@@ -285,6 +297,23 @@
             }
 
             return res;
+        }
+
+        private double[] GetProjectionOfQForLimitations(double[] dQ)
+        {
+            var newdQ = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+            {
+                if (!MathFunctions.SegmentContains(this.Units[i].qMin, this.Units[i].qMin, this.Units[i].Q + dQ[i]))
+                {
+                    var projectionQ = MathFunctions.Projection(this.Units[i].qMin, this.Units[i].qMin, this.Units[i].Q + dQ[i]);
+                    newdQ[i] = projectionQ - this.Units[i].Q;
+                    this.Units[i].v = false;
+                }
+                else
+                    this.Units[i].v = true;
+            }
+            return newdQ;
         }
 
         #region Legacy of hardcoded RRPR arm

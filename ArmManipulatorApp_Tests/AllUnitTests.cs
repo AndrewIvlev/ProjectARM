@@ -143,6 +143,8 @@ namespace ArmManipulatorApp_Tests
                 "\"Units\":[" +
                     "{\"Type\":\"R\"," +
                     "\"Q\":0.0," +
+                    "\"qMin\":-1.0," +
+                    "\"qMax\":1.0," +
                     "\"B\":{\"M\":[" +
                         "[-1.0,0.0,0.0,0.0]," +
                         "[0.0,0.0,1.0,0.0]," +
@@ -151,6 +153,8 @@ namespace ArmManipulatorApp_Tests
                     "]}}," + 
                 "{\"Type\":\"R\"," +
                     "\"Q\":0.0," +
+                    "\"qMin\":-1.0," +
+                    "\"qMax\":1.0," +
                     "\"B\":{\"M\":[" +
                         "[0.0,0.0,1.0,2.0]," +
                         "[1.0,0.0,0.0,0.0]," +
@@ -159,6 +163,8 @@ namespace ArmManipulatorApp_Tests
                 "]}}," +
                     "{\"Type\":\"R\"," +
                 "\"Q\":0.0," +
+                    "\"qMin\":-1.0," +
+                    "\"qMax\":1.0," +
                     "\"B\":{\"M\":[" +
                         "[1.0,0.0,0.0,0.0]," +
                         "[0.0,1.0,0.0,0.0]," +
@@ -167,6 +173,8 @@ namespace ArmManipulatorApp_Tests
                 "]}}," +
                     "{\"Type\":\"P\"," +
                 "\"Q\":0.0," +
+                    "\"qMin\":-1.0," +
+                    "\"qMax\":1.0," +
                 "\"B\":{\"M\":[" +
                 "[0.0,0.0,1.0,0.0]," +
                 "[1.0,0.0,0.0,0.0]," +
@@ -175,6 +183,8 @@ namespace ArmManipulatorApp_Tests
                 "]}}," +
                     "{\"Type\":\"R\"," +
                 "\"Q\":0.0," +
+                    "\"qMin\":-1.0," +
+                    "\"qMax\":1.0," +
                 "\"B\":{\"M\":[" +
                 "[-1.0,0.0,0.0,0.0]," +
                 "[0.0,0.0,1.0,1.0]," +
@@ -198,6 +208,8 @@ namespace ArmManipulatorApp_Tests
                     new Unit{
                         Type = 'R',
                         Q = 0,
+                        qMin = -1,
+                        qMax = 1,
                         B = new Matrix(new[,]
                         {
                             {-1.0, 0.0, 0.0, 0.0 },
@@ -210,6 +222,8 @@ namespace ArmManipulatorApp_Tests
                     {
                         Type = 'R',
                         Q = 0,
+                        qMin = -1,
+                        qMax = 1,
                         B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 2.0 },
@@ -221,6 +235,8 @@ namespace ArmManipulatorApp_Tests
                     new Unit{
                         Type = 'R',
                         Q = 0,
+                        qMin = -1,
+                        qMax = 1,
                         B = new Matrix(new[,]
                         {
                             { 1.0, 0.0, 0.0, 0.0 },
@@ -233,6 +249,8 @@ namespace ArmManipulatorApp_Tests
                     new Unit{
                         Type = 'P',
                         Q = 0,
+                        qMin = -1,
+                        qMax = 1,
                         B = new Matrix(new[,]
                         {
                             { 0.0, 0.0, 1.0, 0.0 },
@@ -244,6 +262,8 @@ namespace ArmManipulatorApp_Tests
                     new Unit{
                         Type = 'R',
                         Q = 0,
+                        qMin = -1,
+                        qMax = 1,
                         B = new Matrix(new[,]
                         {
                             { -1.0, 0.0, 0.0, 0.0 },
