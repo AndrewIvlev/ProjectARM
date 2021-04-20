@@ -152,6 +152,22 @@ namespace ArmManipulatorArm.MathModel.Matrix
 
             return Ab;
         }
+        
+        public static Vector3D SubtractToVector3D(Vector3D b, Matrix A)
+        {
+            if (A.Rows != 3)
+                throw new Exception(
+                    "Matrix and Vector are not conformable");
+
+            for (var i = 0; i < A.Columns; i++)
+            {
+                b.X -= A[0, i];
+                b.Y -= A[1, i];
+                b.Z -= A[2, i];
+            }
+
+            return b;
+        }
 
         public static double Det2D(Matrix m) => m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
 

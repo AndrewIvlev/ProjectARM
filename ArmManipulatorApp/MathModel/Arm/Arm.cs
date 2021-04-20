@@ -17,10 +17,12 @@
 
         [JsonIgnore] public double[] A { get; set; }
 
-        [JsonIgnore] private int countV;
+        [JsonIgnore] private int maxV; // замораживаем не более maxV обобщённых координат
+        [JsonIgnore] private int curV;
 
         [JsonIgnore] public ArrayList T;
         [JsonIgnore] public Matrix D;
+        [JsonIgnore] public Matrix rightResidueD; // слогаемые правой части матричного уравнения
         [JsonIgnore] public Matrix C;
         [JsonIgnore] public ArrayList dT;
         [JsonIgnore] public Matrix[] S;
@@ -39,10 +41,12 @@
                 this.Units[i] = units[i];
             }
 
-            this.countV = 0;
+            this.maxV = 3;
+            this.curV = 0;
 
             this.A = new double[this.N];
             this.D = new Matrix(3, this.N);
+            this.rightResidueD = new Matrix(3, this.N);
             this.C = new Matrix(3, 3);
             this.S = new Matrix[this.N];
             this.dS = new Matrix[this.N];
@@ -207,7 +211,7 @@
             this.Build_D();
             this.Calc_C();
             // Console.WriteLine("Matrix C:");
-            this.C.Print();
+            //this.C.Print();
             this.detC = Matrix.Det3D(this.C);
             // Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
 
@@ -263,11 +267,40 @@
 
             if (withLimitations)
             {
+                // добавить "замораживание" - отключение вычисления производных dF для qi у которых v = false.
+                // вместо dF подставляются константные значения проекции qi
                 dQ = this.GetProjectionOfQForLimitations(dQ);
-            }
+                this.OffsetQ(dQ);
+                this.Build_S_ForAllUnits_ByUnitsType();
+                this.Calc_T();
+                f = this.F(this.N);
+                D = new Vector3D(
+                    p.X - f.X,
+                    p.Y - f.Y,
+                    p.Z - f.Z);
+                // Console.WriteLine("Desired grip offset " + D);
 
-            // добавить "замораживание" - отключение вычисления производных dF для qi у которых v = false.
-            // вместо dF подставляются константные значения проекции qi
+                d = MathFunctions.NormaVector(D);
+
+                this.Build_dS();
+                this.Calc_dT();
+                this.Build_D(withLimitations);
+                this.Calc_C(withLimitations);
+                // Console.WriteLine("Matrix C:");
+                //this.C.Print();
+                this.detC = Matrix.Det3D(this.C);
+                D = Matrix.SubtractToVector3D(D, this.rightResidueD);
+                μ = Matrix.System3x3Solver(this.C, this.detC, D);
+                for (var i = 0; i < this.N; i++)
+                {
+                    if (this.Units[i].v)
+                    {
+                        var dF = this.Get_dF(i);
+                        this.Print_dF(i);
+                        dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+                    }
+                }
+            }
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
@@ -544,14 +577,36 @@
         /// ( Fyq1 Fyq2 ... Fyqn )
         /// ( Fzq1 Fzq2 ... Fzqn )
         /// </summary>
-        public void Build_D()
+        public void Build_D(bool withLimitations = false)
         {
+            this.curV = 0;
             for (var i = 0; i < this.N; i++)
             {
-                var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
-                this.D[0, i] = b.X;
-                this.D[1, i] = b.Y;
-                this.D[2, i] = b.Z;
+                if (withLimitations)
+                {
+                    if (!this.Units[i].v && this.maxV > curV)
+                    {
+                        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+                        this.rightResidueD[0, i] = b.X * this.Units[i].Q;
+                        this.rightResidueD[1, i] = b.Y * this.Units[i].Q;
+                        this.rightResidueD[2, i] = b.Z * this.Units[i].Q;
+                        curV++;
+                    }
+                    else 
+                    {
+                        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+                        this.D[0, i] = b.X;
+                        this.D[1, i] = b.Y;
+                        this.D[2, i] = b.Z;
+                    }
+                }
+                else
+                {
+                    var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+                    this.D[0, i] = b.X;
+                    this.D[1, i] = b.Y;
+                    this.D[2, i] = b.Z;
+                }
             }
         }
 
@@ -572,11 +627,17 @@
         }
 
         // Вычисляем матрицу коэффициентов для метода Лагранжа
-        public void Calc_C()
+        public void Calc_C(bool withLimitations = false)
         {
+            var tmpV = 0;
             this.C = new Matrix(3, 3);
             for (var i = 0; i < this.N; i++)
             {
+                if (withLimitations && this.Units[i].v && tmpV < this.maxV)
+                {
+                    tmpV++;
+                    continue;
+                }
                 var dF = this.Get_dF(i);
                 
                 // C xx
