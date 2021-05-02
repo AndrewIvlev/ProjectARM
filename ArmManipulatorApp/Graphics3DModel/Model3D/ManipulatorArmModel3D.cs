@@ -61,14 +61,18 @@
             for (var i = 0; i < this.arm.N; i++)
             {
                 eup = (Point3D)this.arm.F(i + 1);
-                
+
+                var axis = VRConvert.ConvertFromRealToVirtual(this.arm.GetZAxis(i), this.coeff);
+                MathFunctions.Normalize(axis);
+
                 jointBrush = this.arm.Units[i].Type == 'R' ? Brushes.OrangeRed : Brushes.Green;
                 this.armModelVisual3D.Add(
                     this.CreateArmJointModelVisual3D(
                         VRConvert.ConvertFromRealToVirtual(sup, this.coeff),
                         jointRadius,
                         jointBrush,
-                        i + 1));
+                        i + 1,
+                        axis));
 
                 this.armModelVisual3D.Add(
                     this.CreateArmBoneModelVisual3D(
@@ -106,11 +110,16 @@
             return this.AddTransformGroup(bone, addTransforms);
         }
 
-        private ModelVisual3D CreateArmJointModelVisual3D(Point3D center, double radius, SolidColorBrush brush, int addTransforms = 0)
+        private ModelVisual3D CreateArmJointModelVisual3D(Point3D center, double radius, SolidColorBrush brush, int addTransforms = 0, Vector3D axis = new Vector3D())
         {
             var joint = new ModelVisual3D();
             var jointMesh = new MeshGeometry3D();
             MeshGeometry3DHelper.AddSphere(jointMesh, center, radius, 8, 8);
+            MeshGeometry3DHelper.AddSmoothCylinder(
+                jointMesh,
+                center - radius * 0.5 * axis,
+                radius * axis,
+                0.2 * radius);
             var jointMaterial = new DiffuseMaterial(brush);
             var jointGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
             joint.Content = jointGeometryModel;

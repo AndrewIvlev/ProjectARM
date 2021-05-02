@@ -11,10 +11,20 @@ namespace ArmManipulatorArm.MathModel
 
         public static double NormaVector(Vector3D p) => Math.Sqrt(Math.Pow(p.X, 2) + Math.Pow(p.Y, 2) + Math.Pow(p.Z, 2));
 
+        public static void Normalize(Vector3D p)
+        {
+            var norma = NormaVector(p);
+            p.X = p.X / norma;
+            p.Y = p.Y / norma;
+            p.Z = p.Z / norma;
+        }
+
         public static bool SegmentContains(double left, double right, double num) => (num >= left && num <= right);
 
         public static double Projection(double left, double right, double num)
         {
+            if (left > right) throw new Exception("Invalid arguments: left side is bigger then right side.");
+
             var max = left;
             if (num > max)
                 max = num;

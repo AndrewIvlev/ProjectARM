@@ -244,6 +244,19 @@
             }
         }
 
+        public void Show(ref Viewport3D viewport)
+        {
+            foreach (var mv in this.trackModelVisual3D)
+            {
+                viewport.Children.Add(mv);
+            }
+        }
+
+        public void Hide()
+        {
+
+        }
+
         // TODO: remove it 
         //private void NeighborhoodLinesRotation()
         //{

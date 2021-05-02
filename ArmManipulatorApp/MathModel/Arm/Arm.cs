@@ -42,7 +42,6 @@
             }
 
             this.maxV = 3;
-            this.curV = 0;
 
             this.A = new double[this.N];
             this.D = new Matrix(3, this.N);
@@ -269,36 +268,41 @@
             {
                 // добавить "замораживание" - отключение вычисления производных dF для qi у которых v = false.
                 // вместо dF подставляются константные значения проекции qi
-                dQ = this.GetProjectionOfQForLimitations(dQ);
-                this.OffsetQ(dQ);
-                this.Build_S_ForAllUnits_ByUnitsType();
-                this.Calc_T();
-                f = this.F(this.N);
-                D = new Vector3D(
-                    p.X - f.X,
-                    p.Y - f.Y,
-                    p.Z - f.Z);
-                // Console.WriteLine("Desired grip offset " + D);
-
-                d = MathFunctions.NormaVector(D);
-
-                this.Build_dS();
-                this.Calc_dT();
-                this.Build_D(withLimitations);
-                this.Calc_C(withLimitations);
-                // Console.WriteLine("Matrix C:");
-                //this.C.Print();
-                this.detC = Matrix.Det3D(this.C);
-                D = Matrix.SubtractToVector3D(D, this.rightResidueD);
-                μ = Matrix.System3x3Solver(this.C, this.detC, D);
-                for (var i = 0; i < this.N; i++)
+                var newdQ = this.GetProjectionOfQForLimitations(dQ);
+                if (this.IsAnyVFalse())
                 {
-                    if (this.Units[i].v)
+                    this.OffsetQ(newdQ);
+                    this.Build_S_ForAllUnits_ByUnitsType();
+                    this.Calc_T();
+                    f = this.F(this.N);
+                    D = new Vector3D(
+                        p.X - f.X,
+                        p.Y - f.Y,
+                        p.Z - f.Z);
+
+                    this.Build_dS();
+                    this.Calc_dT();
+                    this.Build_D(withLimitations);
+                    Console.WriteLine(curV);
+
+                    this.Calc_C(withLimitations);
+                    this.detC = Matrix.Det3D(this.C);
+                    d = MathFunctions.NormaVector(D);
+                    D = Matrix.SubtractToVector3D(D, this.rightResidueD);
+                    μ = Matrix.System3x3Solver(this.C, this.detC, D);
+
+                    var tmpV = 0;
+                    for (var i = 0; i < this.N; i++)
                     {
+                        if (!this.Units[i].v && this.curV > tmpV)
+                        {
+                            tmpV++;
+                            continue;
+                        }
                         var dF = this.Get_dF(i);
-                        this.Print_dF(i);
-                        dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+                        newdQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
                     }
+                    dQ = newdQ;
                 }
             }
 
@@ -337,16 +341,29 @@
             var newdQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
             {
-                if (!MathFunctions.SegmentContains(this.Units[i].qMin, this.Units[i].qMin, this.Units[i].Q + dQ[i]))
+                if (!MathFunctions.SegmentContains(this.Units[i].qMin, this.Units[i].qMax, this.Units[i].Q + dQ[i]))
                 {
-                    var projectionQ = MathFunctions.Projection(this.Units[i].qMin, this.Units[i].qMin, this.Units[i].Q + dQ[i]);
+                    var projectionQ = MathFunctions.Projection(this.Units[i].qMin, this.Units[i].qMax, this.Units[i].Q + dQ[i]);
                     newdQ[i] = projectionQ - this.Units[i].Q;
                     this.Units[i].v = false;
                 }
                 else
+                {
                     this.Units[i].v = true;
+                    newdQ[i] = dQ[i];
+                }
             }
             return newdQ;
+        }
+
+        private bool IsAnyVFalse()
+        {
+            for (var i = 0; i < this.N; i++)
+            {
+                if (this.Units[i].v == false)
+                    return true;
+            }
+            return false;
         }
 
         #region Legacy of hardcoded RRPR arm
@@ -579,7 +596,7 @@
         /// </summary>
         public void Build_D(bool withLimitations = false)
         {
-            this.curV = 0;
+            curV = 0;
             for (var i = 0; i < this.N; i++)
             {
                 if (withLimitations)
@@ -633,7 +650,7 @@
             this.C = new Matrix(3, 3);
             for (var i = 0; i < this.N; i++)
             {
-                if (withLimitations && this.Units[i].v && tmpV < this.maxV)
+                if (withLimitations && !this.Units[i].v && tmpV < this.maxV)
                 {
                     tmpV++;
                     continue;

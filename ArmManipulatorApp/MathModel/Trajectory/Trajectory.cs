@@ -240,6 +240,7 @@
             {
                 this.SplitPoints.Add(this.LagrangePolynomial(stepK));
                 var deltaStep = delta / MathFunctions.NormaVector((Vector3D)this.DerivativeLagrangePolynomial(stepK));
+                // добавить коррекцию deltaStep увеличить/умножить 
                 stepK += deltaStep;
             }
 

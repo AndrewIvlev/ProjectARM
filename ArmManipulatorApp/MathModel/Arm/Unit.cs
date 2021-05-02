@@ -19,7 +19,7 @@
         public double Q;
         public double qMin;
         public double qMax;
-        [JsonIgnore] public bool v; // false if Q is <= qMin or >= qMax
+        [JsonIgnore] public bool v; // если вышли на ограничитель, то false (if Q is <= qMin or >= qMax)
 
         /// <summary>
         /// Matrix orientation and position of unit
@@ -29,7 +29,7 @@
         public Unit()
         {
             this.Type = 'T';
-            this.Q = 0;
+            this.Q = 0.0;
             this.qMin = double.MinValue;
             this.qMax = double.MaxValue;
             this.v = true;

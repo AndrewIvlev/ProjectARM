@@ -33,6 +33,7 @@
     using Point3D = System.Windows.Media.Media3D.Point3D;
     using ProgressBar = System.Windows.Controls.ProgressBar;
     using TextBox = System.Windows.Controls.TextBox;
+    using ArmManipulatorArm.MathModel.Arm;
 
     public class ApplicationViewModel
     {
@@ -401,6 +402,64 @@
             }
         }
 
+
+        public ICommand BuildArmFromTextBoxCommand
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                    {
+                        try
+                        {
+                            if (this.armModel3D != null)
+                            {
+                                this.viewport.Children.Clear();
+                            }
+
+                            this.armModel3D = new ManipulatorArmModel3D(JsonConvert.DeserializeObject<Arm>(this.armTextBox.Text),
+                                this.coeff);
+                            this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
+                            this.armModel3D.arm.Calc_T();
+                            var maxArmLength = this.armModel3D.arm.MaxLength();
+
+                            this.thickness = (maxArmLength / this.armModel3D.arm.N) * 0.13;
+                            this.armModel3D.BuildModelVisual3DCollection(this.thickness);
+
+                            // After parsing manipulator configuration file
+                            // on the screen appears 3D scene with axis and manipulator
+                            this.camera = new CameraModel3D(
+                                this.coeff * maxArmLength * 2);
+                            this.scene = new SceneModel3D(
+                                this.coeff * maxArmLength * 2,
+                                this.coeff * this.thickness * 0.5);
+
+                            this.viewport.Camera = this.camera.PerspectiveCamera;
+                            this.viewport.Children.Add(this.scene.ModelVisual3D);
+                            foreach (var mv in this.armModel3D.armModelVisual3D)
+                            {
+                                this.viewport.Children.Add(mv);
+                            }
+
+                            this.viewport.Children.Add(
+                                new ModelVisual3D
+                                {
+                                    Content = new AmbientLight(
+                                            Brushes.White.Color)
+                                });
+                            
+                            this.VectorQTextBox.Text =
+                                JsonConvert.SerializeObject(
+                                    this.armModel3D.arm.GetQ());
+                        }
+                        catch (Exception ex)
+                        {
+                            this.dialogService.ShowMessage(ex.Message);
+                        }
+                    });
+            }
+        }
+
         #endregion
 
         #region Trajectory
@@ -525,15 +584,7 @@
                                    {
                                        try
                                        {
-                                           if (UserControlMod.Mod != UserMod.TrajectoryAnchorPointCreation)
-                                           {
-                                               this.camera = new CameraModel3D(
-                                                   this.coeff * this.armModel3D.arm.MaxLength() * 2);
-                                               this.camera.ViewFromAbove();
-                                               this.viewport.Camera = this.camera.PerspectiveCamera;
-                                               UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
-                                           }
-                                           else
+                                           if (UserControlMod.Mod == UserMod.TrajectoryAnchorPointCreation)
                                            {
                                                this.RemoveAnchorTrackFromViewport();
                                                this.viewport.UpdateLayout();
@@ -542,6 +593,14 @@
 
                                                this.pathLengthLabel.Content =
                                                    $"Длина пути = {this.track3D.track.Length} м";
+                                           }
+                                           else
+                                           {
+                                               this.camera = new CameraModel3D(
+                                                   this.coeff * this.armModel3D.arm.MaxLength() * 2);
+                                               this.camera.ViewFromAbove();
+                                               this.viewport.Camera = this.camera.PerspectiveCamera;
+                                               UserControlMod.Mod = UserMod.TrajectoryAnchorPointCreation;
                                            }
                                        }
                                        catch (Exception ex)
@@ -721,7 +780,7 @@
                 this.viewport.Children.Remove(mv);
             }
 
-            this.track3D.trackModelVisual3D.Clear();
+            //this.track3D.trackModelVisual3D.Clear();
         }
 
         private void AddAnchorTrackToViewport()
@@ -1305,7 +1364,7 @@
             {
                 var q = this.qList[i];
 
-                //Thread.Sleep(60); //TODO: add value from speed slider
+                Thread.Sleep(300); //TODO: add value from speed slider
                 App.Current.Dispatcher.Invoke(
                     DispatcherPriority.SystemIdle,
                     new Action(

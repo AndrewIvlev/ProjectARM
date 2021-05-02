@@ -156,9 +156,12 @@
                 <StackPanel x:Name="SettingsStackPanel" >
                     <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
                     <Separator Height="5"></Separator>
-                    <TextBlock x:Name="QLabel" FontSize="14" Margin="10,0">Текущее значение вектора <LineBreak/> обобщённых координат q:</TextBlock>
+                    <RadioButton x:Name="LagrangeRadioButton" GroupName="PlanningMethodType" IsChecked="True" FontSize="14" Margin="10,5" Content="Метод Лагранжа"/>
+                    <RadioButton x:Name="LagrangeWithActiveInequalityRadioButton" GroupName="PlanningMethodType" IsChecked="False" FontSize="14" Margin="10,5" Content="Метод Лагранжа с активными огр."/>
+
                     <WrapPanel>
-                        <TextBox x:Name="VectorQTextBox" HorizontalAlignment="Left" Width="139" Margin="10,7" ></TextBox>
+                        <TextBlock x:Name="QLabel" FontSize="18" Margin="5,0,5,0">q:</TextBlock>
+                        <TextBox x:Name="VectorQTextBox" HorizontalAlignment="Left" Width="139" Margin="5,7" ></TextBox>
                         <Button Content="Применить" HorizontalAlignment="Right" 
                             Command="{Binding ChangeVectorQFromTextBox}" 
                             Style="{StaticResource ButtonStyle}" >
