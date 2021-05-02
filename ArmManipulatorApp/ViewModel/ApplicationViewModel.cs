@@ -102,6 +102,10 @@
 
         private RadioButton WithoutRepeatPlanningRadioButton;
 
+        private RadioButton LagrangeRadioButton;
+
+        private RadioButton LagrangeWithActiveInequalitiesRadioButton;
+
         private RadioButton WithRepeatPlanningByThresholdRadioButton;
 
         private RadioButton WithRepeatPlanningByNumberTimesRadioButton;
@@ -152,6 +156,8 @@
 
         private bool WithLimitations;
 
+        private bool WithActiveInequalities;
+
         public ApplicationViewModel(
             IDialogService dialogService,
             IFileService fileService,
@@ -167,6 +173,8 @@
             CheckBox WithBalancingCheckBox,
             CheckBox WithLimitationsCheckBox,
             CheckBox WithInterpolationCheckBox,
+            RadioButton LagrangeRadioButton,
+            RadioButton LagrangeWithActiveInequalitiesRadioButton,
             RadioButton WithoutRepeatPlanningRadioButton,
             RadioButton WithRepeatPlanningByThresholdRadioButton,
             RadioButton WithRepeatPlanningByNumberTimesRadioButton,
@@ -232,6 +240,8 @@
             this.WithBalancingCheckBox = WithBalancingCheckBox;
             this.WithLimitationsCheckBox = WithLimitationsCheckBox;
             this.WithInterpolationCheckBox = WithInterpolationCheckBox;
+            this.LagrangeRadioButton = LagrangeRadioButton;
+            this.LagrangeWithActiveInequalitiesRadioButton = LagrangeWithActiveInequalitiesRadioButton;
             this.WithoutRepeatPlanningRadioButton = WithoutRepeatPlanningRadioButton;
             this.WithRepeatPlanningByThresholdRadioButton = WithRepeatPlanningByThresholdRadioButton;
             this.WithRepeatPlanningByNumberTimesRadioButton = WithRepeatPlanningByNumberTimesRadioButton;
@@ -1152,7 +1162,8 @@
                         out var delta,
                         ref cond,
                         this.ThresholdForBalancing,
-                        this.WithLimitations);
+                        this.WithLimitations,
+                        this.WithActiveInequalities);
 
                     this.qList.Add(this.armModel3D.arm.GetQ());
 
@@ -1215,6 +1226,9 @@
                                 this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
 
                                 this.WithLimitations = (bool)this.WithLimitationsCheckBox.IsChecked;
+
+                                this.WithActiveInequalities = (bool)this.LagrangeWithActiveInequalitiesRadioButton.IsChecked;
+
                                 if (this.WithBalancing)
                                 {
                                     this.ThresholdForBalancing = double.Parse(this.ThresholdForBalancingTextBox.Text.Replace(',', '.'));

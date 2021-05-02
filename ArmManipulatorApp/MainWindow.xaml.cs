@@ -27,6 +27,8 @@
                 this.WithBalancingCheckBox,
                 this.WithLimitations,
                 this.WithInterpolationCheckBox,
+                this.LagrangeRadioButton,
+                this.LagrangeWithActiveInequalitiesRadioButton,
                 this.WithoutRepeatPlanningRadioButton,
                 this.WithRepeatPlanningByThresholdRadioButton,
                 this.WithRepeatPlanningByNumberTimesRadioButton,

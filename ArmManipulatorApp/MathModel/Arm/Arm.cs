@@ -190,7 +190,7 @@
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0, bool withLimitations = false)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0, bool withLimitations = false, bool withActiveInequalities = false)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);

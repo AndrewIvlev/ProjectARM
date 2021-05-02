@@ -157,7 +157,7 @@
                     <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Настройки</Label>
                     <Separator Height="5"></Separator>
                     <RadioButton x:Name="LagrangeRadioButton" GroupName="PlanningMethodType" IsChecked="True" FontSize="14" Margin="10,5" Content="Метод Лагранжа"/>
-                    <RadioButton x:Name="LagrangeWithActiveInequalityRadioButton" GroupName="PlanningMethodType" IsChecked="False" FontSize="14" Margin="10,5" Content="Метод Лагранжа с активными огр."/>
+                    <RadioButton x:Name="LagrangeWithActiveInequalitiesRadioButton" GroupName="PlanningMethodType" IsChecked="False" FontSize="14" Margin="10,5" Content="Метод Лагранжа с активными огр."/>
 
                     <WrapPanel>
                         <TextBlock x:Name="QLabel" FontSize="18" Margin="5,0,5,0">q:</TextBlock>
