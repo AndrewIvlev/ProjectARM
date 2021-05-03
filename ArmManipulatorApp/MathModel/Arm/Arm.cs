@@ -16,6 +16,7 @@
         public Unit[] Units;
 
         [JsonIgnore] public double[] A { get; set; }
+        [JsonIgnore] public Matrix diagA { get; set; }
 
         [JsonIgnore] private int maxV; // замораживаем не более maxV обобщённых координат
         [JsonIgnore] private int curV;
@@ -44,6 +45,7 @@
             this.maxV = 3;
 
             this.A = new double[this.N];
+            this.diagA = new Matrix(this.N, this.N);
             this.D = new Matrix(3, this.N);
             this.rightResidueD = new Matrix(3, this.N);
             this.C = new Matrix(3, 3);
@@ -52,6 +54,7 @@
             for (var i = 0; i < this.N; i++)
             {
                 this.A[i] = 1.0 / this.N;
+                this.diagA[i, i] = this.A[i];
                 this.S[i] = new Matrix(4, 4);
                 this.dS[i] = new Matrix(4, 4);
             }
@@ -67,6 +70,7 @@
                 }
 
                 this.A[i] = A[i];
+                this.diagA[i, i] = this.A[i];
             }
         }
 
@@ -190,7 +194,7 @@
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold = 0, bool withLimitations = false, bool withActiveInequalities = false)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold, bool withLimitations = false)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);
@@ -322,6 +326,96 @@
                 newF.Y - p.Y,
                 newF.Z - p.Z);
 
+            delta = MathFunctions.NormaVector(Delta);
+        }
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold, bool withLimitations, bool withActiveInequalities)
+        {
+            // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
+            // Console.WriteLine("Planning trajectory to the point " + p);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var f = this.F(this.N);
+            var D = new Vector3D(
+                p.X - f.X,
+                p.Y - f.Y,
+                p.Z - f.Z);
+            // Console.WriteLine("Desired grip offset " + D);
+
+            d = MathFunctions.NormaVector(D);
+
+            this.Build_dS();
+            this.Calc_dT();
+            this.Build_D();
+            this.Calc_C();
+
+            var zeroVector = new Matrix(this.N, 1, 0.0);
+            var aBt = diagA.AddAsColumns(Matrix.Transpose(this.D).AddAsColumns(zeroVector));
+
+            var zeroMatrix = new Matrix(3, this.N, 0.0);
+            var Bzerod = this.D.AddAsColumns(zeroMatrix).AddAsColumns(D);
+
+            var isAllowed = false;
+            while(isAllowed)
+            {
+                isAllowed = true;
+            }
+
+            if (cond == 0)
+            {
+                if (this.detC == 0)
+                {
+                    cond = double.MaxValue;
+                }
+                else
+                {
+                    cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                    // Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+                }
+            }
+
+            // Balancing by condition number
+            if (condTreshold > 0)
+            {
+                var norm1 = this.C.EuclidNormOfRow(0);
+                var norm2 = this.C.EuclidNormOfRow(1);
+                var norm3 = this.C.EuclidNormOfRow(2);
+
+                var diagNorm = new Matrix(3, 3)
+                {
+                    [0, 0] = 1.0 / norm1,
+                    [0, 1] = 0,
+                    [0, 2] = 0,
+                    [1, 0] = 0,
+                    [1, 1] = 1.0 / norm2,
+                    [1, 2] = 0,
+                    [2, 0] = 0,
+                    [2, 1] = 0,
+                    [2, 2] = 1.0 / norm3
+                };
+
+                this.C = diagNorm * this.C;
+                this.detC = Matrix.Det3D(this.C);
+                D = diagNorm * D;
+
+                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+            }
+            
+
+            //this.OffsetQ(dQ);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+
+            var newF = this.F(this.N);
+            var newD = new Vector3D(
+                newF.X - f.X,
+                newF.Y - f.Y,
+                newF.Z - f.Z);
+            b = MathFunctions.NormaVector(newD);
+            var Delta = new Vector3D(
+                newF.X - p.X,
+                newF.Y - p.Y,
+                newF.Z - p.Z);
             delta = MathFunctions.NormaVector(Delta);
         }
 

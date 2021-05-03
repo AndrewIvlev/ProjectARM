@@ -1155,15 +1155,33 @@
                 for (var j = 0; j < k; j++)
                 {
                     var cond = this.WithCond ? 0.0 : 1.0;
-                    this.armModel3D.arm.LagrangeMethodToThePoint(
-                        point,
-                        out var b,
-                        out var d,
-                        out var delta,
-                        ref cond,
-                        this.ThresholdForBalancing,
-                        this.WithLimitations,
-                        this.WithActiveInequalities);
+
+                    var b = 0.0;
+                    var d = 0.0;
+                    var delta = 0.0;
+                    if (this.WithActiveInequalities)
+                    {
+                        this.armModel3D.arm.LagrangeMethodToThePoint(
+                            point,
+                            out b,
+                            out d,
+                            out delta,
+                            ref cond,
+                            this.ThresholdForBalancing,
+                            this.WithLimitations,
+                            this.WithActiveInequalities);
+                    }
+                    else
+                    {
+                        this.armModel3D.arm.LagrangeMethodToThePoint(
+                            point,
+                            out b,
+                            out d,
+                            out delta,
+                            ref cond,
+                            this.ThresholdForBalancing,
+                            this.WithLimitations);
+                    }
 
                     this.qList.Add(this.armModel3D.arm.GetQ());
 

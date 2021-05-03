@@ -310,6 +310,86 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
+        public void MatrixAddAsColumnsTest()
+        {
+            var left = new Matrix(2, 2)
+            {
+                [0, 0] = 5, [0, 1] = 3,
+                [1, 0] = 4, [1, 1] = 6
+            };
+
+            var right = new Matrix(2, 3)
+            {
+                [0, 0] = 8, [0, 1] = 7, [0, 2] = 1,
+                [1, 0] = 2, [1, 1] = 1, [1, 2] = 7
+            };
+
+            var expectedM = new Matrix(2, 5)
+            {
+                [0, 0] = 5, [0, 1] = 3, [0, 2] = 8, [0, 3] = 7, [0, 4] = 1,
+                [1, 0] = 4, [1, 1] = 6, [1, 2] = 2, [1, 3] = 1, [1, 4] = 7
+            };
+
+            var actualM = left.AddAsColumns(right);
+
+            Assert.IsTrue(expectedM == actualM);
+        }
+
+        [Test]
+        public void MatrixAddVectorAsColumnsTest()
+        {
+            var left = new Matrix(3, 2)
+            {
+                [0, 0] = 5, [0, 1] = 3,
+                [1, 0] = 4, [1, 1] = 6,
+                [2, 0] = 1, [2, 1] = 3
+            };
+
+            var right = new Vector3D(9, 8, 7);
+
+            var expectedM = new Matrix(3, 3)
+            {
+                [0, 0] = 5, [0, 1] = 3, [0, 2] = 9,
+                [1, 0] = 4, [1, 1] = 6, [1, 2] = 8,
+                [2, 0] = 1, [2, 1] = 3, [2, 2] = 7
+            };
+
+            var actualM = left.AddAsColumns(right);
+
+            Assert.IsTrue(expectedM == actualM);
+        }
+
+        [Test]
+        public void MatrixAddAsRowsTest()
+        {
+            var top = new Matrix(2, 2)
+            {
+                [0, 0] = 5, [0, 1] = 3,
+                [1, 0] = 4, [1, 1] = 6
+            };
+
+            var bottom = new Matrix(3, 2)
+            {
+                [0, 0] = 8, [0, 1] = 7,
+                [1, 0] = 1, [1, 1] = 2,
+                [2, 0] = 1, [2, 1] = 7
+            };
+
+            var expectedM = new Matrix(5, 2)
+            {
+                [0, 0] = 5, [0, 1] = 3,
+                [1, 0] = 4, [1, 1] = 6,
+                [2, 0] = 8, [2, 1] = 7,
+                [3, 0] = 1, [3, 1] = 2,
+                [4, 0] = 1, [4, 1] = 7
+            };
+
+            var actualM = top.AddAsRows(bottom);
+
+            Assert.IsTrue(expectedM == actualM);
+        }
+
+        [Test]
         public void Det3DCalculateCorrect()
         {
             var expectedDet = -1;

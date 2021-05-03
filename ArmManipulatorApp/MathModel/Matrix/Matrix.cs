@@ -32,12 +32,12 @@ namespace ArmManipulatorArm.MathModel.Matrix
                 M[i, j] = 0;
         }
 
-        public Matrix(int rows, int columns)
+        public Matrix(int rows, int columns, double value = 0.0)
         {
             M = new double[Rows = rows, Columns = columns];
             for (var i = 0; i < rows; i++)
             for (var j = 0; j < columns; j++)
-                M[i, j] = 0;
+                M[i, j] = value;
         }
 
         public Matrix(Matrix A)
@@ -177,6 +177,57 @@ namespace ArmManipulatorArm.MathModel.Matrix
             + m[0, 2] * (m[1, 0] * m[2, 1] - m[2, 0] * m[1, 1]);
 
         public Vector3D ColumnAsVector3D(int i) => new Vector3D(M[0, i], M[1, i], M[2, i]);
+
+        public Matrix AddAsColumns(Vector3D right)
+        {
+            if (this.Rows != 3) throw new Exception("Matrix must have 3 rows!");
+
+            var resultM = new Matrix(this.Rows, this.Columns + 1);
+
+            for (var i = 0; i < Rows; i++)
+                for (var j = 0; j < Columns; j++)
+                    resultM.M[i, j] = M[i, j];
+
+            resultM.M[0, this.Columns] = right.X;
+            resultM.M[1, this.Columns] = right.Y;
+            resultM.M[2, this.Columns] = right.Z;
+
+            return resultM;
+        }
+
+        public Matrix AddAsColumns(Matrix right)
+        {
+            if (this.Rows != right.Rows) throw new Exception("Rows count should be equal!");
+
+            var resultM = new Matrix(this.Rows, this.Columns + right.Columns);
+
+            for (var i = 0; i < Rows; i++)
+                for (var j = 0; j < Columns; j++)
+                    resultM.M[i, j] = M[i, j];
+
+            for (var i = 0; i < Rows; i++)
+                for (var j = Columns; j < this.Columns + right.Columns; j++)
+                    resultM.M[i, j] = right.M[i, j - this.Columns];
+
+            return resultM;
+        }
+
+        public Matrix AddAsRows(Matrix bottom)
+        {
+            if (this.Columns != bottom.Columns) throw new Exception("Columns count should be equal!");
+
+            var resultM = new Matrix(this.Rows + bottom.Rows, this.Columns);
+
+            for (var i = 0; i < Rows; i++)
+                for (var j = 0; j < Columns; j++)
+                    resultM.M[i, j] = M[i, j];
+
+            for (var i = Rows; i < Rows + bottom.Rows; i++)
+                for (var j = 0; j < this.Columns; j++)
+                    resultM.M[i, j] = bottom.M[i - this.Rows, j];
+
+            return resultM;
+        }
 
         public Matrix Invert3D() => this.Invert3D(Det3D(this));
 
