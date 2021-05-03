@@ -346,17 +346,25 @@
             this.Build_dS();
             this.Calc_dT();
             this.Build_D();
-            this.Calc_C();
+            //this.Calc_C();
 
-            var zeroVector = new Matrix(this.N, 1, 0.0);
-            var aBt = diagA.AddAsColumns(Matrix.Transpose(this.D).AddAsColumns(zeroVector));
+            // Creating intermediate matrixes to create H(0) matrix
+            var aBt = diagA.AddAsColumns(Matrix.Transpose(this.D));
 
             var zeroMatrix = new Matrix(3, this.N, 0.0);
-            var Bzerod = this.D.AddAsColumns(zeroMatrix).AddAsColumns(D);
+            var bZeroD = this.D.AddAsColumns(zeroMatrix);
+            var rightSide = new double[this.N + 3];
+            rightSide[this.N - 3] = D.X;
+            rightSide[this.N - 2] = D.Y;
+            rightSide[this.N - 1] = D.Z;
+
+            var H0 = aBt.AddAsRows(bZeroD);
+            // Matrix.GaussianElimination(H0, rightSide, out var result);
 
             var isAllowed = false;
             while(isAllowed)
             {
+                // Matrix.GaussianElimination(H);
                 isAllowed = true;
             }
 

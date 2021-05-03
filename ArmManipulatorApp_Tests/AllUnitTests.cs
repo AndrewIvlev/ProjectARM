@@ -442,6 +442,27 @@ namespace ArmManipulatorApp_Tests
         }
 
         [Test]
+        [Ignore("TODO")]
+        public void MatrixGaussianEliminationSolver()
+        {
+            var expectedX = new Vector3D(1, 2, 3);
+            var A = new Matrix(3, 3)
+            {
+                [0, 0] = 1, [0, 1] = 0, [0, 2] = 1,
+                [1, 0] = 0, [1, 1] = 2, [1, 2] = -1,
+                [2, 0] = 3, [2, 1] = -1, [2, 2] = 0
+            };
+
+            var b = new Vector3D(4, 1, 1);
+            var Ab = A.AddAsColumns(b);
+            
+
+            //Matrix.GaussianElimination(Ab, out var actualX);
+
+            //Assert.AreEqual(expectedX, actualX);
+        }
+
+        [Test]
         public void MatrixFrobeniusNorm()
         {
             var expectedNorm = 13;

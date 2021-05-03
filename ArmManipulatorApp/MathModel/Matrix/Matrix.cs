@@ -339,7 +339,13 @@ namespace ArmManipulatorArm.MathModel.Matrix
                 detAy / detA,
                 detAz / detA);
         }
-        
+
+        public static bool GaussianElimination(Matrix A, double[] RightPart, out double[] result)
+        {
+            result = new double[A.Rows];
+            return false;
+        }
+            
         public void SwapColumns(int c1, int c2)
         {
             for (var i = 0; i < this.Rows; i++)
