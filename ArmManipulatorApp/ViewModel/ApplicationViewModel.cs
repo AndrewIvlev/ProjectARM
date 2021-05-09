@@ -96,15 +96,15 @@
 
         private CheckBox WithBalancingCheckBox;
 
-        private CheckBox WithLimitationsCheckBox;
-
         private CheckBox WithInterpolationCheckBox;
 
         private RadioButton WithoutRepeatPlanningRadioButton;
 
-        private RadioButton LagrangeRadioButton;
+        private RadioButton LagrangeMethodRadioButton;
 
-        private RadioButton LagrangeWithActiveInequalitiesRadioButton;
+        private RadioButton LagrangeMethodWithProjectionRadioButton;
+
+        private RadioButton ActiveSetMethodRadioButton;
 
         private RadioButton WithRepeatPlanningByThresholdRadioButton;
 
@@ -154,9 +154,14 @@
 
         private bool WithBalancing;
 
-        private bool WithLimitations;
-
-        private bool WithActiveInequalities;
+        PlanningMethod planningMethodType;
+        private enum PlanningMethod
+        {
+            LagrangeMethod,
+            LagrangeMethodWithProjection,
+            ActiveSetMethod,
+            NotSelected
+        }
 
         public ApplicationViewModel(
             IDialogService dialogService,
@@ -171,10 +176,10 @@
             Chart Chart,
             CheckBox WithConditionNumberCheckBox,
             CheckBox WithBalancingCheckBox,
-            CheckBox WithLimitationsCheckBox,
             CheckBox WithInterpolationCheckBox,
-            RadioButton LagrangeRadioButton,
-            RadioButton LagrangeWithActiveInequalitiesRadioButton,
+            RadioButton LagrangeMethodRadioButton,
+            RadioButton LagrangeMethodWithProjectionRadioButton,
+            RadioButton ActiveSetMethodRadioButton,
             RadioButton WithoutRepeatPlanningRadioButton,
             RadioButton WithRepeatPlanningByThresholdRadioButton,
             RadioButton WithRepeatPlanningByNumberTimesRadioButton,
@@ -235,13 +240,14 @@
             this.WithBalancing = false;
             this.ThresholdForBalancing = double.MaxValue;
             this.ThresholdForPlanning = double.MaxValue;
+            this.planningMethodType = PlanningMethod.NotSelected;
             this.NumberTimesRepeatPlanning = 1;
             this.WithConditionNumberCheckBox = WithConditionNumberCheckBox;
             this.WithBalancingCheckBox = WithBalancingCheckBox;
-            this.WithLimitationsCheckBox = WithLimitationsCheckBox;
             this.WithInterpolationCheckBox = WithInterpolationCheckBox;
-            this.LagrangeRadioButton = LagrangeRadioButton;
-            this.LagrangeWithActiveInequalitiesRadioButton = LagrangeWithActiveInequalitiesRadioButton;
+            this.LagrangeMethodRadioButton = LagrangeMethodRadioButton;
+            this.LagrangeMethodWithProjectionRadioButton = LagrangeMethodWithProjectionRadioButton;
+            this.ActiveSetMethodRadioButton = ActiveSetMethodRadioButton;
             this.WithoutRepeatPlanningRadioButton = WithoutRepeatPlanningRadioButton;
             this.WithRepeatPlanningByThresholdRadioButton = WithRepeatPlanningByThresholdRadioButton;
             this.WithRepeatPlanningByNumberTimesRadioButton = WithRepeatPlanningByNumberTimesRadioButton;
@@ -1119,7 +1125,7 @@
                 Enumerable.Range(0, this.IterationCount - 1).ToArray(),
                 this.DistanceBetweenSplitPoints);
 
-            this.track3D.ShowInterpolatedTrack();
+            this.track3D.ShowInterpolatedTrack(this.stepInMeterToSplit > 0.01);
             this.AddSplitTrackToViewport();
 
             this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.GetLen()} м";
@@ -1159,28 +1165,35 @@
                     var b = 0.0;
                     var d = 0.0;
                     var delta = 0.0;
-                    if (this.WithActiveInequalities)
+                    switch (this.planningMethodType)
                     {
-                        this.armModel3D.arm.LagrangeMethodToThePoint(
-                            point,
-                            out b,
-                            out d,
-                            out delta,
-                            ref cond,
-                            this.ThresholdForBalancing,
-                            this.WithLimitations,
-                            this.WithActiveInequalities);
-                    }
-                    else
-                    {
-                        this.armModel3D.arm.LagrangeMethodToThePoint(
-                            point,
-                            out b,
-                            out d,
-                            out delta,
-                            ref cond,
-                            this.ThresholdForBalancing,
-                            this.WithLimitations);
+                        case PlanningMethod.LagrangeMethod:
+                            this.armModel3D.arm.LagrangeMethodToThePoint(
+                                point,
+                                out b,
+                                out d,
+                                out delta,
+                                ref cond,
+                                this.ThresholdForBalancing);
+                            break;
+                        case PlanningMethod.LagrangeMethodWithProjection:
+                            this.armModel3D.arm.LagrangeMethodWithProjectionToThePoint(
+                                point,
+                                out b,
+                                out d,
+                                out delta,
+                                ref cond,
+                                this.ThresholdForBalancing);
+                            break;
+                        case PlanningMethod.ActiveSetMethod:
+                            this.armModel3D.arm.ActiveSetMethod(
+                                point,
+                                out b,
+                                out d,
+                                out delta,
+                                ref cond,
+                                this.ThresholdForBalancing);
+                            break;
                     }
 
                     this.qList.Add(this.armModel3D.arm.GetQ());
@@ -1243,9 +1256,11 @@
 
                                 this.WithBalancing = (bool)this.WithBalancingCheckBox.IsChecked;
 
-                                this.WithLimitations = (bool)this.WithLimitationsCheckBox.IsChecked;
+                                this.planningMethodType = PlanningMethod.NotSelected;
 
-                                this.WithActiveInequalities = (bool)this.LagrangeWithActiveInequalitiesRadioButton.IsChecked;
+                                this.planningMethodType = (bool)this.LagrangeMethodRadioButton.IsChecked ? PlanningMethod.LagrangeMethod : this.planningMethodType;
+                                this.planningMethodType = (bool)this.LagrangeMethodWithProjectionRadioButton.IsChecked ? PlanningMethod.LagrangeMethodWithProjection : this.planningMethodType;
+                                this.planningMethodType = (bool)this.ActiveSetMethodRadioButton.IsChecked ? PlanningMethod.ActiveSetMethod : this.planningMethodType;
 
                                 if (this.WithBalancing)
                                 {

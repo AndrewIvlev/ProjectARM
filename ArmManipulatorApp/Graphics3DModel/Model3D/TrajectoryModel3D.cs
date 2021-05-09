@@ -157,36 +157,28 @@
             return trajectoryLineModelVisual3D;
         }
 
-        public void ShowInterpolatedTrack()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="with3DLines"> if it false then only track points will be displayed</param>
+        public void ShowInterpolatedTrack(bool with3DLines)
         {
-            // TODO: calculate step by formula depending by distance between split points.
-            var step = 1;
-            if (this.track.SplitPoints.Count > 2000)
-            {
-                step = 4;
-            }
-            else if (this.track.SplitPoints.Count > 4000)
-            {
-                step = 13;
-            }
-            else if (this.track.SplitPoints.Count > 7000)
-            {
-                step = 30;
-            }
-
-
             this.splitTrackModelVisual3D.Add(
                 this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[0], this.coeff), this.pointRadius));
-            for (var i = 1; i + step < this.track.SplitPoints.Count; i += step)
+            for (var i = 1; i < this.track.SplitPoints.Count; i++)
             {
-                var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
-                    VRConvert.ConvertFromRealToVirtual(
-                        this.track.SplitPoints[i - 1],
-                        this.coeff),
-                    VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[i + step], this.coeff),
-                    this.trackLineRadius);
+                if (with3DLines)
+                {
+                    var trackLineMV3D = this.CreateTrajectoryLineModelVisual3D(
+                        VRConvert.ConvertFromRealToVirtual(
+                            this.track.SplitPoints[i - 1],
+                            this.coeff),
+                        VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[i], this.coeff),
+                        this.trackLineRadius);
 
-                this.splitTrackModelVisual3D.Add(trackLineMV3D);
+                    this.splitTrackModelVisual3D.Add(trackLineMV3D);
+                }
+
                 this.splitTrackModelVisual3D.Add(
                     this.CreateAnchorPointModelVisual3D(VRConvert.ConvertFromRealToVirtual(this.track.SplitPoints[i], this.coeff), this.pointRadius));
             }

@@ -231,23 +231,55 @@
             }
         }
 
-        public void SplitViaInterpolation(DoWorkEventArgs e, object sender, double delta)
+        public void SplitViaInterpolation(DoWorkEventArgs e, object sender, double delta, bool withDeltaCorrection = false)
         {
             this.Calc_Steps();
             this.SplitPoints.Clear();
             var stepK = this.StepsValue[0];
-            while (stepK < this.StepsValue[this.AnchorPoints.Count - 1])
+            this.SplitPoints.Add(this.LagrangePolynomial(stepK));
+            while (stepK <= this.StepsValue[this.AnchorPoints.Count - 1])
             {
-                this.SplitPoints.Add(this.LagrangePolynomial(stepK));
                 var deltaStep = delta / MathFunctions.NormaVector((Vector3D)this.DerivativeLagrangePolynomial(stepK));
-                // добавить коррекцию deltaStep увеличить/умножить 
-                stepK += deltaStep;
+                stepK = withDeltaCorrection ? StepPlustDeltaStepCorrected(delta, stepK, deltaStep) : stepK + deltaStep;
+                var newPoint = this.LagrangePolynomial(stepK);
+
+                this.SplitPoints.Add(newPoint);
             }
 
             ((BackgroundWorker)sender).ReportProgress(1);
 
             Console.WriteLine("Track divided successfully");
             Console.WriteLine("----Number of all points is " + this.SplitPoints.Count);
+        }
+
+        public double StepPlustDeltaStepCorrected(double delta, double stepK, double deltaStep)
+        {
+            var epsilon = 0.001;
+            var probPoint = this.LagrangePolynomial(stepK + deltaStep);
+            var distance = MathFunctions.NormaVector(this.SplitPoints.Last() - probPoint);
+            var isNewPointAllowed = false;
+            var _deltaStep = deltaStep;
+            var i = 1;
+            while (!isNewPointAllowed)
+            {
+                if (distance < delta - epsilon)
+                {
+                    _deltaStep = deltaStep / (2 * i);
+                    probPoint = this.LagrangePolynomial(stepK + _deltaStep);
+                    distance = MathFunctions.NormaVector(this.SplitPoints.Last() - probPoint);
+                }
+                if (distance > delta + epsilon)
+                {
+                    _deltaStep = deltaStep * 2 * i;
+                    probPoint = this.LagrangePolynomial(stepK + _deltaStep);
+                    distance = MathFunctions.NormaVector(this.SplitPoints.Last() - probPoint);
+                }
+                if (distance > delta - epsilon && distance < delta + epsilon)
+                {
+                    isNewPointAllowed = true;
+                }
+            }
+            return stepK + _deltaStep;
         }
 
         public Point3D LagrangePolynomial(double s)

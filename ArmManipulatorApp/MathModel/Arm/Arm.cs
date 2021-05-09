@@ -194,7 +194,7 @@
         /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold, bool withLimitations = false)
+        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);
@@ -268,47 +268,6 @@
             // Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
             // Console.WriteLine($"Value of Q function = {this.functionQ()}");
 
-            if (withLimitations)
-            {
-                // добавить "замораживание" - отключение вычисления производных dF для qi у которых v = false.
-                // вместо dF подставляются константные значения проекции qi
-                var newdQ = this.GetProjectionOfQForLimitations(dQ);
-                if (this.IsAnyVFalse())
-                {
-                    this.OffsetQ(newdQ);
-                    this.Build_S_ForAllUnits_ByUnitsType();
-                    this.Calc_T();
-                    f = this.F(this.N);
-                    D = new Vector3D(
-                        p.X - f.X,
-                        p.Y - f.Y,
-                        p.Z - f.Z);
-
-                    this.Build_dS();
-                    this.Calc_dT();
-                    this.Build_D(withLimitations);
-                    Console.WriteLine(curV);
-
-                    this.Calc_C(withLimitations);
-                    this.detC = Matrix.Det3D(this.C);
-                    d = MathFunctions.NormaVector(D);
-                    D = Matrix.SubtractToVector3D(D, this.rightResidueD);
-                    μ = Matrix.System3x3Solver(this.C, this.detC, D);
-
-                    var tmpV = 0;
-                    for (var i = 0; i < this.N; i++)
-                    {
-                        if (!this.Units[i].v && this.curV > tmpV)
-                        {
-                            tmpV++;
-                            continue;
-                        }
-                        var dF = this.Get_dF(i);
-                        newdQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
-                    }
-                    dQ = newdQ;
-                }
-            }
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
@@ -328,7 +287,8 @@
 
             delta = MathFunctions.NormaVector(Delta);
         }
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold, bool withLimitations, bool withActiveInequalities)
+
+        public void LagrangeMethodWithProjectionToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);
@@ -346,20 +306,167 @@
             this.Build_dS();
             this.Calc_dT();
             this.Build_D();
-            //this.Calc_C();
+            this.Calc_C();
+            // Console.WriteLine("Matrix C:");
+            //this.C.Print();
+            this.detC = Matrix.Det3D(this.C);
+            // Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
 
-            // Creating intermediate matrixes to create H(0) matrix
-            var aBt = diagA.AddAsColumns(Matrix.Transpose(this.D));
 
-            var zeroMatrix = new Matrix(3, this.N, 0.0);
-            var bZeroD = this.D.AddAsColumns(zeroMatrix);
-            var rightSide = new double[this.N + 3];
-            rightSide[this.N - 3] = D.X;
-            rightSide[this.N - 2] = D.Y;
-            rightSide[this.N - 1] = D.Z;
+            if (cond == 0)
+            {
+                if (this.detC == 0)
+                {
+                    cond = double.MaxValue;
+                }
+                else
+                {
+                    cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                    // Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+                }
+            }
 
-            var H0 = aBt.AddAsRows(bZeroD);
-            // Matrix.GaussianElimination(H0, rightSide, out var result);
+            // Balancing by condition number
+            if (condTreshold > 0)
+            {
+                var norm1 = this.C.EuclidNormOfRow(0);
+                var norm2 = this.C.EuclidNormOfRow(1);
+                var norm3 = this.C.EuclidNormOfRow(2);
+
+                var diagNorm = new Matrix(3, 3)
+                {
+                    [0, 0] = 1.0 / norm1,
+                    [0, 1] = 0,
+                    [0, 2] = 0,
+                    [1, 0] = 0,
+                    [1, 1] = 1.0 / norm2,
+                    [1, 2] = 0,
+                    [2, 0] = 0,
+                    [2, 1] = 0,
+                    [2, 2] = 1.0 / norm3
+                };
+
+                this.C = diagNorm * this.C;
+                this.detC = Matrix.Det3D(this.C);
+                D = diagNorm * D;
+
+                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+            }
+
+            var μ = Matrix.System3x3Solver(this.C, this.detC, D);
+            // Console.WriteLine($"mu = {μ}\n");
+
+            var dQ = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+            {
+                var dF = this.Get_dF(i);
+                this.Print_dF(i);
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+            }
+
+            // Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
+            // Console.WriteLine($"Value of Q function = {this.functionQ()}");
+            
+            // "замораживание" - отключение вычисления производных dF для qi у которых v = false.
+            // вместо dF подставляются константные значения проекции qi
+            var newdQ = this.GetProjectionOfQForLimitations(dQ);
+            if (this.IsAnyVFalse())
+            {
+                this.OffsetQ(newdQ);
+                this.Build_S_ForAllUnits_ByUnitsType();
+                this.Calc_T();
+                f = this.F(this.N);
+                D = new Vector3D(
+                    p.X - f.X,
+                    p.Y - f.Y,
+                    p.Z - f.Z);
+
+                this.Build_dS();
+                this.Calc_dT();
+                this.Build_D(true);
+                Console.WriteLine(curV);
+
+                this.Calc_C(true);
+                this.detC = Matrix.Det3D(this.C);
+                d = MathFunctions.NormaVector(D);
+                D = Matrix.SubtractToVector3D(D, this.rightResidueD);
+                μ = Matrix.System3x3Solver(this.C, this.detC, D);
+
+                var tmpV = 0;
+                for (var i = 0; i < this.N; i++)
+                {
+                    if (!this.Units[i].v && this.curV > tmpV)
+                    {
+                        tmpV++;
+                        continue;
+                    }
+                    var dF = this.Get_dF(i);
+                    newdQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+                }
+                dQ = newdQ;
+            }
+
+            this.OffsetQ(dQ);
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var newF = this.F(this.N);
+            var newD = new Vector3D(
+                newF.X - f.X,
+                newF.Y - f.Y,
+                newF.Z - f.Z);
+
+            b = MathFunctions.NormaVector(newD);
+
+            var Delta = new Vector3D(
+                newF.X - p.X,
+                newF.Y - p.Y,
+                newF.Z - p.Z);
+
+            delta = MathFunctions.NormaVector(Delta);
+        }
+
+        public void ActiveSetMethod(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
+        {
+            #region Гипотеза #1 - множество активных ограничений пусто
+
+            this.Build_S_ForAllUnits_ByUnitsType();
+            this.Calc_T();
+            var f = this.F(this.N);
+            var D = new Vector3D(
+                p.X - f.X,
+                p.Y - f.Y,
+                p.Z - f.Z);
+
+            d = MathFunctions.NormaVector(D);
+
+            this.Build_dS();
+            this.Calc_dT();
+            this.Build_D();
+            this.Calc_C();
+
+            this.detC = Matrix.Det3D(this.C);
+            var μ = Matrix.System3x3Solver(this.C, this.detC, D);
+
+            var dQ = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+            {
+                var dF = this.Get_dF(i);
+                this.Print_dF(i);
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+            }
+
+            #endregion
+
+            // Находим номера нарушенных ограничений и пересчитываем матрицы
+
+            var leftJ = this.GetLeftJ(dQ);
+            var rightJ = this.GetRightJ(dQ);
+
+            this.Calc_dT();
+            this.Build_D();
+            this.Calc_C();
+            
 
             var isAllowed = false;
             while(isAllowed)
@@ -408,9 +515,20 @@
                 cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
                 Console.WriteLine("Condition number of matrix C is " + cond + "\n");
             }
-            
 
-            //this.OffsetQ(dQ);
+            μ = Matrix.System3x3Solver(this.C, this.detC, D);
+            var λ = 0;
+            // TODO: проверка на λ > 0
+
+            dQ = new double[this.N];
+            for (var i = 0; i < this.N; i++)
+            {
+                var dF = this.Get_dF(i);
+                this.Print_dF(i);
+                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+            }
+
+            this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
 
@@ -425,6 +543,34 @@
                 newF.Y - p.Y,
                 newF.Z - p.Z);
             delta = MathFunctions.NormaVector(Delta);
+        }
+
+        public ArrayList GetLeftJ(double[] dQ)
+        {
+            var leftJ = new ArrayList();
+            for (int i = 0; i < Units.Length; i++)
+            {
+                var unit = this.Units[i];
+                if (unit.qMin > unit.Q + dQ[i])
+                {
+                    leftJ.Add(i);
+                }
+            }
+            return leftJ;
+        }
+
+        public ArrayList GetRightJ(double[] dQ)
+        {
+            var rightJ = new ArrayList();
+            for (int i = 0; i < Units.Length; i++)
+            {
+                var unit = this.Units[i];
+                if (unit.qMax < unit.Q + dQ[i])
+                {
+                    rightJ.Add(i);
+                }
+            }
+            return rightJ;
         }
 
         public double functionQ()
@@ -784,6 +930,48 @@
             // C zx
             this.C[2, 0] = this.C[0, 2];
             
+            // C zy
+            this.C[2, 1] = this.C[1, 2];
+        }
+
+        public void Calc_C(ArrayList leftJ, ArrayList rightJ)
+        {
+            var tmpV = 0;
+            this.C = new Matrix(3, 3);
+            for (var i = 0; i < this.N; i++)
+            {
+                if (leftJ.Contains(i) || rightJ.Contains(i) && tmpV < this.maxV)
+                {
+                    tmpV++;
+                    continue;
+                }
+                var dF = this.Get_dF(i);
+
+                // C xx
+                this.C[0, 0] += dF.X * dF.X / this.A[i];
+
+                // C xy
+                this.C[0, 1] += dF.X * dF.Y / this.A[i];
+
+                // C xz
+                this.C[0, 2] += dF.X * dF.Z / this.A[i];
+
+                // C yy
+                this.C[1, 1] += dF.Y * dF.Y / this.A[i];
+
+                // C yz
+                this.C[1, 2] += dF.Y * dF.Z / this.A[i];
+
+                // C zz
+                this.C[2, 2] += dF.Z * dF.Z / this.A[i];
+            }
+
+            // C yx
+            this.C[1, 0] = this.C[0, 1];
+
+            // C zx
+            this.C[2, 0] = this.C[0, 2];
+
             // C zy
             this.C[2, 1] = this.C[1, 2];
         }

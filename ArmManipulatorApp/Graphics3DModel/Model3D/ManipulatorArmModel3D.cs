@@ -117,9 +117,9 @@
             MeshGeometry3DHelper.AddSphere(jointMesh, center, radius, 8, 8);
             MeshGeometry3DHelper.AddSmoothCylinder(
                 jointMesh,
-                center - radius * 0.5 * axis,
-                radius * axis,
-                0.2 * radius);
+                center - radius * 0.25 * axis,
+                radius * axis * 0.5,
+                0.1 * radius);
             var jointMaterial = new DiffuseMaterial(brush);
             var jointGeometryModel = new GeometryModel3D(jointMesh, jointMaterial);
             joint.Content = jointGeometryModel;
