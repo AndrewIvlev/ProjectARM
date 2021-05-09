@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Windows.Media.Media3D;
 
@@ -452,7 +453,6 @@
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.Get_dF(i);
-                this.Print_dF(i);
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
 
@@ -465,67 +465,43 @@
 
             this.Calc_dT();
             this.Build_D();
-            this.Calc_C();
-            
+            this.Calc_C(leftJ, rightJ);
+            this.detC = Matrix.Det3D(this.C);
 
-            var isAllowed = false;
-            while(isAllowed)
-            {
-                // Matrix.GaussianElimination(H);
-                isAllowed = true;
-            }
-
-            if (cond == 0)
-            {
-                if (this.detC == 0)
-                {
-                    cond = double.MaxValue;
-                }
-                else
-                {
-                    cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
-                    // Console.WriteLine("Condition number of matrix C is " + cond + "\n");
-                }
-            }
-
-            // Balancing by condition number
-            if (condTreshold > 0)
-            {
-                var norm1 = this.C.EuclidNormOfRow(0);
-                var norm2 = this.C.EuclidNormOfRow(1);
-                var norm3 = this.C.EuclidNormOfRow(2);
-
-                var diagNorm = new Matrix(3, 3)
-                {
-                    [0, 0] = 1.0 / norm1,
-                    [0, 1] = 0,
-                    [0, 2] = 0,
-                    [1, 0] = 0,
-                    [1, 1] = 1.0 / norm2,
-                    [1, 2] = 0,
-                    [2, 0] = 0,
-                    [2, 1] = 0,
-                    [2, 2] = 1.0 / norm3
-                };
-
-                this.C = diagNorm * this.C;
-                this.detC = Matrix.Det3D(this.C);
-                D = diagNorm * D;
-
-                cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
-                Console.WriteLine("Condition number of matrix C is " + cond + "\n");
-            }
-
+            var sumOfdFLeftJ = SumOfdFLeftJ(leftJ);
+            var sumOfdFRightJ = SumOfdFRightJ(leftJ);
+            D = new Vector3D(
+                 -(p.X - f.X - SumOfdFLeftJ(leftJ).X - SumOfdFRightJ(rightJ).X),
+                 -(p.Y - f.Y - SumOfdFLeftJ(leftJ).Y - SumOfdFRightJ(rightJ).Y),
+                 -(p.Z - f.Z - SumOfdFLeftJ(leftJ).Z - SumOfdFRightJ(rightJ).Z));
             μ = Matrix.System3x3Solver(this.C, this.detC, D);
-            var λ = 0;
+
+            var λ_left = new Stack<double>();
+            foreach(int j in leftJ)
+            {
+                var dF = this.Get_dF(j);
+                var dQj = this.Units[j].qMin - this.Units[j].Q;
+                λ_left.Push(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z + this.A[j] * dQj);
+            }
+
+            var λ_right = new Stack<double>();
+            foreach (int j in rightJ)
+            {
+                var dF = this.Get_dF(j);
+                var dQj = this.Units[j].qMax - this.Units[j].Q;
+                λ_right.Push(-(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) - this.A[j] * dQj);
+            }
             // TODO: проверка на λ > 0
 
             dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
             {
                 var dF = this.Get_dF(i);
-                this.Print_dF(i);
-                dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
+
+                var λi_left = leftJ.Contains(i) ? λ_left.Pop() : 0;
+                var λi_right = rightJ.Contains(i) ? λ_right.Pop() : 0;
+
+                dQ[i] = -((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z) - λi_left + λi_right) / this.A[i];
             }
 
             this.OffsetQ(dQ);
@@ -571,6 +547,34 @@
                 }
             }
             return rightJ;
+        }
+
+        private Vector3D SumOfdFLeftJ(ArrayList leftJ)
+        {
+            var result = new Vector3D();
+            foreach(int j in leftJ)
+            {
+                var dFj = this.Get_dF(j);
+                var dQ = this.Units[j].qMin - this.Units[j].Q;
+                result.X += dFj.X * dQ;
+                result.Y += dFj.Y * dQ;
+                result.Z += dFj.Z * dQ;
+            }
+            return result;
+        }
+
+        private Vector3D SumOfdFRightJ(ArrayList ritghtJ)
+        {
+            var result = new Vector3D();
+            foreach (int j in ritghtJ)
+            {
+                var dFj = this.Get_dF(j);
+                var dQ = this.Units[j].qMax - this.Units[j].Q;
+                result.X += dFj.X * dQ;
+                result.Y += dFj.Y * dQ;
+                result.Z += dFj.Z * dQ;
+            }
+            return result;
         }
 
         public double functionQ()
@@ -936,13 +940,13 @@
 
         public void Calc_C(ArrayList leftJ, ArrayList rightJ)
         {
-            var tmpV = 0;
+            //var tmpV = 0;
             this.C = new Matrix(3, 3);
             for (var i = 0; i < this.N; i++)
             {
-                if (leftJ.Contains(i) || rightJ.Contains(i) && tmpV < this.maxV)
+                if (leftJ.Contains(i) || rightJ.Contains(i))// && tmpV < this.maxV)
                 {
-                    tmpV++;
+                    //tmpV++;
                     continue;
                 }
                 var dF = this.Get_dF(i);
