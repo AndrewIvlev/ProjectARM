@@ -136,6 +136,10 @@
 
         private List<double> deltaList;
 
+        private List<int> CountOfLeftLimitAchievements;
+
+        private List<int> CountOfRightLimitAchievements;
+
         private List<double> CondList;
 
         private List<double> DistanceBetweenSplitPoints;
@@ -147,7 +151,7 @@
         private double stepInMeterToSplit;
 
         private int NumberTimesRepeatPlanning;
-        
+
         private bool SplitTrackWithInterpolation;
 
         private bool WithCond;
@@ -273,9 +277,19 @@
             this.Chart.Series["dSeries"].ChartType = SeriesChartType.Line;
 
             this.Chart.Series.Add(new Series("deltaSeries"));
-            this.Chart.Series["deltaSeries"].Color = System.Drawing.Color.Red;
+            this.Chart.Series["deltaSeries"].Color = System.Drawing.Color.Black;
             this.Chart.Series["deltaSeries"].ChartArea = "Default";
             this.Chart.Series["deltaSeries"].ChartType = SeriesChartType.Line;
+
+            this.Chart.Series.Add(new Series("countOfLeftLimitations"));
+            this.Chart.Series["countOfLeftLimitations"].Color = System.Drawing.Color.Blue;
+            this.Chart.Series["countOfLeftLimitations"].ChartArea = "Default";
+            this.Chart.Series["countOfLeftLimitations"].ChartType = SeriesChartType.Point;
+
+            this.Chart.Series.Add(new Series("countOfRightLimitations"));
+            this.Chart.Series["countOfRightLimitations"].Color = System.Drawing.Color.Red;
+            this.Chart.Series["countOfRightLimitations"].ChartArea = "Default";
+            this.Chart.Series["countOfRightLimitations"].ChartType = SeriesChartType.Point;
 
             this.Chart.Series.Add(new Series("CondSeries"));
             this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Green;
@@ -1142,13 +1156,17 @@
             out List<double> bList,
             out List<double> dList,
             out List<double> deltaList,
-            out List<double> condList)
+            out List<double> condList, 
+            out List<int> countOfLeftLimitAchievements,
+            out List<int> countOfRightLimitAchievements)
         {
             var splitPointsCount = this.track3D.track.SplitPoints.Count;
             bList = new List<double>();
             dList = new List<double>();
             deltaList = new List<double>();
             condList = new List<double>();
+            countOfLeftLimitAchievements = new List<int>();
+            countOfRightLimitAchievements = new List<int>();
 
             this.qList.Clear();
 
@@ -1165,6 +1183,8 @@
                     var b = 0.0;
                     var d = 0.0;
                     var delta = 0.0;
+                    var _countOfLeftLimitAchievements = 0;
+                    var _countOfRightLimitAchievements = 0;
                     switch (this.planningMethodType)
                     {
                         case PlanningMethod.LagrangeMethod:
@@ -1182,6 +1202,8 @@
                                 out b,
                                 out d,
                                 out delta,
+                                out _countOfLeftLimitAchievements,
+                                out _countOfRightLimitAchievements,
                                 ref cond,
                                 this.ThresholdForBalancing);
                             break;
@@ -1191,6 +1213,8 @@
                                 out b,
                                 out d,
                                 out delta,
+                                out _countOfLeftLimitAchievements,
+                                out _countOfRightLimitAchievements,
                                 ref cond,
                                 this.ThresholdForBalancing);
                             break;
@@ -1201,6 +1225,8 @@
                     bList.Add(b);
                     dList.Add(d);
                     deltaList.Add(delta);
+                    countOfLeftLimitAchievements.Add(_countOfLeftLimitAchievements);
+                    countOfRightLimitAchievements.Add(_countOfRightLimitAchievements);
                     if (this.WithCond)
                         condList.Add(cond);
 
@@ -1234,7 +1260,9 @@
                 out this.bList,
                 out this.dList,
                 out this.deltaList,
-                out this.CondList);
+                out this.CondList,
+                out this.CountOfLeftLimitAchievements,
+                out this.CountOfRightLimitAchievements);
         }
 
         private void PlanningWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -1352,22 +1380,37 @@
             //        Enumerable.Range(0, this.IterationCount).ToArray(),
             //        this.dList);
 
+            this.Chart.Series["deltaSeries"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+                this.deltaList);
+            this.Chart.Series["countOfLeftLimitations"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+                MergeDeltasAndCountLimitations(this.deltaList, this.CountOfLeftLimitAchievements));
+            this.Chart.Series["countOfRightLimitations"].Points.DataBindXY(
+                Enumerable.Range(0, this.IterationCount).ToArray(),
+
+                MergeDeltasAndCountLimitations(this.deltaList, this.CountOfRightLimitAchievements));
+
             if (this.WithCond)
             {
-                this.Chart.Series["deltaSeries"].Points.DataBindXY(
-                    Enumerable.Range(0, this.IterationCount).ToArray(),
-                    this.deltaList);
-
                 this.Chart.Series["CondSeries"].Points.DataBindXY(
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.CondList);
             }
-            else
+        }
+
+        private List<double> MergeDeltasAndCountLimitations(List<double> deltaList, List<int> countLimitations)
+        {
+            ;//if delta will change then need to add tmp deltaList
+            if (deltaList.Count != countLimitations.Count)
+                throw new Exception("Count of lists elements should be equal");
+            for (var i = 0; i < deltaList.Count; i++)
             {
-                this.Chart.Series["deltaSeries"].Points.DataBindXY(
-                    Enumerable.Range(0, this.IterationCount).ToArray(),
-                    this.deltaList);
+                if (countLimitations[i] == 0)
+                    deltaList[i] = 0.0;
             }
+
+            return deltaList;
         }
 
         #endregion

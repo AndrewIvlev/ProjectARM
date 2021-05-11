@@ -289,7 +289,7 @@
             delta = MathFunctions.NormaVector(Delta);
         }
 
-        public void LagrangeMethodWithProjectionToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
+        public void LagrangeMethodWithProjectionToThePoint(Point3D p, out double b, out double d, out double delta, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements, ref double cond, double condTreshold)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);
@@ -372,8 +372,13 @@
             // "замораживание" - отключение вычисления производных dF для qi у которых v = false.
             // вместо dF подставляются константные значения проекции qi
             var newdQ = this.GetProjectionOfQForLimitations(dQ);
+            countOfLeftLimitAchievements = 0; // TODO: temporary solution
+            countOfRightLimitAchievements = 0;
             if (this.IsAnyVFalse())
             {
+                countOfLeftLimitAchievements = 1;
+                countOfRightLimitAchievements = 1;
+
                 this.OffsetQ(newdQ);
                 this.Build_S_ForAllUnits_ByUnitsType();
                 this.Calc_T();
@@ -427,7 +432,7 @@
             delta = MathFunctions.NormaVector(Delta);
         }
 
-        public void ActiveSetMethod(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
+        public void ActiveSetMethod(Point3D p, out double b, out double d, out double delta, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements, ref double cond, double condTreshold)
         {
             #region Гипотеза #1 - множество активных ограничений пусто
 
@@ -460,8 +465,8 @@
 
             // Находим номера нарушенных ограничений и пересчитываем матрицы
 
-            var leftJ = this.GetLeftJ(dQ);
-            var rightJ = this.GetRightJ(dQ);
+            var leftJ = this.GetLeftJ(dQ); countOfLeftLimitAchievements = leftJ.Count;
+            var rightJ = this.GetRightJ(dQ); countOfRightLimitAchievements = rightJ.Count;
 
             this.Calc_dT();
             this.Build_D();
