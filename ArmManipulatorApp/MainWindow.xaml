@@ -245,6 +245,9 @@
                         <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
                         <Label x:Name="WorkingTime" Content="Продолжительность планирования = 0 мс" FontSize="14" Margin="10,0"/>
                         <Label x:Name="AverageDeltaLabel" Content="Средняя ошибка перемещения = 0 м" FontSize="14" Margin="10,0" />
+                        <Button Content="Изменение обобщённых координат" HorizontalAlignment="Center" IsEnabled="False" Name="OpenQVectorsWindowsButton"
+                                Command="{Binding OpenQVectorsWindow}" 
+                                Style="{StaticResource ButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </Border>

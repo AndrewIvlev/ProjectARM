@@ -34,6 +34,7 @@
     using ProgressBar = System.Windows.Controls.ProgressBar;
     using TextBox = System.Windows.Controls.TextBox;
     using ArmManipulatorArm.MathModel.Arm;
+    using Button = System.Windows.Controls.Button;
 
     public class ApplicationViewModel
     {
@@ -128,6 +129,8 @@
 
         private Slider SliderAnimation;
 
+        private Button openQVectorsWindowsButton;
+
         private int IterationCount;
 
         private List<double> bList;
@@ -195,7 +198,8 @@
             TextBox ThresholdForRepeatPlanning,
             TextBox ThresholdForBalancingTextBox,
             Label WorkingTime,
-            Slider SliderAnimation)
+            Slider SliderAnimation,
+            Button openQVectorsWindowsButton)
         {
             this.dialogService = dialogService;
             this.fileService = fileService;
@@ -216,6 +220,7 @@
             this.ThresholdForBalancingTextBox = ThresholdForBalancingTextBox;
             this.WorkingTime = WorkingTime;
             this.SliderAnimation = SliderAnimation;
+            this.openQVectorsWindowsButton = openQVectorsWindowsButton;
             this.qList = new List<double[]>();
             this.coeff = 10;
 
@@ -265,6 +270,10 @@
             chartArea.AxisX.Title = "iteration";
             chartArea.AxisY.Title = "Δ(м)";
             chartArea.AxisY2.Title = "cond";
+            chartArea.AxisX.ScaleView.Zoomable = true;
+            chartArea.AxisY.ScaleView.Zoomable = true;
+            this.Chart.MouseWheel += chart1_MouseWheel;
+
             this.Chart.ChartAreas.Add(chartArea);
 
 
@@ -1230,7 +1239,7 @@
                     if (this.WithCond)
                         condList.Add(cond);
 
-                    if (this.ThresholdForPlanning < double.MaxValue)
+                    if (this.ThresholdForPlanning > 0 && this.ThresholdForPlanning < double.MaxValue)
                     {
                         if (b > this.ThresholdForPlanning)
                         {
@@ -1396,6 +1405,7 @@
                     Enumerable.Range(0, this.IterationCount).ToArray(),
                     this.CondList);
             }
+            openQVectorsWindowsButton.IsEnabled = true;
         }
 
         private List<double> MergeDeltasAndCountLimitations(List<double> deltaList, List<int> countLimitations, out List<double> listX)
@@ -1414,6 +1424,27 @@
             }
 
             return resultListY;
+        }
+
+        
+        public ICommand OpenQVectorsWindow
+        {
+            get
+            {
+                return new RelayCommand(
+                    obj =>
+                    {
+                        try
+                        {
+                            SubWindow subWindow = new SubWindow(this.deltaList, this.qList, this.armModel3D.arm);
+                            subWindow.Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            this.dialogService.ShowMessage(ex.Message);
+                        }
+                    });
+            }
         }
 
         #endregion
@@ -1569,6 +1600,38 @@
             {
                 series.Points.Clear();
             }
+        }
+
+        private void chart1_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            var chart = (Chart)sender;
+            var xAxis = chart.ChartAreas[0].AxisX;
+            var yAxis = chart.ChartAreas[0].AxisY;
+
+            try
+            {
+                if (e.Delta < 0) // Scrolled down.
+                {
+                    xAxis.ScaleView.ZoomReset();
+                    yAxis.ScaleView.ZoomReset();
+                }
+                else if (e.Delta > 0) // Scrolled up.
+                {
+                    var xMin = xAxis.ScaleView.ViewMinimum;
+                    var xMax = xAxis.ScaleView.ViewMaximum;
+                    var yMin = yAxis.ScaleView.ViewMinimum;
+                    var yMax = yAxis.ScaleView.ViewMaximum;
+
+                    var posXStart = xAxis.PixelPositionToValue(e.Location.X) - (xMax - xMin) / 4;
+                    var posXFinish = xAxis.PixelPositionToValue(e.Location.X) + (xMax - xMin) / 4;
+                    var posYStart = yAxis.PixelPositionToValue(e.Location.Y) - (yMax - yMin) / 4;
+                    var posYFinish = yAxis.PixelPositionToValue(e.Location.Y) + (yMax - yMin) / 4;
+
+                    xAxis.ScaleView.Zoom(posXStart, posXFinish);
+                    yAxis.ScaleView.Zoom(posYStart, posYFinish);
+                }
+            }
+            catch { }
         }
 
         #endregion

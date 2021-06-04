@@ -40,7 +40,8 @@
                 this.ThresholdForRepeatPlanning,
                 this.ThresholdForBalancing,
                 this.WorkingTime,
-                this.SliderAnimation);
+                this.SliderAnimation,
+                this.OpenQVectorsWindowsButton);
 
             this.DataContext = this.appViewModel;
         }

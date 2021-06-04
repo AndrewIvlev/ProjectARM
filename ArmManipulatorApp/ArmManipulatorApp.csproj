@@ -108,6 +108,9 @@
     <Compile Include="MathModel\Matrix\Matrix.cs" />
     <Compile Include="MathModel\Arm\Unit.cs" />
     <Compile Include="MathModel\Trajectory\Trajectory.cs" />
+    <Compile Include="SubWindow.xaml.cs">
+      <DependentUpon>SubWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\ApplicationViewModel.cs" />
     <Compile Include="Graphics3DModel\Model3D\ManipulatorArmModel3D.cs" />
     <Compile Include="Common\RelayCommand.cs" />
@@ -124,6 +127,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SubWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
