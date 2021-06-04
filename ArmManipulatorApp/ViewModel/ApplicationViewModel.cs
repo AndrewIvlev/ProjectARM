@@ -1359,7 +1359,7 @@
             this.WorkingTime.Content = $"Продолжительность планирования = {timePlanning.ElapsedMilliseconds} мс";
             this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
             this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.#####}", this.deltaList.Average())} м";
-
+            
             this.armModel3D.arm.SetQ(0.0);
             this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
             this.armModel3D.arm.Build_S_ForAllUnits_ByUnitsType();
@@ -1383,13 +1383,12 @@
             this.Chart.Series["deltaSeries"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount).ToArray(),
                 this.deltaList);
-            this.Chart.Series["countOfLeftLimitations"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
-                MergeDeltasAndCountLimitations(this.deltaList, this.CountOfLeftLimitAchievements));
-            this.Chart.Series["countOfRightLimitations"].Points.DataBindXY(
-                Enumerable.Range(0, this.IterationCount).ToArray(),
 
-                MergeDeltasAndCountLimitations(this.deltaList, this.CountOfRightLimitAchievements));
+            var leftYpoints = MergeDeltasAndCountLimitations(this.deltaList, this.CountOfLeftLimitAchievements, out var leftXpoints);
+            this.Chart.Series["countOfLeftLimitations"].Points.DataBindXY(leftXpoints, leftYpoints);
+
+            var rightYpoints = MergeDeltasAndCountLimitations(this.deltaList, this.CountOfRightLimitAchievements, out var rightXpoints);
+            this.Chart.Series["countOfRightLimitations"].Points.DataBindXY(rightXpoints, rightYpoints);
 
             if (this.WithCond)
             {
@@ -1399,18 +1398,22 @@
             }
         }
 
-        private List<double> MergeDeltasAndCountLimitations(List<double> deltaList, List<int> countLimitations)
+        private List<double> MergeDeltasAndCountLimitations(List<double> deltaList, List<int> countLimitations, out List<double> listX)
         {
-            ;//if delta will change then need to add tmp deltaList
+            var resultListY = new List<double>();
+            listX = new List<double>();
             if (deltaList.Count != countLimitations.Count)
                 throw new Exception("Count of lists elements should be equal");
             for (var i = 0; i < deltaList.Count; i++)
             {
-                if (countLimitations[i] == 0)
-                    deltaList[i] = 0.0;
+                if (countLimitations[i] != 0)
+                {
+                    listX.Add(i);
+                    resultListY.Add(deltaList[i]);
+                }
             }
 
-            return deltaList;
+            return resultListY;
         }
 
         #endregion
