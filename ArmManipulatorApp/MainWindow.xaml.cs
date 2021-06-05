@@ -12,6 +12,7 @@
         public MainWindow()
         {
             this.InitializeComponent();
+            this.WindowState = WindowState.Maximized;
             this.appViewModel = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),

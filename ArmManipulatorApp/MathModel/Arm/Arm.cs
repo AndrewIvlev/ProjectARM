@@ -19,7 +19,7 @@
         [JsonIgnore] public double[] A { get; set; }
         [JsonIgnore] public Matrix diagA { get; set; }
 
-        [JsonIgnore] private int maxV; // замораживаем не более maxV обобщённых координат
+        [JsonIgnore] private readonly int maxV = 2; // замораживаем не более maxV обобщённых координат
         [JsonIgnore] private int curV;
 
         [JsonIgnore] public ArrayList T;
@@ -42,8 +42,6 @@
             {
                 this.Units[i] = units[i];
             }
-
-            this.maxV = 3;
 
             this.A = new double[this.N];
             this.diagA = new Matrix(this.N, this.N);
@@ -291,8 +289,6 @@
 
         public void LagrangeMethodWithProjectionToThePoint(Point3D p, out double b, out double d, out double delta, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements, ref double cond, double condTreshold)
         {
-            // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
-            // Console.WriteLine("Planning trajectory to the point " + p);
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
             var f = this.F(this.N);
@@ -308,8 +304,6 @@
             this.Calc_dT();
             this.Build_D();
             this.Calc_C();
-            // Console.WriteLine("Matrix C:");
-            //this.C.Print();
             this.detC = Matrix.Det3D(this.C);
             // Console.WriteLine("Determinant of matrix C is " + this.detC + "\n");
 
@@ -371,38 +365,35 @@
             
             // "замораживание" - отключение вычисления производных dF для qi у которых v = false.
             // вместо dF подставляются константные значения проекции qi
-            var newdQ = this.GetProjectionOfQForLimitations(dQ);
-            countOfLeftLimitAchievements = 0; // TODO: temporary solution
-            countOfRightLimitAchievements = 0;
-            if (this.IsAnyVFalse())
+            var newdQ = this.GetProjectionOfQForLimitations(dQ, out this.curV, out countOfLeftLimitAchievements, out countOfRightLimitAchievements);
+            //if (this.IsAnyVFalse())
+            if (this.curV > 0)
             {
-                countOfLeftLimitAchievements = 1;
-                countOfRightLimitAchievements = 1;
-
                 this.OffsetQ(newdQ);
                 this.Build_S_ForAllUnits_ByUnitsType();
                 this.Calc_T();
                 f = this.F(this.N);
-                D = new Vector3D(
-                    p.X - f.X,
-                    p.Y - f.Y,
-                    p.Z - f.Z);
 
                 this.Build_dS();
                 this.Calc_dT();
-                this.Build_D(true);
-                Console.WriteLine(curV);
-
+                //this.Build_D(true);
+                this.Build_D();
                 this.Calc_C(true);
                 this.detC = Matrix.Det3D(this.C);
-                d = MathFunctions.NormaVector(D);
-                D = Matrix.SubtractToVector3D(D, this.rightResidueD);
+                //d = MathFunctions.NormaVector(D);
+
+                var _dFConstLims = dFConstLims(newdQ);
+                D = new Vector3D(
+                     p.X - f.X - _dFConstLims.X,
+                     p.Y - f.Y - _dFConstLims.Y,
+                     p.Z - f.Z - _dFConstLims.Z);
+                //D = Matrix.SubtractToVector3D(D, this.rightResidueD);
                 μ = Matrix.System3x3Solver(this.C, this.detC, D);
 
                 var tmpV = 0;
                 for (var i = 0; i < this.N; i++)
                 {
-                    if (!this.Units[i].v && this.curV > tmpV)
+                    if (!this.Units[i].v)
                     {
                         tmpV++;
                         continue;
@@ -464,39 +455,56 @@
             #endregion
 
             // Находим номера нарушенных ограничений и пересчитываем матрицы
+            var leftJ = this.GetLeftJ(dQ);
+            var newCountOfLeftLimitAchievements = countOfLeftLimitAchievements = leftJ.Count;
+            var rightJ = this.GetRightJ(dQ);
+            var newCountOfRightLimitAchievements = countOfRightLimitAchievements = rightJ.Count;
 
-            var leftJ = this.GetLeftJ(dQ); countOfLeftLimitAchievements = leftJ.Count;
-            var rightJ = this.GetRightJ(dQ); countOfRightLimitAchievements = rightJ.Count;
-
-            this.Calc_dT();
-            this.Build_D();
-            this.Calc_C(leftJ, rightJ);
-            this.detC = Matrix.Det3D(this.C);
-
-            var sumOfdFLeftJ = SumOfdFLeftJ(leftJ);
-            var sumOfdFRightJ = SumOfdFRightJ(leftJ);
-            D = new Vector3D(
-                 -(p.X - f.X - SumOfdFLeftJ(leftJ).X - SumOfdFRightJ(rightJ).X),
-                 -(p.Y - f.Y - SumOfdFLeftJ(leftJ).Y - SumOfdFRightJ(rightJ).Y),
-                 -(p.Z - f.Z - SumOfdFLeftJ(leftJ).Z - SumOfdFRightJ(rightJ).Z));
-            μ = Matrix.System3x3Solver(this.C, this.detC, D);
-
-            var λ_left = new Stack<double>();
-            foreach(int j in leftJ)
+            Stack<double> λ_left = null;
+            Stack<double> λ_right = null;
+            do
             {
-                var dF = this.Get_dF(j);
-                var dQj = this.Units[j].qMin - this.Units[j].Q;
-                λ_left.Push(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z + this.A[j] * dQj);
-            }
+                countOfLeftLimitAchievements = newCountOfLeftLimitAchievements;
+                countOfRightLimitAchievements = newCountOfRightLimitAchievements;
+                this.Calc_dT();
+                this.Build_D();
+                this.Calc_C(leftJ, rightJ);
+                this.detC = Matrix.Det3D(this.C);
 
-            var λ_right = new Stack<double>();
-            foreach (int j in rightJ)
-            {
-                var dF = this.Get_dF(j);
-                var dQj = this.Units[j].qMax - this.Units[j].Q;
-                λ_right.Push(-(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) - this.A[j] * dQj);
-            }
-            // TODO: проверка на λ > 0
+                var sumOfdFLeftJ = SumOfdFLeftJ(leftJ);
+                var sumOfdFRightJ = SumOfdFRightJ(leftJ);
+                D = new Vector3D(
+                     -(p.X - f.X - SumOfdFLeftJ(leftJ).X - SumOfdFRightJ(rightJ).X),
+                     -(p.Y - f.Y - SumOfdFLeftJ(leftJ).Y - SumOfdFRightJ(rightJ).Y),
+                     -(p.Z - f.Z - SumOfdFLeftJ(leftJ).Z - SumOfdFRightJ(rightJ).Z));
+                μ = Matrix.System3x3Solver(this.C, this.detC, D);
+
+                λ_left = new Stack<double>();
+                for (int j = 0; j < leftJ.Count; j++)
+                {
+                    var dF = this.Get_dF(j);
+                    var dQj = this.Units[j].qMin - this.Units[j].Q;
+                    var condidate_λ_left = μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z + this.A[j] * dQj;
+                    if (condidate_λ_left < 0)
+                        leftJ.RemoveAt(j);
+                    else
+                        λ_left.Push(condidate_λ_left);
+                }
+
+                λ_right = new Stack<double>();
+                for (int j = 0; j < rightJ.Count; j++)
+                {
+                    var dF = this.Get_dF(j);
+                    var dQj = this.Units[j].qMax - this.Units[j].Q;
+                    var condidate_λ_right = -(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) - this.A[j] * dQj;
+                    if (condidate_λ_right < 0)
+                        rightJ.RemoveAt(j);
+                    else
+                        λ_right.Push(condidate_λ_right);
+                }
+                newCountOfLeftLimitAchievements = leftJ.Count;
+                newCountOfRightLimitAchievements = rightJ.Count;
+            } while (newCountOfLeftLimitAchievements != countOfLeftLimitAchievements || newCountOfRightLimitAchievements != countOfRightLimitAchievements);
 
             dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
@@ -554,6 +562,22 @@
             return rightJ;
         }
 
+        private Vector3D dFConstLims(double[] dQ)
+        {
+            var result = new Vector3D();
+            for (var i = 0; i < Units.Length; i++)
+            {
+                if (!Units[i].v)
+                {
+                    var dFj = this.Get_dF(i);
+                    result.X += dFj.X * dQ[i];
+                    result.Y += dFj.Y * dQ[i];
+                    result.Z += dFj.Z * dQ[i];
+                }
+            }
+            return result;
+        }
+
         private Vector3D SumOfdFLeftJ(ArrayList leftJ)
         {
             var result = new Vector3D();
@@ -593,16 +617,24 @@
             return res;
         }
 
-        private double[] GetProjectionOfQForLimitations(double[] dQ)
+        private double[] GetProjectionOfQForLimitations(double[] dQ, out int curV, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements)
         {
+            curV = 0;
+            countOfLeftLimitAchievements = 0;
+            countOfRightLimitAchievements = 0;
             var newdQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
             {
-                if (!MathFunctions.SegmentContains(this.Units[i].qMin, this.Units[i].qMax, this.Units[i].Q + dQ[i]))
+                if (!MathFunctions.SegmentContains(this.Units[i].qMin, this.Units[i].qMax, this.Units[i].Q + dQ[i]) || this.maxV < curV)
                 {
+                    if (this.Units[i].Q + dQ[i] < this.Units[i].qMin)
+                        countOfLeftLimitAchievements++;
+                    if (this.Units[i].Q + dQ[i] > this.Units[i].qMax)
+                        countOfRightLimitAchievements++;
                     var projectionQ = MathFunctions.Projection(this.Units[i].qMin, this.Units[i].qMax, this.Units[i].Q + dQ[i]);
                     newdQ[i] = projectionQ - this.Units[i].Q;
                     this.Units[i].v = false;
+                    curV++;
                 }
                 else
                 {
@@ -851,36 +883,34 @@
         /// ( Fyq1 Fyq2 ... Fyqn )
         /// ( Fzq1 Fzq2 ... Fzqn )
         /// </summary>
-        public void Build_D(bool withLimitations = false)
+        public void Build_D()//bool withLimitations = false)
         {
-            curV = 0;
             for (var i = 0; i < this.N; i++)
             {
-                if (withLimitations)
-                {
-                    if (!this.Units[i].v && this.maxV > curV)
-                    {
-                        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
-                        this.rightResidueD[0, i] = b.X * this.Units[i].Q;
-                        this.rightResidueD[1, i] = b.Y * this.Units[i].Q;
-                        this.rightResidueD[2, i] = b.Z * this.Units[i].Q;
-                        curV++;
-                    }
-                    else 
-                    {
-                        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
-                        this.D[0, i] = b.X;
-                        this.D[1, i] = b.Y;
-                        this.D[2, i] = b.Z;
-                    }
-                }
-                else
-                {
+                //if (withLimitations)
+                //{
+                //    if (!this.Units[i].v && this.maxV > curV)
+                //    {
+                //        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+                //        this.rightResidueD[0, i] = b.X * this.Units[i].Q;
+                //        this.rightResidueD[1, i] = b.Y * this.Units[i].Q;
+                //        this.rightResidueD[2, i] = b.Z * this.Units[i].Q;
+                //    }
+                //    else 
+                //    {
+                //        var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
+                //        this.D[0, i] = b.X;
+                //        this.D[1, i] = b.Y;
+                //        this.D[2, i] = b.Z;
+                //    }
+                //}
+                //else
+                //{
                     var b = ((Matrix)this.dT[i]).ColumnAsVector3D(3);
                     this.D[0, i] = b.X;
                     this.D[1, i] = b.Y;
                     this.D[2, i] = b.Z;
-                }
+                //}
             }
         }
 
@@ -903,13 +933,11 @@
         // Вычисляем матрицу коэффициентов для метода Лагранжа
         public void Calc_C(bool withLimitations = false)
         {
-            var tmpV = 0;
             this.C = new Matrix(3, 3);
             for (var i = 0; i < this.N; i++)
             {
-                if (withLimitations && !this.Units[i].v && tmpV < this.maxV)
+                if (withLimitations && !this.Units[i].v)
                 {
-                    tmpV++;
                     continue;
                 }
                 var dF = this.Get_dF(i);

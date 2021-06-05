@@ -21,6 +21,9 @@ namespace ArmManipulatorApp
         public SubWindow(List<double> deltaList, List<double[]> qList, Arm arm)
         {
             InitializeComponent();
+
+            this.WindowState = WindowState.Maximized;
+            
             // this.Chart.MouseWheel += chart1_MouseWheel; uncoment if you want zoom the first chart
 
             var chartArea = new ChartArea("Default");
