@@ -27,10 +27,9 @@ namespace ArmManipulatorApp
             // this.Chart.MouseWheel += chart1_MouseWheel; uncoment if you want zoom the first chart
 
             var chartArea = new ChartArea("Default");
-            chartArea.AxisY.Title = "Δ(м)";
+            chartArea.AxisY.Title = "Погрешность(м)";
             chartArea.AxisY.LabelStyle.Format = "0.000";
             this.Chart.ChartAreas.Add(chartArea);
-
             this.Chart.Series.Add(new Series("deltaSeries"));
             this.Chart.Series["deltaSeries"].Color = System.Drawing.Color.Black;
             this.Chart.Series["deltaSeries"].ChartArea = "Default";
@@ -38,7 +37,20 @@ namespace ArmManipulatorApp
             this.Chart.Series["deltaSeries"].Points.DataBindXY(
                 Enumerable.Range(0, deltaList.Count).ToArray(),
                 deltaList);
-            
+
+            var qValueChartArea = new ChartArea("funcQArea");
+            qValueChartArea.AxisY.Title = "Значение целевой ф-ии Q";
+            qValueChartArea.AxisY.LabelStyle.Format = "0.000";
+            this.Chart.ChartAreas.Add(qValueChartArea);
+            this.Chart.Series.Add(new Series("funcQSeries"));
+            this.Chart.Series["funcQSeries"].Color = System.Drawing.Color.Red;
+            this.Chart.Series["funcQSeries"].ChartArea = "funcQArea";
+            this.Chart.Series["funcQSeries"].ChartType = SeriesChartType.Point;
+            var qValuesList = new List<double>();
+            qList.ForEach(q => qValuesList.Add(arm.FunctionQ(q)));
+            this.Chart.Series["funcQSeries"].Points.DataBindXY(
+                Enumerable.Range(0, deltaList.Count).ToArray(), qValuesList);
+
             var i = 0;
             foreach (var unit in arm.Units)
             {
@@ -77,7 +89,7 @@ namespace ArmManipulatorApp
                 i++;
             }
 
-            this.Chart.ChartAreas.Last().AxisX.Title = "iteration";
+            this.Chart.ChartAreas.Last().AxisX.Title = "Итерации";
 
             var h = 0;
             var total = this.Chart.ChartAreas.Count;
