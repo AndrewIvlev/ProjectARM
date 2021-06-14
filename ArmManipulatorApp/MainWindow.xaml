@@ -12,7 +12,7 @@
         xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=System"
         mc:Ignorable="d"
         Icon="window_icon.ico"
-        Title="ProjARM" Height="768" Width="1024">
+        Title="ProjARM" Height="910" Width="1024">
 
     <Window.Resources>
         <Style x:Key="ButtonStyle">
@@ -240,14 +240,33 @@
                     <StackPanel x:Name="ResultsStackPanel" Grid.Column="1" Grid.RowSpan="2" >
                         <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Данные:</Label>
                         <!--<TextBlock Margin="10,3" Height="40" FontSize="14">Расчёт вектора коэффициентов вклада<LineBreak/>каждой обобщённой координаты:</TextBlock>-->
-                        <Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />
+                        <!--<Label x:Name="PathLength" Content="Длина пути = 0 м" FontSize="14" Margin="10,0" />-->
                         <Label x:Name="SplitStepPathLabel" Content="Шаг разбиения пути = 0 м" FontSize="14" Margin="10,0" />
-                        <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
-                        <Label x:Name="WorkingTime" Content="Продолжительность планирования = 0 мс" FontSize="14" Margin="10,0"/>
                         <Label x:Name="AverageDeltaLabel" Content="Средняя ошибка перемещения = 0 м" FontSize="14" Margin="10,0" />
+                        <Label x:Name="IterationCountLabel" Content="Число итераций = 0" FontSize="14" Margin="10,0" />
+                        <Label x:Name="SumOfRepeatedIterationCountLabel" Content="Суммарное число пересчётов на &#10;итерациях с выходом на ограничители = 0" FontSize="14" Margin="10,0" />
+                        <Label x:Name="SumOfLambdaRecalculationCountLabel" Content="Суммарное число пересчёта лямбд &#10;в Методе активного набора = 0" FontSize="14" Margin="10,0" />
+                        <Label x:Name="WorkingTime" Content="Продолжительность планирования = 0 мс" FontSize="14" Margin="10,0"/>
                         <Button Content="Изменение обобщённых координат" HorizontalAlignment="Center" IsEnabled="False" Name="OpenQVectorsWindowsButton"
                                 Command="{Binding OpenQVectorsWindow}" 
                                 Style="{StaticResource ButtonStyle}"/>
+                        <Label DockPanel.Dock="Top" HorizontalAlignment="Center" FontSize="15" FontWeight="Bold" >Легенда:</Label>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left" Background="Black" Margin="10,0,0,0"  Height="23" Width="23"></Button>
+                            <Label DockPanel.Dock="Right" Content="- Нет выхода на ограничители" FontSize="14" Margin="0,0" />
+                        </DockPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left" Background="Blue" Margin="10,0,0,0"  Height="23" Width="23"></Button>
+                            <Label DockPanel.Dock="Right" Content="- Выход на нижнюю границу" FontSize="14" Margin="0,0" />
+                        </DockPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left" Background="Red" Margin="10,0,0,0"  Height="23" Width="23"></Button>
+                            <Label DockPanel.Dock="Right" Content="- Выход на верхнюю границу" FontSize="14" Margin="0,0" />
+                        </DockPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left" Background="Green" Margin="10,0,0,0"  Height="23" Width="23"></Button>
+                            <Label DockPanel.Dock="Right" Content="- Выход на оба ограничителя" FontSize="14" Margin="0,0" />
+                        </DockPanel>
                     </StackPanel>
                 </Grid>
             </Border>

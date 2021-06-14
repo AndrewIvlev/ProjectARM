@@ -12,16 +12,18 @@
         public MainWindow()
         {
             this.InitializeComponent();
-            this.WindowState = WindowState.Maximized;
+            //this.WindowState = WindowState.Maximized;
             this.appViewModel = new ApplicationViewModel(
                 new DefaultDialogService(),
                 new JsonFileService(),
                 this.Viewport3D,
                 this.ArmConfigTextBox,
                 this.VectorQTextBox,
-                this.PathLength,
+                //this.PathLength,
                 this.SplitStepPathLabel,
                 this.IterationCountLabel,
+                this.SumOfRepeatedIterationCountLabel,
+                this.SumOfLambdaRecalculationCountLabel,
                 this.AverageDeltaLabel,
                 this.Chart,
                 this.WithConditionNumberCheckBox,

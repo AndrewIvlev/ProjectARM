@@ -19,7 +19,9 @@
         [JsonIgnore] public double[] A { get; set; }
         [JsonIgnore] public Matrix diagA { get; set; }
 
-        [JsonIgnore] private readonly int maxV = 2; // замораживаем не более maxV обобщённых координат
+        [JsonIgnore] private readonly int maxV = 4; // замораживаем не более maxV обобщённых координат
+        [JsonIgnore] public int RepeatedIterCount = 3; // число перепроверок выхода на ограничители на одной итерации
+        [JsonIgnore] public int MaxLambdaRecalculationCount = 30; // лямбды пересчитываются не более 30 раз
         [JsonIgnore] private int curV;
 
         [JsonIgnore] public ArrayList T;
@@ -189,11 +191,9 @@
         /// Решение задачи по нахождению минимума вектора обобщённых координат
         /// </summary>
         /// <param name="p">Желаемое положение схвата</param>
-        /// <param name="b">Реальное смещение</param>
-        /// <param name="d">Желаемое смещение</param>
         /// <param name="delta">Погрешность положения</param>
         /// <param name="cond">Число обусловленности. Если приходит 0 то считаем, если 1 - не считаем</param>
-        public void LagrangeMethodToThePoint(Point3D p, out double b, out double d, out double delta, ref double cond, double condTreshold)
+        public void LagrangeMethodToThePoint(Point3D p, out double delta, ref double cond, double condTreshold)
         {
             // Console.WriteLine($"Current q = " + JsonConvert.SerializeObject(this.GetQ()) + "\n");
             // Console.WriteLine("Planning trajectory to the point " + p);
@@ -205,8 +205,7 @@
                 p.Y - f.Y,
                 p.Z - f.Z);
             // Console.WriteLine("Desired grip offset " + D);
-
-            d = MathFunctions.NormaVector(D);
+            //d = MathFunctions.NormaVector(D); // Желаемое смещение
 
             this.Build_dS();
             this.Calc_dT();
@@ -277,8 +276,8 @@
                 newF.Y - f.Y,
                 newF.Z - f.Z);
 
-            b = MathFunctions.NormaVector(newD);
-            
+            //b = MathFunctions.NormaVector(newD); // Реальное смещение
+
             var Delta = new Vector3D(
                 newF.X - p.X,
                 newF.Y - p.Y,
@@ -287,7 +286,8 @@
             delta = MathFunctions.NormaVector(Delta);
         }
 
-        public void LagrangeMethodWithProjectionToThePoint(Point3D p, out double b, out double d, out double delta, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements, ref double cond, double condTreshold)
+        // TODO: добавить out параметр repeatedIterCount
+        public void LagrangeMethodWithProjectionToThePoint(Point3D p, ref List<double> delta, ref List<int> countOfLeftLimitAchievements, ref List<int> countOfRightLimitAchievements, ref double cond, double condTreshold, ref int resIterCount, out int repeatedIterCount)
         {
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
@@ -298,7 +298,7 @@
                 p.Z - f.Z);
             // Console.WriteLine("Desired grip offset " + D);
 
-            d = MathFunctions.NormaVector(D);
+            //d = MathFunctions.NormaVector(D); // Желаемое смещение
 
             this.Build_dS();
             this.Calc_dT();
@@ -350,7 +350,6 @@
             }
 
             var μ = Matrix.System3x3Solver(this.C, this.detC, D);
-            // Console.WriteLine($"mu = {μ}\n");
 
             var dQ = new double[this.N];
             for (var i = 0; i < this.N; i++)
@@ -360,19 +359,33 @@
                 dQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
             }
 
-            // Console.WriteLine($"dq = {JsonConvert.SerializeObject(dQ)}\n");
-            // Console.WriteLine($"Value of Q function = {this.functionQ()}");
-            
+            Vector3D Delta;
             // "замораживание" - отключение вычисления производных dF для qi у которых v = false.
             // вместо dF подставляются константные значения проекции qi
-            var newdQ = this.GetProjectionOfQForLimitations(dQ, out this.curV, out countOfLeftLimitAchievements, out countOfRightLimitAchievements);
-            //if (this.IsAnyVFalse())
-            if (this.curV > 0)
+
+            this.curV = 0;
+            var newdQ = this.GetProjectionOfQForLimitations(dQ, ref this.curV, out var currCountOfLeftLimitAchievements, out var currCountOfRightLimitAchievements);
+            countOfLeftLimitAchievements.Add(currCountOfLeftLimitAchievements);
+            countOfRightLimitAchievements.Add(currCountOfRightLimitAchievements);
+            repeatedIterCount = 0;
+            while (this.curV > 0)
             {
                 this.OffsetQ(newdQ);
                 this.Build_S_ForAllUnits_ByUnitsType();
                 this.Calc_T();
+
                 f = this.F(this.N);
+                Delta = new Vector3D(
+                    f.X - p.X,
+                    f.Y - p.Y,
+                    f.Z - p.Z);
+                
+                repeatedIterCount++;
+                if (repeatedIterCount > RepeatedIterCount)
+                {
+                    Console.WriteLine($"RepeatedIterCount exceeded max value: {RepeatedIterCount}");
+                    break;
+                }
 
                 this.Build_dS();
                 this.Calc_dT();
@@ -380,7 +393,6 @@
                 this.Build_D();
                 this.Calc_C(true);
                 this.detC = Matrix.Det3D(this.C);
-                //d = MathFunctions.NormaVector(D);
 
                 var _dFConstLims = dFConstLims(newdQ);
                 D = new Vector3D(
@@ -402,6 +414,8 @@
                     newdQ[i] = ((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z)) / this.A[i];
                 }
                 dQ = newdQ;
+                this.curV = 0;
+                newdQ = this.GetProjectionOfQForLimitations(dQ, ref this.curV, out currCountOfLeftLimitAchievements, out currCountOfRightLimitAchievements);
             }
 
             this.OffsetQ(dQ);
@@ -413,17 +427,19 @@
                 newF.Y - f.Y,
                 newF.Z - f.Z);
 
-            b = MathFunctions.NormaVector(newD);
+            // b = MathFunctions.NormaVector(newD); // Реальное смещение
 
-            var Delta = new Vector3D(
+            Delta = new Vector3D(
                 newF.X - p.X,
                 newF.Y - p.Y,
                 newF.Z - p.Z);
 
-            delta = MathFunctions.NormaVector(Delta);
+            resIterCount++;
+            delta.Add(MathFunctions.NormaVector(Delta));
         }
 
-        public void ActiveSetMethod(Point3D p, out double b, out double d, out double delta, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements, ref double cond, double condTreshold)
+        // TODO: добавить out параметр repeatedIterCount
+        public void ActiveSetMethod(Point3D p, ref List<double> delta, ref List<int> countOfLeftLimitAchievements, ref List<int> countOfRightLimitAchievements, ref double cond, double condTreshold, ref int resIterCount, out int repeatedIterCount, out int lambdaRecalculatedCount)
         {
             #region Гипотеза #1 - множество активных ограничений пусто
 
@@ -435,7 +451,7 @@
                 p.Y - f.Y,
                 p.Z - f.Z);
 
-            d = MathFunctions.NormaVector(D);
+            //d = MathFunctions.NormaVector(D); // Желаемое смещение
 
             this.Build_dS();
             this.Calc_dT();
@@ -454,84 +470,162 @@
 
             #endregion
 
+            Dictionary<int, double> λ_left = null;
+            Dictionary<int, double> λ_right = null;
             // Находим номера нарушенных ограничений и пересчитываем матрицы
+            this.curV = 0;
             var leftJ = this.GetLeftJ(dQ);
-            var newCountOfLeftLimitAchievements = countOfLeftLimitAchievements = leftJ.Count;
             var rightJ = this.GetRightJ(dQ);
-            var newCountOfRightLimitAchievements = countOfRightLimitAchievements = rightJ.Count;
-
-            Stack<double> λ_left = null;
-            Stack<double> λ_right = null;
-            do
+            if (!this.CompareLeftRightSets(leftJ, rightJ))
+                throw new Exception("Пересечение множества левых и правых ограничений");
+            var newCountOfLeftLimitAchievements = leftJ.Count;
+            var newCountOfRightLimitAchievements = rightJ.Count;
+            countOfLeftLimitAchievements.Add(newCountOfLeftLimitAchievements);
+            countOfRightLimitAchievements.Add(newCountOfRightLimitAchievements);
+            repeatedIterCount = 0;
+            lambdaRecalculatedCount = 0;
+            while (this.curV > 0)
             {
-                countOfLeftLimitAchievements = newCountOfLeftLimitAchievements;
-                countOfRightLimitAchievements = newCountOfRightLimitAchievements;
-                this.Calc_dT();
-                this.Build_D();
-                this.Calc_C(leftJ, rightJ);
-                this.detC = Matrix.Det3D(this.C);
-
-                var sumOfdFLeftJ = SumOfdFLeftJ(leftJ);
-                var sumOfdFRightJ = SumOfdFRightJ(leftJ);
-                D = new Vector3D(
-                     -(p.X - f.X - SumOfdFLeftJ(leftJ).X - SumOfdFRightJ(rightJ).X),
-                     -(p.Y - f.Y - SumOfdFLeftJ(leftJ).Y - SumOfdFRightJ(rightJ).Y),
-                     -(p.Z - f.Z - SumOfdFLeftJ(leftJ).Z - SumOfdFRightJ(rightJ).Z));
-                μ = Matrix.System3x3Solver(this.C, this.detC, D);
-
-                λ_left = new Stack<double>();
-                for (int j = 0; j < leftJ.Count; j++)
+                repeatedIterCount++;
+                if (repeatedIterCount > RepeatedIterCount)
                 {
-                    var dF = this.Get_dF(j);
-                    var dQj = this.Units[j].qMin - this.Units[j].Q;
-                    var condidate_λ_left = μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z + this.A[j] * dQj;
-                    if (condidate_λ_left < 0)
-                        leftJ.RemoveAt(j);
-                    else
-                        λ_left.Push(condidate_λ_left);
+                    Console.WriteLine($"RepeatedIterCount exceeded max value: {RepeatedIterCount}");
+                    break;
                 }
-
-                λ_right = new Stack<double>();
-                for (int j = 0; j < rightJ.Count; j++)
+                var tmpCountOfLeftLimitAchievements = newCountOfLeftLimitAchievements;
+                var tmpCountOfRightLimitAchievements = newCountOfRightLimitAchievements;
+                var currIterLambdaRecalculationCount = 0;
+                lambdaRecalculatedCount--;
+                do
                 {
-                    var dF = this.Get_dF(j);
-                    var dQj = this.Units[j].qMax - this.Units[j].Q;
-                    var condidate_λ_right = -(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) - this.A[j] * dQj;
-                    if (condidate_λ_right < 0)
-                        rightJ.RemoveAt(j);
-                    else
-                        λ_right.Push(condidate_λ_right);
-                }
+                    tmpCountOfLeftLimitAchievements = newCountOfLeftLimitAchievements;
+                    tmpCountOfRightLimitAchievements = newCountOfRightLimitAchievements;
+                    //countOfLeftLimitAchievements.Add(newCountOfLeftLimitAchievements);
+                    //countOfRightLimitAchievements.Add(newCountOfRightLimitAchievements);
+                    this.OffsetQ(dQ);
+                    this.Build_S_ForAllUnits_ByUnitsType();
+                    this.Calc_T();
+                    f = this.F(this.N);
+
+                    this.Calc_dT();
+                    this.Build_D();
+                    this.Calc_C(leftJ, rightJ);
+                    this.detC = Matrix.Det3D(this.C);
+
+                    var sumOfdFLeftJ = SumOfdFLeftJ(leftJ);
+                    var sumOfdFRightJ = SumOfdFRightJ(rightJ);
+                    D = new Vector3D(
+                         -(p.X - f.X - sumOfdFLeftJ.X - sumOfdFRightJ.X),
+                         -(p.Y - f.Y - sumOfdFLeftJ.Y - sumOfdFRightJ.Y),
+                         -(p.Z - f.Z - sumOfdFLeftJ.Z - sumOfdFRightJ.Z));
+                    μ = Matrix.System3x3Solver(this.C, this.detC, D);
+
+                    λ_left = new Dictionary<int, double>();
+                    for (int j = 0; j < leftJ.Count; j++)
+                    {
+                        var indexJ = (int)leftJ[j];
+                        var dF = this.Get_dF(indexJ);
+                        var dQj = this.Units[indexJ].qMin - this.Units[indexJ].Q;
+                        var condidate_λ_left = μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z + this.A[indexJ] * dQj;
+                        if (condidate_λ_left < 0.0)
+                            leftJ.Remove(indexJ);
+                        else
+                            λ_left[indexJ] = condidate_λ_left;
+                    }
+
+                    λ_right = new Dictionary<int, double>();
+                    for (int j = 0; j < rightJ.Count; j++)
+                    {
+                        var indexJ = (int)rightJ[j];
+                        var dF = this.Get_dF(indexJ);
+                        var dQj = this.Units[indexJ].qMax - this.Units[indexJ].Q;
+                        var condidate_λ_right = -(μ.X * dF.X + μ.Y * dF.Y + μ.Z * dF.Z) - this.A[indexJ] * dQj;
+                        if (condidate_λ_right < 0.0)
+                            rightJ.Remove(indexJ);
+                        else
+                            λ_right[indexJ] = condidate_λ_right;
+                    }
+                    newCountOfLeftLimitAchievements = leftJ.Count;
+                    newCountOfRightLimitAchievements = rightJ.Count;
+                    lambdaRecalculatedCount++;
+                    currIterLambdaRecalculationCount++;
+                    dQ = new double[this.N];
+                    for (var i = 0; i < this.N; i++)
+                    {
+                        var dF = this.Get_dF(i);
+
+                        var λi_left = leftJ.Contains(i) ? λ_left[i] : 0.0; // the same as var λi_left = λ_left[i];
+                        var λi_right = rightJ.Contains(i) ? λ_right[i] : 0.0; // the same as var λi_right = λ_right[i];
+
+                        dQ[i] = -((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z) - λi_left + λi_right) / this.A[i];
+                    }
+                    if (currIterLambdaRecalculationCount > this.MaxLambdaRecalculationCount)
+                    {
+                        break;
+                    }
+
+                } while (newCountOfLeftLimitAchievements != tmpCountOfLeftLimitAchievements || newCountOfRightLimitAchievements != tmpCountOfRightLimitAchievements);
+
+
+                this.curV = 0;
+                leftJ = this.GetLeftJ(dQ);
+                rightJ = this.GetRightJ(dQ);
+                if (!this.CompareLeftRightSets(leftJ, rightJ))
+                    throw new Exception("Пересечение множества левых и правых ограничений");
                 newCountOfLeftLimitAchievements = leftJ.Count;
                 newCountOfRightLimitAchievements = rightJ.Count;
-            } while (newCountOfLeftLimitAchievements != countOfLeftLimitAchievements || newCountOfRightLimitAchievements != countOfRightLimitAchievements);
-
-            dQ = new double[this.N];
-            for (var i = 0; i < this.N; i++)
-            {
-                var dF = this.Get_dF(i);
-
-                var λi_left = leftJ.Contains(i) ? λ_left.Pop() : 0;
-                var λi_right = rightJ.Contains(i) ? λ_right.Pop() : 0;
-
-                dQ[i] = -((μ.X * dF.X) + (μ.Y * dF.Y) + (μ.Z * dF.Z) - λi_left + λi_right) / this.A[i];
             }
 
             this.OffsetQ(dQ);
             this.Build_S_ForAllUnits_ByUnitsType();
             this.Calc_T();
-
             var newF = this.F(this.N);
             var newD = new Vector3D(
                 newF.X - f.X,
                 newF.Y - f.Y,
                 newF.Z - f.Z);
-            b = MathFunctions.NormaVector(newD);
             var Delta = new Vector3D(
                 newF.X - p.X,
                 newF.Y - p.Y,
                 newF.Z - p.Z);
-            delta = MathFunctions.NormaVector(Delta);
+            delta.Add(MathFunctions.NormaVector(Delta));
+            resIterCount++;
+
+            if (cond == 0)
+            {
+                if (this.detC == 0)
+                {
+                    cond = double.MaxValue;
+                }
+                else
+                {
+                    cond = this.C.NormF() * this.C.Invert3D(this.detC).NormF();
+                    // Console.WriteLine("Condition number of matrix C is " + cond + "\n");
+                }
+            }
+        }
+
+        // если есть пересечение -> false, если нет пересечений  -> true
+        public bool CompareLeftRightSets(ArrayList left, ArrayList right)
+        {
+            if (left.Count > right.Count)
+            {
+                foreach(var j in left)
+                {
+                    if (right.Contains(j))
+                        return false;
+                }
+                return true;
+            }
+            else
+            {
+                foreach (var j in right)
+                {
+                    if (left.Contains(j))
+                        return false;
+                }
+                return true;
+            }
         }
 
         public ArrayList GetLeftJ(double[] dQ)
@@ -539,11 +633,17 @@
             var leftJ = new ArrayList();
             for (int i = 0; i < Units.Length; i++)
             {
-                var unit = this.Units[i];
-                if (unit.qMin > unit.Q + dQ[i])
+                if (this.maxV / 2 > curV)
                 {
-                    leftJ.Add(i);
+                    var unit = this.Units[i];
+                    if (unit.qMin > unit.Q + dQ[i])
+                    {
+                        leftJ.Add(i);
+                        curV++;
+                    }
                 }
+                else
+                    break;
             }
             return leftJ;
         }
@@ -553,11 +653,17 @@
             var rightJ = new ArrayList();
             for (int i = 0; i < Units.Length; i++)
             {
-                var unit = this.Units[i];
-                if (unit.qMax < unit.Q + dQ[i])
+                if (this.maxV / 2 > curV)
                 {
-                    rightJ.Add(i);
+                    var unit = this.Units[i];
+                    if (unit.qMax < unit.Q + dQ[i])
+                    {
+                        rightJ.Add(i);
+                        curV++;
+                    }
                 }
+                else
+                    break;
             }
             return rightJ;
         }
@@ -606,7 +712,18 @@
             return result;
         }
 
-        public double functionQ()
+        public double FunctionQ(double[] q)
+        {
+            var res = 0.0;
+            for (var i = 0; i < this.N; i++)
+            {
+                res += this.A[i] * Math.Pow(q[i], 2);
+            }
+
+            return res;
+        }
+
+        public double FunctionQ()
         {
             var res = 0.0;
             for (var i = 0; i < this.N; i++)
@@ -617,9 +734,8 @@
             return res;
         }
 
-        private double[] GetProjectionOfQForLimitations(double[] dQ, out int curV, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements)
+        private double[] GetProjectionOfQForLimitations(double[] dQ, ref int curV, out int countOfLeftLimitAchievements, out int countOfRightLimitAchievements)
         {
-            curV = 0;
             countOfLeftLimitAchievements = 0;
             countOfRightLimitAchievements = 0;
             var newdQ = new double[this.N];

@@ -65,6 +65,8 @@
         private Label SplitStepPathLabel;
 
         private Label IterationCountLabel;
+        private Label SumOfRepeatedIterationCountLabel;
+        private Label SumOfLambdaRecalculationCountLabel;
 
         private Label AverageDeltaLabel;
 
@@ -133,9 +135,9 @@
 
         private int IterationCount;
 
-        private List<double> bList;
+        private int SumOfRepeatedIterationCount;
 
-        private List<double> dList;
+        private int SumOfLambdaRecalculationCount;
 
         private List<double> deltaList;
 
@@ -154,6 +156,8 @@
         private double stepInMeterToSplit;
 
         private int NumberTimesRepeatPlanning;
+
+        private int RepeatIterCount;
 
         private bool SplitTrackWithInterpolation;
 
@@ -176,9 +180,11 @@
             Viewport3D viewport,
             TextBox armTextBox,
             TextBox vectorQTextBox,
-            Label pathLength,
+            //Label pathLength,
             Label SplitStepPathLabel,
             Label IterationCountLabel,
+            Label SumOfRepeatedIterationCountLabel,
+            Label SumOfLambdaRecalculationCountLabel,
             Label AverageDeltaLabel,
             Chart Chart,
             CheckBox WithConditionNumberCheckBox,
@@ -207,9 +213,11 @@
             this.viewport = viewport;
             this.armTextBox = armTextBox;
             this.VectorQTextBox = vectorQTextBox;
-            this.pathLengthLabel = pathLength;
+            //this.pathLengthLabel = pathLength;
             this.SplitStepPathLabel = SplitStepPathLabel;
             this.IterationCountLabel = IterationCountLabel;
+            this.SumOfRepeatedIterationCountLabel = SumOfRepeatedIterationCountLabel;
+            this.SumOfLambdaRecalculationCountLabel = SumOfLambdaRecalculationCountLabel;
             this.AverageDeltaLabel = AverageDeltaLabel;
             this.PathSplittingProgressBar = PathSplittingProgressBar;
             this.PathPlanningProgressBar = PathPlanningProgressBar;
@@ -267,14 +275,32 @@
             var chartArea = new ChartArea("Default");
             chartArea.AxisX.IsMarginVisible = false;
             chartArea.AxisY.IsMarginVisible = false;
-            chartArea.AxisX.Title = "iteration";
-            chartArea.AxisY.Title = "Δ(м)";
-            chartArea.AxisY2.Title = "cond";
+            chartArea.AxisX.Title = "Итерации";
+            chartArea.AxisY.Title = "Погрешность(м)";
+            chartArea.AxisY2.Title = "Число обусловленности";
+            chartArea.AxisX.Interval = 10;
+            //chartArea.AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
             chartArea.AxisX.ScaleView.Zoomable = true;
             chartArea.AxisY.ScaleView.Zoomable = true;
+            this.Chart.ChartAreas.Add(chartArea);
             this.Chart.MouseWheel += chart1_MouseWheel;
 
-            this.Chart.ChartAreas.Add(chartArea);
+            var limitationsChartArea = new ChartArea("limitations");
+            //limitationsChartArea.AxisX.IsMarginVisible = false;
+            //limitationsChartArea.AxisY.IsMarginVisible = false;
+            limitationsChartArea.AxisY.Title = "Число нарушенных ограничений";
+            limitationsChartArea.AxisY.Interval = 1;
+            limitationsChartArea.AxisX.Title = "Итерации";
+            limitationsChartArea.AxisX.Interval = 10;
+            this.Chart.ChartAreas.Add(limitationsChartArea);
+            this.Chart.Series.Add(new Series("leftLimitations"));
+            this.Chart.Series["leftLimitations"].Color = System.Drawing.Color.Blue;
+            this.Chart.Series["leftLimitations"].ChartArea = "limitations";
+            this.Chart.Series["leftLimitations"].ChartType = SeriesChartType.Column;
+            this.Chart.Series.Add(new Series("rightLimitations"));
+            this.Chart.Series["rightLimitations"].Color = System.Drawing.Color.Red;
+            this.Chart.Series["rightLimitations"].ChartArea = "limitations";
+            this.Chart.Series["rightLimitations"].ChartType = SeriesChartType.Column;
 
 
             this.Chart.Series.Add(new Series("bSeries"));
@@ -290,6 +316,11 @@
             this.Chart.Series["deltaSeries"].ChartArea = "Default";
             this.Chart.Series["deltaSeries"].ChartType = SeriesChartType.Line;
 
+            this.Chart.Series.Add(new Series("noLimPoints"));
+            this.Chart.Series["noLimPoints"].Color = System.Drawing.Color.Black;
+            this.Chart.Series["noLimPoints"].ChartArea = "Default";
+            this.Chart.Series["noLimPoints"].ChartType = SeriesChartType.Point;
+
             this.Chart.Series.Add(new Series("countOfLeftLimitations"));
             this.Chart.Series["countOfLeftLimitations"].Color = System.Drawing.Color.Blue;
             this.Chart.Series["countOfLeftLimitations"].ChartArea = "Default";
@@ -300,8 +331,13 @@
             this.Chart.Series["countOfRightLimitations"].ChartArea = "Default";
             this.Chart.Series["countOfRightLimitations"].ChartType = SeriesChartType.Point;
 
+            this.Chart.Series.Add(new Series("countOfBothLimitations"));
+            this.Chart.Series["countOfBothLimitations"].Color = System.Drawing.Color.Green;
+            this.Chart.Series["countOfBothLimitations"].ChartArea = "Default";
+            this.Chart.Series["countOfBothLimitations"].ChartType = SeriesChartType.Point;
+            
             this.Chart.Series.Add(new Series("CondSeries"));
-            this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Green;
+            this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Yellow;
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
             this.Chart.Series["CondSeries"].YAxisType = AxisType.Secondary;
@@ -309,12 +345,20 @@
             this.Chart.Series.Add(new Series("SplitPointsDistance"));
             this.Chart.Series["SplitPointsDistance"].ChartArea = "Default";
             this.Chart.Series["SplitPointsDistance"].ChartType = SeriesChartType.Line;
+            
+            var chartHeight = this.Chart.Height;
+            var chartWidth = this.Chart.Width;
+            this.Chart.ChartAreas["Default"].Position.Y = 5;
+            this.Chart.ChartAreas["Default"].Position.Height = 70;
+            this.Chart.ChartAreas["Default"].Position.Width = 100;
+            this.Chart.ChartAreas["limitations"].Position.Y = this.Chart.ChartAreas["Default"].Position.Bottom;
+            this.Chart.ChartAreas["limitations"].Position.Width = 100;
+            this.Chart.ChartAreas["limitations"].Position.Height = 30;
 
             // Add some values for chart display
-            int[] axisXData = { 0, 1 };
-            double[] axisYData = { 0.0, 1.0 };
-            this.Chart.Series["bSeries"].Points.DataBindXY(axisXData, axisYData);
-            
+            this.Chart.Series["bSeries"].Points.DataBindXY(new int[] { 0, 1 }, new double[] { 0.0, 1.0 });
+            this.Chart.Series["leftLimitations"].Points.DataBindXY(new int []{ 0, 5}, new int[] { 1, -1});
+
             #endregion
         }
 
@@ -630,8 +674,8 @@
                                                this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                                this.AddAnchorTrackToViewport();
 
-                                               this.pathLengthLabel.Content =
-                                                   $"Длина пути = {this.track3D.track.Length} м";
+                                               //this.pathLengthLabel.Content =
+                                               //    $"Длина пути = {this.track3D.track.Length} м";
                                            }
                                            else
                                            {
@@ -727,8 +771,8 @@
                                             this.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, deltaZ * this.coeff));
 
-                                            this.pathLengthLabel.Content =
-                                                $"Длина пути = {this.track3D.track.Length} м";
+                                            //this.pathLengthLabel.Content =
+                                            //    $"Длина пути = {this.track3D.track.Length} м";
                                             break;
                                         case Key.S: // Decrease z coordinate of point
                                             this.RemoveAnchorTrackFromViewport();
@@ -738,8 +782,8 @@
                                             this.AddAnchorTrackToViewport();
                                             this.pointSelector.MoveByOffset(new Point3D(0, 0, -deltaZ * this.coeff));
 
-                                            this.pathLengthLabel.Content =
-                                                $"Длина пути = {this.track3D.track.Length} м";
+                                            //this.pathLengthLabel.Content =
+                                            //    $"Длина пути = {this.track3D.track.Length} м";
                                             break;
                                         case Key.D: // Select next point
                                             if (this.pointSelector.selectedPointIndex
@@ -776,7 +820,7 @@
                                     this.track3D.AddAnchorPoint(this.cursorForAnchorPointCreation.position);
                                     this.AddAnchorTrackToViewport();
 
-                                    this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м";
+                                    //this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.Length} м";
                                 }
                             }
                             catch (Exception ex)
@@ -1151,7 +1195,7 @@
             this.track3D.ShowInterpolatedTrack(this.stepInMeterToSplit > 0.01);
             this.AddSplitTrackToViewport();
 
-            this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.GetLen()} м";
+            //this.pathLengthLabel.Content = $"Длина пути = {this.track3D.track.GetLen()} м";
         }
 
         #endregion
@@ -1162,16 +1206,14 @@
             DoWorkEventArgs e,
             object sender,
             out int resIterCount,
-            out List<double> bList,
-            out List<double> dList,
+            out int SumOfRepeatedIterationCount,
+            out int SumOfLambdaRecalculationCount,
             out List<double> deltaList,
             out List<double> condList, 
             out List<int> countOfLeftLimitAchievements,
             out List<int> countOfRightLimitAchievements)
         {
             var splitPointsCount = this.track3D.track.SplitPoints.Count;
-            bList = new List<double>();
-            dList = new List<double>();
             deltaList = new List<double>();
             condList = new List<double>();
             countOfLeftLimitAchievements = new List<int>();
@@ -1180,6 +1222,8 @@
             this.qList.Clear();
 
             resIterCount = 0;
+            SumOfRepeatedIterationCount = 0;
+            SumOfLambdaRecalculationCount = 0;
             var k = this.NumberTimesRepeatPlanning; // repeat planning to the same point k times
             for (var i = 1; i < splitPointsCount; i++)
             {
@@ -1192,50 +1236,47 @@
                     var b = 0.0;
                     var d = 0.0;
                     var delta = 0.0;
-                    var _countOfLeftLimitAchievements = 0;
-                    var _countOfRightLimitAchievements = 0;
                     switch (this.planningMethodType)
                     {
                         case PlanningMethod.LagrangeMethod:
                             this.armModel3D.arm.LagrangeMethodToThePoint(
                                 point,
-                                out b,
-                                out d,
                                 out delta,
                                 ref cond,
                                 this.ThresholdForBalancing);
+                            deltaList.Add(delta);
+                            resIterCount++;
                             break;
                         case PlanningMethod.LagrangeMethodWithProjection:
                             this.armModel3D.arm.LagrangeMethodWithProjectionToThePoint(
                                 point,
-                                out b,
-                                out d,
-                                out delta,
-                                out _countOfLeftLimitAchievements,
-                                out _countOfRightLimitAchievements,
+                                ref deltaList,
+                                ref countOfLeftLimitAchievements,
+                                ref countOfRightLimitAchievements,
                                 ref cond,
-                                this.ThresholdForBalancing);
+                                this.ThresholdForBalancing,
+                                ref resIterCount,
+                                out RepeatIterCount);
+                            SumOfRepeatedIterationCount += RepeatIterCount;
                             break;
                         case PlanningMethod.ActiveSetMethod:
                             this.armModel3D.arm.ActiveSetMethod(
                                 point,
-                                out b,
-                                out d,
-                                out delta,
-                                out _countOfLeftLimitAchievements,
-                                out _countOfRightLimitAchievements,
+                                ref deltaList,
+                                ref countOfLeftLimitAchievements,
+                                ref countOfRightLimitAchievements,
                                 ref cond,
-                                this.ThresholdForBalancing);
+                                this.ThresholdForBalancing,
+                                ref resIterCount,
+                                out RepeatIterCount,
+                                out var lambdaRecalcultaionCount);
+                            SumOfRepeatedIterationCount += RepeatIterCount;
+                            SumOfLambdaRecalculationCount += lambdaRecalcultaionCount;
                             break;
                     }
 
                     this.qList.Add(this.armModel3D.arm.GetQ());
 
-                    bList.Add(b);
-                    dList.Add(d);
-                    deltaList.Add(delta);
-                    countOfLeftLimitAchievements.Add(_countOfLeftLimitAchievements);
-                    countOfRightLimitAchievements.Add(_countOfRightLimitAchievements);
                     if (this.WithCond)
                         condList.Add(cond);
 
@@ -1246,7 +1287,6 @@
                             i--;
                         }
                     }
-                    ++resIterCount;
                 }
 
                 ((BackgroundWorker)sender).ReportProgress(i);
@@ -1266,8 +1306,8 @@
                 e,
                 sender,
                 out this.IterationCount,
-                out this.bList,
-                out this.dList,
+                out this.SumOfRepeatedIterationCount,
+                out this.SumOfLambdaRecalculationCount,
                 out this.deltaList,
                 out this.CondList,
                 out this.CountOfLeftLimitAchievements,
@@ -1352,7 +1392,7 @@
                                 this.timePlanning.Stop();
                                 this.WorkingTime.Content = $"Продолжительность планирования = {timePlanning.ElapsedMilliseconds} мс";
                                 this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
-                                this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.######}", this.deltaList.Average())} м";
+                                this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.##########}", this.deltaList.Average())} м";
                             }
                             catch (Exception ex)
                             {
@@ -1367,7 +1407,9 @@
             this.timePlanning.Stop();
             this.WorkingTime.Content = $"Продолжительность планирования = {timePlanning.ElapsedMilliseconds} мс";
             this.IterationCountLabel.Content = $"Число итераций = {this.IterationCount}";
-            this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {String.Format("{0:0.#####}", this.deltaList.Average())} м";
+            this.SumOfRepeatedIterationCountLabel.Content = $"Суммарное число пересчётов на \nитерациях с выходом на ограничители = {this.SumOfRepeatedIterationCount}";
+            this.SumOfLambdaRecalculationCountLabel.Content = $"Суммарное число пересчёта лямбд \nв Методе активного набора = {this.SumOfLambdaRecalculationCount}";
+            this.AverageDeltaLabel.Content = $"Средняя ошибка перемещения = {this.deltaList.Average()} м";
             
             this.armModel3D.arm.SetQ(0.0);
             this.VectorQTextBox.Text = JsonConvert.SerializeObject(this.armModel3D.arm.GetQ());
@@ -1379,25 +1421,32 @@
 
             this.ClearAllChartSeries(this.Chart);
 
-            //    this.Chart.Series["bSeries"].Points.Clear();
-            //    this.Chart.Series["bSeries"].Points.DataBindXY(
-            //        Enumerable.Range(0, this.IterationCount).ToArray(),
-            //        this.bList);
-
-            //    this.Chart.Series["dSeries"].Points.Clear();
-            //    this.Chart.Series["dSeries"].Points.DataBindXY(
-            //        Enumerable.Range(0, this.IterationCount).ToArray(),
-            //        this.dList);
 
             this.Chart.Series["deltaSeries"].Points.DataBindXY(
                 Enumerable.Range(0, this.IterationCount).ToArray(),
                 this.deltaList);
 
-            var leftYpoints = MergeDeltasAndCountLimitations(this.deltaList, this.CountOfLeftLimitAchievements, out var leftXpoints);
-            this.Chart.Series["countOfLeftLimitations"].Points.DataBindXY(leftXpoints, leftYpoints);
 
-            var rightYpoints = MergeDeltasAndCountLimitations(this.deltaList, this.CountOfRightLimitAchievements, out var rightXpoints);
-            this.Chart.Series["countOfRightLimitations"].Points.DataBindXY(rightXpoints, rightYpoints);
+            if (this.planningMethodType == PlanningMethod.LagrangeMethodWithProjection || this.planningMethodType == PlanningMethod.ActiveSetMethod)
+            {
+                this.GetColoredPointsLists(deltaList, this.CountOfLeftLimitAchievements, this.CountOfRightLimitAchievements,
+                    out var noLimXp, out var noLimYp,
+                    out var leftXp, out var leftYp,
+                    out var rightXp, out var rightYp,
+                    out var bothXp, out var bothYp);
+
+                this.Chart.Series["noLimPoints"].Points.DataBindXY(noLimXp, noLimYp);
+                this.Chart.Series["countOfLeftLimitations"].Points.DataBindXY(leftXp, leftYp);
+                this.Chart.Series["countOfRightLimitations"].Points.DataBindXY(rightXp, rightYp);
+                this.Chart.Series["countOfBothLimitations"].Points.DataBindXY(bothXp, bothYp);
+
+                this.Chart.ChartAreas["limitations"].AxisX.Maximum = this.IterationCount;
+                this.Chart.Series["leftLimitations"].Points.DataBindXY(leftXp,
+                //this.CountOfLeftLimitAchievements.Where(p => p != 0).ToList<int>());
+                this.CountOfLeftLimitAchievements.Where(p => p != 0).Select(p => p = -p).ToList<int>());
+                this.Chart.Series["rightLimitations"].Points.DataBindXY(rightXp,
+                this.CountOfRightLimitAchievements.Where(p => p != 0).ToList<int>());
+            }
 
             if (this.WithCond)
             {
@@ -1408,25 +1457,58 @@
             openQVectorsWindowsButton.IsEnabled = true;
         }
 
-        private List<double> MergeDeltasAndCountLimitations(List<double> deltaList, List<int> countLimitations, out List<double> listX)
+
+        private void GetColoredPointsLists(List<double> deltaList, List<int> left, List<int> right,
+            out List<int> noLimXp, out List<double> noLimYp,
+            out List<int> leftXp, out List<double> leftYp,
+            out List<int> rightXp, out List<double> rightYp,
+            out List<int> bothXp, out List<double> bothYp)
         {
-            var resultListY = new List<double>();
-            listX = new List<double>();
-            if (deltaList.Count != countLimitations.Count)
+            if (deltaList.Count != left.Count && deltaList.Count != right.Count)
                 throw new Exception("Count of lists elements should be equal");
+
+            noLimXp = new List<int>();
+            leftXp = new List<int>();
+            rightXp = new List<int>();
+            bothXp = new List<int>();
+
+            noLimYp = new List<double>();
+            leftYp = new List<double>();
+            rightYp = new List<double>();
+            bothYp = new List<double>();
+
             for (var i = 0; i < deltaList.Count; i++)
             {
-                if (countLimitations[i] != 0)
+                if (left[i] == right[i])
                 {
-                    listX.Add(i);
-                    resultListY.Add(deltaList[i]);
+                    if (left[i] == 0)
+                    {
+                        noLimXp.Add(i);
+                        noLimYp.Add(deltaList[i]);
+                    }
+                    else
+                    {
+                        bothXp.Add(i);
+                        bothYp.Add(deltaList[i]);
+                    }
+                }
+                else
+                {
+                    if (left[i] != 0)
+                    {
+                        leftXp.Add(i);
+                        leftYp.Add(deltaList[i]);
+                    }
+                    if (right[i] != 0)
+                    {
+                        rightXp.Add(i);
+                        rightYp.Add(deltaList[i]);
+                    }
                 }
             }
 
-            return resultListY;
         }
 
-        
         public ICommand OpenQVectorsWindow
         {
             get
