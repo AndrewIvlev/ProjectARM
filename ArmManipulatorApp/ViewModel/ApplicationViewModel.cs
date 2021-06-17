@@ -292,6 +292,8 @@
             limitationsChartArea.AxisY.Interval = 1;
             limitationsChartArea.AxisX.Title = "Итерации";
             limitationsChartArea.AxisX.Interval = 10;
+            limitationsChartArea.AxisY.IsMarginVisible = true;
+            limitationsChartArea.AxisX.Minimum = 0;
             this.Chart.ChartAreas.Add(limitationsChartArea);
             this.Chart.Series.Add(new Series("leftLimitations"));
             this.Chart.Series["leftLimitations"].Color = System.Drawing.Color.Blue;
@@ -356,8 +358,9 @@
             this.Chart.ChartAreas["limitations"].Position.Height = 30;
 
             // Add some values for chart display
-            this.Chart.Series["bSeries"].Points.DataBindXY(new int[] { 0, 1 }, new double[] { 0.0, 1.0 });
-            this.Chart.Series["leftLimitations"].Points.DataBindXY(new int []{ 0, 5}, new int[] { 1, -1});
+            this.Chart.Series["bSeries"].Points.DataBindXY(new int[] { 0, 10 }, new double[] { 0.0, 1.0 });
+            this.Chart.Series["leftLimitations"].Points.DataBindXY(new int []{ 1, 2, 3, 4, 5}, new int[] { 1, 1, 1, 1, 1});
+            this.Chart.Series["rightLimitations"].Points.DataBindXY(new int[] { 1, 2, 3, 4, 5 }, new int[] { -1, -1, -1, -1, -1 });
 
             #endregion
         }
