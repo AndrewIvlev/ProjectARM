@@ -317,6 +317,7 @@
             this.Chart.Series["deltaSeries"].Color = System.Drawing.Color.Black;
             this.Chart.Series["deltaSeries"].ChartArea = "Default";
             this.Chart.Series["deltaSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series["deltaSeries"].BorderWidth = 4;
 
             this.Chart.Series.Add(new Series("noLimPoints"));
             this.Chart.Series["noLimPoints"].Color = System.Drawing.Color.Black;
@@ -339,9 +340,10 @@
             this.Chart.Series["countOfBothLimitations"].ChartType = SeriesChartType.Point;
             
             this.Chart.Series.Add(new Series("CondSeries"));
-            this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Yellow;
+            this.Chart.Series["CondSeries"].Color = System.Drawing.Color.Red;
             this.Chart.Series["CondSeries"].ChartArea = "Default";
             this.Chart.Series["CondSeries"].ChartType = SeriesChartType.Line;
+            this.Chart.Series["CondSeries"].BorderWidth = 4;
             this.Chart.Series["CondSeries"].YAxisType = AxisType.Secondary;
 
             this.Chart.Series.Add(new Series("SplitPointsDistance"));
@@ -1348,7 +1350,7 @@
                                 }
                                 else
                                 {
-                                    this.ThresholdForBalancing = 0;
+                                    this.ThresholdForBalancing = double.MaxValue;
                                 }
 
                                 if ((bool)this.WithRepeatPlanningByThresholdRadioButton.IsChecked)
